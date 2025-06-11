@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- V2.19: Added two new black and white themes -->
+<!-- V2.18: Refactored theme management to use themes.js, reinstated theme cycling -->
+<!-- V2.17.1: Removed theme cycling logic and hid theme button -->
+<!-- V2.17: Removed themes 2-6, updated version number -->
+<!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
+<!-- Added Phaser library -->
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<title>Orbital Defence Elite v2.19 - Optimised</title>
+<link rel="stylesheet" href="css/styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="bg"></div>
+<canvas id="gameCanvas"></canvas> <!-- Renamed from #g -->
+<div id="hud"> <!-- Renamed from #u -->
+    <span id="creditsDisplay"></span> <!-- Renamed from #c -->
+    <span id="waveDisplay"></span> <!-- Renamed from #w -->
+    <span id="healthDisplay"></span> <!-- Renamed from #h -->
+</div>
+<div id="startScreen"> <!-- Renamed from #s -->
+        <h1>Orbital Defence Elite v2.19</h1>
+    <div class="stats">
+        <div>WASD/Arrow Keys: Move Base</div>
+        <div>Click & Drag: Move Base</div>
+        <div>Click Base: Open Upgrades</div>
+        <div>Click Ring UI: Quick Upgrade</div>
+        <div>Space: Fire</div>
+        <div>F: Toggle Auto-fire</div>
+        <div>M: Macross Missiles</div>
+        <div>U: Open/Close Upgrades</div>
+        <div>I: Toggle Ring Info</div>
+        <div>H: Toggle Hotkeys</div>
+    </div>
+    <button id="startButton">Start Game</button> <!-- Renamed from #b -->
+    <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
+</div>
+<div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
+    <h1>Game Over</h1>
+    <div id="finalStats"></div> <!-- Renamed from #f -->
+    <button id="restartButton">Play Again</button> <!-- Renamed from #r -->
+</div>
+<div id="upgradeMenu" style="display:none"> <!-- Renamed from #m -->
+    <h2>Current Wave Stats</h2>
+    <div id="waveInfo"></div> <!-- Renamed from #i -->
+    <h2>Upgrades</h2>
+    <div id="upgradesContainer"></div> <!-- Renamed from #U -->
+    <div class="stats">
+        <div id="damage-stats">Damage: 1</div>
+        <div id="fire-rate-stats">Fire Rate: 5/s</div>
+        <div id="range-stats">Range: 200</div>
+    </div>
+    <button id="cheatAddCredits">Add 100000 Credits</button> <!-- Renamed from creditBoost -->
+</div>
+<div id="controls">
+    <button id="gameSpeedButton">Speed: 1x</button> <!-- Renamed from #B -->
+    <button id="macrossButton" style="display:none">Macross Missile Massacre</button> <!-- Renamed from #M -->
+    <button id="toggleInfoButton" class="active">i</button> <!-- Renamed from #I -->
+    <button id="themeButton">Theme: Orbital Elite</button> <!-- Added Theme Button -->
+</div>
+<div id="hotkeys" class="show">
+    <div>H: Show/Hide Hotkeys</div>
+    <div>WASD/Arrows/Drag: Move Base</div>
+    <div>Click Base: Upgrades</div>
+    <div>Click Ring UI: Quick Upgrade</div>
+    <div>Space/Auto: Fire</div>
+    <div>U: Upgrades Menu</div>
+    <div>M: Macross Missiles</div>
+    <div>F: Toggle Auto-fire</div>
+    <div>I: Toggle Ring Info</div>
+</div>
+<div id="toast"></div>
+<!-- Removed shipSprite image as it wasn't used -->
+
+<script src="js/themes.js"></script> <!-- Include external theme definitions -->
+<script>
+(function(){ // IIFE to encapsulate code
+
+// --- Configuration Constants ---
+const ENEMY_HEALTH_SCALE_FACTOR = 1.25;
+const BULLET_BASE_SPEED = 5;
+const BASE_RADIUS = 30;
+const INITIAL_FIRE_RATE = 200;
+const MACROSS_BASE_COOLDOWN = 30;
+const MACROSS_COOLDOWN_REDUCTION_PER_LEVEL = 3;
+const PARTICLE_BASE_SPEED = 1;
+const PARTICLE_BASE_LIFE = 1;
+const PARTICLE_BASE_SIZE = 2;
+const WAVE_BASE_DURATION = 60; // seconds
+const WAVE_DURATION_INCREMENT = 10; // seconds per wave
+const BOSS_HEALTH_BASE = 20;
+const BOSS_HEALTH_WAVE_MULTIPLIER = 10;
+const MAX_ENEMY_COUNT = 30; // Increased from 20
+const BASE_INITIAL_MOVE_SPEED = 2;
+const BASE_MOVE_SPEED_INCREMENT = 0.5;
+const MISSILE_FIRE_INTERVAL = 2000; // ms
+const LASER_FIRE_INTERVAL = 500; // ms
+const STUN_EFFECT_DURATION = 2000; // ms
+const AUTO_SAVE_INTERVAL = 60000; // ms (1 minute)
+const DRAG_THRESHOLD = 5; // pixels to initiate drag vs click
+const CANVAS_CLICK_TOLERANCE = 20; // pixels tolerance for clicking ring UI
+
+// Upgrade Category Indices
+const UPGRADE_CATEGORY_CANNON = 0;
+const UPGRADE_CATEGORY_DEFENSE = 1;
+const UPGRADE_CATEGORY_LASER = 2;
+const UPGRADE_CATEGORY_MISSILE = 3;
+const UPGRADE_CATEGORY_SPECIAL = 4;
+
+// Specific Upgrade Indices (within category)
+const UPGRADE_CANNON_FIRERATE = 0;
+const UPGRADE_CANNON_DAMAGE = 1;
+const UPGRADE_CANNON_RANGE = 2;
+const UPGRADE_CANNON_MULTIBARREL = 3;
+const UPGRADE_DEFENSE_HEALTH = 0;
+const UPGRADE_DEFENSE_MOVEMENT = 1;
+const UPGRADE_LASER_DAMAGE = 0; // Only one laser upgrade
+const UPGRADE_MISSILE_COUNT = 0;
+const UPGRADE_MISSILE_RANGE = 1;
+const UPGRADE_MISSILE_DAMAGE = 2;
+const UPGRADE_MISSILE_HOMING = 3;
+const UPGRADE_MISSILE_MACROSS = 4;
+const UPGRADE_SPECIAL_STUN = 0;
+
+// Enemy types: [color, speed, health, radius, credits]
+const ENEMY_TYPES = [
+  ['#f46d43', 1,   3, 10,  10], // Normal
+  ['#fee08b', 2,   2,  8,  20], // Fast
+  ['#d53e4f', 0.5, 6, 15,  30], // Tank
+  ['#9e0142', 0.3, 0, 25, 100]  // Boss (health calculated dynamically)
+];
+const ENEMY_TYPE_NORMAL = 0;
+const ENEMY_TYPE_FAST = 1;
+const ENEMY_TYPE_TANK = 2;
+const ENEMY_TYPE_BOSS = 3;
+
+// Helper for getting DOM elements
+const getElement = id => document.getElementById(id);
+
+// --- Canvas & Context ---
+const canvas = getElement('gameCanvas');
+const ctx = canvas.getContext('2d');
+let canvasWidth = window.innerWidth;
+let canvasHeight = window.innerHeight;
+canvas.width = canvasWidth;
+canvas.height = canvasHeight;
+
+// --- Game State Variables ---
+let showRingInfo = true;
+let baseCanMove = true;
+let keysPressed = {};
+let particles = [];
+let lastTime = 0;
+let deltaTime = 0;
+let gameState; // Contains credits, health, wave, score etc.
+let base; // Contains position, stats, upgrades effects
+let upgradeTree; // Defines upgrade structure, costs, effects
+let gameSpeedMultiplier = 1;
+let isGameRunning = false;
+let animationFrameId = null;
+let savedGame = null; // Stores loaded game state
+let autoSaveTimer = null;
+
+// Dragging State
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+let baseStartX = 0;
+let baseStartY = 0;
+let isReturningToCenter = false;
+let wasDragging = false; // Used to differentiate click from drag-release
+let centerReturnSpeed = 0.5;
+let centerReturnStartTime = 0;
+
+// Ring UI Clickable Regions (calculated during draw)
+let ringClickRegions = [];
+
+// --- Object Pooling ---
+const ObjectPool = function(objectType, initialSize = 20, resetFunction) {
+    let pool = [];
+    let active = [];
+
+    // Pre-populate the pool
+    for (let i = 0; i < initialSize; i++) {
+        pool.push(new objectType());
+    }
+
+    return {
+        get: function(config = {}) {
+            let obj = pool.length > 0 ? pool.pop() : new objectType();
+            // Apply specific config
+            Object.assign(obj, config);
+            // Apply general reset if provided (or could be part of config)
+            if (resetFunction) {
+                resetFunction(obj, config); // Pass config in case reset depends on it
+            }
+            active.push(obj);
+            return obj;
+        },
+        release: function(obj) {
+            let index = active.indexOf(obj);
+            if (index !== -1) {
+                active.splice(index, 1);
+                // Apply reset function before putting back in pool
+                if (resetFunction) {
+                    resetFunction(obj, {}); // Reset to default state
+                }
+                pool.push(obj);
+            }
+        },
+        getActiveObjects: function() {
+            return active;
+        },
+        clear: function() {
+            pool = pool.concat(active);
+            active = [];
+            // Ensure all objects in the pool are reset
+            if (resetFunction) {
+                pool.forEach(obj => resetFunction(obj, {}));
+            }
+        }
+    };
+};
+
+// --- Object Pool Reset Functions ---
+function resetEnemy(enemy, config) {
+    // Reset common properties
+    enemy.x = config.x || 0;
+    enemy.y = config.y || 0;
+    enemy.color = config.c || '#ffffff';
+    enemy.speed = config.s || 0;
+    enemy.normalSpeed = config.s || 0;
+    enemy.health = config.h || 1;
+    enemy.maxHealth = config.m || 1;
+    enemy.radius = config.r || 10;
+    enemy.creditsValue = config.C || 0;
+    enemy.trail = config.T || []; // Ensure trail is reset or set
+    enemy.isStunned = config.st || false;
+    enemy.stunTime = config.stunTime || 0;
+    enemy.type = config.type || 'Normal';
+
+    // Clear dynamic properties
+    enemy.trail = [];
+    enemy.isStunned = false;
+    enemy.stunTime = 0;
+}
+
+function resetBullet(bullet, config) {
+    bullet.x = config.x || 0;
+    bullet.y = config.y || 0;
+    bullet.dx = config.dx || 0;
+    bullet.dy = config.dy || 0;
+}
+
+function resetMissile(missile, config) {
+    missile.x = config.x || 0;
+    missile.y = config.y || 0;
+    missile.dx = config.dx || 0;
+    missile.dy = config.dy || 0;
+    missile.target = config.t || null; // Set target or null
+    missile.speed = config.speed || 1;
+    missile.turnSpeed = config.turnSpeed || 0.05;
+    missile.trail = config.trail || []; // Set initial trail or empty
+    missile.isMacross = config.macross || false;
+    missile.homingActive = config.homingActive || false;
+
+    // Clear dynamic properties
+    missile.target = null;
+    missile.trail = Array(40).fill({ x: missile.x, y: missile.y }); // Reset trail properly
+    missile.isMacross = false;
+    missile.homingActive = false;
+}
+
+
+// Initialize object pools
+const enemyPool = ObjectPool(Object, 50, resetEnemy); // Increased pool size
+const bulletPool = ObjectPool(Object, 150, resetBullet); // Increased pool size
+const missilePool = ObjectPool(Object, 75, resetMissile); // Increased pool size
+
+// Reset pools function
+function resetPools() {
+    enemyPool.clear();
+    bulletPool.clear();
+    missilePool.clear();
+    particles = [];
+}
+
+// --- Particle System ---
+function createParticle(x, y, color, speed = PARTICLE_BASE_SPEED, life = PARTICLE_BASE_LIFE, size = PARTICLE_BASE_SIZE) {
+    // Use theme's particle palettes
+    const themePalettes = currentTheme.particlePalettes;
+    let palette;
+
+    // Basic color matching (can be improved)
+    if (color === 'white' || color === '#ffffff') palette = themePalettes.white;
+    else if (color === 'yellow' || color === '#ffff00') palette = themePalettes.yellow;
+    else if (color === 'red' || color === '#ff0000') palette = themePalettes.red;
+    else if (color === 'orange' || color === '#ff7700') palette = themePalettes.orange;
+    else if (color === 'cyan' || color === '#00ffff') palette = themePalettes.cyan;
+    else {
+        // Attempt to find a matching palette based on hex/rgb similarity (simplified)
+        if (color.includes('f00') || color.includes('800')) palette = themePalettes.red;
+        else if (color.includes('ff0') || color.includes('cc0')) palette = themePalettes.yellow;
+        else if (color.includes('f70') || color.includes('f90')) palette = themePalettes.orange;
+        else if (color.includes('0ff') || color.includes('0cc')) palette = themePalettes.cyan;
+        else palette = themePalettes.white; // Default to white palette
+    }
+
+    // Ensure palette exists, fallback if necessary
+    if (!palette || palette.length === 0) {
+        palette = ['#FFFFFF']; // Fallback to pure white if theme palette is missing/empty
+    }
+
+    const selectedColor = palette[Math.floor(Math.random() * palette.length)];
+
+    particles.push({
+        x: Math.floor(x), // Keep particles pixel-aligned
+        y: Math.floor(y),
+        vx: Math.floor((Math.random() - 0.5) * speed * 2) / 2,
+        vy: Math.floor((Math.random() - 0.5) * speed * 2) / 2,
+        size: Math.max(1, Math.floor(size)),
+        color: selectedColor,
+        alpha: 1,
+        life: life,
+        maxLife: life
+    });
+}
+
+function createExplosion(x, y, color, count = 15, enemyRadius = 10) {
+    const baseSize = Math.max(2, Math.floor(enemyRadius / 3));
+    const particleCount = Math.max(5, Math.floor(count * (enemyRadius / 10)));
+    const ringCount = Math.floor(enemyRadius / 2);
+
+    // Outer ring
+    for (let i = 0; i < ringCount; i++) {
+        const angle = (i / ringCount) * Math.PI * 2;
+        const distance = enemyRadius * 0.8;
+        createParticle(x + Math.cos(angle) * distance, y + Math.sin(angle) * distance, color, 2 + enemyRadius / 10, 0.6, baseSize);
+    }
+
+    // Core explosion
+    for (let i = 0; i < particleCount; i++) {
+        let particleColor = (i < particleCount * 0.2) ? '#ffffff' : (i < particleCount * 0.5) ? '#ffff00' : color;
+        const distanceFactor = Math.random() * 0.8;
+        const speed = 3 + (enemyRadius / 10) * (1 - distanceFactor);
+        const particleSize = baseSize * (1 + (1 - i / particleCount));
+        createParticle(
+            x + (Math.random() - 0.5) * enemyRadius * distanceFactor,
+            y + (Math.random() - 0.5) * enemyRadius * distanceFactor,
+            particleColor, speed, 0.3 + Math.random() * 0.4, particleSize
+        );
+    }
+}
+
+function updateParticles(dt) {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * dt * 60; // Scale velocity by dt
+        p.y += p.vy * dt * 60;
+        p.life -= dt;
+        p.alpha = Math.max(0, p.life / p.maxLife); // Ensure alpha doesn't go negative
+
+        if (p.life <= 0) {
+            particles.splice(i, 1);
+        }
+    }
+}
+
+function drawParticles() {
+    // Batch drawing by color for potential minor optimization
+    const particlesByColor = {};
+    particles.forEach(p => {
+        if (!particlesByColor[p.color]) {
+            particlesByColor[p.color] = [];
+        }
+        particlesByColor[p.color].push(p);
+    });
+
+    ctx.globalAlpha = 1; // Reset global alpha once
+    for (const color in particlesByColor) {
+        ctx.fillStyle = color;
+        particlesByColor[color].forEach(p => {
+            // Apply alpha individually if needed, though batching might be less effective then
+            // ctx.globalAlpha = p.alpha; // Uncomment if alpha varies significantly per particle
+            const pixelX = Math.floor(p.x);
+            const pixelY = Math.floor(p.y);
+            ctx.fillRect(pixelX, pixelY, p.size, p.size);
+        });
+    }
+    // ctx.globalAlpha = 1; // Reset alpha if applied individually
+}
+
+// --- Enemy Spawning ---
+function spawnEnemy(isBoss = false) {
+    const spawnAngle = Math.random() * Math.PI * 2;
+    const spawnRadius = Math.max(canvasWidth, canvasHeight) / 2 + 50; // Spawn slightly off-screen
+    const enemyTypeIndex = isBoss ? ENEMY_TYPE_BOSS : Math.floor(Math.random() * ENEMY_TYPE_BOSS); // Don't randomly spawn boss
+    const enemyTemplate = ENEMY_TYPES[enemyTypeIndex];
+    const difficultyScaling = Math.pow(ENEMY_HEALTH_SCALE_FACTOR, gameState.wave - 1);
+
+    let health, speed, credits, radius = enemyTemplate[3];
+    if (isBoss) {
+        health = (BOSS_HEALTH_BASE + gameState.wave * BOSS_HEALTH_WAVE_MULTIPLIER) * difficultyScaling;
+        speed = enemyTemplate[1] * Math.sqrt(difficultyScaling); // Boss gets faster too
+        credits = Math.floor(enemyTemplate[4] * Math.sqrt(difficultyScaling) * 5); // Boss gives more credits
+    } else {
+        health = enemyTemplate[2] * difficultyScaling;
+        speed = enemyTemplate[1] * Math.sqrt(difficultyScaling);
+        credits = Math.floor(enemyTemplate[4] * Math.sqrt(difficultyScaling));
+    }
+
+    enemyPool.get({
+        x: base.x + Math.cos(spawnAngle) * spawnRadius,
+        y: base.y + Math.sin(spawnAngle) * spawnRadius,
+        c: enemyTemplate[0], // color
+        s: speed,
+        h: health,
+        m: health, // max health
+        r: radius,
+        C: credits, // creditsValue
+        T: [], // trail
+        st: false, // isStunned
+        stunTime: 0,
+        type: isBoss ? 'Boss' : (enemyTypeIndex === ENEMY_TYPE_TANK ? 'Tank' : (enemyTypeIndex === ENEMY_TYPE_FAST ? 'Fast' : 'Normal'))
+    });
+    gameState.enemiesSpawnedThisWave++;
+}
+
+// --- UI & HUD Updates ---
+function showToast(message, duration = 2000) {
+    const toast = getElement('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, duration);
+}
+
+function updateHUD() {
+    getElement('creditsDisplay').textContent = `Credits: ${gameState.credits}`;
+    getElement('healthDisplay').textContent = `Health: ${Math.max(0, gameState.currentHealth)}/${gameState.maxHealth}`; // Ensure health doesn't show < 0
+
+    const currentTime = Date.now();
+    const elapsedTime = (currentTime - gameState.waveStartTime) / 1000 * gameSpeedMultiplier;
+    let countdownText;
+
+    if (gameState.isBossWave) {
+        countdownText = "Boss!";
+    } else {
+        const remainingTime = Math.max(0, gameState.waveDuration - elapsedTime);
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = Math.floor(remainingTime % 60);
+        countdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    getElement('waveDisplay').textContent = `Wave: ${gameState.wave} | ${countdownText}`;
+
+    // Update wave info in the upgrade menu (if open)
+    if (getElement('upgradeMenu').style.display === 'flex') {
+        updateWaveInfoInMenu();
+    }
+}
+
+function updateWaveInfoInMenu() {
+     getElement('waveInfo').innerHTML = ENEMY_TYPES.map((template, i) => {
+        const difficultyScaling = Math.pow(ENEMY_HEALTH_SCALE_FACTOR, gameState.wave - 1);
+        let health;
+        if (i === ENEMY_TYPE_BOSS) {
+            health = (BOSS_HEALTH_BASE + gameState.wave * BOSS_HEALTH_WAVE_MULTIPLIER) * difficultyScaling;
+        } else {
+            health = template[2] * difficultyScaling;
+        }
+         const name = i === ENEMY_TYPE_BOSS ? 'Boss' : (i === ENEMY_TYPE_TANK ? 'Tank' : (i === ENEMY_TYPE_FAST ? 'Fast' : 'Normal'));
+        return `
+        <div class="enemy-info">
+          <span style="color:${template[0]}">${name}</span>
+          <span>Health: ${Math.ceil(health)}</span>
+        </div>`;
+    }).join('');
+}
+
+
+function updateStatsDisplay() {
+    if (getElement('damage-stats')) {
+        getElement('damage-stats').textContent = `Damage: ${base.bulletDamage}`;
+    }
+    if (getElement('fire-rate-stats')) {
+        getElement('fire-rate-stats').textContent = `Fire Rate: ${(1000 / base.fireRate).toFixed(1)}/s`;
+    }
+    if (getElement('range-stats')) {
+        getElement('range-stats').textContent = `Range: ${Math.round(base.cannonRange)}`;
+    }
+}
+
+// --- Game State Management ---
+function saveGame() {
+    const gameStateData = {
+        gameState: { ...gameState },
+        base: { ...base },
+        upgrades: upgradeTree.map(category => ({
+            category: category.category,
+            upgrades: category.upgrades.map(u => ({
+                name: u.name,
+                cost: u.cost,
+                level: u.level,
+                maxLevel: u.maxLevel
+            }))
+        })),
+        // Add isGameOver flag if the game is over
+        isGameOver: gameState.currentHealth <= 0
+    };
+    localStorage.setItem('orbitalDefenseGame_v2.9', JSON.stringify(gameStateData));
+    showToast('Game saved!');
+}
+
+function tryLoadGame() {
+    try {
+        const savedData = localStorage.getItem('orbitalDefenseGame_v2.9');
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            // Check if the saved game is a game over state
+            if (parsedData.isGameOver) {
+                console.log("Saved game data is from a finished game, ignoring.");
+                savedGame = null; // Discard finished game save
+            } else {
+                savedGame = parsedData;
+                console.log("Saved game data found:", savedGame);
+            }
+        } else {
+            console.log("No saved game data found.");
+            savedGame = null;
+        }
+    } catch (e) {
+        console.error('Error loading saved game:', e);
+        savedGame = null;
+    }
+}
+
+function loadGame() {
+    if (!savedGame) return false;
+
+    try {
+        // Restore game state, base stats
+        // Be careful not to overwrite functions or non-serializable data
+        Object.assign(gameState, savedGame.gameState);
+        // Selectively assign base properties that are saved
+        const savedBase = savedGame.base;
+        base.x = savedBase.x;
+        base.y = savedBase.y;
+        base.radius = savedBase.radius;
+        base.fireRate = savedBase.fireRate;
+        base.bulletDamage = savedBase.bulletDamage;
+        base.cannonRange = savedBase.cannonRange;
+        base.laserDamage = savedBase.laserDamage;
+        base.laserRange = savedBase.laserRange;
+        base.laserTargetX = savedBase.laserTargetX;
+        base.laserTargetY = savedBase.laserTargetY;
+        base.gunBarrelCount = savedBase.gunBarrelCount;
+        base.missileCount = savedBase.missileCount;
+        base.missileDamage = savedBase.missileDamage;
+        base.missileTargetingRadius = savedBase.missileTargetingRadius;
+        base.missileExplosionRadius = savedBase.missileExplosionRadius; // Assuming this was saved; if not, recalculate
+        base.macrossMissileCount = savedBase.macrossMissileCount;
+        base.macrossMissileDamage = savedBase.macrossMissileDamage;
+        base.stunLevel = savedBase.stunLevel;
+        base.stunRadius = savedBase.stunRadius;
+        base.missileSpeedMultiplier = savedBase.missileSpeedMultiplier;
+        base.missileHomingRadius = savedBase.missileHomingRadius;
+        base.missileOrbit = false; // Not implemented?
+        base.color = savedBase.color;
+        base.currentMoveSpeed = savedBase.currentMoveSpeed; // Restore move speed
+
+
+        // Restore upgrades levels and costs
+        savedGame.upgrades.forEach((savedCategory, i) => {
+            savedCategory.upgrades.forEach((savedUpgrade, j) => {
+                const currentUpgrade = upgradeTree[i].upgrades[j];
+                if (currentUpgrade && currentUpgrade.name === savedUpgrade.name) { // Check name match for safety
+                    currentUpgrade.level = savedUpgrade.level;
+                    currentUpgrade.cost = savedUpgrade.cost;
+                    // Re-apply the effect immediately based on the loaded level
+                     applyUpgradeEffect(i, j, false); // Apply without cost/level change
+                } else {
+                     console.warn(`Upgrade mismatch during load: save='${savedUpgrade.name}', current='${currentUpgrade?.name}'`);
+                }
+            });
+        });
+
+        // Crucially, re-apply all upgrade effects based on the loaded levels
+        // (Some might already be applied above, but this ensures consistency)
+        // for (let i = 0; i < upgradeTree.length; i++) {
+        //     for (let j = 0; j in upgradeTree[i].upgrades.length; j++) {
+        //         if (upgradeTree[i].upgrades[j].level > 0) {
+        //              applyUpgradeEffect(i, j, false); // false indicates not a new purchase
+        //         }
+        //     }
+        // }
+
+
+        updateHUD();
+        updateStatsDisplay();
+        renderUpgradeMenu(); // Refresh menu display
+        updateUpgradeAvailability(); // Refresh button states
+        showToast('Game loaded!');
+        return true;
+    } catch (e) {
+        console.error('Error applying loaded game state:', e);
+        // If loading fails, potentially reset to default state
+        initializeGame(false); // Re-initialize without trying to load again
+        return false;
+    }
+}
+
+// --- Game Initialization & Start ---
+function initializeGame(shouldTryLoad = true) {
+    const initialRange = Math.min(canvasWidth, canvasHeight) / 4;
+
+    gameState = {
+        credits: 0,
+        currentHealth: 100,
+        maxHealth: 100,
+        wave: 1,
+        enemiesSpawnedThisWave: 0,
+        lastBulletFireTime: 0,
+        isBossWave: false,
+        lastDamageTime: 0,
+        upgradesAvailable: false, // Flag if any upgrade can be bought
+        lastLaserFireTime: 0,
+        laserEffectEndTime: 0,
+        lastMissileFireTime: 0,
+        macrossCooldownTimer: 0,
+        stunEffectEndTime: 0, // Not currently used, stun applied directly
+        waveStartTime: 0,
+        waveDuration: WAVE_BASE_DURATION,
+        score: 0,
+        enemiesKilled: 0,
+        autoFire: true,
+        activeUpgradeTab: 0 // Initialize active tab to the first category
+    };
+
+    base = {
+        x: canvasWidth / 2,
+        y: canvasHeight / 2,
+        radius: BASE_RADIUS,
+        fireRate: INITIAL_FIRE_RATE, // ms per shot
+        bulletDamage: 1,
+        cannonRange: initialRange,
+        laserDamage: 0, // Needs upgrade
+        laserRange: 0, // Needs upgrade
+        laserTargetX: 0, laserTargetY: 0, // For visual effect
+        gunBarrelCount: 1,
+        missileCount: 0, // Needs upgrade
+        missileDamage: 0,
+        missileTargetingRadius: 0,
+        missileExplosionRadius: 0, // Not currently implemented?
+        macrossMissileCount: 0, // Needs upgrade
+        macrossMissileDamage: 20,
+        stunLevel: 0, // Needs upgrade
+        stunRadius: 0,
+        missileSpeedMultiplier: 1,
+        missileHomingRadius: 0,
+        missileOrbit: false, // Not implemented?
+        color: 'rgb(94,79,162)',
+        currentMoveSpeed: BASE_INITIAL_MOVE_SPEED // Base speed without upgrades
+    };
+
+    resetPools();
+    getElement('macrossButton').classList.remove('active');
+
+    isDragging = false;
+    wasDragging = false;
+    isReturningToCenter = false;
+
+
+    // --- Upgrade Tree Definition ---
+    // f: function to calculate effect based on level
+    // g: function to generate display text for the upgrade button
+    upgradeTree = [
+        { // Category 0: Cannon
+            category: "50mm Cannon",
+            upgrades: [
+                { name: 'Fire Rate', cost: 100, level: 0, maxLevel: 10,
+                  f: level => Math.max(50, INITIAL_FIRE_RATE - 15 * level),
+                  g: (level, cost, maxLvl) => {
+                      const currentRate = 1000 / (level > 0 ? Math.max(50, INITIAL_FIRE_RATE - 15 * level) : INITIAL_FIRE_RATE);
+                      const nextRate = level < maxLvl ? 1000 / Math.max(50, INITIAL_FIRE_RATE - 15 * (level + 1)) : currentRate;
+                      return `${currentRate.toFixed(1)}/s ${level < maxLvl ? `→ ${nextRate.toFixed(1)}/s` : '(MAX)'}`;
+                  }},
+                { name: 'Damage', cost: 150, level: 0, maxLevel: 10,
+                  f: level => 1 + level, // Damage = 1 + level
+                  g: (level, cost, maxLvl) => `${1 + level} ${level < maxLvl ? `→ ${2 + level}` : '(MAX)'}` },
+                { name: 'Range', cost: 250, level: 0, maxLevel: 10,
+                  f: level => initialRange * Math.pow(1.05, level),
+                  g: (level, cost, maxLvl) => `${Math.round(initialRange * Math.pow(1.05, level))} ${level < maxLvl ? `→ ${Math.round(initialRange * Math.pow(1.05, level + 1))}` : '(MAX)'}` },
+                { name: 'Multi-Barrel', cost: 12000, level: 0, maxLevel: 4, // Starts at 1 barrel implicitly
+                  f: level => level + 1, // Barrels = 1 + level
+                  g: (level, cost, maxLvl) => `${1 + level} ${level < maxLvl ? `→ ${2 + level}` : '(MAX)'} guns` }
+            ]
+        },
+        { // Category 1: Defense
+            category: "Defense Systems",
+            upgrades: [
+                { name: 'Health', cost: 200, level: 0, maxLevel: 10,
+                  f: level => 100 + 50 * level,
+                  g: (level, cost, maxLvl) => `${100 + 50 * level} ${level < maxLvl ? `→ ${150 + 50 * level}` : '(MAX)'}` },
+                { name: 'Base Movement', cost: 300, level: 0, maxLevel: 5,
+                  f: level => BASE_INITIAL_MOVE_SPEED + level * BASE_MOVE_SPEED_INCREMENT,
+                  g: (level, cost, maxLvl) => `Speed: ${(BASE_INITIAL_MOVE_SPEED + level * BASE_MOVE_SPEED_INCREMENT).toFixed(1)} ${level < maxLvl ? `→ ${(BASE_INITIAL_MOVE_SPEED + (level+1) * BASE_MOVE_SPEED_INCREMENT).toFixed(1)}` : '(MAX)'}` }
+            ]
+        },
+        { // Category 2: Laser
+            category: "Laser System",
+            upgrades: [
+                { name: 'Laser Damage', cost: 2000, level: 0, maxLevel: 6,
+                  f: level => level === 0 ? 0 : 15 * Math.pow(2, level - 1), // Damage doubles
+                  g: (level, cost, maxLvl) => {
+                      const currentDmg = level === 0 ? 0 : 15 * Math.pow(2, level - 1);
+                      const nextDmg = level < maxLvl ? 15 * Math.pow(2, level) : currentDmg;
+                      return `${currentDmg} dmg ${level === 0 ? '(Activate)' : (level < maxLvl ? `→ ${nextDmg} dmg` : '(MAX)')}`;
+                   }}
+            ]
+        },
+        { // Category 3: Missiles
+            category: "Missile Systems",
+            upgrades: [
+                { name: 'Acquire/Double Missiles', cost: 2000, level: 0, maxLevel: 5,
+                  f: level => level === 0 ? 0 : Math.pow(2, level-1), // Missiles: 0 -> 1 -> 2 -> 4 -> 8 -> 16
+                  g: (level, cost, maxLvl) => {
+                       const currentCount = level === 0 ? 0 : Math.pow(2, level-1);
+                       const nextCount = level < maxLvl ? Math.pow(2, level) : currentCount;
+                       return `${currentCount} ${level === 0 ? '(Activate)' : (level < maxLvl ? `→ ${nextCount}` : '(MAX)')} missiles`;
+                  }},
+                { name: 'Targeting Radius', cost: 1500, level: 0, maxLevel: 5, // Requires missile system active
+                  f: level => base.cannonRange * (1 + 0.1 * level), // Scales with cannon range
+                  g: (level, cost, maxLvl) => `${Math.round(base.cannonRange * (1 + 0.1 * level))} ${level < maxLvl ? `→ ${Math.round(base.cannonRange * (1 + 0.1 * (level + 1)))}` : '(MAX)'}` },
+                { name: 'Missile Damage', cost: 2500, level: 0, maxLevel: 5, // Requires missile system active
+                  f: level => 10 + 5 * level,
+                  g: (level, cost, maxLvl) => `${10 + 5 * level} ${level < maxLvl ? `→ ${15 + 5 * level}` : '(MAX)'}` },
+                { name: 'Missile Homing', cost: 3000, level: 0, maxLevel: 5, // Requires missile system active
+                  f: level => Math.min(canvasWidth, canvasHeight) * (0.05 + 0.02 * level),
+                  g: (level, cost, maxLvl) => {
+                      const currentRange = Math.round(Math.min(canvasWidth, canvasHeight) * (0.05 + 0.02 * level));
+                      const nextRange = level < maxLvl ? Math.round(Math.min(canvasWidth, canvasHeight) * (0.05 + 0.02 * (level + 1))) : currentRange;
+                      return `Homing: ${currentRange}px ${level < maxLvl ? `→ ${nextRange}px` : '(MAX)'}`;
+                  }},
+                { name: 'Macross Missile Massacre', cost: 5000, level: 0, maxLevel: 5,
+                  f: level => level === 0 ? 0 : 50 * Math.pow(2, level - 1), // Num missiles 0 -> 50 -> 100 -> ...
+                  g: (level, cost, maxLvl) => {
+                      if (level === 0) return "Activate Macross";
+                      const currentCount = 50 * Math.pow(2, level - 1);
+                      const nextCount = level < maxLvl ? 50 * Math.pow(2, level) : currentCount;
+                      const currentDmg = 20 + level * 5;
+                      const nextDmg = level < maxLvl ? 20 + (level + 1) * 5 : currentDmg;
+                      const currentCD = MACROSS_BASE_COOLDOWN - level * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL;
+                      const nextCD = level < maxLvl ? MACROSS_BASE_COOLDOWN - (level + 1) * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL : currentCD;
+                      return `${currentCount} missiles, ${currentDmg} dmg, ${currentCD}s CD ${level < maxLvl ? `→ ${nextCount}, ${nextDmg}, ${nextCD}s` : '(MAX)'}`;
+                   }}
+            ]
+        },
+        { // Category 4: Special
+            category: "Special Weapons",
+            upgrades: [
+                { name: 'Stun Field', cost: 2000, level: 0, maxLevel: 9, // Max 90% slow
+                  f: level => level * 0.1, // Returns the slow factor (0 to 0.9)
+                  g: (level, cost, maxLvl) => `Slow: ${level * 10}% ${level < maxLvl ? `→ ${(level + 1) * 10}%` : '(MAX)'}` }
+            ]
+        }
+    ];
+
+    updateHUD();
+    updateStatsDisplay();
+    renderUpgradeMenu(); // Initial render of upgrade menu structure
+
+    if (shouldTryLoad) {
+        tryLoadGame(); // Check for saved game after defaults are set
+    }
+}
+
+function startGame() {
+    initializeGame(true); // Initialize with saved game check
+    getElement('startScreen').style.display = 'none';
+    getElement('gameOverScreen').style.display = 'none';
+    getElement('upgradeMenu').style.display = 'none';
+    renderUpgradeMenu(); // Render the menu with initial state
+    updateUpgradeAvailability();
+    isGameRunning = true;
+    gameState.waveStartTime = Date.now(); // Always start fresh timer for new game
+    gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+
+    // Removed confirm() pop-up logic
+
+    // Start auto-save timer
+    if (autoSaveTimer) clearInterval(autoSaveTimer);
+    autoSaveTimer = setInterval(() => {
+        if (isGameRunning) {
+            saveGame();
+        }
+    }, AUTO_SAVE_INTERVAL);
+
+    // Start game loop
+    lastTime = 0; // Reset timer for the loop
+    animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+function gameOver() {
+    isGameRunning = 0;
+    cancelAnimationFrame(animationFrameId);
+    if (autoSaveTimer) clearInterval(autoSaveTimer);
+    getElement('gameOverScreen').style.display = 'flex';
+    getElement('finalStats').textContent = `Final Credits: ${gameState.credits} | Waves Survived: ${gameState.wave} | Score: ${gameState.score}`;
+    saveGame(); // Save final state on game over
+}
+
+// --- Main Game Loop ---
+function gameLoop(timestamp) {
+    if (!lastTime) lastTime = timestamp;
+    deltaTime = Math.min(0.1, (timestamp - lastTime) / 1000); // Delta time in seconds, capped to prevent large jumps
+    lastTime = timestamp;
+
+    if (isGameRunning) {
+        updateGame(deltaTime); // Update game state
+        drawGame(); // Draw game elements
+        updateHUD(); // Update UI text
+
+        if (gameState.currentHealth > 0) {
+            animationFrameId = requestAnimationFrame(gameLoop);
+        } else {
+            gameOver();
+        }
+    }
+}
+
+// --- Game Update Logic ---
+function updateGame(dt) {
+    // Apply game speed multiplier to delta time
+    const effectiveDt = dt * gameSpeedMultiplier;
+
+    handleBaseMovement(effectiveDt);
+    const baseMoved = updateEnemies(effectiveDt); // Returns true if base drag/return caused global move
+    spawnNewEnemies(effectiveDt);
+    handlePlayerFiring(effectiveDt);
+    updateProjectiles(effectiveDt, baseMoved); // Pass baseMoved to adjust projectile trails if needed
+    checkCollisions(effectiveDt);
+    updateParticles(effectiveDt);
+    updateCooldowns(effectiveDt);
+    checkWaveCompletion(effectiveDt);
+    updateUpgradeAvailabilityFlags();
+}
+
+function handleBaseMovement(dt) {
+    if (!baseCanMove) return;
+
+    const prevBaseX = base.x;
+    const prevBaseY = base.y;
+
+    if (isReturningToCenter && !isDragging) {
+        const timeSinceReturn = (Date.now() - centerReturnStartTime) / 1000;
+        const progress = Math.min(1, timeSinceReturn / 3);
+        const easeFactor = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+
+        const centerX = canvasWidth / 2;
+        const centerY = canvasHeight / 2;
+        const dx = centerX - base.x;
+        const dy = centerY - base.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > 1) {
+            const moveAmount = centerReturnSpeed * easeFactor * dt * 60; // dt compensation
+            base.x += (dx / dist) * moveAmount;
+            base.y += (dy / dist) * moveAmount;
+            base.x = Math.max(base.radius, Math.min(canvasWidth - base.radius, base.x));
+            base.y = Math.max(base.radius, Math.min(canvasHeight - base.radius, base.y));
+        } else {
+            isReturningToCenter = false;
+        }
+    } else if (!isDragging) {
+        // Keyboard movement
+        const moveSpeed = base.currentMoveSpeed * dt * 60; // dt compensation
+        let dx = 0, dy = 0;
+        if (keysPressed['ArrowUp'] || keysPressed['w'] || keysPressed['W']) dy -= 1;
+        if (keysPressed['ArrowDown'] || keysPressed['s'] || keysPressed['S']) dy += 1;
+        if (keysPressed['ArrowLeft'] || keysPressed['a'] || keysPressed['A']) dx -= 1;
+        if (keysPressed['ArrowRight'] || keysPressed['d'] || keysPressed['D']) dx += 1;
+
+        const len = Math.hypot(dx, dy);
+        if (len > 0) {
+            dx = (dx / len) * moveSpeed;
+            dy = (dy / len) * moveSpeed;
+            base.x = Math.max(base.radius, Math.min(canvasWidth - base.radius, base.x + dx));
+            base.y = Math.max(base.radius, Math.min(canvasHeight - base.radius, base.y + dy));
+        }
+    }
+     // else: Movement handled by drag handlers
+
+}
+
+function updateEnemies(dt) {
+    const enemies = enemyPool.getActiveObjects();
+    let baseMovedDuringUpdate = false;
+
+    // Check if base moved significantly due to drag/return (handled in event handlers/base movement)
+    // We need to shift enemies relative to this movement
+    // TODO: Improve this - ideally movement happens once, then shifts apply.
+    // This currently only handles stun application and movement towards base.
+    // Base movement due to drag is handled in handleDragMove.
+
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const enemy = enemies[i];
+        const distToBase = Math.hypot(base.x - enemy.x, base.y - enemy.y);
+
+        // Apply stun field effect
+        if (base.stunLevel > 0 && distToBase <= base.stunRadius && !enemy.isStunned) {
+            enemy.isStunned = true;
+            enemy.stunTime = Date.now();
+            createParticle(enemy.x, enemy.y, currentTheme.canvasColors.particleStun, 2, 0.5, 3); // Stun visual
+        }
+
+        // Update stun status and speed
+        let currentSpeed = enemy.normalSpeed;
+        if (enemy.isStunned) {
+            if (Date.now() - enemy.stunTime > STUN_EFFECT_DURATION) {
+                enemy.isStunned = false;
+            } else {
+                currentSpeed *= (1 - base.stunLevel * 0.1); // Reduce speed based on stun upgrade level
+            }
+        }
+        enemy.speed = currentSpeed; // Update speed property used for movement
+
+        // Move enemy towards base
+        if (distToBase > 0) { // Avoid division by zero if somehow enemy is exactly at base center
+             const angle = Math.atan2(base.y - enemy.y, base.x - enemy.x);
+             enemy.x += Math.cos(angle) * enemy.speed * dt * 60; // dt compensation
+             enemy.y += Math.sin(angle) * enemy.speed * dt * 60;
+        }
+
+
+        // Update trail for fast enemies
+        if (enemy.speed > 3) { // Threshold for trailing effect
+            enemy.trail.unshift({ x: enemy.x, y: enemy.y });
+            if (enemy.trail.length > 5) enemy.trail.pop();
+        } else {
+            enemy.trail = [];
+        }
+
+        // Check collision with base
+        if (distToBase < base.radius + enemy.radius) {
+            gameState.currentHealth -= enemy.type === 'Fast' ? Math.ceil(gameState.maxHealth * 0.25) : enemy.radius; // Fast enemies do % damage
+            gameState.lastDamageTime = Date.now();
+            createExplosion(enemy.x, enemy.y, enemy.color, 20, enemy.radius);
+            updateHUD(); // Update health display immediately
+            enemyPool.release(enemy);
+            if (gameState.currentHealth <= 0) {
+                 gameOver(); // End game immediately if base destroyed
+                 return baseMovedDuringUpdate; // Exit early
+            }
+            continue; // Skip rest of loop for this enemy
+        }
+    }
+    return baseMovedDuringUpdate;
+}
+
+
+function spawnNewEnemies(dt) {
+    const currentTime = Date.now();
+    const elapsedTime = (currentTime - gameState.waveStartTime) / 1000 * gameSpeedMultiplier; // Use game speed
+    const enemies = enemyPool.getActiveObjects();
+
+    // Boss spawning
+    if (!gameState.isBossWave && elapsedTime >= gameState.waveDuration) {
+        spawnEnemy(true); // Spawn the boss
+        gameState.isBossWave = true;
+        showToast('Boss Wave!', 3000);
+    }
+    // Regular enemy spawning (if not boss wave and below limit)
+    else if (!gameState.isBossWave && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dt * 60) { // Slightly increased spawn rate
+        spawnEnemy(false);
+    }
+}
+
+function handlePlayerFiring(dt) {
+    const currentTime = Date.now();
+    const enemies = enemyPool.getActiveObjects();
+
+    // --- Bullet Firing ---
+    if (currentTime - gameState.lastBulletFireTime >= base.fireRate / gameSpeedMultiplier) { // Adjust fire rate by speed
+        // Find nearest enemy within cannon range
+        let nearestEnemy = null;
+        let minDistanceSq = base.cannonRange * base.cannonRange;
+
+        enemies.forEach(enemy => {
+            const dx = enemy.x - base.x;
+            const dy = enemy.y - base.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq <= minDistanceSq) {
+                minDistanceSq = distSq;
+                nearestEnemy = enemy;
+            }
+        });
+
+        if (nearestEnemy && (gameState.autoFire || keysPressed[' '])) {
+            const gunAngle = Math.atan2(nearestEnemy.y - base.y, nearestEnemy.x - base.x);
+            const spread = base.gunBarrelCount > 1 ? Math.PI / 12 : 0; // Reduced spread slightly
+
+            for (let i = 0; i < base.gunBarrelCount; i++) {
+                let angle = gunAngle;
+                if (base.gunBarrelCount > 1) {
+                    angle += spread * (i / (base.gunBarrelCount - 1) - 0.5);
+                }
+                angle += (Math.random() - 0.5) * 0.05; // Smaller random deviation
+
+                bulletPool.get({
+                    x: base.x,
+                    y: base.y,
+                    dx: Math.cos(angle),
+                    dy: Math.sin(angle)
+                });
+            }
+            gameState.lastBulletFireTime = currentTime;
+        }
+    }
+
+    // --- Missile Firing ---
+    if (base.missileCount > 0 && currentTime - gameState.lastMissileFireTime >= MISSILE_FIRE_INTERVAL / gameSpeedMultiplier) {
+        let targets = enemies
+            .filter(enemy => Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.missileTargetingRadius)
+            .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y))
+            .slice(0, base.missileCount); // Fire up to missileCount missiles
+
+        if (targets.length > 0) {
+             targets.forEach(target => {
+                const angle = Math.atan2(target.y - base.y, target.x - base.x);
+                const launchAngle = angle + (Math.random() - 0.5) * (Math.PI / 8); // Launch spread
+
+                 missilePool.get({
+                     x: base.x,
+                     y: base.y,
+                     dx: Math.cos(launchAngle),
+                     dy: Math.sin(launchAngle),
+                     t: target, // Initial target
+                     speed: 2 + Math.random() * 2,
+                     turnSpeed: 0.08, // Slightly better turning for Macross
+                     macross: true,
+                     homingActive: true // Start homing immediately
+                 });
+             });
+            createExplosion(base.x, base.y, 'orange', 5 * targets.length, 8); // Bigger launch effect for more missiles
+            gameState.lastMissileFireTime = currentTime;
+        }
+    }
+
+    // --- Laser Firing ---
+    if (base.laserDamage > 0 && currentTime - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
+        // Target Fast or Boss enemies first within laser range
+        const laserTarget = enemies.find(enemy =>
+            (enemy.type === 'Fast' || enemy.type === 'Boss') &&
+            Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.laserRange
+        );
+
+        if (laserTarget) {
+            laserTarget.health -= base.laserDamage;
+            gameState.lastLaserFireTime = currentTime;
+            gameState.laserEffectEndTime = currentTime + 200; // Duration of visual effect
+            base.laserTargetX = laserTarget.x;
+            base.laserTargetY = laserTarget.y;
+
+            // Laser hit particles
+            for (let i = 0; i < 5; i++) {
+                const t = i / 5;
+                createParticle(
+                    base.x + (laserTarget.x - base.x) * t,
+                    base.y + (laserTarget.y - base.y) * t,
+                    currentTheme.canvasColors.laser, 1, 0.2, 3 // Use laser color for particles
+                );
+            }
+
+             // Check if laser killed the enemy
+             if (laserTarget.health <= 0) {
+                 gameState.credits += laserTarget.creditsValue;
+                 gameState.score += laserTarget.creditsValue * 20; // More points for laser kills
+                 gameState.enemiesKilled++;
+                 createExplosion(laserTarget.x, laserTarget.y, laserTarget.color, 40, laserTarget.radius);
+                 enemyPool.release(laserTarget);
+                 updateHUD();
+                 updateUpgradeAvailabilityFlags();
+             }
+        }
+    }
+}
+
+function updateProjectiles(dt, baseMoved) {
+    const bullets = bulletPool.getActiveObjects();
+    const missiles = missilePool.getActiveObjects();
+    const enemies = enemyPool.getActiveObjects(); // Need enemy list for missile targeting
+
+    // --- Update Bullets ---
+    const bulletMoveDist = BULLET_BASE_SPEED * dt * 60; // dt compensation
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        const bullet = bullets[i];
+        bullet.x += bullet.dx * bulletMoveDist;
+        bullet.y += bullet.dy * bulletMoveDist;
+
+        // Remove bullets out of bounds
+        if (bullet.x < -10 || bullet.x > canvasWidth + 10 || bullet.y < -10 || bullet.y > canvasHeight + 10) {
+            bulletPool.release(bullet);
+        }
+        // Collision checked in checkCollisions
+    }
+
+    // --- Update Missiles ---
+    const missileBaseSpeed = 2; // Base speed units per update cycle (before multipliers)
+    const missileTurnSpeed = 0.05; // Radians per update cycle (approx)
+
+    for (let i = missiles.length - 1; i >= 0; i--) {
+        const missile = missiles[i];
+        let targetEnemy = missile.target;
+
+        // 1. Homing Logic: Find/Update Target
+        if (targetEnemy && !enemies.includes(targetEnemy)) {
+            targetEnemy = null; // Target destroyed or released
+            missile.target = null;
+            missile.homingActive = true; // Activate general homing
+        }
+
+        if (!targetEnemy && missile.homingActive) {
+            // Find the closest enemy within homing range
+            let closestDistSq = base.missileHomingRadius * base.missileHomingRadius;
+            let potentialTarget = null;
+            enemies.forEach(enemy => {
+                const dx = enemy.x - missile.x;
+                const dy = enemy.y - missile.y;
+                const distSq = dx * dx + dy * dy;
+                if (distSq < closestDistSq) {
+                    closestDistSq = distSq;
+                    potentialTarget = enemy;
+                }
+            });
+            targetEnemy = potentialTarget;
+            missile.target = targetEnemy; // Update target for next frame
+        }
+
+        // 2. Steering Logic
+        if (targetEnemy) {
+            const dx = targetEnemy.x - missile.x;
+            const dy = targetEnemy.y - missile.y;
+            const targetAngle = Math.atan2(dy, dx);
+            const currentAngle = Math.atan2(missile.dy, missile.dx);
+
+            let angleDiff = targetAngle - currentAngle;
+            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+            while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+            // Limit turning rate
+            const turnAmount = Math.max(-missileTurnSpeed, Math.min(missileTurnSpeed, angleDiff));
+            const newAngle = currentAngle + turnAmount;
+
+            missile.dx = Math.cos(newAngle);
+            missile.dy = Math.sin(newAngle);
+        }
+        // else: continue straight
+
+        // 3. Movement
+        const missileMoveDist = missile.speed * base.missileSpeedMultiplier * dt * 60; // dt compensation
+        missile.x += missile.dx * missileMoveDist;
+        missile.y += missile.dy * missileMoveDist;
+
+        // 4. Update Trail
+        missile.trail.unshift({ x: missile.x, y: missile.y });
+        if (missile.trail.length > 40) missile.trail.pop();
+
+
+        // 5. Check bounds / Collision (Collision checked in checkCollisions)
+         if (missile.x < -50 || missile.x > canvasWidth + 50 || missile.y < -50 || missile.y > canvasHeight + 50) {
+             missilePool.release(missile);
+         }
+    }
+}
+
+function checkCollisions(dt) {
+    const enemies = enemyPool.getActiveObjects();
+    const bullets = bulletPool.getActiveObjects();
+    const missiles = missilePool.getActiveObjects();
+
+    // --- Bullet-Enemy Collisions ---
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        const bullet = bullets[i];
+        let bulletHit = false;
+        for (let j = enemies.length - 1; j >= 0; j--) {
+            const enemy = enemies[j];
+            // Simple circle collision check
+            const dx = bullet.x - enemy.x;
+            const dy = bullet.y - enemy.y;
+            const distSq = dx*dx + dy*dy;
+            const radiiSumSq = (enemy.radius + 3) * (enemy.radius + 3); // 3 is bullet radius approx
+
+            if (distSq < radiiSumSq) {
+                bulletHit = true;
+                enemy.health -= base.bulletDamage;
+                createParticle(bullet.x, bullet.y, currentTheme.canvasColors.particleHit, 2, 0.3, 2); // Hit spark
+
+                if (enemy.health <= 0) {
+                    gameState.credits += enemy.creditsValue;
+                    gameState.score += enemy.creditsValue * 10;
+                    gameState.enemiesKilled++;
+                    createExplosion(enemy.x, enemy.y, enemy.color, 30, enemy.radius);
+                    enemyPool.release(enemy); // Remove enemy
+                    updateHUD(); // Update score/credits
+                    updateUpgradeAvailabilityFlags();
+                }
+                break; // Bullet hits one enemy max
+            }
+        }
+        if (bulletHit) {
+            bulletPool.release(bullet); // Remove bullet
+        }
+    }
+
+    // --- Missile-Enemy Collisions ---
+    for (let i = missiles.length - 1; i >= 0; i--) {
+        const missile = missiles[i];
+        let missileHit = false;
+        for (let j = enemies.length - 1; j >= 0; j--) {
+            const enemy = enemies[j];
+            const dx = missile.x - enemy.x;
+            const dy = missile.y - enemy.y;
+            const distSq = dx * dx + dy * dy;
+            const radiiSumSq = (enemy.radius + 5) * (enemy.radius + 5); // Missile collision radius approx 5
+
+            if (distSq < radiiSumSq) {
+                missileHit = true;
+                const damage = missile.isMacross ? base.macrossMissileDamage : base.missileDamage;
+                enemy.health -= damage;
+                 // Small impact explosion
+                 createExplosion(missile.x, missile.y, currentTheme.canvasColors.missile, 10, enemy.radius / 2); // Use missile color
+
+                if (enemy.health <= 0) {
+                    gameState.credits += enemy.creditsValue;
+                    gameState.score += enemy.creditsValue * 15; // More points for missile kills
+                    gameState.enemiesKilled++;
+                    createExplosion(enemy.x, enemy.y, enemy.color, 35, enemy.radius); // Bigger death explosion
+                    enemyPool.release(enemy);
+                    updateHUD();
+                    updateUpgradeAvailabilityFlags();
+                }
+                 // Missile only hits one enemy, but doesn't necessarily get destroyed?
+                 // For now, let's destroy it on hit. Could add piercing later.
+                break;
+            }
+        }
+         if (missileHit) {
+             missilePool.release(missile); // Remove missile
+         }
+    }
+}
+
+
+function updateCooldowns(dt) {
+    // Macross Missile Cooldown
+    if (gameState.macrossCooldownTimer > 0) {
+        gameState.macrossCooldownTimer -= dt;
+        if (gameState.macrossCooldownTimer <= 0) {
+            gameState.macrossCooldownTimer = 0;
+             if(base.macrossMissileCount > 0) { // Only enable if upgrade purchased
+                 getElement('macrossButton').disabled = false;
+                 getElement('macrossButton').classList.add('active');
+             }
+        }
+    }
+}
+
+function checkWaveCompletion(dt) {
+    // Wave completes when boss is defeated
+    if (gameState.isBossWave && enemyPool.getActiveObjects().length === 0) {
+        gameState.wave++;
+        gameState.enemiesSpawnedThisWave = 0;
+        gameState.isBossWave = false;
+        // Heal base slightly
+        gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
+        gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+        gameState.waveStartTime = Date.now(); // Reset timer for next wave
+        showToast(`Wave ${gameState.wave} started! +10% Health`, 3000);
+        updateHUD();
+        saveGame(); // Save at the end of a wave
+    }
+}
+
+function updateUpgradeAvailabilityFlags() {
+    // Check if any upgrade is affordable
+    gameState.upgradesAvailable = upgradeTree.some(category =>
+        category.upgrades.some(u => gameState.credits >= u.cost && u.level < u.maxLevel)
+    );
+    // Base color change removed, could be added back if desired
+}
+
+
+// --- Drawing Logic ---
+function drawGame() {
+    // Clear canvas (using theme color)
+    ctx.fillStyle = currentTheme.cssVariables['--canvas-bg'] || 'rgba(0, 0, 0, 0.3)'; // Use theme canvas bg or default
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    // --- Draw Range Rings ---
+    ctx.lineWidth = 2;
+    // Cannon Range
+    const canUpgradeCannonRange = gameState.credits >= upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_RANGE].cost && upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_RANGE].level < upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_RANGE].maxLevel;
+    ctx.strokeStyle = canUpgradeCannonRange ? currentTheme.canvasColors.ringCannonUpgrade : currentTheme.canvasColors.ringCannon;
+    ctx.beginPath();
+    ctx.arc(base.x, base.y, base.cannonRange, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Missile Range (if applicable)
+    if (base.missileCount > 0 && base.missileTargetingRadius > 0) {
+        const canUpgradeMissileRange = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level > 0 && gameState.credits >= upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE].cost && upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE].level < upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE].maxLevel;
+        ctx.strokeStyle = canUpgradeMissileRange ? currentTheme.canvasColors.ringMissileUpgrade : currentTheme.canvasColors.ringMissile;
+        ctx.beginPath();
+        ctx.arc(base.x, base.y, base.missileTargetingRadius, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    // Laser Range (if applicable)
+    if (base.laserDamage > 0 && base.laserRange > 0) {
+        const canUpgradeLaser = gameState.credits >= upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].cost && upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level < upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].maxLevel;
+        ctx.strokeStyle = canUpgradeLaser ? currentTheme.canvasColors.ringLaserUpgrade : currentTheme.canvasColors.ringLaser;
+        ctx.beginPath();
+        ctx.arc(base.x, base.y, base.laserRange, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    // Stun Range (if applicable)
+    if (base.stunLevel > 0 && base.stunRadius > 0) {
+        const canUpgradeStun = gameState.credits >= upgradeTree[UPGRADE_CATEGORY_SPECIAL].upgrades[UPGRADE_SPECIAL_STUN].cost && upgradeTree[UPGRADE_CATEGORY_SPECIAL].upgrades[UPGRADE_SPECIAL_STUN].level < upgradeTree[UPGRADE_CATEGORY_SPECIAL].upgrades[UPGRADE_SPECIAL_STUN].maxLevel;
+        ctx.strokeStyle = canUpgradeStun ? currentTheme.canvasColors.ringStunUpgrade : currentTheme.canvasColors.ringStun;
+        ctx.beginPath();
+        ctx.arc(base.x, base.y, base.stunRadius, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // --- Draw Ring UI (Directly on Canvas) ---
+    ringClickRegions = []; // Clear regions each frame
+
+    // --- Draw Upgrade Category Tabs ---
+    const tabDisplayWidth = 180; // New width for vertical tabs
+    const tabDisplayHeight = 35; // New height for vertical tabs
+    const tabSpacing = 10;
+    const tabsAreaX = 10; // Position from left edge
+    const tabsAreaY = 60; // Position below HUD
+
+    upgradeTree.forEach((category, i) => {
+        const tabX = tabsAreaX;
+        const tabY = tabsAreaY + i * (tabDisplayHeight + tabSpacing); // Stack vertically
+        const isTabActive = gameState.activeUpgradeTab === i;
+
+        // Check if any upgrade in this category is available
+        const hasAvailableUpgrade = category.upgrades.some(u => gameState.credits >= u.cost && u.level < u.maxLevel);
+
+        // Determine tab color and flashing
+        let tabColor = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50, 50, 50, 0.7)'; // Default grey
+        let borderColor = currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)'; // Default border color
+
+        if (isTabActive) {
+            tabColor = currentTheme.canvasColors.ringUpgradeBoxAvailable || 'rgba(0, 255, 0, 0.7)'; // Active tab color
+            borderColor = currentTheme.canvasColors.ringUpgradeBoxMax || 'rgba(230, 181, 75, 1)'; // Active border color
+        } else if (hasAvailableUpgrade) {
+            // Flashing effect for available upgrades
+            const pulse = Math.abs(Math.sin(Date.now() / 150)); // Faster pulse
+            tabColor = `rgba(255, 255, 0, ${0.5 + pulse * 0.5})`; // Bright yellow flash
+            borderColor = `rgba(255, 255, 0, ${0.8 + pulse * 0.2})`;
+        }
+
+        // Draw tab background
+        ctx.fillStyle = tabColor;
+        ctx.fillRect(tabX, tabY, tabDisplayWidth, tabDisplayHeight);
+
+        // Draw tab border
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(tabX, tabY, tabDisplayWidth, tabDisplayHeight);
+
+        // Draw tab text
+        ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)';
+        ctx.font = `14px ${currentTheme.cssVariables['--font-family'] || "'Press Start 2P', monospace"}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(category.category, tabX + tabDisplayWidth / 2, tabY + tabDisplayHeight / 2);
+
+        // Store clickable region for the tab
+        ringClickRegions.push({
+            type: 'upgrade_tab',
+            x: tabX,
+            y: tabY,
+            width: tabDisplayWidth,
+            height: tabDisplayHeight,
+            categoryIndex: i,
+            upgradeIndex: -1 // Not a specific upgrade button
+        });
+    });
+
+    // --- Draw Upgrades for the Active Tab ---
+    if (gameState.activeUpgradeTab !== null && gameState.activeUpgradeTab < upgradeTree.length) {
+        const activeCategory = upgradeTree[gameState.activeUpgradeTab];
+        const upgradeButtonWidth = 220; // New width for upgrade buttons
+        const upgradeButtonHeight = 70; // New height for upgrade buttons
+        const upgradeButtonSpacing = 10;
+        const upgradesAreaX = tabsAreaX + tabDisplayWidth + tabSpacing; // Position to the right of tabs
+        const upgradesAreaY = tabsAreaY; // Align with the top of the tabs area
+
+        // This part will need to draw the individual upgrade buttons on the canvas
+        // Similar to the logic in drawCollapsibleUpgradeElement, but for a flat grid
+        activeCategory.upgrades.forEach((upgradeDef, upgradeIndex) => {
+            const buttonX = upgradesAreaX;
+            const buttonY = upgradesAreaY + upgradeIndex * (upgradeButtonHeight + upgradeButtonSpacing); // Stack vertically
+
+            const currentLevel = upgradeDef.level;
+            const maxLevel = upgradeDef.maxLevel;
+            const cost = upgradeDef.cost;
+            const canUpgrade = gameState.credits >= cost && currentLevel < maxLevel;
+
+            // Draw button background
+            ctx.fillStyle = canUpgrade ? (currentTheme.canvasColors.ringUpgradeBoxAvailable || 'rgba(0, 255, 0, 0.7)') : (currentTheme.canvasColors.buttonDisabledBg || '#2f240c');
+            ctx.fillRect(buttonX, buttonY, upgradeButtonWidth, upgradeButtonHeight);
+
+            // Draw button border
+            ctx.strokeStyle = canUpgrade ? (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)') : (currentTheme.canvasColors.buttonDisabledText || '#ac4834');
+            ctx.lineWidth = 2;
+            ctx.strokeRect(buttonX, buttonY, upgradeButtonWidth, upgradeButtonHeight);
+
+            // Draw button text
+            ctx.fillStyle = canUpgrade ? (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)') : (currentTheme.canvasColors.buttonDisabledText || '#ac4834');
+            ctx.font = `12px ${currentTheme.cssVariables['--font-family'] || "'Press Start 2P', monospace"}`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+
+            const textLines = [
+                `${upgradeDef.name} (${currentLevel}/${maxLevel})`,
+                `Cost: ${cost}`,
+                upgradeDef.g(currentLevel, cost, maxLevel)
+            ];
+
+            let textY = buttonY + 5;
+            textLines.forEach(line => {
+                ctx.fillText(line, buttonX + 5, textY);
+                textY += 15; // Line height
+            });
+
+
+            // Store button clickable region
+            ringClickRegions.push({
+                type: 'upgrade_button', // Changed type to differentiate from collapsible
+                x: buttonX,
+                y: buttonY,
+                width: upgradeButtonWidth,
+                height: upgradeButtonHeight,
+                categoryIndex: gameState.activeUpgradeTab,
+                upgradeIndex: upgradeIndex
+            });
+        });
+    }
+
+
+    // --- Draw Base ---
+    const baseHitTime = 200;
+    const flashColor = currentTheme.canvasColors.baseHit;
+    const baseColor = (Date.now() - gameState.lastDamageTime < baseHitTime) ? flashColor : currentTheme.canvasColors.base;
+    ctx.fillStyle = baseColor;
+    ctx.strokeStyle = baseColor; // Use fill color for stroke too
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(base.x, base.y, base.radius, 0, Math.PI * 2);
+    ctx.fill();
+    // Optional: Add a subtle border (maybe theme dependent?)
+    // ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    // ctx.stroke();
+
+
+    // --- Draw Base State Indicators ---
+    if (isDragging) {
+        ctx.strokeStyle = currentTheme.canvasColors.baseDragIndicator;
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(base.x, base.y, base.radius + 8, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    } else if (isReturningToCenter) {
+        ctx.strokeStyle = currentTheme.canvasColors.baseReturnIndicator;
+        ctx.setLineDash([3, 3]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(base.x, base.y, base.radius + 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // --- Draw Upgrade Rings (Visual only now) ---
+    const laserLevel = upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level;
+    const missileLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level;
+    const maxRings = Math.max(laserLevel, missileLevel);
+    ctx.lineWidth = 2;
+    for (let i = 0; i < maxRings; i++) {
+        const ringRadius = base.radius + 5 + i * 6; // Slightly adjusted spacing
+        if (i < laserLevel) {
+            ctx.strokeStyle = currentTheme.canvasColors.upgradeRingLaser;
+            ctx.beginPath();
+            ctx.arc(base.x, base.y, ringRadius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        if (i < missileLevel) {
+            ctx.strokeStyle = currentTheme.canvasColors.upgradeRingMissile;
+            ctx.beginPath();
+            ctx.arc(base.x, base.y, ringRadius + 2, 0, Math.PI * 2); // Offset slightly
+            ctx.stroke();
+        }
+    }
+
+
+    // --- Draw Gun Barrel Indicator ---
+    const enemies = enemyPool.getActiveObjects();
+    let nearestEnemy = null;
+    let minDistanceSq = Infinity;
+    enemies.forEach(enemy => {
+        const dx = enemy.x - base.x;
+        const dy = enemy.y - base.y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < minDistanceSq) {
+            minDistanceSq = distSq;
+            nearestEnemy = enemy;
+        }
+    });
+
+    if (nearestEnemy) {
+        const gunAngle = Math.atan2(nearestEnemy.y - base.y, nearestEnemy.x - base.x);
+        ctx.save();
+        ctx.translate(base.x, base.y);
+        ctx.rotate(gunAngle);
+        ctx.fillStyle = currentTheme.canvasColors.gunBarrel;
+        // Draw concentric circles for barrels
+        for (let i = 0; i < base.gunBarrelCount; i++) {
+            ctx.beginPath();
+            ctx.arc(base.radius * 0.5 + i * 3, 0, 3 - i * 0.5, 0, Math.PI * 2); // Barrels pointing out
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+
+    // --- Draw Enemies ---
+    ctx.lineWidth = 2;
+    enemies.forEach(enemy => {
+        // Trail for fast enemies
+        if (enemy.trail.length > 1) {
+            ctx.strokeStyle = `${enemy.color}80`; // Semi-transparent color
+            ctx.beginPath();
+            ctx.moveTo(enemy.trail[0].x, enemy.trail[0].y);
+            for(let i = 1; i < enemy.trail.length; i++) {
+             ctx.globalAlpha = 1 - (i / enemy.trail.length) * 0.7;
+             ctx.lineTo(enemy.trail[i].x, enemy.trail[i].y);
+        }
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        }
+
+        // Enemy body
+        ctx.fillStyle = enemy.color;
+        ctx.beginPath();
+        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Stun effect visual
+        if (enemy.isStunned) {
+            ctx.strokeStyle = currentTheme.canvasColors.enemyStunEffect;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(enemy.x, enemy.y, enemy.radius + 4, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // Health bar
+        const healthPercent = Math.max(0, enemy.health / enemy.maxHealth);
+        const barWidth = enemy.radius * 2;
+        const barHeight = 4;
+        const barX = enemy.x - enemy.radius;
+        const barY = enemy.y - enemy.radius - 10;
+        ctx.fillStyle = currentTheme.canvasColors.enemyHealthBarBg;
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+        ctx.fillStyle = currentTheme.canvasColors.enemyHealthBarFg;
+        ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+        // Optional: Theme-based border?
+        // ctx.strokeStyle = 'rgba(0,0,0,0.5)'; // Border
+        // ctx.lineWidth = 1;
+        // ctx.strokeRect(barX, barY, barWidth, barHeight);
+    });
+
+
+    // --- Draw Bullets ---
+    ctx.fillStyle = currentTheme.canvasColors.bullet;
+    bulletPool.getActiveObjects().forEach(bullet => {
+        ctx.beginPath();
+        ctx.arc(bullet.x, bullet.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    // --- Draw Missiles ---
+    missilePool.getActiveObjects().forEach(missile => {
+        // Trail
+        ctx.strokeStyle = currentTheme.canvasColors.missileTrail;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(missile.trail[0].x, missile.trail[0].y);
+        for(let i = 1; i < missile.trail.length; i++) {
+             ctx.globalAlpha = 1 - (i / missile.trail.length) * 0.7;
+             ctx.lineTo(missile.trail[i].x, missile.trail[i].y);
+        }
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        // Missile body
+        ctx.fillStyle = missile.isMacross ? currentTheme.canvasColors.macrossMissile : currentTheme.canvasColors.missile;
+        ctx.beginPath();
+        // Draw a small triangle for directionality
+        ctx.save();
+        ctx.translate(missile.x, missile.y);
+        ctx.rotate(Math.atan2(missile.dy, missile.dx));
+        ctx.moveTo(3, 0);
+        ctx.lineTo(-2, -2);
+        ctx.lineTo(-2, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    });
+
+    // --- Draw Laser ---
+    if (base.laserDamage > 0 && Date.now() < gameState.laserEffectEndTime) {
+        ctx.strokeStyle = currentTheme.canvasColors.laser;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(base.x, base.y);
+        ctx.lineTo(base.laserTargetX, base.laserTargetY);
+        ctx.stroke();
+        // Core glow
+        ctx.strokeStyle = currentTheme.canvasColors.laserGlow;
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(base.x, base.y);
+        ctx.lineTo(base.laserTargetX, base.laserTargetY);
+        ctx.stroke();
+    }
+
+    // --- Draw Particles ---
+    drawParticles();
+}
+
+// --- Canvas Ring UI Drawing Helper ---
+function drawRingUIElement(type, radius, labelText, categoryIndex, upgradeIndex, angle, color) {
+    const upgradeDef = upgradeTree[categoryIndex].upgrades[upgradeIndex];
+    const currentLevel = upgradeDef.level;
+    const maxLevel = upgradeDef.maxLevel;
+    const cost = upgradeDef.cost;
+    const isMissileSubUpgrade = categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex > UPGRADE_MISSILE_COUNT;
+    const missilePrereqMet = !isMissileSubUpgrade || upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level > 0;
+    const canUpgrade = gameState.credits >= cost && currentLevel < maxLevel && missilePrereqMet;
+
+
+    ctx.save();
+    ctx.translate(base.x, base.y);
+    ctx.rotate(angle); // Rotate context to the desired angle
+
+    const elementBaseX = radius; // Position along the rotated x-axis
+    const elementBaseY = 0;
+    const fontSize = 11;
+    const padding = 3;
+    const boxSize = 8;
+    const boxSpacing = 2;
+    const totalBoxesWidth = maxLevel * boxSize + (maxLevel - 1) * boxSpacing;
+
+    // Use theme font if specified, otherwise default
+    ctx.font = `${fontSize}px ${currentTheme.cssVariables['--font-family'] || "'Press Start 2P', monospace"}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Calculate total width needed
+    const labelWidth = ctx.measureText(labelText).width;
+    const costText = `$${cost}`;
+    const costWidth = ctx.measureText(costText).width;
+    const totalWidth = labelWidth + padding * 2 + totalBoxesWidth + padding * 2 + (canUpgrade ? costWidth + padding : 0);
+    const totalHeight = fontSize + padding * 2;
+
+    // Center the element horizontally
+    const startX = elementBaseX - totalWidth / 2;
+
+    // Background (optional, subtle)
+    // ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+    // ctx.fillRect(startX - padding, elementBaseY - totalHeight / 2 - padding, totalWidth + padding*2, totalHeight + padding*2);
+
+    let currentX = startX;
+
+    // Draw Label Text
+    ctx.fillStyle = color;
+    ctx.fillText(labelText, currentX + labelWidth / 2, elementBaseY);
+    currentX += labelWidth + padding * 2;
+
+    // Draw Upgrade Boxes
+    const boxStartY = elementBaseY - boxSize / 2;
+    for (let i = 0; i < maxLevel; i++) {
+        const boxX = currentX + i * (boxSize + boxSpacing);
+        if (i < currentLevel) {
+            ctx.fillStyle = color; // Use the passed-in ring color for filled boxes
+            ctx.fillRect(boxX, boxStartY, boxSize, boxSize);
+        } else if (i === currentLevel && canUpgrade) {
+            // Pulsing effect for next available upgrade
+            const pulse = Math.abs(Math.sin(Date.now() / 300));
+            // Calculate inverted color based on the ring's base color
+            const baseColorMatch = color.match(/(\d+(\.\d+)?)/g);
+            let invertedColor = 'rgba(255, 255, 255, 0.7)'; // Default to white if parsing fails
+
+            if (baseColorMatch && baseColorMatch.length >= 3) {
+                 const r = parseInt(baseColorMatch[0]);
+                 const g = parseInt(baseColorMatch[1]);
+                 const b = parseInt(baseColorMatch[2]);
+                 invertedColor = `rgba(${255 - r}, ${255 - g}, ${255 - b}, ${0.5 + pulse * 0.5})`; // Invert RGB, apply pulsing alpha
+            } else {
+                 // Attempt to handle hex colors if needed (simplified)
+                 if (color.startsWith('#') && color.length === 7) {
+                     const r = parseInt(color.substring(1, 3), 16);
+                     const g = parseInt(color.substring(3, 5), 16);
+                     const b = parseInt(color.substring(5, 7), 16);
+                     invertedColor = `rgba(${255 - r}, ${255 - g}, ${255 - b}, ${0.5 + pulse * 0.5})`;
+                 }
+            }
+
+            ctx.fillStyle = invertedColor;
+            ctx.fillRect(boxX, boxStartY, boxSize, boxSize);
+        } else {
+             // Empty box background using theme color
+            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50, 50, 50, 0.7)';
+            ctx.fillRect(boxX, boxStartY, boxSize, boxSize);
+        }
+        // Border (using the main ring color)
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(boxX, boxStartY, boxSize, boxSize);
+    }
+    const boxesEndX = currentX + totalBoxesWidth;
+    currentX += totalBoxesWidth + padding * 2;
+
+    // Draw Cost Text (if upgradable)
+    if (canUpgrade && currentLevel < maxLevel) {
+        ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)'; // Use theme color or default green
+        ctx.fillText(costText, currentX + costWidth / 2, elementBaseY);
+        currentX += costWidth + padding;
+    } else if (currentLevel >= maxLevel) {
+        const maxText = "MAX";
+        const maxTextWidth = ctx.measureText(maxText).width;
+        ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxMax || color; // Use theme color or ring color
+        ctx.fillText(maxText, currentX + maxTextWidth / 2, elementBaseY);
+        currentX += maxTextWidth + padding;
+    }
+
+    // Store clickable region - use non-rotated coordinates
+    // Calculate the bounding box in the unrotated coordinate system
+    const regionWidth = totalWidth + padding * 2;
+    const regionHeight = totalHeight + padding * 2;
+    const regionCenterX = base.x + Math.cos(angle) * radius;
+    const regionCenterY = base.y + Math.sin(angle) * radius;
+
+    // Simple AABB (Axis-Aligned Bounding Box) for clicking, might need rotation if precise clicks are needed
+    // For simplicity, using a larger circular region around the center point
+    const clickRadius = regionWidth / 1.5; // Make click area reasonably large
+
+    ringClickRegions.push({
+        type: type,
+        x: regionCenterX,
+        y: regionCenterY,
+        radius: clickRadius, // Using radius for simple check
+        categoryIndex: categoryIndex,
+        upgradeIndex: upgradeIndex
+    });
+
+
+    ctx.restore();
+}
+
+// --- Canvas Collapsible Upgrade Category UI Drawing Helper ---
+// Modified to handle a whole category of upgrades
+function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isExpanded, color) {
+    const fontSize = 12;
+    const padding = 8;
+    const boxMargin = 4;
+    const upgradeSpacing = 10; // Space between upgrades
+    const headerHeight = fontSize + padding * 2;
+    let contentHeight = 0;
+    const contentWidth = 170; // Slightly wider panel
+
+    // Use theme font
+    ctx.font = `${fontSize}px ${currentTheme.cssVariables['--font-family'] || "'Press Start 2P', monospace"}`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+
+    // Calculate content height if expanded
+    if (isExpanded) {
+        category.upgrades.forEach(upgradeDef => {
+            const currentLevel = upgradeDef.level;
+            const maxLevel = upgradeDef.maxLevel;
+            const cost = upgradeDef.cost;
+            const statsText = upgradeDef.g(currentLevel, cost, maxLevel);
+            const statsLines = statsText.split('\n').length;
+            contentHeight += (fontSize + boxMargin) * statsLines; // Height for stats
+            contentHeight += (fontSize + padding * 2 + boxMargin); // Height for button/MAX text
+            contentHeight += upgradeSpacing; // Space after each upgrade
+        });
+        contentHeight -= upgradeSpacing; // Remove last spacing
+        contentHeight += padding * 2; // Top/bottom padding for content area
+    }
+
+    const totalHeight = headerHeight + (isExpanded ? contentHeight : 0);
+    const totalWidth = contentWidth;
+
+    // Background box
+    ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50, 50, 50, 0.7)';
+    ctx.fillRect(x, y, totalWidth, totalHeight);
+
+    // Border
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, totalWidth, totalHeight);
+
+    // Header (Clickable area)
+    ctx.fillStyle = color;
+    ctx.fillText(title, x + padding, y + padding);
+
+    // Expansion indicator (simple +/-)
+    ctx.textAlign = 'right';
+    ctx.fillText(isExpanded ? '-' : '+', x + totalWidth - padding, y + padding);
+    ctx.textAlign = 'left'; // Reset alignment
+
+    // Draw content if expanded
+    if (isExpanded) {
+        let currentY = y + headerHeight + padding;
+
+        category.upgrades.forEach((upgradeDef, upgradeIndex) => {
+            const currentLevel = upgradeDef.level;
+            const maxLevel = upgradeDef.maxLevel;
+            const cost = upgradeDef.cost;
+            const canUpgrade = gameState.credits >= cost && currentLevel < maxLevel;
+
+            // Draw upgrade name/stats
+            const statsText = `${upgradeDef.name}: ${upgradeDef.g(currentLevel, cost, maxLevel)}`;
+            const statsLines = statsText.split('\n');
+            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)';
+            statsLines.forEach(line => {
+                ctx.fillText(line, x + padding, currentY);
+                currentY += fontSize + boxMargin;
+            });
+
+            // Draw Upgrade Button or MAX text
+            const buttonHeight = fontSize + padding * 2;
+            const buttonX = x + padding;
+            const buttonY = currentY;
+            const buttonWidth = totalWidth - padding * 2;
+
+            if (currentLevel < maxLevel) {
+                const buttonText = `Upgrade: $${cost}`;
+
+                // Button background
+                if (canUpgrade) {
+                    const pulse = Math.abs(Math.sin(Date.now() / 300));
+                    const pulseColor = currentTheme.canvasColors.ringUpgradeBoxAvailable || 'rgba(0, 255, 0, 0.7)';
+                    const rgbMatch = pulseColor.match(/(\d+(\.\d+)?)/g);
+                    if (rgbMatch && rgbMatch.length >= 3) {
+                        ctx.fillStyle = `rgba(${rgbMatch[0]}, ${rgbMatch[1]}, ${rgbMatch[2]}, ${0.5 + pulse * 0.5})`;
+                    } else {
+                        ctx.fillStyle = pulseColor;
+                    }
+                } else {
+                    ctx.fillStyle = currentTheme.canvasColors.buttonDisabledBg || '#2f240c';
+                }
+                ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+
+                // Button border
+                ctx.strokeStyle = canUpgrade ? color : currentTheme.canvasColors.buttonDisabledText || '#ac4834';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+
+                // Button text
+                ctx.fillStyle = canUpgrade ? currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)' : currentTheme.canvasColors.buttonDisabledText || '#ac4834';
+                ctx.fillText(buttonText, buttonX + padding, buttonY + padding);
+
+                // Store button clickable region
+                ringClickRegions.push({
+                    type: 'collapsible_upgrade_button',
+                    x: buttonX,
+                    y: buttonY,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    categoryIndex: categoryIndex,
+                    upgradeIndex: upgradeIndex // Store the correct index for this button
+                });
+
+            } else {
+                // MAX level text
+                const maxText = "MAX LEVEL";
+                ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxMax || color;
+                ctx.fillText(maxText, buttonX + padding, buttonY + padding);
+            }
+            currentY += buttonHeight + upgradeSpacing; // Move Y for next upgrade
+        });
+    }
+
+    // Store header clickable region (still useful for potential future interactions, even if click is ignored now)
+    ringClickRegions.push({
+        type: 'collapsible_upgrade_header',
+        x: x,
+        y: y,
+        width: totalWidth,
+        height: headerHeight,
+        categoryIndex: categoryIndex,
+        upgradeIndex: -1 // No specific upgrade index for header
+    });
+}
+
+
+// --- Upgrade Logic ---
+function purchaseUpgrade(categoryIndex, upgradeIndex) {
+    const upgrade = upgradeTree[categoryIndex].upgrades[upgradeIndex];
+
+    // Check prerequisite for missile sub-upgrades
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex > UPGRADE_MISSILE_COUNT) {
+        if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0) {
+            showToast("Requires Missile System Acquisition first!", 2500);
+            return; // Cannot buy sub-upgrades if missiles not acquired
+        }
+    }
+
+    if (gameState.credits >= upgrade.cost && upgrade.level < upgrade.maxLevel) {
+        gameState.credits -= upgrade.cost;
+        upgrade.level++;
+        upgrade.cost = Math.ceil(upgrade.cost * 1.5); // Increase cost
+
+        applyUpgradeEffect(categoryIndex, upgradeIndex, true); // Apply effect of new level
+
+        updateHUD();
+        renderUpgradeMenu(); // Update display in menu
+        updateStatsDisplay();
+        updateUpgradeAvailability(); // Update button disabled states
+        showToast(`Upgraded ${upgrade.name}!`);
+        saveGame(); // Auto-save on upgrade
+    } else if (gameState.credits < upgrade.cost) {
+         showToast("Not enough credits!", 1500);
+    } else if (upgrade.level >= upgrade.maxLevel) {
+         showToast(`${upgrade.name} at Max Level!`, 1500);
+    }
+}
+
+function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
+    const upgrade = upgradeTree[categoryIndex].upgrades[upgradeIndex];
+    const level = upgrade.level; // Current level after potential purchase
+
+    switch(categoryIndex) {
+        case UPGRADE_CATEGORY_CANNON:
+            switch(upgradeIndex) {
+                case UPGRADE_CANNON_FIRERATE: base.fireRate = upgrade.f(level); break;
+                case UPGRADE_CANNON_DAMAGE: base.bulletDamage = upgrade.f(level); break;
+                case UPGRADE_CANNON_RANGE: base.cannonRange = upgrade.f(level);
+                    // Also update missile targeting radius if missiles are active
+                    if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level > 0) {
+                         const missileRangeUpgrade = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE];
+                         base.missileTargetingRadius = missileRangeUpgrade.f(missileRangeUpgrade.level);
+                    }
+                    break;
+                case UPGRADE_CANNON_MULTIBARREL: base.gunBarrelCount = upgrade.f(level); break;
+            }
+            break;
+        case UPGRADE_CATEGORY_DEFENSE:
+            switch(upgradeIndex) {
+                case UPGRADE_DEFENSE_HEALTH:
+                    const oldMaxHealth = gameState.maxHealth;
+                    gameState.maxHealth = upgrade.f(level);
+                    // Heal amount equal to the increase
+                    gameState.currentHealth += (gameState.maxHealth - oldMaxHealth);
+                    gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth); // Cap at new max
+                    updateHUD();
+                    break;
+                case UPGRADE_DEFENSE_MOVEMENT: base.currentMoveSpeed = upgrade.f(level); break;
+            }
+            break;
+        case UPGRADE_CATEGORY_LASER:
+             if (upgradeIndex === UPGRADE_LASER_DAMAGE) {
+                 base.laserDamage = upgrade.f(level);
+                 if (level === 1 && isNewPurchase) { // First level purchased
+                     base.laserRange = Math.min(canvasWidth, canvasHeight) * 0.3; // Set initial range
+                 } else if (level > 0) {
+                     // Optionally increase range slightly with levels?
+                     base.laserRange = Math.min(canvasWidth, canvasHeight) * (0.3 + (level - 1) * 0.02);
+                 } else {
+                     base.laserRange = 0; // Turn off if somehow level becomes 0
+                 }
+             }
+             break;
+        case UPGRADE_CATEGORY_MISSILE:
+            switch(upgradeIndex) {
+                case UPGRADE_MISSILE_COUNT:
+                    base.missileCount = upgrade.f(level);
+                    if (level === 1 && isNewPurchase) {
+                        // First missile acquisition - grant base level of sub-upgrades?
+                        // Or just enable them for purchase? Let's just enable.
+                         const missileRangeUpgrade = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE];
+                         base.missileTargetingRadius = missileRangeUpgrade.f(missileRangeUpgrade.level); // Apply current level (might be 0)
+
+                         const missileDmgUpgrade = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_DAMAGE];
+                         base.missileDamage = missileDmgUpgrade.f(missileDmgUpgrade.level);
+
+                         const missileHomingUpgrade = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_HOMING];
+                         base.missileHomingRadius = missileHomingUpgrade.f(missileHomingUpgrade.level);
+                    }
+                    break;
+                case UPGRADE_MISSILE_RANGE: base.missileTargetingRadius = upgrade.f(level); break;
+                case UPGRADE_MISSILE_DAMAGE: base.missileDamage = upgrade.f(level); break;
+                case UPGRADE_MISSILE_HOMING: base.missileHomingRadius = upgrade.f(level); break;
+                case UPGRADE_MISSILE_MACROSS:
+                    base.macrossMissileCount = upgrade.f(level);
+                    base.macrossMissileDamage = 20 + level * 5;
+                    getElement('macrossButton').style.display = level > 0 ? 'block' : 'none';
+                    // Enable button immediately if cooldown is 0
+                    if (level > 0 && gameState.macrossCooldownTimer <= 0) {
+                        getElement('macrossButton').disabled = false;
+                        getElement('macrossButton').classList.add('active');
+                    }
+                    break;
+            }
+            break;
+        case UPGRADE_CATEGORY_SPECIAL:
+            if (upgradeIndex === UPGRADE_SPECIAL_STUN) {
+                 base.stunLevel = level; // Store level, used directly in enemy update
+                 if (level === 1 && isNewPurchase) { // First level
+                     base.stunRadius = Math.min(canvasWidth, canvasHeight) / 3; // Set initial radius
+                 } else if (level > 0) {
+                     // Optionally increase radius slightly with levels?
+                     base.stunRadius = Math.min(canvasWidth, canvasHeight) / 3 * (1 + (level-1)*0.03);
+                 } else {
+                     base.stunRadius = 0;
+                 }
+            }
+            break;
+    }
+}
+
+
+function renderUpgradeMenu() {
+    let upgradeHTML = '';
+    upgradeTree.forEach((category, i) => {
+        upgradeHTML += `
+        <div class="upgrade-category">
+            <h3>${category.category}</h3>
+            <div class="upgrade-grid">
+        `;
+        category.upgrades.forEach((u, j) => {
+             upgradeHTML += createUpgradeButtonHTML(u, i, j);
+        });
+        upgradeHTML += `</div></div>`;
+    });
+
+    getElement('upgradesContainer').innerHTML = upgradeHTML;
+
+    // Add event listener for missile radius toggle if it exists
+    const toggle = getElement('toggleMissileRadius');
+    if (toggle) {
+        toggle.onchange = toggleMissileRadiusVisibility; // Make sure function exists
+    }
+
+    // Update visibility of Macross button based on upgrade level
+    const macrossLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
+    getElement('macrossButton').style.display = macrossLevel > 0 ? 'block' : 'none';
+}
+
+
+function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
+    const level = upgradeDef.level;
+    const maxLevel = upgradeDef.maxLevel;
+    const cost = upgradeDef.cost;
+    const name = upgradeDef.name;
+
+    // Generate stats text using the 'g' function
+    const statsText = upgradeDef.g(level, cost, maxLevel);
+
+    // Determine if button should be disabled
+    let isDisabled = gameState.credits < cost || level >= maxLevel;
+    // Add prerequisite check for missile sub-upgrades
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex > UPGRADE_MISSILE_COUNT) {
+        isDisabled = isDisabled || upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0;
+    }
+
+    // Add toggle switch specifically for Missile Homing upgrade display
+    let toggleHTML = '';
+    // if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_HOMING) {
+    //     toggleHTML = `
+    //       <label class="switch">
+    //         <input type="checkbox" id="toggleMissileRadius" ${showMissileRadius ? 'checked' : ''}>
+    //         <span class="slider round"></span>
+    //       </label>
+    //       <span class="switch-label">Show Radius</span>`;
+    // }
+
+
+    return `
+    <div class="upgrade-button-container">
+        ${toggleHTML}
+        <button id="upgrade_${categoryIndex}_${upgradeIndex}" onclick="purchaseUpgrade(${categoryIndex}, ${upgradeIndex})" ${isDisabled ? 'disabled' : ''}>
+            ${name} (${level}/${maxLevel}) - Cost: ${cost}<br>
+            <span class="upgrade-stats-display">${statsText}</span>
+        </button>
+    </div>`;
+}
+
+function updateUpgradeAvailability() {
+    upgradeTree.forEach((category, i) => {
+        category.upgrades.forEach((u, j) => {
+            const button = getElement(`upgrade_${i}_${j}`);
+            if (button) {
+                 let isAvailable = gameState.credits >= u.cost && u.level < u.maxLevel;
+                 // Prerequisite check
+                 if (i === UPGRADE_CATEGORY_MISSILE && j > UPGRADE_MISSILE_COUNT) {
+                     isAvailable = isAvailable && upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level > 0;
+                 }
+                 button.disabled = !isAvailable;
+            }
+        });
+    });
+     // Update Macross button enabled state based on cooldown
+     const macrossButton = getElement('macrossButton');
+     if (macrossButton.style.display !== 'none') {
+         macrossButton.disabled = gameState.macrossCooldownTimer > 0;
+         if (gameState.macrossCooldownTimer <= 0) {
+             macrossButton.classList.add('active');
+         } else {
+             macrossButton.classList.remove('active');
+         }
+     }
+
+}
+
+// --- Special Actions ---
+function fireMacrossMissiles() {
+    if (gameState.macrossCooldownTimer <= 0 && base.macrossMissileCount > 0) {
+        const count = base.macrossMissileCount;
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2 + Math.random() * 0.1 - 0.05; // Add slight random angle variation
+            const launchSpeed = 3 + Math.random() * 3; // Vary launch speeds
+
+            missilePool.get({
+                x: base.x,
+                y: base.y,
+                dx: Math.cos(angle),
+                dy: Math.sin(angle),
+                t: null, // Macross missiles start without a specific target
+                speed: launchSpeed,
+                turnSpeed: 0.08, // Slightly better turning for Macross
+                macross: true,
+                homingActive: true // Start homing immediately
+            });
+        }
+
+        createExplosion(base.x, base.y, 'red', 50, 40); // Big launch effect
+        showToast('Macross Missile Massacre!');
+
+        const cooldownLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
+        gameState.macrossCooldownTimer = MACROSS_BASE_COOLDOWN - cooldownLevel * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL;
+        getElement('macrossButton').disabled = true;
+        getElement('macrossButton').classList.remove('active');
+    }
+}
+
+// --- Menu Toggles ---
+/*
+function toggleUpgradeMenu() {
+    const menu = getElement('upgradeMenu');
+    if (menu.style.display === 'none') {
+        menu.style.display = 'flex';
+        isGameRunning = false; // Pause game
+        cancelAnimationFrame(animationFrameId);
+        if (autoSaveTimer) clearInterval(autoSaveTimer); // Pause saving
+        updateWaveInfoInMenu(); // Update info when opening
+        renderUpgradeMenu(); // Ensure buttons are up-to-date
+        updateStatsDisplay();
+        updateUpgradeAvailability();
+        updateUpgradeMenuBorder(); // Update border when menu is opened
+    } else {
+        menu.style.display = 'none';
+        isGameRunning = true; // Resume game
+        updateUpgradeMenuBorder(); // Update border when menu is closed (clears it)
+        lastTime = 0; // Reset delta time calculation
+        animationFrameId = requestAnimationFrame(gameLoop);
+         // Restart auto-save timer
+         if (autoSaveTimer) clearInterval(autoSaveTimer);
+         autoSaveTimer = setInterval(() => {
+             if (isGameRunning) saveGame();
+         }, AUTO_SAVE_INTERVAL);
+    }
+}
+*/
+
+function toggleHotkeys() {
+    getElement('hotkeys').classList.toggle('show');
+}
+
+function toggleRingInfoDisplay() {
+    showRingInfo = !showRingInfo;
+    getElement('toggleInfoButton').classList.toggle('active', showRingInfo);
+    // No need to add/remove DOM elements anymore, drawGame handles visibility
+    showToast(showRingInfo ? 'Ring info enabled' : 'Ring info disabled');
+}
+
+function toggleMissileRadiusVisibility() {
+     // This function is now potentially obsolete as radius isn't toggled via switch
+     // Could be repurposed for toggling missile *homing* radius visibility if desired
+     console.warn("toggleMissileRadiusVisibility called - functionality removed/changed.");
+     // showMissileRadius = getElement('toggleMissileRadius').checked;
+}
+
+
+// --- Event Handlers ---
+
+// Keyboard
+window.addEventListener('keydown', e => {
+    keysPressed[e.key.toLowerCase()] = true; // Use lower case for consistency
+
+    // Handle single-press actions only if game is running or menu allows it
+    if (isGameRunning || getElement('upgradeMenu').style.display === 'flex') {
+        switch (e.key.toLowerCase()) {
+            case 'm': if (isGameRunning) fireMacrossMissiles(); break; // Only fire if game running
+            case 'h': toggleHotkeys(); break; // Toggle hotkeys anytime
+            case 'f':
+                if (isGameRunning) {
+                    gameState.autoFire = !gameState.autoFire;
+                    showToast(gameState.autoFire ? 'Auto-fire enabled' : 'Auto-fire disabled');
+                }
+                break;
+            case 'i': toggleRingInfoDisplay(); break; // Toggle info anytime
+             // Add Esc key to close upgrade menu
+            case 'escape':
+                 break; // Removed upgrade menu close logic
+        }
+    }
+});
+
+window.addEventListener('keyup', e => {
+    keysPressed[e.key.toLowerCase()] = false;
+});
+
+// Mouse/Touch Dragging - Shared Logic
+function handleDragStart(clientX, clientY) {
+    if (!isGameRunning) return false; // Only drag if game is running
+
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = clientX - rect.left;
+    const mouseY = clientY - rect.top;
+
+    if (Math.hypot(mouseX - base.x, mouseY - base.y) <= base.radius) {
+        isDragging = true;
+        dragStartX = mouseX;
+        dragStartY = mouseY;
+        baseStartX = base.x;
+        baseStartY = base.y;
+        wasDragging = false; // Reset flag
+        isReturningToCenter = false; // Stop return-to-center if dragging starts
+        return true; // Indicate drag started
+    }
+    return false; // Click was not on base
+}
+
+function handleDragMove(clientX, clientY) {
+    if (isDragging && isGameRunning) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = clientX - rect.left;
+        const mouseY = clientY - rect.top;
+
+        const deltaX = mouseX - dragStartX;
+        const deltaY = mouseY - dragStartY;
+
+        if (!wasDragging && Math.hypot(deltaX, deltaY) > DRAG_THRESHOLD) {
+            wasDragging = true; // It's officially a drag
+        }
+
+        // Calculate new base position
+        const targetX = baseStartX + deltaX;
+        const targetY = baseStartY + deltaY;
+
+        // Clamp position within bounds
+        base.x = Math.max(base.radius, Math.min(canvasWidth - base.radius, targetX));
+        base.y = Math.max(base.radius, Math.min(canvasHeight - base.radius, targetY));
+
+        // Update drag start points relative to the *new* base position for smoother continuation
+        // This prevents large jumps if the base hits the edge
+        // dragStartX = mouseX - (base.x - baseStartX);
+        // dragStartY = mouseY - (base.y - baseStartY);
+        // baseStartX = base.x; // Update base start for next delta calculation
+        // baseStartY = base.y;
+
+    }
+}
+
+
+function handleDragEnd() {
+    if (isDragging) {
+        isDragging = false;
+        if (wasDragging) { // Only return to center if it was an actual drag
+            isReturningToCenter = true;
+            centerReturnStartTime = Date.now();
+        }
+        // wasDragging remains true/false based on movement during drag
+    }
+}
+
+// Canvas Click (handles base click for menu, ring UI clicks)
+function handleCanvasClick(clientX, clientY) {
+    if (!isGameRunning) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const clickX = clientX - rect.left;
+    const clickY = clientY - rect.top;
+
+    // Check if click was part of a drag ending - if so, ignore click action
+    if (wasDragging) {
+        wasDragging = false; // Reset flag after checking
+        return;
+    }
+
+    // 1. Check click on Canvas UI elements (tabs, then upgrade buttons)
+    for (const region of ringClickRegions) {
+        // Check if click is within the rectangular bounds of the region
+        if (clickX >= region.x && clickX <= region.x + region.width &&
+            clickY >= region.y && clickY <= region.y + region.height) {
+
+            if (region.type === 'upgrade_tab') {
+                // Clicked on an upgrade category tab
+                gameState.activeUpgradeTab = region.categoryIndex;
+                // No need to redraw immediately, gameLoop will handle it
+                return; // Handle click and exit
+            } else if (region.type === 'upgrade_button') {
+                // Clicked on an upgrade button within the active tab
+                purchaseUpgrade(region.categoryIndex, region.upgradeIndex);
+                return; // Handle click and exit
+            }
+        }
+    }
+
+
+    // 2. Check click on Base (opens upgrade menu) - Check this last
+    // Removed base click to open full-screen upgrade menu
+}
+
+
+// Attach Specific Event Listeners
+canvas.addEventListener('mousedown', e => {
+    if(e.button === 0) { // Only left click
+         handleDragStart(e.clientX, e.clientY);
+    }
+});
+window.addEventListener('mousemove', e => {
+    handleDragMove(e.clientX, e.clientY);
+});
+window.addEventListener('mouseup', e => {
+     if(e.button === 0) {
+         handleDragEnd();
+         // Process click action only if not dragging
+         handleCanvasClick(e.clientX, e.clientY);
+     }
+});
+
+// Touch Events
+canvas.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+        if (handleDragStart(e.touches[0].clientX, e.touches[0].clientY)) {
+            e.preventDefault(); // Prevent scrolling if drag started on base
+        }
+    }
+}, { passive: false });
+
+window.addEventListener('touchmove', e => {
+    if (e.touches.length === 1) {
+        handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+        if (isDragging) {
+             e.preventDefault(); // Prevent scrolling while dragging base
+        }
+    }
+}, { passive: false });
+
+window.addEventListener('touchend', e => {
+    if (e.changedTouches.length === 1) {
+        const touch = e.changedTouches[0];
+        handleDragEnd();
+        // Process click action only if not dragging
+        handleCanvasClick(touch.clientX, touch.clientY);
+    }
+});
+
+
+// UI Button Listeners
+getElement('startButton').onclick = startGame;
+getElement('restartButton').onclick = startGame; // Restart calls startGame to reinitialize
+getElement('gameSpeedButton').onclick = () => {
+    const speeds = [1, 1.5, 2, 3, 0.5]; // Added 0.5x speed
+    gameSpeedMultiplier = speeds[(speeds.indexOf(gameSpeedMultiplier) + 1) % speeds.length];
+    getElement('gameSpeedButton').textContent = `Speed: ${gameSpeedMultiplier}x`;
+};
+getElement('macrossButton').onclick = fireMacrossMissiles;
+getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
+getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
+getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
+getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
+getElement('cheatAddCredits').onclick = () => { // Cheat function
+    gameState.credits += 100000;
+    updateHUD();
+    updateUpgradeAvailability();
+    showToast('Cheated 100k credits!');
+};
+
+// Window Resize
+window.addEventListener('resize', () => {
+    canvasWidth = window.innerWidth;
+    canvasHeight = window.innerHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    // No need to reposition DOM elements anymore
+    // Re-applying certain base stats that depend on screen size might be needed
+    // e.g., if stun radius or laser range were calculated differently based on resize.
+    // For now, assume fixed calculation or recalculation within applyUpgradeEffect.
+    if (isGameRunning) {
+        drawGame(); // Redraw immediately after resize
+    }
+});
+
+
+// --- Theme Switching Logic ---
+function applyTheme(themeIndex) {
+    currentThemeIndex = themeIndex % THEMES.length; // Cycle through themes
+    currentTheme = THEMES[currentThemeIndex];
+
+    // Apply CSS Variables
+    const root = document.documentElement;
+    for (const [key, value] of Object.entries(currentTheme.cssVariables)) {
+        root.style.setProperty(key, value);
+    }
+
+    // Update button text (optional, if theme name changes)
+    const themeButton = getElement('themeButton');
+    if (themeButton) {
+        themeButton.textContent = `Theme: ${currentTheme.name}`;
+    }
+
+    // Potentially update other non-CSS visual elements if needed
+    // e.g., if particle generation logic changes drastically per theme
+
+    // Re-render upgrade menu to reflect potential color changes in buttons/text
+    if (getElement('upgradeMenu').style.display === 'flex') {
+        renderUpgradeMenu();
+        updateUpgradeAvailability();
+    }
+
+    // Force redraw of canvas with new colors
+    if (isGameRunning || getElement('startScreen').style.display === 'flex' || getElement('gameOverScreen').style.display === 'flex') {
+        drawGame();
+    }
+    showToast(`Theme set to: ${currentTheme.name}`, 1500);
+    // updateUpgradeMenuBorder(); // Update border when theme changes - Removed
+}
+
+function cycleTheme() {
+    applyTheme(currentThemeIndex + 1);
+    // Save the selected theme index to localStorage
+    // Save the selected theme index to localStorage
+    localStorage.setItem('orbitalDefenseTheme_v2.9', currentThemeIndex);
+}
+
+/*
+/*
+// --- Upgrade Menu Border Drawing ---
+function updateUpgradeMenuBorder() {
+    const menu = getElement('upgradeMenu');
+    const borderCanvas = getElement('upgradeMenuBorderCanvas');
+    const borderCtx = borderCanvas.getContext('2d');
+
+    // Ensure canvas matches window size
+    borderCanvas.width = window.innerWidth;
+    borderCanvas.height = window.innerHeight;
+
+    // Clear the border canvas
+    borderCtx.clearRect(0, 0, borderCanvas.width, borderCtx.canvas.height);
+
+    // Only draw if the upgrade menu is visible AND the theme is Retro Terminal
+    if (menu.style.display !== 'none' && currentTheme.name === "Retro Terminal") {
+        const rect = menu.getBoundingClientRect();
+        const menuX = rect.left;
+        const menuY = rect.top;
+        const menuWidth = rect.width;
+        const menuHeight = rect.height;
+
+        const brailleCharWidth = 8; // Approximate width of a braille character
+        const brailleCharHeight = 16; // Approximate height of a braille character (adjust as needed)
+
+        borderCtx.fillStyle = currentTheme.cssVariables['--text-color'] || '#00ff00'; // Use theme text color
+        borderCtx.font = `${brailleCharHeight}px ${currentTheme.cssVariables['--font-family'] || "'Courier New', Courier, monospace"}`;
+        borderCtx.textBaseline = 'top';
+
+        // Braille characters for borders (example set)
+        const cornerTL = '▛'; // Top-left
+        const cornerTR = '▜'; // Top-right
+        const cornerBL = '▙'; // Bottom-left
+        const cornerBR = '▟'; // Bottom-right
+        const horizontal = '━'; // Horizontal line (using box-drawing char for now, could use braille)
+        const vertical = '┃'; // Vertical line (using box-drawing char for now, could use braille)
+
+        // Draw corners
+        borderCtx.fillText(cornerTL, menuX - brailleCharWidth, menuY - brailleCharHeight);
+        borderCtx.fillText(cornerTR, menuX + menuWidth, menuY - brailleCharHeight);
+        borderCtx.fillText(cornerBL, menuX - brailleCharWidth, menuY + menuHeight);
+        borderCtx.fillText(cornerBR, menuX + menuWidth, menuY + menuHeight);
+
+        // Draw top and bottom borders
+        for (let x = menuX; x < menuX + menuWidth; x += brailleCharWidth) {
+            borderCtx.fillText(horizontal, x, menuY - brailleCharHeight);
+            borderCtx.fillText(horizontal, x, menuY + menuHeight);
+        }
+
+        // Draw left and right borders
+        for (let y = menuY; y < menuY + menuHeight; y += brailleCharHeight) {
+            borderCtx.fillText(vertical, menuX - brailleCharWidth, y);
+            borderCtx.fillText(vertical, menuX + menuWidth, y);
+        }
+    }
+}
+*/
+
+// --- Load and Start Game Function ---
+function loadAndStartGame() {
+    initializeGame(false); // Initialize basic structures without trying to load save again
+
+    if (!loadGame()) { // Attempt to load the saved game
+        showToast("Failed to load saved game.", 2000);
+        // Fallback to starting a new game if loading fails catastrophically
+        initializeGame(false); // Re-initialize fresh
+    }
+
+    // Common starting logic after initialization/loading
+    getElement('startScreen').style.display = 'none';
+    getElement('gameOverScreen').style.display = 'none';
+    getElement('upgradeMenu').style.display = 'none';
+    renderUpgradeMenu(); // Ensure menu reflects loaded state
+    updateUpgradeAvailability(); // Ensure buttons reflect loaded state
+    isGameRunning = true;
+
+    // Start auto-save timer
+    if (autoSaveTimer) clearInterval(autoSaveTimer);
+    autoSaveTimer = setInterval(() => {
+        if (isGameRunning) {
+            saveGame();
+        }
+    }, AUTO_SAVE_INTERVAL);
+
+    // Start game loop
+    lastTime = 0; // Reset delta time calculation for the loop
+    animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+
+// Initial setup on load
+window.onload = () => {
+    // Preload pixel font if needed (optional, adds dependency)
+    // const fontLink = document.createElement('link');
+    // fontLink.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+    // fontLink.rel = 'stylesheet';
+    // document.head.appendChild(fontLink);
+
+    initializeGame(false); // Initialize without loading saved game yet
+
+    // Load saved theme preference
+    const savedThemeIndex = 5; // Set default theme to Retro Terminal
+    applyTheme(savedThemeIndex); // Apply saved or default theme
+
+    getElement('startScreen').style.display = 'flex';
+    getElement('gameOverScreen').style.display = 'none';
+    getElement('upgradeMenu').style.display = 'none';
+    // Draw initial empty state? Or just wait for game start.
+    ctx.fillStyle = 'rgb(0, 0, 0)';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    // Try loading save data now, before Start Game is pressed
+    tryLoadGame();
+    // Show Load Game button if save data exists
+    if (savedGame) {
+        getElement('loadButton').style.display = 'block'; // Or 'inline-block' if preferred next to Start
+    }
+};
+
+// --- Global Access (for HTML onclick) ---
+window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
+// updateUpgradeMenuBorder(); // Update border when menu is closed (clears it) - Removed
+
+
+})(); // End IIFE
+</script>
+<div id="crt-overlay"></div>
+</body>
+</html>
+
+</file_content>
+
+Now that you have the latest state of the file, try the operation again with fewer, more precise SEARCH blocks. For large files especially, it may be prudent to try to limit yourself to <5 SEARCH/REPLACE blocks at a time, then wait for the user to respond with the result of the operation before following up with another replace_in_file call to make additional edits.
+(If you run into this error 3 times in a row, you may use the write_to_file tool as a fallback.)
+</error><environment_details>
+# VSCode Visible Files
+index.html
+
+# VSCode Open Tabs
+style.css
+index.html
+
+# Current Time
+16/05/2025, 1:56:47 pm (Australia/Adelaide, UTC+9.5:00)
+
+# Context Window Usage
+761,310 / 1,048.576K tokens used (73%)
+
+# Current Mode
+ACT MODE
+</environment_details>
