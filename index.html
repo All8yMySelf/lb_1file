@@ -11,7 +11,85 @@
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 <title>Orbital Defence Elite v2.19 - Optimised</title>
-<link rel="stylesheet" href="css/styles.css">
+<style>
+:root {
+    /* Theme 1: Orbital Elite (Default) */
+    --bg-gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    --body-bg: #000;
+    --text-color: #fff;
+    --hud-color: #fff;
+    --title-color: #fff;
+    --final-stats-color: #cfab52;
+    --button-bg: rgba(44, 34, 15, 1);
+    --button-text: rgba(230, 181, 75, 1);
+    --button-border: rgba(230, 181, 75, 1);
+    --button-hover-bg: #1c1404;
+    --button-disabled-bg: #2f240c;
+    --button-disabled-text: #ac4834;
+    --upgrade-title-color: rgba(230, 181, 75, 1);
+    --toggle-active-bg: #1c1404;
+    --toggle-active-text: #e6b54b;
+    --toast-bg: rgba(0, 0, 0, 0.7);
+    --toast-text: #fff;
+    --switch-bg: #2f240c;
+    --switch-slider-color: rgba(230, 181, 75, 1);
+    --switch-checked-bg: #1c1404;
+    --switch-label-color: rgba(230, 181, 75, 1);
+    --stats-border: rgba(230, 181, 75, 0.3);
+    --stats-bg: rgba(0, 0, 0, 0.4);
+    --hotkey-bg: rgba(0, 0, 0, 0.6);
+    --hotkey-text: rgba(230, 181, 75, 0.8);
+    --canvas-bg: rgba(0, 0, 0, 0.7);
+    --crt-overlay-bg: linear-gradient(rgba(0, 0, 0, 0.6) 50%, transparent 100%);
+    --crt-overlay-blend: overlay;
+    --crt-scanline-color: rgba(0, 0, 0, 0.1);
+    --crt-vignette: radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.6) 100%);
+    --crt-interlace-color: rgba(0, 0, 0, 0.25);
+    --font-family: 'Press Start 2P', monospace;
+}
+/* Font served from Google Fonts */
+*{font-family: var(--font-family); box-sizing:border-box;margin:0;padding:0}
+body{margin:0;overflow:hidden;background: var(--body-bg); color: var(--text-color)}
+#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;background-image: var(--crt-overlay-bg); background-size:100% 2px;background-blend-mode: var(--crt-overlay-blend)}
+#gameCanvas{background: var(--canvas-bg); position:absolute;top:0;left:0} /* Renamed from #g */
+.bg{position:absolute;top:0;left:0;width:100%;height:100%;background: var(--bg-gradient); z-index:-1}
+#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:28px;padding:0;z-index:10;line-height:2;min-height:0; color: var(--hud-color)} /* Renamed from #u */
+#startScreen h1,#gameOverScreen h1{font-size:4rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; color: var(--title-color)} /* Renamed from #s, #o */
+#gameOverScreen h1{font-size:3.5rem;margin-bottom:1rem} /* Renamed from #o */
+#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hud #creditsDisplay{text-align:left} /* Renamed from #c */
+#hud #healthDisplay{text-align:right} /* Renamed from #h */
+#startScreen,#gameOverScreen,#upgradeMenu{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.8);text-align:center;z-index:100} /* Renamed from #s, #o, #m */
+#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color: var(--final-stats-color)} /* Renamed from #f */
+#upgradeMenu{position:absolute;top:0;left:0;bottom:0;width: 450px; display:flex;flex-direction:column;justify-content:flex-start;align-items: flex-start; padding-top:20px;overflow-y:auto; background:rgba(0,0,0,0.8);z-index:100} /* Modified to position on the left */
+button{padding:10px 20px;font-size:24px;line-height:1;margin-top:22px;background: var(--button-bg); color: var(--button-text); border:2px solid var(--button-border); cursor:pointer;transition:all 0.3s ease}
+button:hover{background: var(--button-hover-bg); transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2)}
+button:active{transform:translateY(1px)}
+button:disabled{background: var(--button-disabled-bg); color: var(--button-disabled-text); cursor:not-allowed;transform:none;box-shadow:none}
+.upgrade-category h3{text-align:left;margin-bottom:2px;color: var(--upgrade-title-color)}
+.upgrade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10}
+#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
+#toggleInfoButton.active{background-color: var(--toggle-active-bg); color: var(--toggle-active-text)}
+#toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background: var(--toast-bg); color: var(--toast-text); padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity 0.3s ease;pointer-events:none}
+#toast.show{opacity:1}
+.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color: var(--switch-bg); transition:.4s;border-radius:24px}
+.slider:before{position:absolute;content:"";height:16px;width:16px;left:4px;bottom:4px;background-color: var(--switch-slider-color); transition:.4s;border-radius:50%}
+input:checked+.slider{background-color: var(--switch-checked-bg)}
+input:checked+.slider:before{transform:translateX(26px)}
+.switch-label{color: var(--switch-label-color); font-size:16px}
+.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}
+.stats div{border:1px solid var(--stats-border); padding:5px 10px;background: var(--stats-bg); border-radius:5px}
+#hotkeys{position:absolute;top:60px;right:10px;background: var(--hotkey-bg); padding:5px 10px;border-radius:5px;font-size:14px;color: var(--hotkey-text); display:none}
+#hotkeys.show{display:block}
+/* Removed styles related to DOM-based ring UI (.ring-upgrade-box, .upgrade-info-panel, .ring-info-container, etc.) */
+.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg, var(--crt-scanline-color), var(--crt-scanline-color) 1px,transparent 1px,transparent 2px);pointer-events:none}
+.crt-container{transform:translateZ(0);position:relative;overflow:hidden}
+.crt-container::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background: var(--crt-vignette); pointer-events:none;z-index:1}
+.crt-container::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(rgba(18,16,16,0) 50%, var(--crt-interlace-color) 50%);background-size:100% 4px;pointer-events:none;z-index:2}
+</style>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -76,7 +154,258 @@
 <div id="toast"></div>
 <!-- Removed shipSprite image as it wasn't used -->
 
-<script src="js/themes.js"></script> <!-- Include external theme definitions -->
+<script>
+// Orbital Defence Elite - Theme Definitions
+// V2.19.1: Modified black and white themes to have white backgrounds
+// V2.19: Added two new black and white themes
+const THEMES = [
+    { // Theme 1: Orbital Elite (Default)
+        name: "Orbital Elite",
+        cssVariables: {
+            '--bg-gradient': 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)',
+            '--body-bg': '#000',
+            '--text-color': '#fff',
+            '--hud-color': '#fff',
+            '--title-color': '#fff',
+            '--final-stats-color': '#cfab52',
+            '--button-bg': 'rgba(44, 34, 15, 1)',
+            '--button-text': 'rgba(230, 181, 75, 1)',
+            '--button-border': 'rgba(230, 181, 75, 1)',
+            '--button-hover-bg': '#1c1404',
+            '--button-disabled-bg': '#2f240c',
+            '--button-disabled-text': '#ac4834',
+            '--upgrade-title-color': 'rgba(230, 181, 75, 1)',
+            '--toggle-active-bg': '#1c1404',
+            '--toggle-active-text': '#e6b54b',
+            '--toast-bg': 'rgba(0, 0, 0, 0.7)',
+            '--toast-text': '#fff',
+            '--switch-bg': '#2f240c',
+            '--switch-slider-color': 'rgba(230, 181, 75, 1)',
+            '--switch-checked-bg': '#1c1404',
+            '--switch-label-color': 'rgba(230, 181, 75, 1)',
+            '--stats-border': 'rgba(230, 181, 75, 0.3)',
+            '--stats-bg': 'rgba(0, 0, 0, 0.4)',
+            '--hotkey-bg': 'rgba(0, 0, 0, 0.6)',
+            '--hotkey-text': 'rgba(230, 181, 75, 0.8)',
+            '--canvas-bg': 'rgba(0, 0, 0, 0.7)',
+            '--crt-overlay-bg': 'linear-gradient(rgba(0, 0, 0, 0.6) 50%, transparent 100%)',
+            '--crt-overlay-blend': 'overlay',
+            '--crt-scanline-color': 'rgba(0, 0, 0, 0.1)',
+            '--crt-vignette': 'radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.6) 100%)',
+            '--crt-interlace-color': 'rgba(0, 0, 0, 0.25)',
+            '--font-family': "'Press Start 2P', monospace"
+        },
+        canvasColors: {
+            base: 'rgb(94, 79, 162)',
+            baseHit: 'yellow',
+            bullet: 'white',
+            missile: 'orange',
+            macrossMissile: '#ff4500',
+            missileTrail: 'rgba(255, 165, 0, 0.6)',
+            laser: 'rgba(255, 0, 0, 0.8)',
+            laserGlow: 'rgba(255, 255, 0, 0.6)',
+            particleDefault: '#ffffff',
+            particleHit: 'white',
+            particleExplosion: ['#ffffff', '#ffff00'], // Base colors, actual color passed in
+            particleStun: 'cyan',
+            particleLaunch: 'orange',
+            enemyNormal: '#f46d43',
+            enemyFast: '#fee08b',
+            enemyTank: '#d53e4f',
+            enemyBoss: '#9e0142',
+            enemyHealthBarBg: '#500',
+            enemyHealthBarFg: '#0f0',
+            enemyStunEffect: 'rgba(0, 255, 255, 0.8)',
+            ringCannon: 'rgba(94, 79, 162, 0.6)',
+            ringCannonUpgrade: 'rgba(148, 0, 211, 0.8)',
+            ringMissile: 'rgba(50, 136, 189, 0.6)',
+            ringMissileUpgrade: 'rgba(30, 144, 255, 0.8)',
+            ringLaser: 'rgba(255, 0, 0, 0.5)',
+            ringLaserUpgrade: 'rgba(255, 0, 0, 0.8)',
+            ringStun: 'rgba(0, 255, 255, 0.5)',
+            ringStunUpgrade: 'rgba(0, 255, 255, 0.8)',
+            ringUpgradeBoxBg: 'rgba(50, 50, 50, 0.7)',
+            ringUpgradeBoxAvailable: 'rgba(0, 255, 0, 0.7)',
+            ringUpgradeBoxText: 'rgba(230, 181, 75, 1)',
+            ringUpgradeBoxMax: 'rgba(230, 181, 75, 1)',
+            gunBarrel: 'white',
+            baseDragIndicator: 'rgba(200, 200, 255, 0.6)',
+            baseReturnIndicator: 'rgba(120, 255, 120, 0.6)',
+            upgradeRingLaser: 'rgba(255, 0, 0, 0.6)',
+            upgradeRingMissile: 'rgba(255, 165, 0, 0.6)'
+        },
+        particlePalettes: { // For createParticle color mapping
+            red: ['#ff0000', '#cc0000', '#880000', '#550000'],
+            orange: ['#ff7700', '#cc5500', '#883300', '#552200'],
+            yellow: ['#ffff00', '#cccc00', '#888800', '#555500'],
+            white: ['#ffffff', '#cccccc', '#888888', '#555555'],
+            cyan: ['#00ffff', '#00cccc', '#008888', '#005555']
+        }
+    },
+    { // Theme 2: Vector Grid
+        name: "Vector Grid",
+        cssVariables: {
+            '--bg-gradient': '#000000',
+            '--body-bg': '#000',
+            '--text-color': '#00ffcc',
+            '--hud-color': '#00ffcc',
+            '--title-color': '#ff00ff',
+            '--final-stats-color': '#ffff00',
+            '--button-bg': 'rgba(0, 0, 0, 0.5)',
+            '--button-text': '#00ff00',
+            '--button-border': '#00ff00',
+            '--button-hover-bg': 'rgba(0, 50, 0, 0.8)',
+            '--button-disabled-bg': 'rgba(0, 20, 0, 0.5)',
+            '--button-disabled-text': '#008800',
+            '--upgrade-title-color': '#ff00ff',
+            '--toggle-active-bg': 'rgba(0, 50, 50, 0.8)',
+            '--toggle-active-text': '#00ffff',
+            '--toast-bg': 'rgba(0, 0, 0, 0.8)',
+            '--toast-text': '#00ffcc',
+            '--switch-bg': '#003322',
+            '--switch-slider-color': '#00ff00',
+            '--switch-checked-bg': '#005500',
+            '--switch-label-color': '#00ffcc',
+            '--stats-border': 'rgba(0, 255, 0, 0.5)',
+            '--stats-bg': 'rgba(0, 0, 0, 0.6)',
+            '--hotkey-bg': 'rgba(0, 0, 0, 0.7)',
+            '--hotkey-text': '#00ffaa',
+            '--canvas-bg': 'rgba(0, 0, 0, 0.9)',
+            '--crt-overlay-bg': 'linear-gradient(rgba(0, 10, 0, 0.3) 50%, transparent 100%)',
+            '--crt-overlay-blend': 'overlay',
+            '--crt-scanline-color': 'rgba(0, 255, 0, 0.1)',
+            '--crt-vignette': 'radial-gradient(circle at center, transparent 60%, rgba(0, 40, 0, 0.6) 100%)',
+            '--crt-interlace-color': 'rgba(0, 255, 0, 0.25)',
+            '--font-family': "'Press Start 2P', monospace"
+        },
+        canvasColors: {
+            base: '#00ffcc',
+            baseHit: '#00ffaa',
+            bullet: '#00ff00',
+            missile: '#00ff00',
+            macrossMissile: '#ff00ff',
+            missileTrail: 'rgba(0, 255, 0, 0.6)',
+            laser: '#ff00ff',
+            laserGlow: '#ffff00',
+            particleDefault: '#00ffcc',
+            particleHit: '#00ffcc',
+            particleExplosion: ['#00ffcc', '#00ffaa'],
+            particleStun: '#00ffaa',
+            particleLaunch: '#00ffcc',
+            enemyNormal: '#00ffaa',
+            enemyFast: '#00ffcc',
+            enemyTank: '#00ff88',
+            enemyBoss: '#00ff00',
+            enemyHealthBarBg: '#003300',
+            enemyHealthBarFg: '#00ff00',
+            enemyStunEffect: 'rgba(0, 255, 255, 0.8)',
+            ringCannon: 'rgba(0, 255, 0, 0.6)',
+            ringCannonUpgrade: 'rgba(0, 255, 100, 0.8)',
+            ringMissile: 'rgba(0, 200, 255, 0.6)',
+            ringMissileUpgrade: 'rgba(0, 150, 255, 0.8)',
+            ringLaser: 'rgba(255, 0, 255, 0.5)',
+            ringLaserUpgrade: 'rgba(255, 0, 255, 0.8)',
+            ringStun: 'rgba(0, 255, 255, 0.5)',
+            ringStunUpgrade: 'rgba(0, 255, 255, 0.8)',
+            ringUpgradeBoxBg: 'rgba(0, 0, 0, 0.7)',
+            ringUpgradeBoxAvailable: 'rgba(0, 255, 0, 0.7)',
+            ringUpgradeBoxText: '#00ffcc',
+            ringUpgradeBoxMax: '#00ffaa',
+            gunBarrel: '#00ff00',
+            baseDragIndicator: 'rgba(0, 255, 255, 0.6)',
+            baseReturnIndicator: 'rgba(0, 255, 100, 0.6)'
+        },
+        particlePalettes: {
+            red: ['#ff0000', '#cc0000', '#880000'],
+            orange: ['#ff7700', '#cc5500', '#883300'],
+            yellow: ['#ffff00', '#cccc00'],
+            white: ['#ffffff', '#cccccc', '#888888'],
+            cyan: ['#00ffff', '#00cccc']
+        }
+    },
+    { // Theme 4: Pixel Black and White
+        name: "Pixel Black and White",
+        cssVariables: {
+            '--bg-gradient': 'linear-gradient(135deg, #ffffff, #cccccc, #999999)',
+            '--body-bg': '#fff',
+            '--text-color': '#000',
+            '--hud-color': '#000',
+            '--title-color': '#000',
+            '--final-stats-color': '#333333',
+            '--button-bg': 'rgba(200, 200, 200, 1)',
+            '--button-text': '#000000',
+            '--button-border': '#000000',
+            '--button-hover-bg': '#cccccc',
+            '--button-disabled-bg': '#e6e6e6',
+            '--button-disabled-text': '#999999',
+            '--upgrade-title-color': '#000000',
+            '--toggle-active-bg': '#cccccc',
+            '--toggle-active-text': '#000000',
+            '--toast-bg': 'rgba(255, 255, 255, 0.8)',
+            '--toast-text': '#000',
+            '--switch-bg': '#cccccc',
+            '--switch-slider-color': '#000000',
+            '--switch-checked-bg': '#999999',
+            '--switch-label-color': '#000000',
+            '--stats-border': 'rgba(0, 0, 0, 0.3)',
+            '--stats-bg': 'rgba(255, 255, 255, 0.4)',
+            '--hotkey-bg': 'rgba(255, 255, 255, 0.6)',
+            '--hotkey-text': 'rgba(0, 0, 0, 0.8)',
+            '--canvas-bg': 'rgba(255, 255, 255, 0.7)',
+            '--crt-overlay-bg': 'linear-gradient(rgba(255, 255, 255, 0.6) 50%, transparent 100%)',
+            '--crt-overlay-blend': 'overlay',
+            '--crt-scanline-color': 'rgba(0, 0, 0, 0.1)',
+            '--crt-vignette': 'radial-gradient(circle at center, transparent 60%, rgba(255, 255, 255, 0.6) 100%)',
+            '--crt-interlace-color': 'rgba(0, 0, 0, 0.25)',
+            '--font-family': "'Press Start 2P', cursive"
+        },
+        canvasColors: {
+            base: '#333333',
+            baseHit: '#000000',
+            bullet: '#000000',
+            missile: '#333333',
+            macrossMissile: '#000000',
+            missileTrail: 'rgba(50, 50, 50, 0.6)',
+            laser: 'rgba(0, 0, 0, 0.8)',
+            laserGlow: 'rgba(50, 50, 50, 0.6)',
+            particleDefault: '#000000',
+            particleHit: '#000000',
+            particleExplosion: ['#000000', '#333333'],
+            particleStun: '#777777',
+            particleLaunch: '#333333',
+            enemyNormal: '#333333',
+            enemyFast: '#000000',
+            enemyTank: '#777777',
+            enemyBoss: '#ffffff',
+            enemyHealthBarBg: '#cccccc',
+            enemyHealthBarFg: '#00ff00',
+            enemyStunEffect: 'rgba(100, 100, 100, 0.8)',
+            ringCannon: 'rgba(100, 100, 100, 0.6)',
+            ringCannonUpgrade: 'rgba(50, 50, 50, 0.8)',
+            ringMissile: 'rgba(150, 150, 150, 0.6)',
+            ringMissileUpgrade: 'rgba(100, 100, 100, 0.8)',
+            ringLaser: 'rgba(50, 50, 50, 0.5)',
+            ringLaserUpgrade: 'rgba(0, 0, 0, 0.8)',
+            ringStun: 'rgba(100, 100, 100, 0.5)',
+            ringStunUpgrade: 'rgba(50, 50, 50, 0.8)',
+            ringUpgradeBoxBg: 'rgba(200, 200, 200, 0.7)',
+            ringUpgradeBoxAvailable: 'rgba(0, 255, 0, 0.7)',
+            ringUpgradeBoxText: '#000000',
+            ringUpgradeBoxMax: '#333333',
+            gunBarrel: '#000000',
+            baseDragIndicator: 'rgba(50, 50, 50, 0.6)',
+            baseReturnIndicator: 'rgba(100, 100, 100, 0.6)'
+        },
+        particlePalettes: {
+            red: ['#000000', '#333333', '#777777'],
+            orange: ['#333333', '#777777', '#aaaaaa'],
+            yellow: ['#000000', '#333333'],
+            white: ['#000000', '#333333', '#777777', '#aaaaaa'],
+            cyan: ['#333333', '#777777']
+        }
+    }
+];
+</script>
 <script>
 (function(){ // IIFE to encapsulate code
 
@@ -2600,25 +2929,3 @@ window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for b
 <div id="crt-overlay"></div>
 </body>
 </html>
-
-</file_content>
-
-Now that you have the latest state of the file, try the operation again with fewer, more precise SEARCH blocks. For large files especially, it may be prudent to try to limit yourself to <5 SEARCH/REPLACE blocks at a time, then wait for the user to respond with the result of the operation before following up with another replace_in_file call to make additional edits.
-(If you run into this error 3 times in a row, you may use the write_to_file tool as a fallback.)
-</error><environment_details>
-# VSCode Visible Files
-index.html
-
-# VSCode Open Tabs
-style.css
-index.html
-
-# Current Time
-16/05/2025, 1:56:47 pm (Australia/Adelaide, UTC+9.5:00)
-
-# Context Window Usage
-761,310 / 1,048.576K tokens used (73%)
-
-# Current Mode
-ACT MODE
-</environment_details>
