@@ -1,0 +1,9 @@
+{
+  "name": "orbital-defence-elite",
+  "version": "1.0.0",
+  "description": "Self-contained browser game",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0"
+  }
+}

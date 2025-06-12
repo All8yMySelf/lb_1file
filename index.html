@@ -71,6 +71,8 @@ button:disabled{background: var(--button-disabled-bg); color: var(--button-disab
 .upgrade-category h3{text-align:left;margin-bottom:2px;color: var(--upgrade-title-color)}
 .upgrade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .upgrade-button-container button{font-size:18px;white-space:normal;word-wrap:break-word}
+.upgrade-slider-container{display:flex;align-items:center;margin-top:5px}
+.upgrade-slider-container input[type=range]{flex:1;margin-left:5px}
 #controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10}
 #toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
 #toggleInfoButton.active{background-color: var(--toggle-active-bg); color: var(--toggle-active-text)}
@@ -466,6 +468,7 @@ const UPGRADE_CANNON_FIRERATE = 0;
 const UPGRADE_CANNON_DAMAGE = 1;
 const UPGRADE_CANNON_RANGE = 2;
 const UPGRADE_CANNON_MULTIBARREL = 3;
+const UPGRADE_CANNON_FOCUS_RADIUS = 4;
 const UPGRADE_DEFENSE_HEALTH = 0;
 const UPGRADE_DEFENSE_MOVEMENT = 1;
 const UPGRADE_LASER_DAMAGE = 0; // Only one laser upgrade
@@ -938,8 +941,9 @@ function loadGame() {
         base.stunLevel = savedBase.stunLevel;
         base.stunRadius = savedBase.stunRadius;
        base.missileSpeedMultiplier = savedBase.missileSpeedMultiplier;
-        base.missileTurnSpeed = savedBase.missileTurnSpeed || 0.05;
-       base.missileHomingRadius = savedBase.missileHomingRadius;
+       base.missileTurnSpeed = savedBase.missileTurnSpeed || 0.05;
+      base.missileHomingRadius = savedBase.missileHomingRadius;
+        base.focusRadiusSetting = savedBase.focusRadiusSetting || 0;
         base.missileOrbit = false; // Not implemented?
         base.color = savedBase.color;
         base.currentMoveSpeed = savedBase.currentMoveSpeed; // Restore move speed
@@ -1034,6 +1038,7 @@ function initializeGame(shouldTryLoad = true) {
         missileSpeedMultiplier: 1,
         missileTurnSpeed: 0.05,
         missileHomingRadius: 0,
+        focusRadiusSetting: 0,
         missileOrbit: false, // Not implemented?
         color: 'rgb(94,79,162)',
         currentMoveSpeed: BASE_INITIAL_MOVE_SPEED // Base speed without upgrades
@@ -1069,7 +1074,10 @@ function initializeGame(shouldTryLoad = true) {
                   g: (level, cost, maxLvl) => `${Math.round(initialRange * Math.pow(1.05, level))} ${level < maxLvl ? `→ ${Math.round(initialRange * Math.pow(1.05, level + 1))}` : '(MAX)'}` },
                 { name: 'Multi-Barrel', cost: 12000, level: 0, maxLevel: 4, // Starts at 1 barrel implicitly
                   f: level => level + 1, // Barrels = 1 + level
-                  g: (level, cost, maxLvl) => `${1 + level} ${level < maxLvl ? `→ ${2 + level}` : '(MAX)'} guns` }
+                  g: (level, cost, maxLvl) => `${1 + level} ${level < maxLvl ? `→ ${2 + level}` : '(MAX)'} guns` },
+                { name: 'Focus Radius', cost: 500, level: 0, maxLevel: 10,
+                  f: level => level * 0.1,
+                  g: (level, cost, maxLvl) => `${level * 10}% ${level < maxLvl ? `→ ${(level + 1) * 10}%` : '(MAX)'}` }
             ]
         },
         { // Category 1: Defense
@@ -1394,8 +1402,11 @@ function handlePlayerFiring(dt) {
                 .filter(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange)
                 .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
             const bigThreat = targets.find(e => e.radius >= 20 && Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * 0.5);
+            const focusTarget = targets.find(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * base.focusRadiusSetting);
             if (bigThreat) {
                 targets = Array(base.gunBarrelCount).fill(bigThreat);
+            } else if (focusTarget) {
+                targets = Array(base.gunBarrelCount).fill(focusTarget);
             } else {
                 if (targets.length < base.gunBarrelCount) {
                     while (targets.length < base.gunBarrelCount) targets.push(nearestEnemy);
@@ -2384,6 +2395,9 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     }
                     break;
                 case UPGRADE_CANNON_MULTIBARREL: base.gunBarrelCount = upgrade.f(level); break;
+                case UPGRADE_CANNON_FOCUS_RADIUS:
+                    base.focusRadiusSetting = upgrade.f(level);
+                    break;
             }
             break;
         case UPGRADE_CATEGORY_DEFENSE:
@@ -2489,6 +2503,11 @@ function renderUpgradeMenu() {
         toggle.onchange = toggleMissileRadiusVisibility; // Make sure function exists
     }
 
+    const slider = getElement('focusRadiusSlider');
+    if (slider) {
+        slider.oninput = updateFocusRadiusFromSlider;
+    }
+
     // Update visibility of Macross button based on upgrade level
     const macrossLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
     getElement('macrossButton').style.display = macrossLevel > 0 ? 'block' : 'none';
@@ -2513,6 +2532,7 @@ function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
 
     // Add toggle switch specifically for Missile Homing upgrade display
     let toggleHTML = '';
+    let sliderHTML = '';
     if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_HOMING) {
         toggleHTML = `
           <label class="switch">
@@ -2520,6 +2540,15 @@ function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
             <span class="slider round"></span>
           </label>
           <span class="switch-label">Show Radius</span>`;
+    }
+
+    if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS && level > 0) {
+        const val = Math.round(base.focusRadiusSetting * 100);
+        sliderHTML = `
+          <div class="upgrade-slider-container">
+            <span id="focusRadiusLabel">Focus Radius: ${val}%</span>
+            <input type="range" id="focusRadiusSlider" min="10" max="${level * 10}" step="10" value="${val}">
+          </div>`;
     }
 
 
@@ -2537,6 +2566,7 @@ function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
             ${name} (${level}/${maxLevel}) - Cost: ${cost}<br>
             <span class="upgrade-stats-display">${statsText}</span>
         </button>
+        ${sliderHTML}
     </div>`;
 }
 
@@ -2641,6 +2671,14 @@ function toggleRingInfoDisplay() {
 
 function toggleMissileRadiusVisibility() {
      showMissileRadius = getElement('toggleMissileRadius').checked;
+}
+
+function updateFocusRadiusFromSlider() {
+     const slider = getElement('focusRadiusSlider');
+     const val = parseInt(slider.value);
+     base.focusRadiusSetting = val / 100;
+     const label = getElement('focusRadiusLabel');
+     if (label) label.textContent = `Focus Radius: ${val}%`;
 }
 
 
