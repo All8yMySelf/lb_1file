@@ -72,10 +72,11 @@ button:disabled{background: var(--button-disabled-bg); color: var(--button-disab
 .upgrade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .upgrade-button-container button{font-size:18px;white-space:normal;word-wrap:break-word}
 #focus-notch-container{display:flex;flex-direction:column;align-items:center;margin-top:5px}
-#focus-notch-row{display:flex;gap:4px;margin-top:4px}
-.focus-notch{width:22px;height:16px;border:2px solid #555;background:#333;cursor:pointer;box-shadow:0 0 4px #000 inset;border-radius:2px}
-.focus-notch.active{background:var(--button-text);box-shadow:0 0 6px var(--button-border)}
-.focus-notch.selected{border-color:lime}
+#focus-notch-row{display:flex;gap:2px;margin-top:4px}
+.focus-notch{width:10px;height:16px;border:1px solid var(--button-border);background:#111;cursor:pointer;box-shadow:0 0 2px var(--button-border) inset;border-radius:0}
+.focus-notch.active{background:var(--button-text);box-shadow:0 0 4px var(--button-border)}
+.focus-notch.selected{border-color:lime;animation:notchBlink 1s step-end infinite}
+@keyframes notchBlink{0%,50%{opacity:1}50.1%,100%{opacity:.3}}
 .focus-notch-label{font-size:14px;color:var(--upgrade-title-color);margin-bottom:2px}
 #controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10}
 #toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
@@ -2692,11 +2693,9 @@ function toggleUpgradeMenu() {
         renderUpgradeMenu(); // Ensure buttons are up-to-date
         updateStatsDisplay();
         updateUpgradeAvailability();
-        // updateUpgradeMenuBorder(); // Border drawing disabled
     } else {
         menu.style.display = 'none';
         isGameRunning = true; // Resume game
-        // updateUpgradeMenuBorder(); // Border drawing disabled
         lastTime = 0; // Reset delta time calculation
         animationFrameId = requestAnimationFrame(gameLoop);
         // Restart auto-save timer
@@ -2989,74 +2988,13 @@ function applyTheme(themeIndex) {
         drawGame();
     }
     showToast(`Theme set to: ${currentTheme.name}`, 1500);
-    // updateUpgradeMenuBorder(); // Update border when theme changes - Removed
 }
 
 function cycleTheme() {
     applyTheme(currentThemeIndex + 1);
     // Save the selected theme index to localStorage
-    // Save the selected theme index to localStorage
     localStorage.setItem('orbitalDefenseTheme_v2.9', currentThemeIndex);
 }
-
-/*
-/*
-// --- Upgrade Menu Border Drawing ---
-function updateUpgradeMenuBorder() {
-    const menu = getElement('upgradeMenu');
-    const borderCanvas = getElement('upgradeMenuBorderCanvas');
-    const borderCtx = borderCanvas.getContext('2d');
-
-    // Ensure canvas matches window size
-    borderCanvas.width = window.innerWidth;
-    borderCanvas.height = window.innerHeight;
-
-    // Clear the border canvas
-    borderCtx.clearRect(0, 0, borderCanvas.width, borderCtx.canvas.height);
-
-    // Only draw if the upgrade menu is visible AND the theme is Retro Terminal
-    if (menu.style.display !== 'none' && currentTheme.name === "Retro Terminal") {
-        const rect = menu.getBoundingClientRect();
-        const menuX = rect.left;
-        const menuY = rect.top;
-        const menuWidth = rect.width;
-        const menuHeight = rect.height;
-
-        const brailleCharWidth = 8; // Approximate width of a braille character
-        const brailleCharHeight = 16; // Approximate height of a braille character (adjust as needed)
-
-        borderCtx.fillStyle = currentTheme.cssVariables['--text-color'] || '#00ff00'; // Use theme text color
-        borderCtx.font = `${brailleCharHeight}px ${currentTheme.cssVariables['--font-family'] || "'Courier New', Courier, monospace"}`;
-        borderCtx.textBaseline = 'top';
-
-        // Braille characters for borders (example set)
-        const cornerTL = '▛'; // Top-left
-        const cornerTR = '▜'; // Top-right
-        const cornerBL = '▙'; // Bottom-left
-        const cornerBR = '▟'; // Bottom-right
-        const horizontal = '━'; // Horizontal line (using box-drawing char for now, could use braille)
-        const vertical = '┃'; // Vertical line (using box-drawing char for now, could use braille)
-
-        // Draw corners
-        borderCtx.fillText(cornerTL, menuX - brailleCharWidth, menuY - brailleCharHeight);
-        borderCtx.fillText(cornerTR, menuX + menuWidth, menuY - brailleCharHeight);
-        borderCtx.fillText(cornerBL, menuX - brailleCharWidth, menuY + menuHeight);
-        borderCtx.fillText(cornerBR, menuX + menuWidth, menuY + menuHeight);
-
-        // Draw top and bottom borders
-        for (let x = menuX; x < menuX + menuWidth; x += brailleCharWidth) {
-            borderCtx.fillText(horizontal, x, menuY - brailleCharHeight);
-            borderCtx.fillText(horizontal, x, menuY + menuHeight);
-        }
-
-        // Draw left and right borders
-        for (let y = menuY; y < menuY + menuHeight; y += brailleCharHeight) {
-            borderCtx.fillText(vertical, menuX - brailleCharWidth, y);
-            borderCtx.fillText(vertical, menuX + menuWidth, y);
-        }
-    }
-}
-*/
 
 // --- Load and Start Game Function ---
 function loadAndStartGame() {
@@ -3121,7 +3059,6 @@ window.onload = () => {
 
 // --- Global Access (for HTML onclick) ---
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
-// updateUpgradeMenuBorder(); // Update border when menu is closed (clears it) - Removed
 
 
 })(); // End IIFE
