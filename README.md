@@ -13,3 +13,19 @@ Open `index.html` in any modern browser. The game will load immediately with no 
 The previous `css/` and `js/` folders have been removed as part of the single-file challenge.
 The repository also includes a `favicon.ico` so browsers display an icon in the
 tab when the game is loaded.
+
+## Change Log
+
+The game is under active development. Below is a brief summary of recent updates.
+See [CHANGELOG.md](CHANGELOG.md) for the full history.
+
+### v2.31
+- Added a clickable Focus Radius selector that saves your preference.
+- Updated version references and refined notch visuals.
+- Removed redundant code for a leaner single-file build.
+
+### v2.30
+- Major UI overhaul with a more compact HUD and screens.
+- Introduced a Debug panel for quickly awarding credits.
+- Added the Focus Radius upgrade and visual ring indicator.
+- Implemented missile homing improvements and toggle controls.
