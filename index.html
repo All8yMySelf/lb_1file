@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- V2.30: Added debug panel and improved projectile logic -->
-<!-- V2.30: Performance optimizations and refactoring -->
+<!-- V2.31: Added block-based Focus Radius selector -->
+<!-- V2.31: Performance optimizations and refactoring -->
 <!-- V2.18: Refactored theme management to use themes.js, reinstated theme cycling -->
 <!-- V2.17.1: Removed theme cycling logic and hid theme button -->
 <!-- V2.17: Removed themes 2-6, updated version number -->
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<title>Orbital Defence Elite v2.30 - Optimised</title>
+<title>Orbital Defence Elite v2.31 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root {
@@ -110,7 +110,7 @@ input:checked+.slider:before{transform:translateX(26px)}
     <span id="healthDisplay"></span> <!-- Renamed from #h -->
 </div>
 <div id="startScreen"> <!-- Renamed from #s -->
-    <h1>Orbital Defence Elite v2.30</h1>
+    <h1>Orbital Defence Elite v2.31</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
 </div>
@@ -2561,7 +2561,7 @@ function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
           <span class="switch-label">Show Radius</span>`;
     }
 
-    if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS && level > 0) {
+    if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS) {
         const val = Math.round(base.focusRadiusSetting * 100);
         let notches = '';
         for(let p=10; p<=100; p+=10){
@@ -2569,7 +2569,7 @@ function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
         }
         sliderHTML = `
           <div id="focus-notch-container">
-            <div class="focus-notch-label">Select Focus Sync Threshold</div>
+            <div class="focus-notch-label">Select Focus Radius Threshold</div>
             <div id="focus-notch-row">${notches}</div>
             <span id="focusRadiusLabel">Focus Radius Threshold: ${val}%</span>
           </div>`;
@@ -2703,6 +2703,7 @@ function focusNotchClicked(e){
     base.focusRadiusSetting=val/100;
     updateFocusNotches();
     drawGame();
+    saveGame();
 }
 function updateFocusNotches(){
     const row=getElement('focus-notch-row');
