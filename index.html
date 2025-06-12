@@ -74,6 +74,9 @@ button:disabled{background: var(--button-disabled-bg); color: var(--button-disab
 .upgrade-slider-container{display:flex;align-items:center;margin-top:5px}
 .upgrade-slider-container input[type=range]{flex:1;margin-left:5px}
 #controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10}
+input[type=range].focus-slider{-webkit-appearance:none;height:8px;border-radius:5px;background:#555;outline:none;background-image:repeating-linear-gradient(to right,transparent 0,transparent calc(10% - 1px),#000 calc(10% - 1px),#000 10%)}
+input[type=range].focus-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--button-text);border:2px solid var(--button-border);cursor:pointer}
+input[type=range].focus-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--button-text);border:2px solid var(--button-border);cursor:pointer}
 #toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
 #toggleInfoButton.active{background-color: var(--toggle-active-bg); color: var(--toggle-active-text)}
 #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background: var(--toast-bg); color: var(--toast-text); padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity 0.3s ease;pointer-events:none}
@@ -698,6 +701,14 @@ function shadeColor(color, percent) {
     g = Math.min(255, Math.max(0, g));
     b = Math.min(255, Math.max(0, b));
     return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+}
+function colorWithAlpha(color, alpha){
+    const m=color.match(/rgba?\(([^)]+)\)/);
+    if(m){
+        const parts=m[1].split(/,s*/);
+        return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+    }
+    return color;
 }
 
 function createExplosion(x, y, color, count = 15, enemyRadius = 10) {
@@ -1747,6 +1758,12 @@ function drawGame() {
         ctx.arc(base.x, base.y, base.stunRadius, 0, Math.PI * 2);
         ctx.stroke();
     }
+    if (base.focusRadiusSetting > 0) {
+        ctx.strokeStyle = colorWithAlpha(currentTheme.canvasColors.ringCannon, 0.2);
+        ctx.beginPath();
+        ctx.arc(base.x, base.y, base.cannonRange * base.focusRadiusSetting, 0, Math.PI * 2);
+        ctx.stroke();
+    }
 
     // --- Draw Ring UI (Directly on Canvas) ---
     ringClickRegions = []; // Clear regions each frame
@@ -2506,6 +2523,7 @@ function renderUpgradeMenu() {
     const slider = getElement('focusRadiusSlider');
     if (slider) {
         slider.oninput = updateFocusRadiusFromSlider;
+        updateFocusRadiusSlider();
     }
 
     // Update visibility of Macross button based on upgrade level
@@ -2546,8 +2564,8 @@ function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
         const val = Math.round(base.focusRadiusSetting * 100);
         sliderHTML = `
           <div class="upgrade-slider-container">
-            <span id="focusRadiusLabel">Focus Radius: ${val}%</span>
-            <input type="range" id="focusRadiusSlider" min="10" max="${level * 10}" step="10" value="${val}">
+            <span id="focusRadiusLabel">Focus Radius Threshold: ${val}%</span>
+            <input type="range" id="focusRadiusSlider" class="focus-slider" min="10" max="100" step="10" value="${val}">
           </div>`;
     }
 
@@ -2672,20 +2690,30 @@ function toggleRingInfoDisplay() {
 function toggleMissileRadiusVisibility() {
      showMissileRadius = getElement('toggleMissileRadius').checked;
 }
-
-function updateFocusRadiusFromSlider() {
-     const slider = getElement('focusRadiusSlider');
-     const val = parseInt(slider.value);
-     base.focusRadiusSetting = val / 100;
-     const label = getElement('focusRadiusLabel');
-     if (label) label.textContent = `Focus Radius: ${val}%`;
+function updateFocusRadiusFromSlider(){
+    const slider=getElement("focusRadiusSlider");
+    const unlocked=upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_FOCUS_RADIUS].level*10;
+    let val=parseInt(slider.value);
+    if(val>unlocked) val=unlocked;
+    slider.value=val;
+    base.focusRadiusSetting=val/100;
+    updateFocusRadiusSlider();
+    drawGame();
+}
+function updateFocusRadiusSlider(){
+    const slider=getElement("focusRadiusSlider");
+    if(!slider) return;
+    const unlocked=upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_FOCUS_RADIUS].level*10;
+    let val=Math.round(base.focusRadiusSetting*100);
+    if(val>unlocked) val=unlocked;
+    slider.value=val;
+    slider.style.background=`linear-gradient(to right, #e6b54b 0%, #e6b54b ${unlocked}%, #555 ${unlocked}%, #555 100%), repeating-linear-gradient(to right, transparent 0, transparent calc(10% - 1px), #000 calc(10% - 1px), #000 10%)`;
+    const label=getElement("focusRadiusLabel");
+    if(label) label.textContent=`Focus Radius Threshold: ${val}%`;
 }
 
-
-// --- Event Handlers ---
-
-// Keyboard
 window.addEventListener('keydown', e => {
+
     keysPressed[e.key.toLowerCase()] = true; // Use lower case for consistency
 
     // Handle single-press actions only if game is running or menu allows it
