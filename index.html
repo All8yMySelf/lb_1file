@@ -61,7 +61,7 @@ body{margin:0;overflow:hidden;background: var(--body-bg); color: var(--text-colo
 #hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #hud #creditsDisplay{text-align:left} /* Renamed from #c */
 #hud #healthDisplay{text-align:right} /* Renamed from #h */
-#startScreen,#gameOverScreen,#upgradeMenu,#highScoreScreen{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.8);text-align:center;z-index:100} /* Renamed from #s, #o, #m */
+#startScreen,#gameOverScreen,#upgradeMenu,#highScoreScreen,#highScoreModal{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.8);text-align:center;z-index:100} /* Renamed from #s, #o, #m */
 #gameOverScreen #finalStats{font-size:1.33rem;margin-bottom:1.5rem;color: var(--final-stats-color)} /* Renamed from #f */
 #upgradeMenu{position:absolute;top:0;left:0;bottom:0;width: 450px; display:flex;flex-direction:column;justify-content:flex-start;align-items: flex-start; padding-top:20px;overflow-y:auto; background:rgba(0,0,0,0.8);z-index:100} /* Modified to position on the left */
 button{padding:10px 20px;font-size:24px;line-height:1;margin-top:22px;background: var(--button-bg); color: var(--button-text); border:2px solid var(--button-border); cursor:pointer;transition:all 0.3s ease}
@@ -97,8 +97,12 @@ input:checked+.slider:before{transform:translateX(26px)}
 /* Removed styles related to DOM-based ring UI (.ring-upgrade-box, .upgrade-info-panel, .ring-info-container, etc.) */
 #highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse}
 #highScoreTable th,#highScoreTable td{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}
+#highScoreTable td{white-space:nowrap}
 #highScoreTable th{font-weight:bold}
 #highScoreTable td:last-child{text-align:right}
+.blinking-cursor{font-weight:bold;animation:blinkCursor 1s step-end infinite}
+@keyframes blinkCursor{50%{opacity:0}}
+#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}
 .crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg, var(--crt-scanline-color), var(--crt-scanline-color) 1px,transparent 1px,transparent 2px);pointer-events:none}
 .crt-container{transform:translateZ(0);position:relative;overflow:hidden}
 .crt-container::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background: var(--crt-vignette); pointer-events:none;z-index:1}
@@ -124,12 +128,22 @@ input:checked+.slider:before{transform:translateX(26px)}
     <h1>Game Over</h1>
     <div id="finalStats"></div> <!-- Renamed from #f -->
     <div id="gameOverHighScores"></div>
+    <div id="nonHighScoreMessage" style="margin-top:10px"></div>
     <button id="restartButton">Play Again</button> <!-- Renamed from #r -->
 </div>
 <div id="highScoreScreen" style="display:none">
     <h1>High Scores</h1>
     <div id="highScoreTable"></div>
     <button id="backButton">Back</button>
+</div>
+<div id="highScoreModal" style="display:none">
+    <h1>New High Score!</h1>
+    <div id="beatenScores" style="margin:10px 0"></div>
+    <div id="initialInputContainer" style="display:flex;align-items:center;gap:5px">
+        <input id="highScoreInitials" maxlength="3" autofocus>
+        <span class="blinking-cursor">_</span>
+    </div>
+    <button id="saveHighScoreButton">Save</button>
 </div>
 <div id="upgradeMenu" style="display:none"> <!-- Renamed from #m -->
     <h2>Current Wave Stats</h2>
@@ -1038,19 +1052,51 @@ function formatDate(date) {
     return date.toISOString().split('T')[0];
 }
 
+let pendingHighScore = null;
+
 function recordHighScore(score) {
     let scores = loadHighScores();
-    const qualifies = scores.length < 10 || score > scores[scores.length - 1].score;
-    if (qualifies) {
-        let initials = prompt('New High Score! Enter 3 initials:', '') || '???';
-        initials = initials.toUpperCase().slice(0,3);
-        scores.push({ initials, score, date: formatDate(new Date()) });
-        scores.sort((a,b) => b.score - a.score);
-        scores = scores.slice(0,10);
-        saveHighScores(scores);
+    const withPlayer = scores.concat({ initials: '', score, date: formatDate(new Date()) });
+    withPlayer.sort((a,b) => b.score - a.score);
+    const rank = withPlayer.findIndex(s => s.initials === '' && s.score === score) + 1;
+
+    if (rank <= 10) {
+        const beaten = withPlayer.slice(rank).filter(s => s.initials);
+        showHighScoreModal(score, beaten);
+    } else {
+        getElement('nonHighScoreMessage').textContent = `Game Over – You placed #${rank}. Try again to reach the top 10!`;
+        renderHighScores('gameOverHighScores', scores);
     }
-    return scores;
 }
+
+function showHighScoreModal(score, beaten) {
+    pendingHighScore = score;
+    const list = beaten.map(s => `<div>${s.initials} - ${s.score} - ${s.date}</div>`).join('');
+    getElement('beatenScores').innerHTML = list;
+    getElement('highScoreInitials').value = '';
+    getElement('highScoreModal').style.display = 'flex';
+    setTimeout(() => getElement('highScoreInitials').focus(), 50);
+}
+
+function saveHighScoreFromModal() {
+    let initials = getElement('highScoreInitials').value.trim().toUpperCase().slice(0,3);
+    if (!initials) initials = '???';
+    let scores = loadHighScores();
+    scores.push({ initials, score: pendingHighScore, date: formatDate(new Date()) });
+    scores.sort((a,b) => b.score - a.score);
+    scores = scores.slice(0,10);
+    saveHighScores(scores);
+    renderHighScores('gameOverHighScores', scores);
+    getElement('highScoreModal').style.display = 'none';
+    getElement('nonHighScoreMessage').textContent = '';
+    pendingHighScore = null;
+}
+
+getElement('highScoreInitials').addEventListener('keyup', e => {
+    if (e.key === 'Enter') {
+        saveHighScoreFromModal();
+    }
+});
 
 function renderHighScores(containerId, scores) {
     const container = getElement(containerId);
@@ -1266,6 +1312,8 @@ function startGame() {
     initializeGame(true); // Initialize with saved game check
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
+    getElement('highScoreModal').style.display = 'none';
+    getElement('nonHighScoreMessage').textContent = '';
     getElement('upgradeMenu').style.display = 'none';
     renderUpgradeMenu(); // Render the menu with initial state
     updateUpgradeAvailability();
@@ -1294,8 +1342,7 @@ function gameOver() {
     if (autoSaveTimer) clearInterval(autoSaveTimer);
     getElement('gameOverScreen').style.display = 'flex';
     getElement('finalStats').textContent = `Final Credits: ${gameState.credits} | Waves Survived: ${gameState.wave} | Score: ${gameState.score}`;
-    const scores = recordHighScore(gameState.score);
-    renderHighScores('gameOverHighScores', scores);
+    recordHighScore(gameState.score);
     saveGame(); // Save final state on game over
 }
 
@@ -3019,6 +3066,7 @@ getElement('gameSpeedButton').onclick = () => {
 getElement('macrossButton').onclick = fireMacrossMissiles;
 getElement('highScoreButton').onclick = openHighScoreScreen;
 getElement('backButton').onclick = closeHighScoreScreen;
+getElement('saveHighScoreButton').onclick = saveHighScoreFromModal;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
