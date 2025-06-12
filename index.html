@@ -459,6 +459,7 @@ const UPGRADE_CATEGORY_DEFENSE = 1;
 const UPGRADE_CATEGORY_LASER = 2;
 const UPGRADE_CATEGORY_MISSILE = 3;
 const UPGRADE_CATEGORY_SPECIAL = 4;
+const UPGRADE_CATEGORY_DEBUG = 5;
 
 // Specific Upgrade Indices (within category)
 const UPGRADE_CANNON_FIRERATE = 0;
@@ -1137,6 +1138,19 @@ function initializeGame(shouldTryLoad = true) {
                 { name: 'Stun Field', cost: 2000, level: 0, maxLevel: 9, // Max 90% slow
                   f: level => level * 0.1, // Returns the slow factor (0 to 0.9)
                   g: (level, cost, maxLvl) => `Slow: ${level * 10}% ${level < maxLvl ? `→ ${(level + 1) * 10}%` : '(MAX)'}` }
+            ]
+        },
+        { // Category 5: Debug
+            category: "Debug",
+            upgrades: [
+                {
+                    name: 'Add 100,000 Credits',
+                    cost: 0,
+                    level: 0,
+                    maxLevel: Infinity,
+                    f: () => {},
+                    g: () => 'Gain 100k credits'
+                }
             ]
         }
     ];
@@ -2317,6 +2331,14 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
 function purchaseUpgrade(categoryIndex, upgradeIndex) {
     const upgrade = upgradeTree[categoryIndex].upgrades[upgradeIndex];
 
+    if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
+        gameState.credits += 100000;
+        updateHUD();
+        updateUpgradeAvailability();
+        showToast('Cheated 100k credits!');
+        return;
+    }
+
     // Check prerequisite for missile sub-upgrades
     if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex > UPGRADE_MISSILE_COUNT) {
         if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0) {
@@ -2459,28 +2481,7 @@ function renderUpgradeMenu() {
         upgradeHTML += `</div></div>`;
     });
 
-    // Add debug button styled like regular upgrades
-    upgradeHTML += `
-        <div class="upgrade-category">
-            <h3>Debug</h3>
-            <div class="upgrade-grid">
-                <div class="upgrade-button-container">
-                    <button id="cheatAddCredits">Add 100,000 Credits</button>
-                </div>
-            </div>
-        </div>`;
-
     getElement('upgradesContainer').innerHTML = upgradeHTML;
-
-    const cheatBtn = getElement('cheatAddCredits');
-    if (cheatBtn) {
-        cheatBtn.onclick = () => {
-            gameState.credits += 100000;
-            updateHUD();
-            updateUpgradeAvailability();
-            showToast('Cheated 100k credits!');
-        };
-    }
 
     // Add event listener for missile radius toggle if it exists
     const toggle = getElement('toggleMissileRadius');
@@ -2521,6 +2522,13 @@ function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
           <span class="switch-label">Show Radius</span>`;
     }
 
+
+    if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
+        return `
+        <div class="upgrade-button-container">
+            <button id="upgrade_${categoryIndex}_${upgradeIndex}" onclick="purchaseUpgrade(${categoryIndex}, ${upgradeIndex})">Add 100,000 Credits</button>
+        </div>`;
+    }
 
     return `
     <div class="upgrade-button-container">
