@@ -2901,8 +2901,9 @@ window.onload = () => {
 
     initializeGame(false); // Initialize without loading saved game yet
 
-    // Load saved theme preference
-    const savedThemeIndex = 5; // Set default theme to Retro Terminal
+    // Load saved theme preference, default to "Orbital Elite" (index 0)
+    const savedTheme = localStorage.getItem('orbitalDefenseTheme_v2.9');
+    const savedThemeIndex = savedTheme !== null ? parseInt(savedTheme, 10) : 0;
     applyTheme(savedThemeIndex); // Apply saved or default theme
 
     getElement('startScreen').style.display = 'flex';
