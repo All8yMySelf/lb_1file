@@ -123,10 +123,6 @@ input:checked+.slider:before{transform:translateX(26px)}
         <div id="fire-rate-stats">Fire Rate: 5/s</div>
         <div id="range-stats">Range: 200</div>
     </div>
-    <h2>Debug</h2>
-    <div id="debugPanel">
-        <button id="cheatAddCredits">Add 100,000 Credits</button>
-    </div>
 </div>
 <div id="controls">
     <button id="gameSpeedButton">Speed: 1x</button> <!-- Renamed from #B -->
@@ -2462,7 +2458,28 @@ function renderUpgradeMenu() {
         upgradeHTML += `</div></div>`;
     });
 
+    // Add debug button styled like regular upgrades
+    upgradeHTML += `
+        <div class="upgrade-category">
+            <h3>Debug</h3>
+            <div class="upgrade-grid">
+                <div class="upgrade-button-container">
+                    <button id="cheatAddCredits">Add 100,000 Credits</button>
+                </div>
+            </div>
+        </div>`;
+
     getElement('upgradesContainer').innerHTML = upgradeHTML;
+
+    const cheatBtn = getElement('cheatAddCredits');
+    if (cheatBtn) {
+        cheatBtn.onclick = () => {
+            gameState.credits += 100000;
+            updateHUD();
+            updateUpgradeAvailability();
+            showToast('Cheated 100k credits!');
+        };
+    }
 
     // Add event listener for missile radius toggle if it exists
     const toggle = getElement('toggleMissileRadius');
@@ -2808,12 +2825,6 @@ getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
-getElement('cheatAddCredits').onclick = () => { // Cheat function
-    gameState.credits += 100000;
-    updateHUD();
-    updateUpgradeAvailability();
-    showToast('Cheated 100k credits!');
-};
 
 // Window Resize
 window.addEventListener('resize', () => {
