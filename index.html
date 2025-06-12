@@ -1008,7 +1008,10 @@ function loadGame() {
         console.error('Error applying loaded game state:', e);
         // If loading fails, potentially reset to default state
         initializeGame(false); // Re-initialize without trying to load again
-return false;
+        return false;
+    }
+
+    // Close loadGame function
 }
 
 const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.32';
@@ -1074,7 +1077,6 @@ function openHighScoreScreen() {
 function closeHighScoreScreen() {
     getElement('highScoreScreen').style.display = 'none';
     getElement('startScreen').style.display = 'flex';
-}
 }
 
 // --- Game Initialization & Start ---
