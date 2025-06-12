@@ -1,5 +1,9 @@
 # Orbital Defence Elite - Change Log
 
+## v2.33
+- Upgrade categories are now collapsible.
+- Reduced font size of upgrade buttons to prevent text clipping.
+
 ## v2.32
 - Added persistent Top 10 High Scores feature
 - Scores include 3-character initials, score, and date
