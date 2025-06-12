@@ -2654,7 +2654,6 @@ function fireMacrossMissiles() {
 }
 
 // --- Menu Toggles ---
-/*
 function toggleUpgradeMenu() {
     const menu = getElement('upgradeMenu');
     if (menu.style.display === 'none') {
@@ -2666,21 +2665,20 @@ function toggleUpgradeMenu() {
         renderUpgradeMenu(); // Ensure buttons are up-to-date
         updateStatsDisplay();
         updateUpgradeAvailability();
-        updateUpgradeMenuBorder(); // Update border when menu is opened
+        // updateUpgradeMenuBorder(); // Border drawing disabled
     } else {
         menu.style.display = 'none';
         isGameRunning = true; // Resume game
-        updateUpgradeMenuBorder(); // Update border when menu is closed (clears it)
+        // updateUpgradeMenuBorder(); // Border drawing disabled
         lastTime = 0; // Reset delta time calculation
         animationFrameId = requestAnimationFrame(gameLoop);
-         // Restart auto-save timer
-         if (autoSaveTimer) clearInterval(autoSaveTimer);
-         autoSaveTimer = setInterval(() => {
-             if (isGameRunning) saveGame();
-         }, AUTO_SAVE_INTERVAL);
+        // Restart auto-save timer
+        if (autoSaveTimer) clearInterval(autoSaveTimer);
+        autoSaveTimer = setInterval(() => {
+            if (isGameRunning) saveGame();
+        }, AUTO_SAVE_INTERVAL);
     }
 }
-*/
 
 function toggleHotkeys() {
     getElement('hotkeys').classList.toggle('show');
@@ -2727,6 +2725,9 @@ window.addEventListener('keydown', e => {
     if (isGameRunning || getElement('upgradeMenu').style.display === 'flex') {
         switch (e.key.toLowerCase()) {
             case 'm': if (isGameRunning) fireMacrossMissiles(); break; // Only fire if game running
+            case 'u':
+                toggleUpgradeMenu();
+                break;
             case 'h': toggleHotkeys(); break; // Toggle hotkeys anytime
             case 'f':
                 if (isGameRunning) {
@@ -2735,9 +2736,11 @@ window.addEventListener('keydown', e => {
                 }
                 break;
             case 'i': toggleRingInfoDisplay(); break; // Toggle info anytime
-             // Add Esc key to close upgrade menu
             case 'escape':
-                 break; // Removed upgrade menu close logic
+                if (getElement('upgradeMenu').style.display === 'flex') {
+                    toggleUpgradeMenu();
+                }
+                break;
         }
     }
 });
