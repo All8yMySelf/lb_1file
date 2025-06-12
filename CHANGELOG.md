@@ -4,6 +4,7 @@
 - Added clickable block-based Focus Radius selector with save persistence
 - Updated version references
 - Improved notch visibility to ensure blocks are noticeable
+- Switched to rectangular notch styling and removed obsolete menu border code
 
 
 ## v2.30
