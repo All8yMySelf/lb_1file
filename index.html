@@ -84,6 +84,8 @@ button:disabled{background: var(--button-disabled-bg); color: var(--button-disab
 #controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10}
 #toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
 #toggleInfoButton.active{background-color: var(--toggle-active-bg); color: var(--toggle-active-text)}
+#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}
+#speedDisplay{display:flex;align-items:center;justify-content:center;width:40px;font-size:18px}
 #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background: var(--toast-bg); color: var(--toast-text); padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity 0.3s ease;pointer-events:none}
 #toast.show{opacity:1}
 .switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}
@@ -161,7 +163,10 @@ input:checked+.slider:before{transform:translateX(26px)}
 
 </div>
 <div id="controls">
-    <button id="gameSpeedButton">Speed: 1x</button> <!-- Renamed from #B -->
+    <button id="playPauseButton">&#9654;</button>
+    <button id="slowDownButton">&#171;</button>
+    <span id="speedDisplay">1x</span>
+    <button id="speedUpButton">&#187;</button>
     <button id="macrossButton" style="display:none">Macross Missile Massacre</button> <!-- Renamed from #M -->
     <button id="toggleInfoButton" class="active">i</button> <!-- Renamed from #I -->
     <button id="themeButton">Theme: Orbital Elite</button> <!-- Added Theme Button -->
@@ -565,7 +570,9 @@ let deltaTime = 0;
 let gameState; // Contains credits, health, wave, score etc.
 let base; // Contains position, stats, upgrades effects
 let upgradeTree; // Defines upgrade structure, costs, effects
-let gameSpeedMultiplier = 1;
+const SPEED_STEPS = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.5,2,3,4,5,6,7,8,9,10];
+let speedIndex = SPEED_STEPS.indexOf(1);
+let gameSpeedMultiplier = SPEED_STEPS[speedIndex];
 let isGameRunning = false;
 let animationFrameId = null;
 let savedGame = null; // Stores loaded game state
@@ -927,6 +934,33 @@ function updateStatsDisplay() {
     if (getElement('range-stats')) {
         getElement('range-stats').textContent = `Range: ${Math.round(base.cannonRange)}`;
     }
+}
+
+function updateSpeedDisplay() {
+    const val = SPEED_STEPS[speedIndex];
+    const text = Number.isInteger(val) ? val.toString() : val.toFixed(1);
+    getElement('speedDisplay').textContent = `${text}x`;
+}
+
+function pauseGame() {
+    if (!isGameRunning) return;
+    isGameRunning = false;
+    cancelAnimationFrame(animationFrameId);
+    if (autoSaveTimer) clearInterval(autoSaveTimer);
+    getElement('playPauseButton').textContent = '\u25B6';
+}
+
+function resumeGame() {
+    if (isGameRunning) return;
+    gameSpeedMultiplier = 1;
+    speedIndex = SPEED_STEPS.indexOf(1);
+    updateSpeedDisplay();
+    isGameRunning = true;
+    lastTime = 0;
+    animationFrameId = requestAnimationFrame(gameLoop);
+    if (autoSaveTimer) clearInterval(autoSaveTimer);
+    autoSaveTimer = setInterval(() => { if (isGameRunning) saveGame(); }, AUTO_SAVE_INTERVAL);
+    getElement('playPauseButton').textContent = '\u23F8';
 }
 
 // --- Game State Management ---
@@ -1348,6 +1382,10 @@ function startGame() {
     renderUpgradeMenu(); // Render the menu with initial state
     updateUpgradeAvailability();
     isGameRunning = true;
+    gameSpeedMultiplier = 1;
+    speedIndex = SPEED_STEPS.indexOf(1);
+    updateSpeedDisplay();
+    getElement('playPauseButton').textContent = '\u23F8';
     gameState.waveStartTime = Date.now(); // Always start fresh timer for new game
     gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
 
@@ -1370,6 +1408,10 @@ function gameOver() {
     isGameRunning = 0;
     cancelAnimationFrame(animationFrameId);
     if (autoSaveTimer) clearInterval(autoSaveTimer);
+    gameSpeedMultiplier = 1;
+    speedIndex = SPEED_STEPS.indexOf(1);
+    updateSpeedDisplay();
+    getElement('playPauseButton').textContent = '\u25B6';
     getElement('gameOverScreen').style.display = 'flex';
     getElement('finalStats').textContent = `Final Credits: ${gameState.credits} | Waves Survived: ${gameState.wave} | Score: ${gameState.score}`;
     recordHighScore(gameState.score);
@@ -2850,6 +2892,7 @@ function toggleUpgradeMenu() {
         isGameRunning = false; // Pause game
         cancelAnimationFrame(animationFrameId);
         if (autoSaveTimer) clearInterval(autoSaveTimer); // Pause saving
+        getElement('playPauseButton').textContent = '\u25B6';
         updateWaveInfoInMenu(); // Update info when opening
         renderUpgradeMenu(); // Ensure buttons are up-to-date
         updateStatsDisplay();
@@ -2864,6 +2907,7 @@ function toggleUpgradeMenu() {
         autoSaveTimer = setInterval(() => {
             if (isGameRunning) saveGame();
         }, AUTO_SAVE_INTERVAL);
+        getElement('playPauseButton').textContent = '\u23F8';
     }
 }
 
@@ -3098,10 +3142,24 @@ window.addEventListener('touchend', e => {
 // UI Button Listeners
 getElement('startButton').onclick = startGame;
 getElement('restartButton').onclick = startGame; // Restart calls startGame to reinitialize
-getElement('gameSpeedButton').onclick = () => {
-    const speeds = [1, 1.5, 2, 3, 0.5]; // Added 0.5x speed
-    gameSpeedMultiplier = speeds[(speeds.indexOf(gameSpeedMultiplier) + 1) % speeds.length];
-    getElement('gameSpeedButton').textContent = `Speed: ${gameSpeedMultiplier}x`;
+getElement('playPauseButton').onclick = () => {
+    if (isGameRunning) pauseGame(); else resumeGame();
+};
+getElement('slowDownButton').onclick = () => {
+    if (!isGameRunning) return;
+    if (speedIndex > 0) {
+        speedIndex--;
+        gameSpeedMultiplier = SPEED_STEPS[speedIndex];
+        updateSpeedDisplay();
+    }
+};
+getElement('speedUpButton').onclick = () => {
+    if (!isGameRunning) return;
+    if (speedIndex < SPEED_STEPS.length - 1) {
+        speedIndex++;
+        gameSpeedMultiplier = SPEED_STEPS[speedIndex];
+        updateSpeedDisplay();
+    }
 };
 getElement('macrossButton').onclick = fireMacrossMissiles;
 getElement('highScoreButton').onclick = openHighScoreScreen;
@@ -3183,6 +3241,10 @@ function loadAndStartGame() {
     renderUpgradeMenu(); // Ensure menu reflects loaded state
     updateUpgradeAvailability(); // Ensure buttons reflect loaded state
     isGameRunning = true;
+    gameSpeedMultiplier = 1;
+    speedIndex = SPEED_STEPS.indexOf(1);
+    updateSpeedDisplay();
+    getElement('playPauseButton').textContent = '\u23F8';
 
     // Start auto-save timer
     if (autoSaveTimer) clearInterval(autoSaveTimer);
@@ -3212,6 +3274,8 @@ window.onload = () => {
     const savedTheme = localStorage.getItem('orbitalDefenseTheme_v2.9');
     const savedThemeIndex = savedTheme !== null ? parseInt(savedTheme, 10) : 0;
     applyTheme(savedThemeIndex); // Apply saved or default theme
+
+    updateSpeedDisplay();
 
     getElement('startScreen').style.display = 'flex';
     getElement('gameOverScreen').style.display = 'none';
