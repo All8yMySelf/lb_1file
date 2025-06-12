@@ -471,6 +471,7 @@ const CONFIG = {
     WAVE_DURATION_INCREMENT: 10, // seconds per wave
     BOSS_HEALTH_BASE: 20,
     BOSS_HEALTH_WAVE_MULTIPLIER: 10,
+    BOSS_RADIUS_INCREMENT: 2,
     MAX_ENEMY_COUNT: 30, // Increased from 20
     BASE_INITIAL_MOVE_SPEED: 2,
     BASE_MOVE_SPEED_INCREMENT: 0.5,
@@ -495,6 +496,7 @@ const {
   WAVE_DURATION_INCREMENT,
   BOSS_HEALTH_BASE,
   BOSS_HEALTH_WAVE_MULTIPLIER,
+  BOSS_RADIUS_INCREMENT,
   MAX_ENEMY_COUNT,
   BASE_INITIAL_MOVE_SPEED,
   BASE_MOVE_SPEED_INCREMENT,
@@ -837,6 +839,7 @@ function spawnEnemy(isBoss = false) {
         health = (BOSS_HEALTH_BASE + gameState.wave * BOSS_HEALTH_WAVE_MULTIPLIER) * difficultyScaling;
         speed = enemyTemplate[1] * Math.sqrt(difficultyScaling); // Boss gets faster too
         credits = Math.floor(enemyTemplate[4] * Math.sqrt(difficultyScaling) * 5); // Boss gives more credits
+        radius += (gameState.wave - 1) * BOSS_RADIUS_INCREMENT;
     } else {
         health = enemyTemplate[2] * difficultyScaling;
         speed = enemyTemplate[1] * Math.sqrt(difficultyScaling);
