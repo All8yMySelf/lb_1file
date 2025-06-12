@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- V2.19: Added two new black and white themes -->
+<!-- V2.20: Added two new black and white themes -->
+<!-- V2.20: Performance optimizations and refactoring -->
 <!-- V2.18: Refactored theme management to use themes.js, reinstated theme cycling -->
 <!-- V2.17.1: Removed theme cycling logic and hid theme button -->
 <!-- V2.17: Removed themes 2-6, updated version number -->
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<title>Orbital Defence Elite v2.19 - Optimised</title>
+<title>Orbital Defence Elite v2.20 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root {
@@ -102,7 +103,7 @@ input:checked+.slider:before{transform:translateX(26px)}
     <span id="healthDisplay"></span> <!-- Renamed from #h -->
 </div>
 <div id="startScreen"> <!-- Renamed from #s -->
-        <h1>Orbital Defence Elite v2.19</h1>
+        <h1>Orbital Defence Elite v2.20</h1>
     <div class="stats">
         <div>WASD/Arrow Keys: Move Base</div>
         <div>Click & Drag: Move Base</div>
@@ -157,8 +158,8 @@ input:checked+.slider:before{transform:translateX(26px)}
 
 <script>
 // Orbital Defence Elite - Theme Definitions
-// V2.19.1: Modified black and white themes to have white backgrounds
-// V2.19: Added two new black and white themes
+// V2.20.1: Modified black and white themes to have white backgrounds
+// V2.20: Added two new black and white themes
 const THEMES = [
     { // Theme 1: Orbital Elite (Default)
         name: "Orbital Elite",
@@ -409,33 +410,60 @@ const THEMES = [
 </script>
 <script>
 (function(){ // IIFE to encapsulate code
+"use strict";
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
 
 // --- Configuration Constants ---
-const ENEMY_HEALTH_SCALE_FACTOR = 1.25;
-const BULLET_BASE_SPEED = 5;
-const BASE_RADIUS = 30;
-const INITIAL_FIRE_RATE = 200;
-const MACROSS_BASE_COOLDOWN = 30;
-const MACROSS_COOLDOWN_REDUCTION_PER_LEVEL = 3;
-const PARTICLE_BASE_SPEED = 1;
-const PARTICLE_BASE_LIFE = 1;
-const PARTICLE_BASE_SIZE = 2;
-const WAVE_BASE_DURATION = 60; // seconds
-const WAVE_DURATION_INCREMENT = 10; // seconds per wave
-const BOSS_HEALTH_BASE = 20;
-const BOSS_HEALTH_WAVE_MULTIPLIER = 10;
-const MAX_ENEMY_COUNT = 30; // Increased from 20
-const BASE_INITIAL_MOVE_SPEED = 2;
-const BASE_MOVE_SPEED_INCREMENT = 0.5;
-const MISSILE_FIRE_INTERVAL = 2000; // ms
-const LASER_FIRE_INTERVAL = 500; // ms
-const STUN_EFFECT_DURATION = 2000; // ms
-const AUTO_SAVE_INTERVAL = 60000; // ms (1 minute)
-const DRAG_THRESHOLD = 5; // pixels to initiate drag vs click
-const CANVAS_CLICK_TOLERANCE = 20; // pixels tolerance for clicking ring UI
 
+const CONFIG = {
+    ENEMY_HEALTH_SCALE_FACTOR: 1.25,
+    BULLET_BASE_SPEED: 5,
+    BASE_RADIUS: 30,
+    INITIAL_FIRE_RATE: 200,
+    MACROSS_BASE_COOLDOWN: 30,
+    MACROSS_COOLDOWN_REDUCTION_PER_LEVEL: 3,
+    PARTICLE_BASE_SPEED: 1,
+    PARTICLE_BASE_LIFE: 1,
+    PARTICLE_BASE_SIZE: 2,
+    WAVE_BASE_DURATION: 60, // seconds
+    WAVE_DURATION_INCREMENT: 10, // seconds per wave
+    BOSS_HEALTH_BASE: 20,
+    BOSS_HEALTH_WAVE_MULTIPLIER: 10,
+    MAX_ENEMY_COUNT: 30, // Increased from 20
+    BASE_INITIAL_MOVE_SPEED: 2,
+    BASE_MOVE_SPEED_INCREMENT: 0.5,
+    MISSILE_FIRE_INTERVAL: 2000, // ms
+    LASER_FIRE_INTERVAL: 500, // ms
+    STUN_EFFECT_DURATION: 2000, // ms
+    AUTO_SAVE_INTERVAL: 60000, // ms (1 minute)
+    DRAG_THRESHOLD: 5, // pixels to initiate drag vs click
+    CANVAS_CLICK_TOLERANCE: 20 // pixels tolerance for clicking ring UI
+};
+const {
+  ENEMY_HEALTH_SCALE_FACTOR,
+  BULLET_BASE_SPEED,
+  BASE_RADIUS,
+  INITIAL_FIRE_RATE,
+  MACROSS_BASE_COOLDOWN,
+  MACROSS_COOLDOWN_REDUCTION_PER_LEVEL,
+  PARTICLE_BASE_SPEED,
+  PARTICLE_BASE_LIFE,
+  PARTICLE_BASE_SIZE,
+  WAVE_BASE_DURATION,
+  WAVE_DURATION_INCREMENT,
+  BOSS_HEALTH_BASE,
+  BOSS_HEALTH_WAVE_MULTIPLIER,
+  MAX_ENEMY_COUNT,
+  BASE_INITIAL_MOVE_SPEED,
+  BASE_MOVE_SPEED_INCREMENT,
+  MISSILE_FIRE_INTERVAL,
+  LASER_FIRE_INTERVAL,
+  STUN_EFFECT_DURATION,
+  AUTO_SAVE_INTERVAL,
+  DRAG_THRESHOLD,
+  CANVAS_CLICK_TOLERANCE
+} = CONFIG;
 // Upgrade Category Indices
 const UPGRADE_CATEGORY_CANNON = 0;
 const UPGRADE_CATEGORY_DEFENSE = 1;
@@ -689,10 +717,11 @@ function createExplosion(x, y, color, count = 15, enemyRadius = 10) {
 }
 
 function updateParticles(dt) {
+    const dtScaled = dt * 60;
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.x += p.vx * dt * 60; // Scale velocity by dt
-        p.y += p.vy * dt * 60;
+        p.x += p.vx * dtScaled;
+        p.y += p.vy * dtScaled;
         p.life -= dt;
         p.alpha = Math.max(0, p.life / p.maxLife); // Ensure alpha doesn't go negative
 
@@ -703,6 +732,7 @@ function updateParticles(dt) {
 }
 
 function drawParticles() {
+    if (particles.length === 0) return;
     // Batch drawing by color for potential minor optimization
     const particlesByColor = {};
     particles.forEach(p => {
@@ -1186,6 +1216,7 @@ function updateGame(dt) {
 function handleBaseMovement(dt) {
     if (!baseCanMove) return;
 
+    const dtScaled = dt * 60;
     const prevBaseX = base.x;
     const prevBaseY = base.y;
 
@@ -1201,7 +1232,7 @@ function handleBaseMovement(dt) {
         const dist = Math.hypot(dx, dy);
 
         if (dist > 1) {
-            const moveAmount = centerReturnSpeed * easeFactor * dt * 60; // dt compensation
+            const moveAmount = centerReturnSpeed * easeFactor * dtScaled;
             base.x += (dx / dist) * moveAmount;
             base.y += (dy / dist) * moveAmount;
             base.x = Math.max(base.radius, Math.min(canvasWidth - base.radius, base.x));
@@ -1211,7 +1242,7 @@ function handleBaseMovement(dt) {
         }
     } else if (!isDragging) {
         // Keyboard movement
-        const moveSpeed = base.currentMoveSpeed * dt * 60; // dt compensation
+        const moveSpeed = base.currentMoveSpeed * dtScaled;
         let dx = 0, dy = 0;
         if (keysPressed['ArrowUp'] || keysPressed['w'] || keysPressed['W']) dy -= 1;
         if (keysPressed['ArrowDown'] || keysPressed['s'] || keysPressed['S']) dy += 1;
@@ -1233,6 +1264,8 @@ function handleBaseMovement(dt) {
 function updateEnemies(dt) {
     const enemies = enemyPool.getActiveObjects();
     let baseMovedDuringUpdate = false;
+
+    const dtScaled = dt * 60;
 
     // Check if base moved significantly due to drag/return (handled in event handlers/base movement)
     // We need to shift enemies relative to this movement
@@ -1265,8 +1298,8 @@ function updateEnemies(dt) {
         // Move enemy towards base
         if (distToBase > 0) { // Avoid division by zero if somehow enemy is exactly at base center
              const angle = Math.atan2(base.y - enemy.y, base.x - enemy.x);
-             enemy.x += Math.cos(angle) * enemy.speed * dt * 60; // dt compensation
-             enemy.y += Math.sin(angle) * enemy.speed * dt * 60;
+             enemy.x += Math.cos(angle) * enemy.speed * dtScaled;
+             enemy.y += Math.sin(angle) * enemy.speed * dtScaled;
         }
 
 
@@ -1300,6 +1333,7 @@ function spawnNewEnemies(dt) {
     const currentTime = Date.now();
     const elapsedTime = (currentTime - gameState.waveStartTime) / 1000 * gameSpeedMultiplier; // Use game speed
     const enemies = enemyPool.getActiveObjects();
+    const dtScaled = dt * 60;
 
     // Boss spawning
     if (!gameState.isBossWave && elapsedTime >= gameState.waveDuration) {
@@ -1308,7 +1342,7 @@ function spawnNewEnemies(dt) {
         showToast('Boss Wave!', 3000);
     }
     // Regular enemy spawning (if not boss wave and below limit)
-    else if (!gameState.isBossWave && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dt * 60) { // Slightly increased spawn rate
+    else if (!gameState.isBossWave && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) { // Slightly increased spawn rate
         spawnEnemy(false);
     }
 }
@@ -1427,9 +1461,10 @@ function updateProjectiles(dt, baseMoved) {
     const bullets = bulletPool.getActiveObjects();
     const missiles = missilePool.getActiveObjects();
     const enemies = enemyPool.getActiveObjects(); // Need enemy list for missile targeting
+    const dtScaled = dt * 60;
 
     // --- Update Bullets ---
-    const bulletMoveDist = BULLET_BASE_SPEED * dt * 60; // dt compensation
+    const bulletMoveDist = BULLET_BASE_SPEED * dtScaled;
     for (let i = bullets.length - 1; i >= 0; i--) {
         const bullet = bullets[i];
         bullet.x += bullet.dx * bulletMoveDist;
@@ -1495,7 +1530,7 @@ function updateProjectiles(dt, baseMoved) {
         // else: continue straight
 
         // 3. Movement
-        const missileMoveDist = missile.speed * base.missileSpeedMultiplier * dt * 60; // dt compensation
+        const missileMoveDist = missile.speed * base.missileSpeedMultiplier * dtScaled;
         missile.x += missile.dx * missileMoveDist;
         missile.y += missile.dy * missileMoveDist;
 
