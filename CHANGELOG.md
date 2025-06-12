@@ -5,6 +5,7 @@
 - Updated version references
 - Improved notch visibility to ensure blocks are noticeable
 
+
 ## v2.30
 - Major UI update: Reduced HUD, Game Over screen, and title sizes
 - Removed instruction list from Start screen
