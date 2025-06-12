@@ -143,7 +143,6 @@ input:checked+.slider:before{transform:translateX(26px)}
     <div>Click Base: Upgrades</div>
     <div>Click Ring UI: Quick Upgrade</div>
     <div>Space/Auto: Fire</div>
-    <div>U: Upgrades Menu</div>
     <div>M: Macross Missiles</div>
     <div>F: Toggle Auto-fire</div>
     <div>I: Toggle Ring Info</div>
@@ -1830,7 +1829,7 @@ function drawGame() {
     if (gameState.activeUpgradeTab !== null && gameState.activeUpgradeTab < upgradeTree.length) {
         const activeCategory = upgradeTree[gameState.activeUpgradeTab];
         const upgradeButtonWidth = 220; // New width for upgrade buttons
-        const upgradeButtonHeight = 70; // New height for upgrade buttons
+        const upgradeButtonHeight = 90; // Increased height for extra controls
         const upgradeButtonSpacing = 10;
         const upgradesAreaX = tabsAreaX + tabDisplayWidth + tabSpacing; // Position to the right of tabs
         const upgradesAreaY = tabsAreaY; // Align with the top of the tabs area
@@ -1873,6 +1872,34 @@ function drawGame() {
                 textY += 15; // Line height
             });
 
+            // Extra UI for Focus Radius slider
+            if (gameState.activeUpgradeTab === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS) {
+                const selectedVal = Math.round(base.focusRadiusSetting * 100);
+                const unlocked = currentLevel * 10;
+                ctx.fillText(`Threshold: ${selectedVal}%`, buttonX + 5, textY);
+                const notchY = textY + 12;
+                const notchW = 12;
+                const notchH = 8;
+                const notchSpacing = 2;
+                let notchX = buttonX + 5;
+                for (let p = 10; p <= 100; p += 10) {
+                    ctx.fillStyle = p <= unlocked ? (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)') : (currentTheme.canvasColors.buttonDisabledBg || '#333');
+                    ctx.fillRect(notchX, notchY, notchW, notchH);
+                    ctx.strokeStyle = p === selectedVal ? 'lime' : '#555';
+                    ctx.strokeRect(notchX, notchY, notchW, notchH);
+                    ringClickRegions.push({
+                        type: 'focus_notch',
+                        x: notchX,
+                        y: notchY,
+                        width: notchW,
+                        height: notchH,
+                        categoryIndex: gameState.activeUpgradeTab,
+                        upgradeIndex: upgradeIndex,
+                        value: p
+                    });
+                    notchX += notchW + notchSpacing;
+                }
+            }
 
             // Store button clickable region
             ringClickRegions.push({
@@ -2725,9 +2752,6 @@ window.addEventListener('keydown', e => {
     if (isGameRunning || getElement('upgradeMenu').style.display === 'flex') {
         switch (e.key.toLowerCase()) {
             case 'm': if (isGameRunning) fireMacrossMissiles(); break; // Only fire if game running
-            case 'u':
-                toggleUpgradeMenu();
-                break;
             case 'h': toggleHotkeys(); break; // Toggle hotkeys anytime
             case 'f':
                 if (isGameRunning) {
@@ -2837,6 +2861,14 @@ function handleCanvasClick(clientX, clientY) {
                 // Clicked on an upgrade category tab
                 gameState.activeUpgradeTab = region.categoryIndex;
                 // No need to redraw immediately, gameLoop will handle it
+                return; // Handle click and exit
+            } else if (region.type === 'focus_notch') {
+                const unlocked = upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_FOCUS_RADIUS].level * 10;
+                if (region.value <= unlocked) {
+                    base.focusRadiusSetting = region.value / 100;
+                    drawGame();
+                    saveGame();
+                }
                 return; // Handle click and exit
             } else if (region.type === 'upgrade_button') {
                 // Clicked on an upgrade button within the active tab
