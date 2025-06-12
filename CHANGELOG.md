@@ -3,6 +3,8 @@
 ## v2.31
 - Added clickable block-based Focus Radius selector with save persistence
 - Updated version references
+- Improved notch visibility to ensure blocks are noticeable
+
 
 ## v2.30
 - Major UI update: Reduced HUD, Game Over screen, and title sizes
