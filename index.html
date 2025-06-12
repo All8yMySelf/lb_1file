@@ -408,6 +408,8 @@ const THEMES = [
 </script>
 <script>
 (function(){ // IIFE to encapsulate code
+let currentThemeIndex = 0;
+let currentTheme = THEMES[currentThemeIndex];
 
 // --- Configuration Constants ---
 const ENEMY_HEALTH_SCALE_FACTOR = 1.25;
