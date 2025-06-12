@@ -3,15 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- V2.32: Added persistent Top 10 High Scores -->
-<!-- V2.32: Minor optimizations -->
+<!-- V2.33: Expandable upgrade categories and UI tweaks -->
 <!-- V2.18: Refactored theme management to use themes.js, reinstated theme cycling -->
 <!-- V2.17.1: Removed theme cycling logic and hid theme button -->
 <!-- V2.17: Removed themes 2-6, updated version number -->
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<title>Orbital Defence Elite v2.32 - Optimised</title>
+<title>Orbital Defence Elite v2.33 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root {
@@ -68,9 +67,9 @@ button{padding:10px 20px;font-size:24px;line-height:1;margin-top:22px;background
 button:hover{background: var(--button-hover-bg); transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2)}
 button:active{transform:translateY(1px)}
 button:disabled{background: var(--button-disabled-bg); color: var(--button-disabled-text); cursor:not-allowed;transform:none;box-shadow:none}
-.upgrade-category h3{text-align:left;margin-bottom:2px;color: var(--upgrade-title-color)}
+.upgrade-category h3{text-align:left;margin-bottom:2px;color: var(--upgrade-title-color);cursor:pointer}
 .upgrade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.upgrade-button-container button{font-size:18px;white-space:normal;word-wrap:break-word}
+.upgrade-button-container button{font-size:16px;white-space:normal;word-wrap:break-word}
 #focus-notch-container{display:flex;flex-direction:column;align-items:center;margin-top:5px}
 #focus-notch-row{display:flex;gap:2px;margin-top:4px}
 .focus-notch{width:10px;height:16px;border:1px solid var(--button-border);background:#111;cursor:pointer;box-shadow:0 0 2px var(--button-border) inset;border-radius:0}
@@ -119,7 +118,7 @@ input:checked+.slider:before{transform:translateX(26px)}
     <span id="healthDisplay"></span> <!-- Renamed from #h -->
 </div>
 <div id="startScreen"> <!-- Renamed from #s -->
-    <h1>Orbital Defence Elite v2.32</h1>
+    <h1>Orbital Defence Elite v2.33</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
     <button id="highScoreButton">High Scores</button>
@@ -1028,7 +1027,7 @@ function loadGame() {
     // Close loadGame function
 }
 
-const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.32';
+const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.33';
 
 function loadHighScores() {
     try {
@@ -1194,6 +1193,7 @@ function initializeGame(shouldTryLoad = true) {
     upgradeTree = [
         { // Category 0: Cannon
             category: "50mm Cannon",
+            expanded: false,
             upgrades: [
                 { name: 'Fire Rate', cost: 100, level: 0, maxLevel: 10,
                   f: level => Math.max(50, INITIAL_FIRE_RATE - 15 * level),
@@ -1218,6 +1218,7 @@ function initializeGame(shouldTryLoad = true) {
         },
         { // Category 1: Defense
             category: "Defense Systems",
+            expanded: false,
             upgrades: [
                 { name: 'Health', cost: 200, level: 0, maxLevel: 10,
                   f: level => 100 + 50 * level,
@@ -1229,6 +1230,7 @@ function initializeGame(shouldTryLoad = true) {
         },
         { // Category 2: Laser
             category: "Laser System",
+            expanded: false,
             upgrades: [
                 { name: 'Laser Damage', cost: 2000, level: 0, maxLevel: 6,
                   f: level => level === 0 ? 0 : 15 * Math.pow(2, level - 1), // Damage doubles
@@ -1241,6 +1243,7 @@ function initializeGame(shouldTryLoad = true) {
         },
         { // Category 3: Missiles
             category: "Missile Systems",
+            expanded: false,
             upgrades: [
                 { name: 'Acquire/Double Missiles', cost: 2000, level: 0, maxLevel: 5,
                   f: level => level === 0 ? 0 : Math.pow(2, level-1), // Missiles: 0 -> 1 -> 2 -> 4 -> 8 -> 16
@@ -1278,6 +1281,7 @@ function initializeGame(shouldTryLoad = true) {
         },
         { // Category 4: Special
             category: "Special Weapons",
+            expanded: false,
             upgrades: [
                 { name: 'Stun Field', cost: 2000, level: 0, maxLevel: 9, // Max 90% slow
                   f: level => level * 0.1, // Returns the slow factor (0 to 0.9)
@@ -1286,6 +1290,7 @@ function initializeGame(shouldTryLoad = true) {
         },
         { // Category 5: Debug
             category: "Debug",
+            expanded: false,
             upgrades: [
                 {
                     name: 'Add 100,000 Credits',
@@ -2659,12 +2664,14 @@ function renderUpgradeMenu() {
     upgradeTree.forEach((category, i) => {
         upgradeHTML += `
         <div class="upgrade-category">
-            <h3>${category.category}</h3>
-            <div class="upgrade-grid">
+            <h3 onclick="toggleUpgradeCategory(${i})">${category.category}</h3>
+            <div id="upgrade-grid-${i}" class="upgrade-grid" style="display:${category.expanded ? 'grid' : 'none'}">
         `;
-        category.upgrades.forEach((u, j) => {
-             upgradeHTML += createUpgradeButtonHTML(u, i, j);
-        });
+        if (category.expanded) {
+            category.upgrades.forEach((u, j) => {
+                upgradeHTML += createUpgradeButtonHTML(u, i, j);
+            });
+        }
         upgradeHTML += `</div></div>`;
     });
 
@@ -2846,6 +2853,12 @@ function toggleRingInfoDisplay() {
 
 function toggleMissileRadiusVisibility() {
      showMissileRadius = getElement('toggleMissileRadius').checked;
+}
+
+function toggleUpgradeCategory(index) {
+    upgradeTree[index].expanded = !upgradeTree[index].expanded;
+    renderUpgradeMenu();
+    updateUpgradeAvailability();
 }
 function focusNotchClicked(e){
     const val=parseInt(e.target.getAttribute('data-val'));
