@@ -24,6 +24,14 @@ See [CHANGELOG.md](CHANGELOG.md) for the full history.
 - Updated version references and refined notch visuals.
 - Removed redundant code for a leaner single-file build.
 
+### v2.32
+- Added persistent Top 10 High Scores feature.
+- Minor optimizations.
+
+### v2.33
+- Upgrade categories can now be expanded or collapsed.
+- Reduced upgrade button font size so long labels fit.
+
 ### v2.30
 - Major UI overhaul with a more compact HUD and screens.
 - Introduced a Debug panel for quickly awarding credits.
