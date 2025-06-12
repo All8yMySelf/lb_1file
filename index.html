@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- V2.20: Added two new black and white themes -->
-<!-- V2.20: Performance optimizations and refactoring -->
+<!-- V2.30: Added debug panel and improved projectile logic -->
+<!-- V2.30: Performance optimizations and refactoring -->
 <!-- V2.18: Refactored theme management to use themes.js, reinstated theme cycling -->
 <!-- V2.17.1: Removed theme cycling logic and hid theme button -->
 <!-- V2.17: Removed themes 2-6, updated version number -->
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<title>Orbital Defence Elite v2.20 - Optimised</title>
+<title>Orbital Defence Elite v2.30 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root {
@@ -55,14 +55,14 @@ body{margin:0;overflow:hidden;background: var(--body-bg); color: var(--text-colo
 #crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;background-image: var(--crt-overlay-bg); background-size:100% 2px;background-blend-mode: var(--crt-overlay-blend)}
 #gameCanvas{background: var(--canvas-bg); position:absolute;top:0;left:0} /* Renamed from #g */
 .bg{position:absolute;top:0;left:0;width:100%;height:100%;background: var(--bg-gradient); z-index:-1}
-#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:28px;padding:0;z-index:10;line-height:2;min-height:0; color: var(--hud-color)} /* Renamed from #u */
-#startScreen h1,#gameOverScreen h1{font-size:4rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; color: var(--title-color)} /* Renamed from #s, #o */
+#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:19px;padding:0;z-index:10;line-height:2;min-height:0; color: var(--hud-color)} /* Renamed from #u */
+#startScreen h1,#gameOverScreen h1{font-size:2rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; color: var(--title-color)} /* Renamed from #s, #o */
 #gameOverScreen h1{font-size:3.5rem;margin-bottom:1rem} /* Renamed from #o */
 #hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #hud #creditsDisplay{text-align:left} /* Renamed from #c */
 #hud #healthDisplay{text-align:right} /* Renamed from #h */
 #startScreen,#gameOverScreen,#upgradeMenu{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.8);text-align:center;z-index:100} /* Renamed from #s, #o, #m */
-#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color: var(--final-stats-color)} /* Renamed from #f */
+#gameOverScreen #finalStats{font-size:1.33rem;margin-bottom:1.5rem;color: var(--final-stats-color)} /* Renamed from #f */
 #upgradeMenu{position:absolute;top:0;left:0;bottom:0;width: 450px; display:flex;flex-direction:column;justify-content:flex-start;align-items: flex-start; padding-top:20px;overflow-y:auto; background:rgba(0,0,0,0.8);z-index:100} /* Modified to position on the left */
 button{padding:10px 20px;font-size:24px;line-height:1;margin-top:22px;background: var(--button-bg); color: var(--button-text); border:2px solid var(--button-border); cursor:pointer;transition:all 0.3s ease}
 button:hover{background: var(--button-hover-bg); transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2)}
@@ -70,6 +70,7 @@ button:active{transform:translateY(1px)}
 button:disabled{background: var(--button-disabled-bg); color: var(--button-disabled-text); cursor:not-allowed;transform:none;box-shadow:none}
 .upgrade-category h3{text-align:left;margin-bottom:2px;color: var(--upgrade-title-color)}
 .upgrade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.upgrade-button-container button{font-size:18px;white-space:normal;word-wrap:break-word}
 #controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10}
 #toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
 #toggleInfoButton.active{background-color: var(--toggle-active-bg); color: var(--toggle-active-text)}
@@ -103,19 +104,7 @@ input:checked+.slider:before{transform:translateX(26px)}
     <span id="healthDisplay"></span> <!-- Renamed from #h -->
 </div>
 <div id="startScreen"> <!-- Renamed from #s -->
-        <h1>Orbital Defence Elite v2.20</h1>
-    <div class="stats">
-        <div>WASD/Arrow Keys: Move Base</div>
-        <div>Click & Drag: Move Base</div>
-        <div>Click Base: Open Upgrades</div>
-        <div>Click Ring UI: Quick Upgrade</div>
-        <div>Space: Fire</div>
-        <div>F: Toggle Auto-fire</div>
-        <div>M: Macross Missiles</div>
-        <div>U: Open/Close Upgrades</div>
-        <div>I: Toggle Ring Info</div>
-        <div>H: Toggle Hotkeys</div>
-    </div>
+    <h1>Orbital Defence Elite v2.30</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
 </div>
@@ -134,7 +123,6 @@ input:checked+.slider:before{transform:translateX(26px)}
         <div id="fire-rate-stats">Fire Rate: 5/s</div>
         <div id="range-stats">Range: 200</div>
     </div>
-    <button id="cheatAddCredits">Add 100000 Credits</button> <!-- Renamed from creditBoost -->
 </div>
 <div id="controls">
     <button id="gameSpeedButton">Speed: 1x</button> <!-- Renamed from #B -->
@@ -158,8 +146,8 @@ input:checked+.slider:before{transform:translateX(26px)}
 
 <script>
 // Orbital Defence Elite - Theme Definitions
-// V2.20.1: Modified black and white themes to have white backgrounds
-// V2.20: Added two new black and white themes
+// V2.30.1: Modified black and white themes to have white backgrounds
+// V2.30: Added two new black and white themes
 const THEMES = [
     { // Theme 1: Orbital Elite (Default)
         name: "Orbital Elite",
@@ -511,6 +499,7 @@ canvas.height = canvasHeight;
 
 // --- Game State Variables ---
 let showRingInfo = true;
+let showMissileRadius = false;
 let baseCanMove = true;
 let keysPressed = {};
 let particles = [];
@@ -614,6 +603,7 @@ function resetBullet(bullet, config) {
     bullet.y = config.y || 0;
     bullet.dx = config.dx || 0;
     bullet.dy = config.dy || 0;
+    bullet.color = config.color || currentTheme.canvasColors.bullet;
 }
 
 function resetMissile(missile, config) {
@@ -624,6 +614,7 @@ function resetMissile(missile, config) {
     missile.target = config.t || null; // Set target or null
     missile.speed = config.speed || 1;
     missile.turnSpeed = config.turnSpeed || 0.05;
+    missile.homingRadius = config.homingRadius || base.missileHomingRadius;
     missile.trail = config.trail || []; // Set initial trail or empty
     missile.isMacross = config.macross || false;
     missile.homingActive = config.homingActive || false;
@@ -633,6 +624,7 @@ function resetMissile(missile, config) {
     missile.trail = Array(40).fill({ x: missile.x, y: missile.y }); // Reset trail properly
     missile.isMacross = false;
     missile.homingActive = false;
+    missile.homingRadius = base.missileHomingRadius;
 }
 
 
@@ -688,6 +680,19 @@ function createParticle(x, y, color, speed = PARTICLE_BASE_SPEED, life = PARTICL
         life: life,
         maxLife: life
     });
+}
+
+function shadeColor(color, percent) {
+    if (color.startsWith('#')) color = color.slice(1);
+    if (color.toLowerCase() === 'white') color = 'ffffff';
+    let num = parseInt(color, 16);
+    let r = (num >> 16) + percent;
+    let g = ((num >> 8) & 0x00ff) + percent;
+    let b = (num & 0x0000ff) + percent;
+    r = Math.min(255, Math.max(0, r));
+    g = Math.min(255, Math.max(0, g));
+    b = Math.min(255, Math.max(0, b));
+    return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
 }
 
 function createExplosion(x, y, color, count = 15, enemyRadius = 10) {
@@ -930,8 +935,9 @@ function loadGame() {
         base.macrossMissileDamage = savedBase.macrossMissileDamage;
         base.stunLevel = savedBase.stunLevel;
         base.stunRadius = savedBase.stunRadius;
-        base.missileSpeedMultiplier = savedBase.missileSpeedMultiplier;
-        base.missileHomingRadius = savedBase.missileHomingRadius;
+       base.missileSpeedMultiplier = savedBase.missileSpeedMultiplier;
+        base.missileTurnSpeed = savedBase.missileTurnSpeed || 0.05;
+       base.missileHomingRadius = savedBase.missileHomingRadius;
         base.missileOrbit = false; // Not implemented?
         base.color = savedBase.color;
         base.currentMoveSpeed = savedBase.currentMoveSpeed; // Restore move speed
@@ -1024,6 +1030,7 @@ function initializeGame(shouldTryLoad = true) {
         stunLevel: 0, // Needs upgrade
         stunRadius: 0,
         missileSpeedMultiplier: 1,
+        missileTurnSpeed: 0.05,
         missileHomingRadius: 0,
         missileOrbit: false, // Not implemented?
         color: 'rgb(94,79,162)',
@@ -1368,21 +1375,30 @@ function handlePlayerFiring(dt) {
         });
 
         if (nearestEnemy && (gameState.autoFire || keysPressed[' '])) {
-            const gunAngle = Math.atan2(nearestEnemy.y - base.y, nearestEnemy.x - base.x);
-            const spread = base.gunBarrelCount > 1 ? Math.PI / 12 : 0; // Reduced spread slightly
+            let targets = enemies
+                .filter(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange)
+                .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
+            const bigThreat = targets.find(e => e.radius >= 20 && Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * 0.5);
+            if (bigThreat) {
+                targets = Array(base.gunBarrelCount).fill(bigThreat);
+            } else {
+                if (targets.length < base.gunBarrelCount) {
+                    while (targets.length < base.gunBarrelCount) targets.push(nearestEnemy);
+                } else {
+                    targets = targets.slice(0, base.gunBarrelCount);
+                }
+            }
 
             for (let i = 0; i < base.gunBarrelCount; i++) {
-                let angle = gunAngle;
-                if (base.gunBarrelCount > 1) {
-                    angle += spread * (i / (base.gunBarrelCount - 1) - 0.5);
-                }
-                angle += (Math.random() - 0.5) * 0.05; // Smaller random deviation
-
+                const t = targets[i] || nearestEnemy;
+                const angle = Math.atan2(t.y - base.y, t.x - base.x);
+                const shade = Math.floor((i - (base.gunBarrelCount - 1) / 2) * 20);
                 bulletPool.get({
                     x: base.x,
                     y: base.y,
                     dx: Math.cos(angle),
-                    dy: Math.sin(angle)
+                    dy: Math.sin(angle),
+                    color: shadeColor(currentTheme.canvasColors.bullet, shade)
                 });
             }
             gameState.lastBulletFireTime = currentTime;
@@ -1406,11 +1422,11 @@ function handlePlayerFiring(dt) {
                      y: base.y,
                      dx: Math.cos(launchAngle),
                      dy: Math.sin(launchAngle),
-                     t: target, // Initial target
+                     t: target,
                      speed: 2 + Math.random() * 2,
-                     turnSpeed: 0.08, // Slightly better turning for Macross
-                     macross: true,
-                     homingActive: true // Start homing immediately
+                     turnSpeed: base.missileTurnSpeed,
+                     homingRadius: base.missileHomingRadius,
+                     homingActive: true
                  });
              });
             createExplosion(base.x, base.y, 'orange', 5 * targets.length, 8); // Bigger launch effect for more missiles
@@ -1479,7 +1495,7 @@ function updateProjectiles(dt, baseMoved) {
 
     // --- Update Missiles ---
     const missileBaseSpeed = 2; // Base speed units per update cycle (before multipliers)
-    const missileTurnSpeed = 0.05; // Radians per update cycle (approx)
+    const missileTurnSpeed = base.missileTurnSpeed;
 
     for (let i = missiles.length - 1; i >= 0; i--) {
         const missile = missiles[i];
@@ -1494,7 +1510,7 @@ function updateProjectiles(dt, baseMoved) {
 
         if (!targetEnemy && missile.homingActive) {
             // Find the closest enemy within homing range
-            let closestDistSq = base.missileHomingRadius * base.missileHomingRadius;
+            let closestDistSq = (missile.homingRadius || base.missileHomingRadius) ** 2;
             let potentialTarget = null;
             enemies.forEach(enemy => {
                 const dx = enemy.x - missile.x;
@@ -1507,6 +1523,9 @@ function updateProjectiles(dt, baseMoved) {
             });
             targetEnemy = potentialTarget;
             missile.target = targetEnemy; // Update target for next frame
+            if (targetEnemy) {
+                missile.speed *= 1 + upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_HOMING].level * 0.05;
+            }
         }
 
         // 2. Steering Logic
@@ -1960,8 +1979,8 @@ function drawGame() {
 
 
     // --- Draw Bullets ---
-    ctx.fillStyle = currentTheme.canvasColors.bullet;
     bulletPool.getActiveObjects().forEach(bullet => {
+        ctx.fillStyle = bullet.color || currentTheme.canvasColors.bullet;
         ctx.beginPath();
         ctx.arc(bullet.x, bullet.y, 3, 0, Math.PI * 2);
         ctx.fill();
@@ -1994,6 +2013,13 @@ function drawGame() {
         ctx.closePath();
         ctx.fill();
         ctx.restore();
+
+        if (showMissileRadius) {
+            ctx.strokeStyle = 'rgba(0,255,0,0.3)';
+            ctx.beginPath();
+            ctx.arc(missile.x, missile.y, missile.homingRadius || base.missileHomingRadius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
     });
 
     // --- Draw Laser ---
@@ -2376,13 +2402,19 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                          const missileDmgUpgrade = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_DAMAGE];
                          base.missileDamage = missileDmgUpgrade.f(missileDmgUpgrade.level);
 
-                         const missileHomingUpgrade = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_HOMING];
+                        const missileHomingUpgrade = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_HOMING];
                          base.missileHomingRadius = missileHomingUpgrade.f(missileHomingUpgrade.level);
+                         base.missileTurnSpeed = 0.05 + missileHomingUpgrade.level * 0.01;
+                         base.missileSpeedMultiplier = 1 + missileHomingUpgrade.level * 0.05;
                     }
                     break;
                 case UPGRADE_MISSILE_RANGE: base.missileTargetingRadius = upgrade.f(level); break;
                 case UPGRADE_MISSILE_DAMAGE: base.missileDamage = upgrade.f(level); break;
-                case UPGRADE_MISSILE_HOMING: base.missileHomingRadius = upgrade.f(level); break;
+                case UPGRADE_MISSILE_HOMING:
+                    base.missileHomingRadius = upgrade.f(level);
+                    base.missileTurnSpeed = 0.05 + level * 0.01;
+                    base.missileSpeedMultiplier = 1 + level * 0.05;
+                    break;
                 case UPGRADE_MISSILE_MACROSS:
                     base.macrossMissileCount = upgrade.f(level);
                     base.macrossMissileDamage = 20 + level * 5;
@@ -2426,7 +2458,28 @@ function renderUpgradeMenu() {
         upgradeHTML += `</div></div>`;
     });
 
+    // Add debug button styled like regular upgrades
+    upgradeHTML += `
+        <div class="upgrade-category">
+            <h3>Debug</h3>
+            <div class="upgrade-grid">
+                <div class="upgrade-button-container">
+                    <button id="cheatAddCredits">Add 100,000 Credits</button>
+                </div>
+            </div>
+        </div>`;
+
     getElement('upgradesContainer').innerHTML = upgradeHTML;
+
+    const cheatBtn = getElement('cheatAddCredits');
+    if (cheatBtn) {
+        cheatBtn.onclick = () => {
+            gameState.credits += 100000;
+            updateHUD();
+            updateUpgradeAvailability();
+            showToast('Cheated 100k credits!');
+        };
+    }
 
     // Add event listener for missile radius toggle if it exists
     const toggle = getElement('toggleMissileRadius');
@@ -2458,14 +2511,14 @@ function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
 
     // Add toggle switch specifically for Missile Homing upgrade display
     let toggleHTML = '';
-    // if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_HOMING) {
-    //     toggleHTML = `
-    //       <label class="switch">
-    //         <input type="checkbox" id="toggleMissileRadius" ${showMissileRadius ? 'checked' : ''}>
-    //         <span class="slider round"></span>
-    //       </label>
-    //       <span class="switch-label">Show Radius</span>`;
-    // }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_HOMING) {
+        toggleHTML = `
+          <label class="switch">
+            <input type="checkbox" id="toggleMissileRadius" ${showMissileRadius ? 'checked' : ''}>
+            <span class="slider round"></span>
+          </label>
+          <span class="switch-label">Show Radius</span>`;
+    }
 
 
     return `
@@ -2518,11 +2571,12 @@ function fireMacrossMissiles() {
                 y: base.y,
                 dx: Math.cos(angle),
                 dy: Math.sin(angle),
-                t: null, // Macross missiles start without a specific target
+                t: null,
                 speed: launchSpeed,
-                turnSpeed: 0.08, // Slightly better turning for Macross
+                turnSpeed: base.missileTurnSpeed,
+                homingRadius: base.missileHomingRadius,
                 macross: true,
-                homingActive: true // Start homing immediately
+                homingActive: true
             });
         }
 
@@ -2577,10 +2631,7 @@ function toggleRingInfoDisplay() {
 }
 
 function toggleMissileRadiusVisibility() {
-     // This function is now potentially obsolete as radius isn't toggled via switch
-     // Could be repurposed for toggling missile *homing* radius visibility if desired
-     console.warn("toggleMissileRadiusVisibility called - functionality removed/changed.");
-     // showMissileRadius = getElement('toggleMissileRadius').checked;
+     showMissileRadius = getElement('toggleMissileRadius').checked;
 }
 
 
@@ -2774,12 +2825,6 @@ getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
-getElement('cheatAddCredits').onclick = () => { // Cheat function
-    gameState.credits += 100000;
-    updateHUD();
-    updateUpgradeAvailability();
-    showToast('Cheated 100k credits!');
-};
 
 // Window Resize
 window.addEventListener('resize', () => {
