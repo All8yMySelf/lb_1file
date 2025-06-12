@@ -71,12 +71,13 @@ button:disabled{background: var(--button-disabled-bg); color: var(--button-disab
 .upgrade-category h3{text-align:left;margin-bottom:2px;color: var(--upgrade-title-color)}
 .upgrade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .upgrade-button-container button{font-size:18px;white-space:normal;word-wrap:break-word}
-.upgrade-slider-container{display:flex;align-items:center;margin-top:5px}
-.upgrade-slider-container input[type=range]{flex:1;margin-left:5px}
+#focus-notch-container{display:flex;flex-direction:column;align-items:center;margin-top:5px}
+#focus-notch-row{display:flex;gap:4px;margin-top:4px}
+.focus-notch{width:18px;height:14px;border:2px solid #444;background:#222;cursor:pointer;box-shadow:0 0 4px #000 inset}
+.focus-notch.active{background:var(--button-text);box-shadow:0 0 6px var(--button-border)}
+.focus-notch.selected{border-color:lime}
+.focus-notch-label{font-size:14px;color:var(--upgrade-title-color);margin-bottom:2px}
 #controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10}
-input[type=range].focus-slider{-webkit-appearance:none;height:8px;border-radius:5px;background:#555;outline:none;background-image:repeating-linear-gradient(to right,transparent 0,transparent calc(10% - 1px),#000 calc(10% - 1px),#000 10%)}
-input[type=range].focus-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--button-text);border:2px solid var(--button-border);cursor:pointer}
-input[type=range].focus-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--button-text);border:2px solid var(--button-border);cursor:pointer}
 #toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
 #toggleInfoButton.active{background-color: var(--toggle-active-bg); color: var(--toggle-active-text)}
 #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background: var(--toast-bg); color: var(--toast-text); padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity 0.3s ease;pointer-events:none}
@@ -2520,10 +2521,10 @@ function renderUpgradeMenu() {
         toggle.onchange = toggleMissileRadiusVisibility; // Make sure function exists
     }
 
-    const slider = getElement('focusRadiusSlider');
-    if (slider) {
-        slider.oninput = updateFocusRadiusFromSlider;
-        updateFocusRadiusSlider();
+    const notchRow = getElement('focus-notch-row');
+    if (notchRow) {
+        notchRow.querySelectorAll('.focus-notch').forEach(n => n.onclick = focusNotchClicked);
+        updateFocusNotches();
     }
 
     // Update visibility of Macross button based on upgrade level
@@ -2562,10 +2563,15 @@ function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
 
     if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS && level > 0) {
         const val = Math.round(base.focusRadiusSetting * 100);
+        let notches = '';
+        for(let p=10; p<=100; p+=10){
+            notches += `<div class="focus-notch" data-val="${p}" title="Focus Radius: ${p}%"></div>`;
+        }
         sliderHTML = `
-          <div class="upgrade-slider-container">
+          <div id="focus-notch-container">
+            <div class="focus-notch-label">Select Focus Sync Threshold</div>
+            <div id="focus-notch-row">${notches}</div>
             <span id="focusRadiusLabel">Focus Radius Threshold: ${val}%</span>
-            <input type="range" id="focusRadiusSlider" class="focus-slider" min="10" max="100" step="10" value="${val}">
           </div>`;
     }
 
@@ -2690,25 +2696,25 @@ function toggleRingInfoDisplay() {
 function toggleMissileRadiusVisibility() {
      showMissileRadius = getElement('toggleMissileRadius').checked;
 }
-function updateFocusRadiusFromSlider(){
-    const slider=getElement("focusRadiusSlider");
+function focusNotchClicked(e){
+    const val=parseInt(e.target.getAttribute('data-val'));
     const unlocked=upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_FOCUS_RADIUS].level*10;
-    let val=parseInt(slider.value);
-    if(val>unlocked) val=unlocked;
-    slider.value=val;
+    if(val>unlocked) return;
     base.focusRadiusSetting=val/100;
-    updateFocusRadiusSlider();
+    updateFocusNotches();
     drawGame();
 }
-function updateFocusRadiusSlider(){
-    const slider=getElement("focusRadiusSlider");
-    if(!slider) return;
+function updateFocusNotches(){
+    const row=getElement('focus-notch-row');
+    if(!row) return;
     const unlocked=upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_FOCUS_RADIUS].level*10;
-    let val=Math.round(base.focusRadiusSetting*100);
-    if(val>unlocked) val=unlocked;
-    slider.value=val;
-    slider.style.background=`linear-gradient(to right, #e6b54b 0%, #e6b54b ${unlocked}%, #555 ${unlocked}%, #555 100%), repeating-linear-gradient(to right, transparent 0, transparent calc(10% - 1px), #000 calc(10% - 1px), #000 10%)`;
-    const label=getElement("focusRadiusLabel");
+    const val=Math.round(base.focusRadiusSetting*100);
+    row.querySelectorAll('.focus-notch').forEach(n=>{
+        const v=parseInt(n.getAttribute('data-val'));
+        n.classList.toggle('active', v<=unlocked);
+        n.classList.toggle('selected', v===val);
+    });
+    const label=getElement('focusRadiusLabel');
     if(label) label.textContent=`Focus Radius Threshold: ${val}%`;
 }
 
