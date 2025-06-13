@@ -1,5 +1,11 @@
 # Orbital Defence Elite - Change Log
 
+## v2.34
+- Fire rate button layout and cost highlights for upgrades.
+- Cannon category renamed and menu uses flowchart layout.
+- Missile homing fixed with range checks; wave timer resumes after pause.
+
+
 ## v2.33
 - Upgrade categories are now collapsible.
 - Reduced font size of upgrade buttons to prevent text clipping.
