@@ -1210,7 +1210,7 @@ function initializeGame(shouldTryLoad = true) {
                   g: (level, cost, maxLvl) => {
                       const currentRate = 5 + level;
                       const nextRate = level < maxLvl ? currentRate + 1 : currentRate;
-                      return `${currentRate}/s ${level < maxLvl ? `> ${nextRate}/s` : '(MAX)'}`;
+                      return `${currentRate}s ${level < maxLvl ? `> ${nextRate}s` : '(MAX)'}`;
                   }},
                 { name: 'Damage', cost: 150, level: 0, maxLevel: 10,
                   f: level => 1 + level, // Damage = 1 + level
@@ -1255,7 +1255,8 @@ function initializeGame(shouldTryLoad = true) {
                   g: (level, cost, maxLvl) => {
                       const currentDmg = level === 0 ? 0 : 15 * Math.pow(2, level - 1);
                       const nextDmg = level < maxLvl ? 15 * Math.pow(2, level) : currentDmg;
-                      return `${currentDmg} dmg ${level === 0 ? '(Activate)' : (level < maxLvl ? `> ${nextDmg} dmg` : '(MAX)')}`;
+                      if (level === 0) return '(Activate)';
+                      return `${currentDmg} dmg ${level < maxLvl ? `> ${nextDmg} dmg` : '(MAX)'}`;
                    }}
             ]
         },
@@ -1266,9 +1267,10 @@ function initializeGame(shouldTryLoad = true) {
                 { name: 'Missiles', cost: 2000, level: 0, maxLevel: 6,
                   f: level => level,
                   g: (level, cost, maxLvl) => {
+                       if (level === 0) return '(Activate)';
                        const currentCount = level;
                        const nextCount = level < maxLvl ? level + 1 : currentCount;
-                       return `${currentCount} ${level === 0 ? '(Activate)' : (level < maxLvl ? `> ${nextCount}` : '(MAX)')} missiles`;
+                       return `${currentCount} ${level < maxLvl ? `> ${nextCount}` : '(MAX)'} missiles`;
                   }},
                 { name: 'Radius', cost: 1500, level: 0, maxLevel: 5, // Requires missile system active
                   f: level => base.cannonRange * (1 + 0.1 * level), // Scales with cannon range
@@ -1277,16 +1279,17 @@ function initializeGame(shouldTryLoad = true) {
                   f: level => 10 + 5 * level,
                   g: (level, cost, maxLvl) => `${10 + 5 * level} ${level < maxLvl ? `> ${15 + 5 * level}` : '(MAX)'}` },
                 { name: 'Homing', cost: 3000, level: 0, maxLevel: 5, // Requires missile system active
-                  f: level => Math.min(canvasWidth, canvasHeight) * (0.05 + 0.02 * level),
+                  f: level => level === 0 ? 0 : 20 * level,
                   g: (level, cost, maxLvl) => {
-                      const currentRange = Math.round(Math.min(canvasWidth, canvasHeight) * (0.05 + 0.02 * level));
-                      const nextRange = level < maxLvl ? Math.round(Math.min(canvasWidth, canvasHeight) * (0.05 + 0.02 * (level + 1))) : currentRange;
-                      return `Homing: ${currentRange}px ${level < maxLvl ? `> ${nextRange}px` : '(MAX)'}`;
+                      if (level === 0) return '(Activate)';
+                      const currentPct = level * 10;
+                      const nextPct = level < maxLvl ? (level + 1) * 10 : currentPct;
+                      return `${currentPct}% ${level < maxLvl ? `> ${nextPct}%` : '(MAX)'}`;
                   }},
-                { name: 'Macross', cost: 5000, level: 0, maxLevel: 5,
+                { name: 'Macros', cost: 5000, level: 0, maxLevel: 5,
                   f: level => level === 0 ? 0 : 50 * Math.pow(2, level - 1), // Num missiles 0 -> 50 -> 100 -> ...
                   g: (level, cost, maxLvl) => {
-                      if (level === 0) return "Activate Macross";
+                      if (level === 0) return '(Activate)';
                       const currentCount = 50 * Math.pow(2, level - 1);
                       const nextCount = level < maxLvl ? 50 * Math.pow(2, level) : currentCount;
                       const currentDmg = 20 + level * 5;
@@ -1311,12 +1314,12 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 {
-                    name: '+100k',
+                    name: '+100,000 credits',
                     cost: 0,
                     level: 0,
                     maxLevel: Infinity,
                     f: () => {},
-                    g: () => '+100k credits'
+                    g: () => ''
                 }
             ]
         }
@@ -2423,7 +2426,7 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
         gameState.credits += 100000;
         updateHUD();
-        showToast('Cheated 100k credits!');
+        showToast('Cheated 100,000 credits!');
         return;
     }
 
