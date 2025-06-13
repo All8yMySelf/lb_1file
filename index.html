@@ -134,7 +134,7 @@ input:checked+.slider:before{transform:translateX(26px)}
     <h1>New High Score!</h1>
     <div id="beatenScores" style="margin:10px 0"></div>
     <div id="initialInputContainer" style="display:flex;align-items:center;gap:5px">
-        <input id="highScoreInitials" maxlength="3" autofocus>
+        <input style="text-transform: uppercase" id="highScoreInitials" maxlength="3" autofocus>
         <span class="blinking-cursor">_</span>
     </div>
     <button id="saveHighScoreButton">Save</button>
@@ -1113,6 +1113,7 @@ function saveHighScoreFromModal() {
 }
 
 getElement('highScoreInitials').addEventListener('keyup', e => {
+getElement("highScoreInitials").addEventListener("input", e => { e.target.value = e.target.value.toUpperCase(); });
     if (e.key === 'Enter') {
         saveHighScoreFromModal();
     }
@@ -2323,9 +2324,22 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         const panelX = connectX + 10;
 
         const buttons = [];
+        let focusButton = null;
         let maxTextWidth = 0;
-        category.upgrades.forEach((u) => {
-            if (u.progressBar) {
+        category.upgrades.forEach((u, idx) => {
+            if (categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS) {
+                const lines = [u.name];
+                if (u.level < u.maxLevel) {
+                    lines.push(`Cost: $${u.cost}`);
+                } else {
+                    lines.push('MAX');
+                }
+                const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+                const barWidth = u.maxLevel * 10 + (u.maxLevel - 1) * 2;
+                maxTextWidth = Math.max(maxTextWidth, textWidth, barWidth);
+                const buttonHeight = lines.length * fontSize + padding * 3 + 10;
+                focusButton = {u, lines, height: buttonHeight, progressBar: true, idx};
+            } else if (u.progressBar) {
                 const lines = [u.name];
                 if (u.level < u.maxLevel) {
                     lines.push(`Cost: $${u.cost}`);
@@ -2336,7 +2350,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 const barWidth = u.maxLevel * 10 + (u.maxLevel - 1) * 2; // progress boxes
                 maxTextWidth = Math.max(maxTextWidth, textWidth, barWidth);
                 const buttonHeight = lines.length * fontSize + padding * 3 + 10; // extra space for bar
-                buttons.push({u, lines, height: buttonHeight, progressBar: true});
+                buttons.push({u, lines, height: buttonHeight, progressBar: true, idx});
             } else {
                 const stats = u.g(u.level, u.cost, u.maxLevel);
                 const lines = `${u.name}: ${stats}`.split('\n');
@@ -2348,19 +2362,23 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
                 maxTextWidth = Math.max(maxTextWidth, textWidth);
                 const buttonHeight = lines.length * fontSize + padding * 2;
-                buttons.push({u, lines, height: buttonHeight});
+                buttons.push({u, lines, height: buttonHeight, idx});
             }
         });
 
         const buttonWidth = Math.max(150, maxTextWidth + padding * 2);
         let currentY = y;
         const centers = [];
+        let gunButtonY = null;
 
         // Compute center positions
         let tempY = y;
         buttons.forEach(b => {
             const center = tempY + b.height / 2;
             centers.push(center);
+            if (categoryIndex === UPGRADE_CATEGORY_CANNON && b.idx === UPGRADE_CANNON_MULTIBARREL) {
+                gunButtonY = tempY;
+            }
             tempY += b.height + 10;
         });
 
@@ -2415,15 +2433,31 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 const barY = textY + padding / 2;
                 for (let i = 0; i < b.u.maxLevel; i++) {
                     const boxX = startX + i * (boxSize + boxSpacing);
+                    const value = (i + 1) * 10;
                     if (i < b.u.level) {
                         ctx.fillStyle = '#ffff00';
                     } else {
                         ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
                     }
-                    ctx.fillRect(boxX, barY, boxSize, boxSize);
-                    ctx.strokeStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(boxX, barY, boxSize, boxSize);
+                    ctx.beginPath();
+                    ctx.moveTo(boxX + boxSize / 2, barY);
+                    ctx.lineTo(boxX, barY + boxSize);
+                    ctx.lineTo(boxX + boxSize, barY + boxSize);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : (canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)'));
+                    ctx.lineWidth = (base.focusRadiusSetting * 100 === value) ? 2 : 1;
+                    ctx.stroke();
+                    if (categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS) {
+                        ringClickRegions.push({
+                            type: 'focus_notch',
+                            x: boxX,
+                            y: barY,
+                            width: boxSize,
+                            height: boxSize,
+                            value: value
+                        });
+                    }
                 }
                 textY += boxSize + padding;
             }
@@ -2435,11 +2469,81 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 width: buttonWidth,
                 height: b.height,
                 categoryIndex: categoryIndex,
-                upgradeIndex: idx
+                upgradeIndex: b.idx
             });
 
             currentY += b.height + 10;
         });
+
+        if (focusButton) {
+            const subX = panelX + buttonWidth + 40;
+            const btnY = gunButtonY !== null ? gunButtonY : currentY;
+            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+            ctx.fillRect(subX, btnY, buttonWidth, focusButton.height);
+            ctx.strokeStyle = color;
+            ctx.strokeRect(subX, btnY, buttonWidth, focusButton.height);
+
+            let canAfford = gameState.credits >= focusButton.u.cost && focusButton.u.level < focusButton.u.maxLevel &&
+                             upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_MULTIBARREL].level > 0;
+            if (canAfford) {
+                ctx.fillStyle = 'rgba(0,255,0,0.2)';
+                ctx.fillRect(subX, btnY, buttonWidth, focusButton.height);
+            }
+            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            let textY = btnY + padding;
+            focusButton.lines.forEach(line => {
+                ctx.fillText(line, subX + padding, textY);
+                textY += fontSize;
+            });
+
+            // progressBar drawing for focusButton
+            const boxSize = 10;
+            const boxSpacing = 2;
+            const startX = subX + padding;
+            const barY = textY + padding / 2;
+            for (let i = 0; i < focusButton.u.maxLevel; i++) {
+                const boxX = startX + i * (boxSize + boxSpacing);
+                const value = (i + 1) * 10;
+                if (i < focusButton.u.level) {
+                    ctx.fillStyle = '#ffff00';
+                } else {
+                    ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+                }
+                ctx.beginPath();
+                ctx.moveTo(boxX + boxSize / 2, barY);
+                ctx.lineTo(boxX, barY + boxSize);
+                ctx.lineTo(boxX + boxSize, barY + boxSize);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : (canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)'));
+                ctx.lineWidth = (base.focusRadiusSetting * 100 === value) ? 2 : 1;
+                ctx.stroke();
+                ringClickRegions.push({
+                    type: 'focus_notch',
+                    x: boxX,
+                    y: barY,
+                    width: boxSize,
+                    height: boxSize,
+                    value: value
+                });
+            }
+            textY += boxSize + padding;
+
+            ctx.beginPath();
+            ctx.moveTo(panelX + buttonWidth, btnY + focusButton.height / 2);
+            ctx.lineTo(subX - 10, btnY + focusButton.height / 2);
+            ctx.stroke();
+
+            ringClickRegions.push({
+                type: 'collapsible_upgrade_button',
+                x: subX,
+                y: btnY,
+                width: buttonWidth,
+                height: focusButton.height,
+                categoryIndex: categoryIndex,
+                upgradeIndex: focusButton.idx
+            });
+        }
     }
 
     ringClickRegions.push({
