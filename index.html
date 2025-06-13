@@ -456,7 +456,7 @@ const CONFIG = {
     BOSS_RADIUS_INCREMENT: 2,
     MAX_ENEMY_COUNT: 30, // Increased from 20
     BASE_INITIAL_MOVE_SPEED: 2,
-    BASE_MOVE_SPEED_INCREMENT: 0.5,
+    BASE_MOVE_SPEED_INCREMENT: 1,
     MISSILE_FIRE_INTERVAL: 2000, // ms
     LASER_FIRE_INTERVAL: 500, // ms
     STUN_EFFECT_DURATION: 2000, // ms
@@ -1205,25 +1205,29 @@ function initializeGame(shouldTryLoad = true) {
             category: "50mm Cannon",
             expanded: false,
             upgrades: [
-                { name: 'Fire Rate', cost: 100, level: 0, maxLevel: 10,
-                  f: level => Math.max(50, INITIAL_FIRE_RATE - 15 * level),
+                { name: 'Fire Rate', cost: 100, level: 0, maxLevel: 15,
+                  f: level => 1000 / (5 + level),
                   g: (level, cost, maxLvl) => {
-                      const currentRate = 1000 / (level > 0 ? Math.max(50, INITIAL_FIRE_RATE - 15 * level) : INITIAL_FIRE_RATE);
-                      const nextRate = level < maxLvl ? 1000 / Math.max(50, INITIAL_FIRE_RATE - 15 * (level + 1)) : currentRate;
-                      return `${currentRate.toFixed(1)}/s ${level < maxLvl ? `→ ${nextRate.toFixed(1)}/s` : '(MAX)'}`;
+                      const currentRate = 5 + level;
+                      const nextRate = level < maxLvl ? currentRate + 1 : currentRate;
+                      return `${currentRate}/s ${level < maxLvl ? `> ${nextRate}/s` : '(MAX)'}`;
                   }},
                 { name: 'Damage', cost: 150, level: 0, maxLevel: 10,
                   f: level => 1 + level, // Damage = 1 + level
-                  g: (level, cost, maxLvl) => `${1 + level} ${level < maxLvl ? `→ ${2 + level}` : '(MAX)'}` },
+                  g: (level, cost, maxLvl) => `${1 + level} ${level < maxLvl ? `> ${2 + level}` : '(MAX)'}` },
                 { name: 'Range', cost: 250, level: 0, maxLevel: 10,
                   f: level => initialRange * Math.pow(1.05, level),
-                  g: (level, cost, maxLvl) => `${Math.round(initialRange * Math.pow(1.05, level))} ${level < maxLvl ? `→ ${Math.round(initialRange * Math.pow(1.05, level + 1))}` : '(MAX)'}` },
-                { name: 'Multi-Barrel', cost: 12000, level: 0, maxLevel: 4, // Starts at 1 barrel implicitly
-                  f: level => level + 1, // Barrels = 1 + level
-                  g: (level, cost, maxLvl) => `${1 + level} ${level < maxLvl ? `→ ${2 + level}` : '(MAX)'} guns` },
+                  g: (level, cost, maxLvl) => `${Math.round(initialRange * Math.pow(1.05, level))} ${level < maxLvl ? `> ${Math.round(initialRange * Math.pow(1.05, level + 1))}` : '(MAX)'}` },
+                { name: 'Guns', cost: 12000, level: 0, maxLevel: 5, // Starts at 1 gun implicitly
+                  f: level => level + 1, // Guns = 1 + level
+                  g: (level, cost, maxLvl) => `${1 + level} ${level < maxLvl ? `> ${2 + level}` : '(MAX)'} guns` },
                 { name: 'Focus Radius', cost: 500, level: 0, maxLevel: 10,
-                  f: level => level * 0.1,
-                  g: (level, cost, maxLvl) => `${level * 10}% ${level < maxLvl ? `→ ${(level + 1) * 10}%` : '(MAX)'}` }
+                  f: level => level === 0 ? 0 : 0.2 + 0.1 * (level - 1),
+                  g: (level, cost, maxLvl) => {
+                      const current = level === 0 ? 0 : 20 + (level - 1) * 10;
+                      const next = level < maxLvl ? (level === 0 ? 20 : 20 + level * 10) : current;
+                      return `${current}% ${level < maxLvl ? `> ${next}%` : '(MAX)'}`;
+                  } }
             ]
         },
         { // Category 1: Defense
@@ -1232,22 +1236,26 @@ function initializeGame(shouldTryLoad = true) {
             upgrades: [
                 { name: 'Health', cost: 200, level: 0, maxLevel: 10,
                   f: level => 100 + 50 * level,
-                  g: (level, cost, maxLvl) => `${100 + 50 * level} ${level < maxLvl ? `→ ${150 + 50 * level}` : '(MAX)'}` },
-                { name: 'Base Movement', cost: 300, level: 0, maxLevel: 5,
+                  g: (level, cost, maxLvl) => `${100 + 50 * level} ${level < maxLvl ? `> ${150 + 50 * level}` : '(MAX)'}` },
+                { name: 'Movement', cost: 300, level: 0, maxLevel: 5,
                   f: level => BASE_INITIAL_MOVE_SPEED + level * BASE_MOVE_SPEED_INCREMENT,
-                  g: (level, cost, maxLvl) => `Speed: ${(BASE_INITIAL_MOVE_SPEED + level * BASE_MOVE_SPEED_INCREMENT).toFixed(1)} ${level < maxLvl ? `→ ${(BASE_INITIAL_MOVE_SPEED + (level+1) * BASE_MOVE_SPEED_INCREMENT).toFixed(1)}` : '(MAX)'}` }
+                  g: (level, cost, maxLvl) => {
+                      const current = BASE_INITIAL_MOVE_SPEED + level * BASE_MOVE_SPEED_INCREMENT;
+                      const next = BASE_INITIAL_MOVE_SPEED + (level + 1) * BASE_MOVE_SPEED_INCREMENT;
+                      return `${current} ${level < maxLvl ? `> ${next}` : '(MAX)'}`;
+                  } }
             ]
         },
         { // Category 2: Laser
             category: "Laser System",
             expanded: false,
             upgrades: [
-                { name: 'Laser Damage', cost: 2000, level: 0, maxLevel: 6,
+                { name: 'Damage', cost: 2000, level: 0, maxLevel: 6,
                   f: level => level === 0 ? 0 : 15 * Math.pow(2, level - 1), // Damage doubles
                   g: (level, cost, maxLvl) => {
                       const currentDmg = level === 0 ? 0 : 15 * Math.pow(2, level - 1);
                       const nextDmg = level < maxLvl ? 15 * Math.pow(2, level) : currentDmg;
-                      return `${currentDmg} dmg ${level === 0 ? '(Activate)' : (level < maxLvl ? `→ ${nextDmg} dmg` : '(MAX)')}`;
+                      return `${currentDmg} dmg ${level === 0 ? '(Activate)' : (level < maxLvl ? `> ${nextDmg} dmg` : '(MAX)')}`;
                    }}
             ]
         },
@@ -1255,27 +1263,27 @@ function initializeGame(shouldTryLoad = true) {
             category: "Missile Systems",
             expanded: false,
             upgrades: [
-                { name: 'Acquire/Double Missiles', cost: 2000, level: 0, maxLevel: 5,
-                  f: level => level === 0 ? 0 : Math.pow(2, level-1), // Missiles: 0 -> 1 -> 2 -> 4 -> 8 -> 16
+                { name: 'Missiles', cost: 2000, level: 0, maxLevel: 6,
+                  f: level => level,
                   g: (level, cost, maxLvl) => {
-                       const currentCount = level === 0 ? 0 : Math.pow(2, level-1);
-                       const nextCount = level < maxLvl ? Math.pow(2, level) : currentCount;
-                       return `${currentCount} ${level === 0 ? '(Activate)' : (level < maxLvl ? `→ ${nextCount}` : '(MAX)')} missiles`;
+                       const currentCount = level;
+                       const nextCount = level < maxLvl ? level + 1 : currentCount;
+                       return `${currentCount} ${level === 0 ? '(Activate)' : (level < maxLvl ? `> ${nextCount}` : '(MAX)')} missiles`;
                   }},
-                { name: 'Targeting Radius', cost: 1500, level: 0, maxLevel: 5, // Requires missile system active
+                { name: 'Radius', cost: 1500, level: 0, maxLevel: 5, // Requires missile system active
                   f: level => base.cannonRange * (1 + 0.1 * level), // Scales with cannon range
-                  g: (level, cost, maxLvl) => `${Math.round(base.cannonRange * (1 + 0.1 * level))} ${level < maxLvl ? `→ ${Math.round(base.cannonRange * (1 + 0.1 * (level + 1)))}` : '(MAX)'}` },
-                { name: 'Missile Damage', cost: 2500, level: 0, maxLevel: 5, // Requires missile system active
+                  g: (level, cost, maxLvl) => `${Math.round(base.cannonRange * (1 + 0.1 * level))} ${level < maxLvl ? `> ${Math.round(base.cannonRange * (1 + 0.1 * (level + 1)))}` : '(MAX)'}` },
+                { name: 'Damage', cost: 2500, level: 0, maxLevel: 5, // Requires missile system active
                   f: level => 10 + 5 * level,
-                  g: (level, cost, maxLvl) => `${10 + 5 * level} ${level < maxLvl ? `→ ${15 + 5 * level}` : '(MAX)'}` },
-                { name: 'Missile Homing', cost: 3000, level: 0, maxLevel: 5, // Requires missile system active
+                  g: (level, cost, maxLvl) => `${10 + 5 * level} ${level < maxLvl ? `> ${15 + 5 * level}` : '(MAX)'}` },
+                { name: 'Homing', cost: 3000, level: 0, maxLevel: 5, // Requires missile system active
                   f: level => Math.min(canvasWidth, canvasHeight) * (0.05 + 0.02 * level),
                   g: (level, cost, maxLvl) => {
                       const currentRange = Math.round(Math.min(canvasWidth, canvasHeight) * (0.05 + 0.02 * level));
                       const nextRange = level < maxLvl ? Math.round(Math.min(canvasWidth, canvasHeight) * (0.05 + 0.02 * (level + 1))) : currentRange;
-                      return `Homing: ${currentRange}px ${level < maxLvl ? `→ ${nextRange}px` : '(MAX)'}`;
+                      return `Homing: ${currentRange}px ${level < maxLvl ? `> ${nextRange}px` : '(MAX)'}`;
                   }},
-                { name: 'Macross Missile Massacre', cost: 5000, level: 0, maxLevel: 5,
+                { name: 'Macross', cost: 5000, level: 0, maxLevel: 5,
                   f: level => level === 0 ? 0 : 50 * Math.pow(2, level - 1), // Num missiles 0 -> 50 -> 100 -> ...
                   g: (level, cost, maxLvl) => {
                       if (level === 0) return "Activate Macross";
@@ -1285,7 +1293,7 @@ function initializeGame(shouldTryLoad = true) {
                       const nextDmg = level < maxLvl ? 20 + (level + 1) * 5 : currentDmg;
                       const currentCD = MACROSS_BASE_COOLDOWN - level * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL;
                       const nextCD = level < maxLvl ? MACROSS_BASE_COOLDOWN - (level + 1) * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL : currentCD;
-                      return `${currentCount} missiles, ${currentDmg} dmg, ${currentCD}s CD ${level < maxLvl ? `→ ${nextCount}, ${nextDmg}, ${nextCD}s` : '(MAX)'}`;
+                      return `${currentCount}m ${currentDmg}d ${currentCD}s ${level < maxLvl ? `> ${nextCount}m ${nextDmg}d ${nextCD}s` : '(MAX)'}`;
                    }}
             ]
         },
@@ -1295,7 +1303,7 @@ function initializeGame(shouldTryLoad = true) {
             upgrades: [
                 { name: 'Stun Field', cost: 2000, level: 0, maxLevel: 9, // Max 90% slow
                   f: level => level * 0.1, // Returns the slow factor (0 to 0.9)
-                  g: (level, cost, maxLvl) => `Slow: ${level * 10}% ${level < maxLvl ? `→ ${(level + 1) * 10}%` : '(MAX)'}` }
+                  g: (level, cost, maxLvl) => `${level * 10}% ${level < maxLvl ? `> ${(level + 1) * 10}%` : '(MAX)'}` }
             ]
         },
         { // Category 5: Debug
@@ -1303,12 +1311,12 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 {
-                    name: 'Add 100,000 Credits',
+                    name: '+100k',
                     cost: 0,
                     level: 0,
                     maxLevel: Infinity,
                     f: () => {},
-                    g: () => 'Gain 100k credits'
+                    g: () => '+100k credits'
                 }
             ]
         }
