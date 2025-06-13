@@ -648,6 +648,8 @@ function resetBullet(bullet, config) {
 }
 
 function resetMissile(missile, config) {
+    const isRelease = !config || Object.keys(config).length === 0;
+
     missile.x = config.x || 0;
     missile.y = config.y || 0;
     missile.dx = config.dx || 0;
@@ -655,17 +657,26 @@ function resetMissile(missile, config) {
     missile.target = config.t || null; // Set target or null
     missile.speed = config.speed || 1;
     missile.turnSpeed = config.turnSpeed || 0.05;
-    missile.homingRadius = config.homingRadius || base.missileHomingRadius;
-    missile.trail = config.trail || []; // Set initial trail or empty
+    missile.homingRadius =
+        typeof config.homingRadius !== 'undefined' ? config.homingRadius : base.missileHomingRadius;
+    missile.trail = config.trail || Array(40).fill({ x: missile.x, y: missile.y });
     missile.isMacross = config.macross || false;
     missile.homingActive = config.homingActive || false;
+    missile.startX = config.startX || missile.x;
+    missile.startY = config.startY || missile.y;
+    missile.rangeLimit = config.rangeLimit || base.missileTargetingRadius * 1.1;
 
-    // Clear dynamic properties
-    missile.target = null;
-    missile.trail = Array(40).fill({ x: missile.x, y: missile.y }); // Reset trail properly
-    missile.isMacross = false;
-    missile.homingActive = false;
-    missile.homingRadius = base.missileHomingRadius;
+    if (isRelease) {
+        // When releasing back to the pool, clear dynamic state
+        missile.target = null;
+        missile.trail = [];
+        missile.isMacross = false;
+        missile.homingActive = false;
+        missile.homingRadius = base.missileHomingRadius;
+        missile.startX = 0;
+        missile.startY = 0;
+        missile.rangeLimit = base.missileTargetingRadius * 1.1;
+    }
 }
 
 
@@ -1614,17 +1625,20 @@ function handlePlayerFiring(dt) {
                 const angle = Math.atan2(target.y - base.y, target.x - base.x);
                 const launchAngle = angle + (Math.random() - 0.5) * (Math.PI / 8); // Launch spread
 
-                 missilePool.get({
-                     x: base.x,
-                     y: base.y,
-                     dx: Math.cos(launchAngle),
-                     dy: Math.sin(launchAngle),
-                     t: target,
-                     speed: 2 + Math.random() * 2,
-                     turnSpeed: base.missileTurnSpeed,
-                     homingRadius: base.missileHomingRadius,
-                     homingActive: true
-                 });
+                missilePool.get({
+                    x: base.x,
+                    y: base.y,
+                    dx: Math.cos(launchAngle),
+                    dy: Math.sin(launchAngle),
+                    t: target,
+                    speed: 2 + Math.random() * 2,
+                    turnSpeed: base.missileTurnSpeed,
+                    homingRadius: base.missileHomingRadius,
+                    homingActive: true,
+                    startX: base.x,
+                    startY: base.y,
+                    rangeLimit: base.missileTargetingRadius * 1.1
+                });
              });
             createExplosion(base.x, base.y, 'orange', 5 * targets.length, 8); // Bigger launch effect for more missiles
             gameState.lastMissileFireTime = currentTime;
@@ -1754,11 +1768,13 @@ function updateProjectiles(dt, baseMoved) {
         missile.trail.unshift({ x: missile.x, y: missile.y });
         if (missile.trail.length > 40) missile.trail.pop();
 
-
-        // 5. Check bounds / Collision (Collision checked in checkCollisions)
-         if (missile.x < -50 || missile.x > canvasWidth + 50 || missile.y < -50 || missile.y > canvasHeight + 50) {
-             missilePool.release(missile);
-         }
+        // 5. Check bounds / Range (collision checked separately)
+        const distFromStart = Math.hypot(missile.x - missile.startX, missile.y - missile.startY);
+        if (distFromStart > missile.rangeLimit ||
+            missile.x < -50 || missile.x > canvasWidth + 50 ||
+            missile.y < -50 || missile.y > canvasHeight + 50) {
+            missilePool.release(missile);
+        }
     }
 }
 
@@ -2577,7 +2593,10 @@ function fireMacrossMissiles() {
                 turnSpeed: base.missileTurnSpeed,
                 homingRadius: base.missileHomingRadius,
                 macross: true,
-                homingActive: true
+                homingActive: true,
+                startX: base.x,
+                startY: base.y,
+                rangeLimit: base.missileTargetingRadius * 1.1
             });
         }
 
