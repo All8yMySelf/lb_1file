@@ -1213,7 +1213,7 @@ function initializeGame(shouldTryLoad = true) {
     // g: function to generate display text for the upgrade button
     upgradeTree = [
         { // Category 0: Cannon
-            category: "50mm Cannon",
+            category: "Cannon",
             expanded: false,
             upgrades: [
                 { name: 'Fire Rate', cost: 100, level: 0, maxLevel: 15,
@@ -2289,151 +2289,111 @@ function drawRingUIElement(type, radius, labelText, categoryIndex, upgradeIndex,
 
 // --- Canvas Collapsible Upgrade Category UI Drawing Helper ---
 // Modified to handle a whole category of upgrades
+
 function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isExpanded, color, hasAvailable) {
     const fontSize = parseInt(currentTheme.cssVariables['--upgrade-button-font-size']) || 12;
     const padding = 8;
-    const boxMargin = 4;
-    const upgradeSpacing = 10; // Space between upgrades
     const headerHeight = fontSize + padding * 2;
-    let contentHeight = 0;
-    const contentWidth = 170; // Slightly wider panel
+    const boxWidth = 170;
 
-    // Use theme font
     ctx.font = `${fontSize}px ${currentTheme.cssVariables['--font-family'] || "'Press Start 2P', monospace"}`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
 
-    // Calculate content height if expanded
-    if (isExpanded) {
-        category.upgrades.forEach(upgradeDef => {
-            const currentLevel = upgradeDef.level;
-            const maxLevel = upgradeDef.maxLevel;
-            const cost = upgradeDef.cost;
-            const statsText = upgradeDef.g(currentLevel, cost, maxLevel);
-            const statsLines = statsText.split('\n').length;
-            contentHeight += (fontSize + boxMargin) * statsLines; // Height for stats
-            contentHeight += (fontSize + padding * 2 + boxMargin); // Height for button/MAX text
-            contentHeight += upgradeSpacing; // Space after each upgrade
-        });
-        contentHeight -= upgradeSpacing; // Remove last spacing
-        contentHeight += padding * 2; // Top/bottom padding for content area
-    }
-
-    const totalHeight = headerHeight + (isExpanded ? contentHeight : 0);
-    const totalWidth = contentWidth;
-
-    // Background box
-    ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50, 50, 50, 0.7)';
-    ctx.fillRect(x, y, totalWidth, totalHeight);
-
-    // Highlight header if upgrades are available
-    if (hasAvailable) {
-        ctx.fillStyle = 'rgba(0,255,0,0.3)';
-        ctx.fillRect(x, y, totalWidth, headerHeight);
-    }
-
-    // Border
+    // Header box
+    ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+    ctx.fillRect(x, y, boxWidth, headerHeight);
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
-    ctx.strokeRect(x, y, totalWidth, totalHeight);
+    ctx.strokeRect(x, y, boxWidth, headerHeight);
 
-    // Header (Clickable area)
+    if (hasAvailable) {
+        ctx.fillStyle = 'rgba(0,255,0,0.3)';
+        ctx.fillRect(x, y, boxWidth, headerHeight);
+    }
+
     ctx.fillStyle = hasAvailable ? '#00ff00' : color;
     ctx.fillText(title, x + padding, y + padding);
-
-    // Expansion indicator (simple +/-)
     ctx.textAlign = 'right';
-    ctx.fillStyle = hasAvailable ? '#00ff00' : color;
-    ctx.fillText(isExpanded ? '-' : '+', x + totalWidth - padding, y + padding);
-    ctx.textAlign = 'left'; // Reset alignment
+    ctx.fillText(isExpanded ? '-' : '+', x + boxWidth - padding, y + padding);
+    ctx.textAlign = 'left';
 
-    // Draw content if expanded
     if (isExpanded) {
-        let currentY = y + headerHeight + padding;
+        const connectX = x + boxWidth + 10;
+        const panelX = connectX + 10;
+        const buttonWidth = 150;
+        let currentY = y;
+        const centers = [];
+        const buttons = [];
+        category.upgrades.forEach((u) => {
+            const stats = u.g(u.level, u.cost, u.maxLevel);
+            const lines = `${u.name}: ${stats}`.split('\n');
+            const buttonHeight = lines.length * fontSize + padding * 2;
+            buttons.push({u, lines, height: buttonHeight});
+        });
 
-        category.upgrades.forEach((upgradeDef, upgradeIndex) => {
-            const currentLevel = upgradeDef.level;
-            const maxLevel = upgradeDef.maxLevel;
-            const cost = upgradeDef.cost;
-            const canUpgrade = gameState.credits >= cost && currentLevel < maxLevel;
+        // Compute center positions
+        let tempY = y;
+        buttons.forEach(b => {
+            const center = tempY + b.height / 2;
+            centers.push(center);
+            tempY += b.height + 10;
+        });
 
-            // Draw upgrade name/stats
-            const statsText = `${upgradeDef.name}: ${upgradeDef.g(currentLevel, cost, maxLevel)}`;
-            const statsLines = statsText.split('\n');
-            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)';
-            statsLines.forEach(line => {
-                ctx.fillText(line, x + padding, currentY);
-                currentY += fontSize + boxMargin;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + boxWidth, y + headerHeight / 2);
+        ctx.lineTo(connectX, y + headerHeight / 2);
+        ctx.lineTo(connectX, centers[centers.length - 1]);
+        ctx.stroke();
+        centers.forEach(c => {
+            ctx.beginPath();
+            ctx.moveTo(connectX, c);
+            ctx.lineTo(panelX, c);
+            ctx.stroke();
+        });
+
+        currentY = y;
+        buttons.forEach((b, idx) => {
+            const btnY = currentY;
+            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+            ctx.fillRect(panelX, btnY, buttonWidth, b.height);
+            ctx.strokeStyle = color;
+            ctx.strokeRect(panelX, btnY, buttonWidth, b.height);
+            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)';
+            let textY = btnY + padding;
+            b.lines.forEach(line => {
+                ctx.fillText(line, panelX + padding, textY);
+                textY += fontSize;
             });
 
-            // Draw Upgrade Button or MAX text
-            const buttonHeight = fontSize + padding * 2;
-            const buttonX = x + padding;
-            const buttonY = currentY;
-            const buttonWidth = totalWidth - padding * 2;
+            ringClickRegions.push({
+                type: 'collapsible_upgrade_button',
+                x: panelX,
+                y: btnY,
+                width: buttonWidth,
+                height: b.height,
+                categoryIndex: categoryIndex,
+                upgradeIndex: idx
+            });
 
-            if (currentLevel < maxLevel) {
-                const buttonText = `Upgrade: $${cost}`;
-
-                // Button background
-                if (canUpgrade) {
-                    const pulse = Math.abs(Math.sin(Date.now() / 300));
-                    const pulseColor = currentTheme.canvasColors.ringUpgradeBoxAvailable || 'rgba(0, 255, 0, 0.7)';
-                    const rgbMatch = pulseColor.match(/(\d+(\.\d+)?)/g);
-                    if (rgbMatch && rgbMatch.length >= 3) {
-                        ctx.fillStyle = `rgba(${rgbMatch[0]}, ${rgbMatch[1]}, ${rgbMatch[2]}, ${0.5 + pulse * 0.5})`;
-                    } else {
-                        ctx.fillStyle = pulseColor;
-                    }
-                } else {
-                    ctx.fillStyle = currentTheme.canvasColors.buttonDisabledBg || '#2f240c';
-                }
-                ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
-
-                // Button border
-                ctx.strokeStyle = canUpgrade ? color : currentTheme.canvasColors.buttonDisabledText || '#ac4834';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
-
-                // Button text
-                ctx.fillStyle = canUpgrade ? currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)' : currentTheme.canvasColors.buttonDisabledText || '#ac4834';
-                ctx.fillText(buttonText, buttonX + padding, buttonY + padding);
-
-                // Store button clickable region
-                ringClickRegions.push({
-                    type: 'collapsible_upgrade_button',
-                    x: buttonX,
-                    y: buttonY,
-                    width: buttonWidth,
-                    height: buttonHeight,
-                    categoryIndex: categoryIndex,
-                    upgradeIndex: upgradeIndex // Store the correct index for this button
-                });
-
-            } else {
-                // MAX level text
-                const maxText = "MAX LEVEL";
-                ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxMax || color;
-                ctx.fillText(maxText, buttonX + padding, buttonY + padding);
-            }
-            currentY += buttonHeight + upgradeSpacing; // Move Y for next upgrade
+            currentY += b.height + 10;
         });
     }
 
-    // Store header clickable region (still useful for potential future interactions, even if click is ignored now)
     ringClickRegions.push({
         type: 'collapsible_upgrade_header',
         x: x,
         y: y,
-        width: totalWidth,
+        width: boxWidth,
         height: headerHeight,
         categoryIndex: categoryIndex,
-        upgradeIndex: -1 // No specific upgrade index for header
+        upgradeIndex: -1
     });
 
-    return totalHeight;
+    return headerHeight;
 }
-
 
 // --- Upgrade Logic ---
 function purchaseUpgrade(categoryIndex, upgradeIndex) {
@@ -2623,7 +2583,7 @@ function toggleRingInfoDisplay() {
 }
 
 function toggleUpgradeCategory(index) {
-    upgradeTree[index].expanded = !upgradeTree[index].expanded;
+    upgradeTree.forEach((cat,i)=>{cat.expanded = i===index ? !cat.expanded : false;});
     drawGame();
 }
 
