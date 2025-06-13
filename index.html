@@ -2733,7 +2733,7 @@ function renderUpgradeMenu() {
     upgradeTree.forEach((category, i) => {
         upgradeHTML += `
         <div class="upgrade-category">
-            <h3 onclick="toggleUpgradeCategory(${i})">${category.category}</h3>
+            <h3 onclick="toggleUpgradeCategory(${i})">${category.expanded ? '&#9662;' : '&#9656;'} ${category.category}</h3>
             <div id="upgrade-grid-${i}" class="upgrade-grid" style="display:${category.expanded ? 'grid' : 'none'}">
         `;
         if (category.expanded) {
@@ -3293,6 +3293,7 @@ window.onload = () => {
 
 // --- Global Access (for HTML onclick) ---
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
+window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
 
 
 })(); // End IIFE
