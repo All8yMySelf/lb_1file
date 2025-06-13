@@ -2321,16 +2321,26 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
     if (isExpanded) {
         const connectX = x + boxWidth + 10;
         const panelX = connectX + 10;
-        const buttonWidth = 150;
-        let currentY = y;
-        const centers = [];
+
         const buttons = [];
+        let maxTextWidth = 0;
         category.upgrades.forEach((u) => {
             const stats = u.g(u.level, u.cost, u.maxLevel);
             const lines = `${u.name}: ${stats}`.split('\n');
+            if (u.level < u.maxLevel) {
+                lines.push(`Cost: $${u.cost}`);
+            } else {
+                lines.push('MAX');
+            }
+            const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+            maxTextWidth = Math.max(maxTextWidth, textWidth);
             const buttonHeight = lines.length * fontSize + padding * 2;
             buttons.push({u, lines, height: buttonHeight});
         });
+
+        const buttonWidth = Math.max(150, maxTextWidth + padding * 2);
+        let currentY = y;
+        const centers = [];
 
         // Compute center positions
         let tempY = y;
@@ -2361,7 +2371,19 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             ctx.fillRect(panelX, btnY, buttonWidth, b.height);
             ctx.strokeStyle = color;
             ctx.strokeRect(panelX, btnY, buttonWidth, b.height);
-            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)';
+
+            let canAfford = gameState.credits >= b.u.cost && b.u.level < b.u.maxLevel;
+            if (categoryIndex === UPGRADE_CATEGORY_MISSILE && idx > UPGRADE_MISSILE_COUNT &&
+                upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0) {
+                canAfford = false;
+            }
+
+            if (canAfford) {
+                ctx.fillStyle = 'rgba(0,255,0,0.2)';
+                ctx.fillRect(panelX, btnY, buttonWidth, b.height);
+            }
+
+            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
             let textY = btnY + padding;
             b.lines.forEach(line => {
                 ctx.fillText(line, panelX + padding, textY);
