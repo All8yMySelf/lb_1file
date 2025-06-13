@@ -19,6 +19,11 @@ tab when the game is loaded.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v2.34
+- Redesigned upgrade menu with flowchart layout and visible costs.
+- Categories highlight when affordable upgrades are available.
+- Missile homing fixed with range limit and wave timer resumes correctly.
+
 ### v2.31
 - Added a clickable Focus Radius selector that saves your preference.
 - Updated version references and refined notch visuals.
