@@ -871,8 +871,7 @@ function updateHUD() {
     getElement('creditsDisplay').textContent = `Credits: ${gameState.credits}`;
     getElement('healthDisplay').textContent = `Health: ${Math.max(0, gameState.currentHealth)}/${gameState.maxHealth}`; // Ensure health doesn't show < 0
 
-    const currentTime = Date.now();
-    const elapsedTime = (currentTime - gameState.waveStartTime) / 1000 * gameSpeedMultiplier;
+    const elapsedTime = gameState.waveElapsedTime;
     let countdownText;
 
     if (gameState.isBossWave) {
@@ -1155,6 +1154,7 @@ function initializeGame(shouldTryLoad = true) {
         macrossCooldownTimer: 0,
         stunEffectEndTime: 0, // Not currently used, stun applied directly
         waveStartTime: 0,
+        waveElapsedTime: 0,
         waveDuration: WAVE_BASE_DURATION,
         score: 0,
         enemiesKilled: 0,
@@ -1335,6 +1335,7 @@ function startGame() {
     updateSpeedDisplay();
     getElement('playPauseButton').textContent = '\u23F8';
     gameState.waveStartTime = Date.now(); // Always start fresh timer for new game
+    gameState.waveElapsedTime = 0;
     gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
 
     // Removed confirm() pop-up logic
@@ -1519,8 +1520,8 @@ function updateEnemies(dt) {
 
 
 function spawnNewEnemies(dt) {
-    const currentTime = Date.now();
-    const elapsedTime = (currentTime - gameState.waveStartTime) / 1000 * gameSpeedMultiplier; // Use game speed
+    gameState.waveElapsedTime += dt;
+    const elapsedTime = gameState.waveElapsedTime;
     const enemies = enemyPool.getActiveObjects();
     const dtScaled = dt * 60;
 
@@ -1852,6 +1853,7 @@ function checkWaveCompletion(dt) {
         gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
         gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
         gameState.waveStartTime = Date.now(); // Reset timer for next wave
+        gameState.waveElapsedTime = 0;
         showToast(`Wave ${gameState.wave} started! +10% Health`, 3000);
         updateHUD();
         saveGame(); // Save at the end of a wave
