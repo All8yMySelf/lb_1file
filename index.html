@@ -64,23 +64,12 @@ body{margin:0;overflow:hidden;background: var(--body-bg); color: var(--text-colo
 #hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #hud #creditsDisplay{text-align:left} /* Renamed from #c */
 #hud #healthDisplay{text-align:right} /* Renamed from #h */
-#startScreen,#gameOverScreen,#upgradeMenu,#highScoreScreen,#highScoreModal{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.8);text-align:center;z-index:100} /* Renamed from #s, #o, #m */
+#startScreen,#gameOverScreen,#highScoreScreen,#highScoreModal{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.8);text-align:center;z-index:100} /* Renamed from #s, #o, #m */
 #gameOverScreen #finalStats{font-size:1.33rem;margin-bottom:1.5rem;color: var(--final-stats-color)} /* Renamed from #f */
-#upgradeMenu{position:absolute;top:0;left:0;bottom:0;width: 450px; display:flex;flex-direction:column;justify-content:flex-start;align-items: flex-start; padding-top:20px;overflow-y:auto; background:rgba(0,0,0,0.8);z-index:100} /* Modified to position on the left */
 button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background: var(--button-bg); color: var(--button-text); border:2px solid var(--button-border); cursor:pointer;transition:all 0.3s ease}
 button:hover{background: var(--button-hover-bg); transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2)}
 button:active{transform:translateY(1px)}
 button:disabled{background: var(--button-disabled-bg); color: var(--button-disabled-text); cursor:not-allowed;transform:none;box-shadow:none}
-.upgrade-category h3{text-align:left;margin-bottom:2px;color: var(--upgrade-title-color);cursor:pointer}
-.upgrade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.upgrade-button-container button{font-size:var(--upgrade-button-font-size);white-space:normal;word-wrap:break-word}
-#focus-notch-container{display:flex;flex-direction:column;align-items:center;margin-top:5px}
-#focus-notch-row{display:flex;gap:2px;margin-top:4px}
-.focus-notch{width:10px;height:16px;border:1px solid var(--button-border);background:#111;cursor:pointer;box-shadow:0 0 2px var(--button-border) inset;border-radius:0}
-.focus-notch.active{background:var(--button-text);box-shadow:0 0 4px var(--button-border)}
-.focus-notch.selected{border-color:lime;animation:notchBlink 1s step-end infinite}
-@keyframes notchBlink{0%,50%{opacity:1}50.1%,100%{opacity:.3}}
-.focus-notch-label{font-size:14px;color:var(--upgrade-title-color);margin-bottom:2px}
 #controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10}
 #toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
 #toggleInfoButton.active{background-color: var(--toggle-active-bg); color: var(--toggle-active-text)}
@@ -149,18 +138,6 @@ input:checked+.slider:before{transform:translateX(26px)}
         <span class="blinking-cursor">_</span>
     </div>
     <button id="saveHighScoreButton">Save</button>
-</div>
-<div id="upgradeMenu" style="display:none"> <!-- Renamed from #m -->
-    <h2>Current Wave Stats</h2>
-    <div id="waveInfo"></div> <!-- Renamed from #i -->
-    <h2>Upgrades</h2>
-    <div id="upgradesContainer"></div> <!-- Renamed from #U -->
-    <div class="stats">
-        <div id="damage-stats">Damage: 1</div>
-        <div id="fire-rate-stats">Fire Rate: 5/s</div>
-        <div id="range-stats">Range: 200</div>
-    </div>
-
 </div>
 <div id="controls">
     <button id="playPauseButton">&#9654;</button>
@@ -767,6 +744,16 @@ function colorWithAlpha(color, alpha){
     return color;
 }
 
+function getCategoryColor(index){
+    switch(index){
+        case UPGRADE_CATEGORY_CANNON: return currentTheme.canvasColors.ringCannon;
+        case UPGRADE_CATEGORY_LASER: return currentTheme.canvasColors.ringLaser;
+        case UPGRADE_CATEGORY_MISSILE: return currentTheme.canvasColors.ringMissile;
+        case UPGRADE_CATEGORY_SPECIAL: return currentTheme.canvasColors.ringStun;
+        default: return currentTheme.canvasColors.ringCannon;
+    }
+}
+
 function createExplosion(x, y, color, count = 15, enemyRadius = 10) {
     const baseSize = Math.max(2, Math.floor(enemyRadius / 3));
     const particleCount = Math.max(5, Math.floor(count * (enemyRadius / 10)));
@@ -899,42 +886,9 @@ function updateHUD() {
 
     getElement('waveDisplay').textContent = `Wave: ${gameState.wave} | ${countdownText}`;
 
-    // Update wave info in the upgrade menu (if open)
-    if (getElement('upgradeMenu').style.display === 'flex') {
-        updateWaveInfoInMenu();
-    }
-}
-
-function updateWaveInfoInMenu() {
-     getElement('waveInfo').innerHTML = ENEMY_TYPES.map((template, i) => {
-        const difficultyScaling = Math.pow(ENEMY_HEALTH_SCALE_FACTOR, gameState.wave - 1);
-        let health;
-        if (i === ENEMY_TYPE_BOSS) {
-            health = (BOSS_HEALTH_BASE + gameState.wave * BOSS_HEALTH_WAVE_MULTIPLIER) * difficultyScaling;
-        } else {
-            health = template[2] * difficultyScaling;
-        }
-         const name = i === ENEMY_TYPE_BOSS ? 'Boss' : (i === ENEMY_TYPE_TANK ? 'Tank' : (i === ENEMY_TYPE_FAST ? 'Fast' : 'Normal'));
-        return `
-        <div class="enemy-info">
-          <span style="color:${template[0]}">${name}</span>
-          <span>Health: ${Math.ceil(health)}</span>
-        </div>`;
-    }).join('');
 }
 
 
-function updateStatsDisplay() {
-    if (getElement('damage-stats')) {
-        getElement('damage-stats').textContent = `Damage: ${base.bulletDamage}`;
-    }
-    if (getElement('fire-rate-stats')) {
-        getElement('fire-rate-stats').textContent = `Fire Rate: ${(1000 / base.fireRate).toFixed(1)}/s`;
-    }
-    if (getElement('range-stats')) {
-        getElement('range-stats').textContent = `Range: ${Math.round(base.cannonRange)}`;
-    }
-}
 
 function updateSpeedDisplay() {
     const val = SPEED_STEPS[speedIndex];
@@ -1071,9 +1025,7 @@ function loadGame() {
 
 
         updateHUD();
-        updateStatsDisplay();
-        renderUpgradeMenu(); // Refresh menu display
-        updateUpgradeAvailability(); // Refresh button states
+        drawGame();
         showToast('Game loaded!');
         return true;
     } catch (e) {
@@ -1206,8 +1158,7 @@ function initializeGame(shouldTryLoad = true) {
         waveDuration: WAVE_BASE_DURATION,
         score: 0,
         enemiesKilled: 0,
-        autoFire: true,
-        activeUpgradeTab: 0 // Initialize active tab to the first category
+        autoFire: true
     };
 
     base = {
@@ -1364,8 +1315,7 @@ function initializeGame(shouldTryLoad = true) {
     ];
 
     updateHUD();
-    updateStatsDisplay();
-    renderUpgradeMenu(); // Initial render of upgrade menu structure
+    drawGame();
 
     if (shouldTryLoad) {
         tryLoadGame(); // Check for saved game after defaults are set
@@ -1378,9 +1328,7 @@ function startGame() {
     getElement('gameOverScreen').style.display = 'none';
     getElement('highScoreModal').style.display = 'none';
     getElement('nonHighScoreMessage').textContent = '';
-    getElement('upgradeMenu').style.display = 'none';
-    renderUpgradeMenu(); // Render the menu with initial state
-    updateUpgradeAvailability();
+    // Upgrade menu removed, canvas UI handles upgrades
     isGameRunning = true;
     gameSpeedMultiplier = 1;
     speedIndex = SPEED_STEPS.indexOf(1);
@@ -1968,153 +1916,16 @@ function drawGame() {
     // --- Draw Ring UI (Directly on Canvas) ---
     ringClickRegions = []; // Clear regions each frame
 
-    // --- Draw Upgrade Category Tabs ---
-    const tabDisplayWidth = 180; // New width for vertical tabs
-    const tabDisplayHeight = 35; // New height for vertical tabs
-    const tabSpacing = 10;
-    const tabsAreaX = 10; // Position from left edge
-    const tabsAreaY = 60; // Position below HUD
+    // --- Draw Collapsible Upgrade Categories ---
+    const menuX = 10;
+    let currentY = 60;
+    const categorySpacing = 10;
 
     upgradeTree.forEach((category, i) => {
-        const tabX = tabsAreaX;
-        const tabY = tabsAreaY + i * (tabDisplayHeight + tabSpacing); // Stack vertically
-        const isTabActive = gameState.activeUpgradeTab === i;
-
-        // Check if any upgrade in this category is available
-        const hasAvailableUpgrade = category.upgrades.some(u => gameState.credits >= u.cost && u.level < u.maxLevel);
-
-        // Determine tab color and flashing
-        let tabColor = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50, 50, 50, 0.7)'; // Default grey
-        let borderColor = currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)'; // Default border color
-
-        if (isTabActive) {
-            tabColor = currentTheme.canvasColors.ringUpgradeBoxAvailable || 'rgba(0, 255, 0, 0.7)'; // Active tab color
-            borderColor = currentTheme.canvasColors.ringUpgradeBoxMax || 'rgba(230, 181, 75, 1)'; // Active border color
-        } else if (hasAvailableUpgrade) {
-            // Flashing effect for available upgrades
-            const pulse = Math.abs(Math.sin(Date.now() / 150)); // Faster pulse
-            tabColor = `rgba(255, 255, 0, ${0.5 + pulse * 0.5})`; // Bright yellow flash
-            borderColor = `rgba(255, 255, 0, ${0.8 + pulse * 0.2})`;
-        }
-
-        // Draw tab background
-        ctx.fillStyle = tabColor;
-        ctx.fillRect(tabX, tabY, tabDisplayWidth, tabDisplayHeight);
-
-        // Draw tab border
-        ctx.strokeStyle = borderColor;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(tabX, tabY, tabDisplayWidth, tabDisplayHeight);
-
-        // Draw tab text
-        ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)';
-        const tabFont = parseInt(currentTheme.cssVariables['--tab-font-size']) || 14;
-        ctx.font = `${tabFont}px ${currentTheme.cssVariables['--font-family'] || "'Press Start 2P', monospace"}`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(category.category, tabX + tabDisplayWidth / 2, tabY + tabDisplayHeight / 2);
-
-        // Store clickable region for the tab
-        ringClickRegions.push({
-            type: 'upgrade_tab',
-            x: tabX,
-            y: tabY,
-            width: tabDisplayWidth,
-            height: tabDisplayHeight,
-            categoryIndex: i,
-            upgradeIndex: -1 // Not a specific upgrade button
-        });
+        const color = getCategoryColor(i);
+        const h = drawCollapsibleUpgradeElement(menuX, currentY, category.category, category, i, category.expanded, color);
+        currentY += h + categorySpacing;
     });
-
-    // --- Draw Upgrades for the Active Tab ---
-    if (gameState.activeUpgradeTab !== null && gameState.activeUpgradeTab < upgradeTree.length) {
-        const activeCategory = upgradeTree[gameState.activeUpgradeTab];
-        const upgradeButtonWidth = 220; // New width for upgrade buttons
-        const upgradeButtonHeight = 90; // Increased height for extra controls
-        const upgradeButtonSpacing = 10;
-        const upgradesAreaX = tabsAreaX + tabDisplayWidth + tabSpacing; // Position to the right of tabs
-        const upgradesAreaY = tabsAreaY; // Align with the top of the tabs area
-
-        // This part will need to draw the individual upgrade buttons on the canvas
-        // Similar to the logic in drawCollapsibleUpgradeElement, but for a flat grid
-        activeCategory.upgrades.forEach((upgradeDef, upgradeIndex) => {
-            const buttonX = upgradesAreaX;
-            const buttonY = upgradesAreaY + upgradeIndex * (upgradeButtonHeight + upgradeButtonSpacing); // Stack vertically
-
-            const currentLevel = upgradeDef.level;
-            const maxLevel = upgradeDef.maxLevel;
-            const cost = upgradeDef.cost;
-            const canUpgrade = gameState.credits >= cost && currentLevel < maxLevel;
-
-            // Draw button background
-            ctx.fillStyle = canUpgrade ? (currentTheme.canvasColors.ringUpgradeBoxAvailable || 'rgba(0, 255, 0, 0.7)') : (currentTheme.canvasColors.buttonDisabledBg || '#2f240c');
-            ctx.fillRect(buttonX, buttonY, upgradeButtonWidth, upgradeButtonHeight);
-
-            // Draw button border
-            ctx.strokeStyle = canUpgrade ? (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)') : (currentTheme.canvasColors.buttonDisabledText || '#ac4834');
-            ctx.lineWidth = 2;
-            ctx.strokeRect(buttonX, buttonY, upgradeButtonWidth, upgradeButtonHeight);
-
-            // Draw button text
-            ctx.fillStyle = canUpgrade ? (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)') : (currentTheme.canvasColors.buttonDisabledText || '#ac4834');
-            const upgradeFont = parseInt(currentTheme.cssVariables['--upgrade-button-font-size']) || 12;
-            ctx.font = `${upgradeFont}px ${currentTheme.cssVariables['--font-family'] || "'Press Start 2P', monospace"}`;
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-
-            const textLines = [
-                `${upgradeDef.name} (${currentLevel}/${maxLevel})`,
-                `Cost: ${cost}`,
-                upgradeDef.g(currentLevel, cost, maxLevel)
-            ];
-
-            let textY = buttonY + 5;
-            textLines.forEach(line => {
-                ctx.fillText(line, buttonX + 5, textY);
-                textY += 15; // Line height
-            });
-
-            // Extra UI for Focus Radius slider
-            if (gameState.activeUpgradeTab === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS) {
-                const selectedVal = Math.round(base.focusRadiusSetting * 100);
-                const unlocked = currentLevel * 10;
-                ctx.fillText(`Threshold: ${selectedVal}%`, buttonX + 5, textY);
-                const notchY = textY + 12;
-                const notchW = 12;
-                const notchH = 8;
-                const notchSpacing = 2;
-                let notchX = buttonX + 5;
-                for (let p = 10; p <= 100; p += 10) {
-                    ctx.fillStyle = p <= unlocked ? (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230, 181, 75, 1)') : (currentTheme.canvasColors.buttonDisabledBg || '#333');
-                    ctx.fillRect(notchX, notchY, notchW, notchH);
-                    ctx.strokeStyle = p === selectedVal ? 'lime' : '#555';
-                    ctx.strokeRect(notchX, notchY, notchW, notchH);
-                    ringClickRegions.push({
-                        type: 'focus_notch',
-                        x: notchX,
-                        y: notchY,
-                        width: notchW,
-                        height: notchH,
-                        categoryIndex: gameState.activeUpgradeTab,
-                        upgradeIndex: upgradeIndex,
-                        value: p
-                    });
-                    notchX += notchW + notchSpacing;
-                }
-            }
-
-            // Store button clickable region
-            ringClickRegions.push({
-                type: 'upgrade_button', // Changed type to differentiate from collapsible
-                x: buttonX,
-                y: buttonY,
-                width: upgradeButtonWidth,
-                height: upgradeButtonHeight,
-                categoryIndex: gameState.activeUpgradeTab,
-                upgradeIndex: upgradeIndex
-            });
-        });
-    }
 
 
     // --- Draw Base ---
@@ -2582,6 +2393,8 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         categoryIndex: categoryIndex,
         upgradeIndex: -1 // No specific upgrade index for header
     });
+
+    return totalHeight;
 }
 
 
@@ -2592,7 +2405,6 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
         gameState.credits += 100000;
         updateHUD();
-        updateUpgradeAvailability();
         showToast('Cheated 100k credits!');
         return;
     }
@@ -2613,9 +2425,7 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
         applyUpgradeEffect(categoryIndex, upgradeIndex, true); // Apply effect of new level
 
         updateHUD();
-        renderUpgradeMenu(); // Update display in menu
-        updateStatsDisplay();
-        updateUpgradeAvailability(); // Update button disabled states
+        drawGame();
         showToast(`Upgraded ${upgrade.name}!`);
         saveGame(); // Auto-save on upgrade
     } else if (gameState.credits < upgrade.cost) {
@@ -2728,130 +2538,6 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
 }
 
 
-function renderUpgradeMenu() {
-    let upgradeHTML = '';
-    upgradeTree.forEach((category, i) => {
-        upgradeHTML += `
-        <div class="upgrade-category">
-            <h3 onclick="toggleUpgradeCategory(${i})">${category.expanded ? '&#9662;' : '&#9656;'} ${category.category}</h3>
-            <div id="upgrade-grid-${i}" class="upgrade-grid" style="display:${category.expanded ? 'grid' : 'none'}">
-        `;
-        if (category.expanded) {
-            category.upgrades.forEach((u, j) => {
-                upgradeHTML += createUpgradeButtonHTML(u, i, j);
-            });
-        }
-        upgradeHTML += `</div></div>`;
-    });
-
-    getElement('upgradesContainer').innerHTML = upgradeHTML;
-
-    // Add event listener for missile radius toggle if it exists
-    const toggle = getElement('toggleMissileRadius');
-    if (toggle) {
-        toggle.onchange = toggleMissileRadiusVisibility; // Make sure function exists
-    }
-
-    const notchRow = getElement('focus-notch-row');
-    if (notchRow) {
-        notchRow.querySelectorAll('.focus-notch').forEach(n => n.onclick = focusNotchClicked);
-        updateFocusNotches();
-    }
-
-    // Update visibility of Macross button based on upgrade level
-    const macrossLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
-    getElement('macrossButton').style.display = macrossLevel > 0 ? 'block' : 'none';
-}
-
-
-function createUpgradeButtonHTML(upgradeDef, categoryIndex, upgradeIndex) {
-    const level = upgradeDef.level;
-    const maxLevel = upgradeDef.maxLevel;
-    const cost = upgradeDef.cost;
-    const name = upgradeDef.name;
-
-    // Generate stats text using the 'g' function
-    const statsText = upgradeDef.g(level, cost, maxLevel);
-
-    // Determine if button should be disabled
-    let isDisabled = gameState.credits < cost || level >= maxLevel;
-    // Add prerequisite check for missile sub-upgrades
-    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex > UPGRADE_MISSILE_COUNT) {
-        isDisabled = isDisabled || upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0;
-    }
-
-    // Add toggle switch specifically for Missile Homing upgrade display
-    let toggleHTML = '';
-    let sliderHTML = '';
-    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_HOMING) {
-        toggleHTML = `
-          <label class="switch">
-            <input type="checkbox" id="toggleMissileRadius" ${showMissileRadius ? 'checked' : ''}>
-            <span class="slider round"></span>
-          </label>
-          <span class="switch-label">Show Radius</span>`;
-    }
-
-    if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS) {
-        const val = Math.round(base.focusRadiusSetting * 100);
-        let notches = '';
-        for(let p=10; p<=100; p+=10){
-            notches += `<div class="focus-notch" data-val="${p}" title="Focus Radius: ${p}%"></div>`;
-        }
-        sliderHTML = `
-          <div id="focus-notch-container">
-            <div class="focus-notch-label">Select Focus Radius Threshold</div>
-            <div id="focus-notch-row">${notches}</div>
-            <span id="focusRadiusLabel">Focus Radius Threshold: ${val}%</span>
-          </div>`;
-    }
-
-
-    if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
-        return `
-        <div class="upgrade-button-container">
-            <button id="upgrade_${categoryIndex}_${upgradeIndex}" onclick="purchaseUpgrade(${categoryIndex}, ${upgradeIndex})">Add 100,000 Credits</button>
-        </div>`;
-    }
-
-    return `
-    <div class="upgrade-button-container">
-        ${toggleHTML}
-        <button id="upgrade_${categoryIndex}_${upgradeIndex}" onclick="purchaseUpgrade(${categoryIndex}, ${upgradeIndex})" ${isDisabled ? 'disabled' : ''}>
-            ${name} (${level}/${maxLevel}) - Cost: ${cost}<br>
-            <span class="upgrade-stats-display">${statsText}</span>
-        </button>
-        ${sliderHTML}
-    </div>`;
-}
-
-function updateUpgradeAvailability() {
-    upgradeTree.forEach((category, i) => {
-        category.upgrades.forEach((u, j) => {
-            const button = getElement(`upgrade_${i}_${j}`);
-            if (button) {
-                 let isAvailable = gameState.credits >= u.cost && u.level < u.maxLevel;
-                 // Prerequisite check
-                 if (i === UPGRADE_CATEGORY_MISSILE && j > UPGRADE_MISSILE_COUNT) {
-                     isAvailable = isAvailable && upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level > 0;
-                 }
-                 button.disabled = !isAvailable;
-            }
-        });
-    });
-     // Update Macross button enabled state based on cooldown
-     const macrossButton = getElement('macrossButton');
-     if (macrossButton.style.display !== 'none') {
-         macrossButton.disabled = gameState.macrossCooldownTimer > 0;
-         if (gameState.macrossCooldownTimer <= 0) {
-             macrossButton.classList.add('active');
-         } else {
-             macrossButton.classList.remove('active');
-         }
-     }
-
-}
-
 // --- Special Actions ---
 function fireMacrossMissiles() {
     if (gameState.macrossCooldownTimer <= 0 && base.macrossMissileCount > 0) {
@@ -2885,32 +2571,6 @@ function fireMacrossMissiles() {
 }
 
 // --- Menu Toggles ---
-function toggleUpgradeMenu() {
-    const menu = getElement('upgradeMenu');
-    if (menu.style.display === 'none') {
-        menu.style.display = 'flex';
-        isGameRunning = false; // Pause game
-        cancelAnimationFrame(animationFrameId);
-        if (autoSaveTimer) clearInterval(autoSaveTimer); // Pause saving
-        getElement('playPauseButton').textContent = '\u25B6';
-        updateWaveInfoInMenu(); // Update info when opening
-        renderUpgradeMenu(); // Ensure buttons are up-to-date
-        updateStatsDisplay();
-        updateUpgradeAvailability();
-    } else {
-        menu.style.display = 'none';
-        isGameRunning = true; // Resume game
-        lastTime = 0; // Reset delta time calculation
-        animationFrameId = requestAnimationFrame(gameLoop);
-        // Restart auto-save timer
-        if (autoSaveTimer) clearInterval(autoSaveTimer);
-        autoSaveTimer = setInterval(() => {
-            if (isGameRunning) saveGame();
-        }, AUTO_SAVE_INTERVAL);
-        getElement('playPauseButton').textContent = '\u23F8';
-    }
-}
-
 function toggleHotkeys() {
     getElement('hotkeys').classList.toggle('show');
 }
@@ -2922,44 +2582,18 @@ function toggleRingInfoDisplay() {
     showToast(showRingInfo ? 'Ring info enabled' : 'Ring info disabled');
 }
 
-function toggleMissileRadiusVisibility() {
-     showMissileRadius = getElement('toggleMissileRadius').checked;
-}
-
 function toggleUpgradeCategory(index) {
     upgradeTree[index].expanded = !upgradeTree[index].expanded;
-    renderUpgradeMenu();
-    updateUpgradeAvailability();
-}
-function focusNotchClicked(e){
-    const val=parseInt(e.target.getAttribute('data-val'));
-    const unlocked=upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_FOCUS_RADIUS].level*10;
-    if(val>unlocked) return;
-    base.focusRadiusSetting=val/100;
-    updateFocusNotches();
     drawGame();
-    saveGame();
 }
-function updateFocusNotches(){
-    const row=getElement('focus-notch-row');
-    if(!row) return;
-    const unlocked=upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_FOCUS_RADIUS].level*10;
-    const val=Math.round(base.focusRadiusSetting*100);
-    row.querySelectorAll('.focus-notch').forEach(n=>{
-        const v=parseInt(n.getAttribute('data-val'));
-        n.classList.toggle('active', v<=unlocked);
-        n.classList.toggle('selected', v===val);
-    });
-    const label=getElement('focusRadiusLabel');
-    if(label) label.textContent=`Focus Radius Threshold: ${val}%`;
-}
+
 
 window.addEventListener('keydown', e => {
 
     keysPressed[e.key.toLowerCase()] = true; // Use lower case for consistency
 
-    // Handle single-press actions only if game is running or menu allows it
-    if (isGameRunning || getElement('upgradeMenu').style.display === 'flex') {
+    // Handle single-press actions only if game is running
+    if (isGameRunning) {
         switch (e.key.toLowerCase()) {
             case 'm': if (isGameRunning) fireMacrossMissiles(); break; // Only fire if game running
             case 'h': toggleHotkeys(); break; // Toggle hotkeys anytime
@@ -2970,11 +2604,6 @@ window.addEventListener('keydown', e => {
                 }
                 break;
             case 'i': toggleRingInfoDisplay(); break; // Toggle info anytime
-            case 'escape':
-                if (getElement('upgradeMenu').style.display === 'flex') {
-                    toggleUpgradeMenu();
-                }
-                break;
         }
     }
 });
@@ -3067,11 +2696,9 @@ function handleCanvasClick(clientX, clientY) {
         if (clickX >= region.x && clickX <= region.x + region.width &&
             clickY >= region.y && clickY <= region.y + region.height) {
 
-            if (region.type === 'upgrade_tab') {
-                // Clicked on an upgrade category tab
-                gameState.activeUpgradeTab = region.categoryIndex;
-                // No need to redraw immediately, gameLoop will handle it
-                return; // Handle click and exit
+            if (region.type === 'collapsible_upgrade_header') {
+                toggleUpgradeCategory(region.categoryIndex);
+                return;
             } else if (region.type === 'focus_notch') {
                 const unlocked = upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_FOCUS_RADIUS].level * 10;
                 if (region.value <= unlocked) {
@@ -3080,8 +2707,7 @@ function handleCanvasClick(clientX, clientY) {
                     saveGame();
                 }
                 return; // Handle click and exit
-            } else if (region.type === 'upgrade_button') {
-                // Clicked on an upgrade button within the active tab
+            } else if (region.type === 'upgrade_button' || region.type === 'collapsible_upgrade_button') {
                 purchaseUpgrade(region.categoryIndex, region.upgradeIndex);
                 return; // Handle click and exit
             }
@@ -3205,11 +2831,7 @@ function applyTheme(themeIndex) {
     // Potentially update other non-CSS visual elements if needed
     // e.g., if particle generation logic changes drastically per theme
 
-    // Re-render upgrade menu to reflect potential color changes in buttons/text
-    if (getElement('upgradeMenu').style.display === 'flex') {
-        renderUpgradeMenu();
-        updateUpgradeAvailability();
-    }
+
 
     // Force redraw of canvas with new colors
     if (isGameRunning || getElement('startScreen').style.display === 'flex' || getElement('gameOverScreen').style.display === 'flex') {
@@ -3237,9 +2859,7 @@ function loadAndStartGame() {
     // Common starting logic after initialization/loading
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
-    getElement('upgradeMenu').style.display = 'none';
-    renderUpgradeMenu(); // Ensure menu reflects loaded state
-    updateUpgradeAvailability(); // Ensure buttons reflect loaded state
+    // Canvas UI upgrades are always available
     isGameRunning = true;
     gameSpeedMultiplier = 1;
     speedIndex = SPEED_STEPS.indexOf(1);
@@ -3279,7 +2899,6 @@ window.onload = () => {
 
     getElement('startScreen').style.display = 'flex';
     getElement('gameOverScreen').style.display = 'none';
-    getElement('upgradeMenu').style.display = 'none';
     // Draw initial empty state? Or just wait for game start.
     ctx.fillStyle = 'rgb(0, 0, 0)';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
