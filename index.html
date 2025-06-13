@@ -1925,7 +1925,8 @@ function drawGame() {
 
     upgradeTree.forEach((category, i) => {
         const color = getCategoryColor(i);
-        const h = drawCollapsibleUpgradeElement(menuX, currentY, category.category, category, i, category.expanded, color);
+        const hasAvailable = category.upgrades.some(u => gameState.credits >= u.cost && u.level < u.maxLevel);
+        const h = drawCollapsibleUpgradeElement(menuX, currentY, category.category, category, i, category.expanded, color, hasAvailable);
         currentY += h + categorySpacing;
     });
 
@@ -2261,7 +2262,7 @@ function drawRingUIElement(type, radius, labelText, categoryIndex, upgradeIndex,
 
 // --- Canvas Collapsible Upgrade Category UI Drawing Helper ---
 // Modified to handle a whole category of upgrades
-function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isExpanded, color) {
+function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isExpanded, color, hasAvailable) {
     const fontSize = parseInt(currentTheme.cssVariables['--upgrade-button-font-size']) || 12;
     const padding = 8;
     const boxMargin = 4;
@@ -2298,17 +2299,24 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
     ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50, 50, 50, 0.7)';
     ctx.fillRect(x, y, totalWidth, totalHeight);
 
+    // Highlight header if upgrades are available
+    if (hasAvailable) {
+        ctx.fillStyle = 'rgba(0,255,0,0.3)';
+        ctx.fillRect(x, y, totalWidth, headerHeight);
+    }
+
     // Border
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.strokeRect(x, y, totalWidth, totalHeight);
 
     // Header (Clickable area)
-    ctx.fillStyle = color;
+    ctx.fillStyle = hasAvailable ? '#00ff00' : color;
     ctx.fillText(title, x + padding, y + padding);
 
     // Expansion indicator (simple +/-)
     ctx.textAlign = 'right';
+    ctx.fillStyle = hasAvailable ? '#00ff00' : color;
     ctx.fillText(isExpanded ? '-' : '+', x + totalWidth - padding, y + padding);
     ctx.textAlign = 'left'; // Reset alignment
 
