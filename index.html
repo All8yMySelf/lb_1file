@@ -447,8 +447,17 @@ const firebaseConfig = {
   appId: "1:828776232983:web:6a93c19468c9c70124c452",
   measurementId: "G-0279TD72PL"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+let db = null;
+try {
+  if (window.firebase) {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+  } else {
+    console.warn('Firebase SDK failed to load, online leaderboard disabled.');
+  }
+} catch (e) {
+  console.warn('Firebase init error, online leaderboard disabled.', e);
+}
 </script>
 (function(){ // IIFE to encapsulate code
 "use strict";
@@ -1166,6 +1175,10 @@ function closeHighScoreScreen() {
 
 // --- Game Initialization & Start ---
 async function fetchGlobalScores(){
+    if(!db){
+        getElement("globalHighScores").innerHTML = "<p>Online leaderboard unavailable</p>";
+        return [];
+    }
     try {
         const snap = await db.ref("scores").once("value");
         let arr = snap.val() || [];
@@ -1181,6 +1194,7 @@ async function fetchGlobalScores(){
 }
 
 async function submitGlobalScore(initials, country, score){
+    if(!db) return;
     try {
         const snap = await db.ref("scores").once("value");
         let arr = snap.val() || [];
@@ -1195,6 +1209,7 @@ async function submitGlobalScore(initials, country, score){
 }
 
 async function checkGlobalHighScore(score){
+    if(!db) return;
     const scores = await fetchGlobalScores();
     const withPlayer = scores.concat({initials:"", country:"", score, date: formatDate(new Date())});
     withPlayer.sort((a,b)=>b.score-a.score);
