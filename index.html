@@ -1232,7 +1232,7 @@ function initializeGame(shouldTryLoad = true) {
                 { name: 'Guns', cost: 12000, level: 0, maxLevel: 5, // Starts at 1 gun implicitly
                   f: level => level + 1, // Guns = 1 + level
                   g: (level, cost, maxLvl) => `${1 + level}${level < maxLvl ? ` > ${2 + level}` : ''} guns` },
-                { name: 'Focus Radius', cost: 500, level: 0, maxLevel: 9,
+                { name: 'Focus Radius', cost: 500, level: 0, maxLevel: 9, progressBar: true,
                   f: level => level === 0 ? 0 : 0.2 + 0.1 * (level - 1),
                   g: (level, cost, maxLvl) => {
                       const current = level === 0 ? 0 : 20 + (level - 1) * 10;
@@ -2325,17 +2325,31 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         const buttons = [];
         let maxTextWidth = 0;
         category.upgrades.forEach((u) => {
-            const stats = u.g(u.level, u.cost, u.maxLevel);
-            const lines = `${u.name}: ${stats}`.split('\n');
-            if (u.level < u.maxLevel) {
-                lines.push(`Cost: $${u.cost}`);
+            if (u.progressBar) {
+                const lines = [u.name];
+                if (u.level < u.maxLevel) {
+                    lines.push(`Cost: $${u.cost}`);
+                } else {
+                    lines.push('MAX');
+                }
+                const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+                const barWidth = u.maxLevel * 10 + (u.maxLevel - 1) * 2; // progress boxes
+                maxTextWidth = Math.max(maxTextWidth, textWidth, barWidth);
+                const buttonHeight = lines.length * fontSize + padding * 3 + 10; // extra space for bar
+                buttons.push({u, lines, height: buttonHeight, progressBar: true});
             } else {
-                lines.push('MAX');
+                const stats = u.g(u.level, u.cost, u.maxLevel);
+                const lines = `${u.name}: ${stats}`.split('\n');
+                if (u.level < u.maxLevel) {
+                    lines.push(`Cost: $${u.cost}`);
+                } else {
+                    lines.push('MAX');
+                }
+                const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+                maxTextWidth = Math.max(maxTextWidth, textWidth);
+                const buttonHeight = lines.length * fontSize + padding * 2;
+                buttons.push({u, lines, height: buttonHeight});
             }
-            const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
-            maxTextWidth = Math.max(maxTextWidth, textWidth);
-            const buttonHeight = lines.length * fontSize + padding * 2;
-            buttons.push({u, lines, height: buttonHeight});
         });
 
         const buttonWidth = Math.max(150, maxTextWidth + padding * 2);
@@ -2377,6 +2391,10 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0) {
                 canAfford = false;
             }
+            if (categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS &&
+                upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_MULTIBARREL].level === 0) {
+                canAfford = false;
+            }
 
             if (canAfford) {
                 ctx.fillStyle = 'rgba(0,255,0,0.2)';
@@ -2389,6 +2407,26 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 ctx.fillText(line, panelX + padding, textY);
                 textY += fontSize;
             });
+
+            if (b.progressBar) {
+                const boxSize = 10;
+                const boxSpacing = 2;
+                const startX = panelX + padding;
+                const barY = textY + padding / 2;
+                for (let i = 0; i < b.u.maxLevel; i++) {
+                    const boxX = startX + i * (boxSize + boxSpacing);
+                    if (i < b.u.level) {
+                        ctx.fillStyle = '#ffff00';
+                    } else {
+                        ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+                    }
+                    ctx.fillRect(boxX, barY, boxSize, boxSize);
+                    ctx.strokeStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(boxX, barY, boxSize, boxSize);
+                }
+                textY += boxSize + padding;
+            }
 
             ringClickRegions.push({
                 type: 'collapsible_upgrade_button',
@@ -2433,6 +2471,12 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
         if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0) {
             showToast("Requires Missile System Acquisition first!", 2500);
             return; // Cannot buy sub-upgrades if missiles not acquired
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS) {
+        if (upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_MULTIBARREL].level === 0) {
+            showToast("Requires Guns upgrade first!", 2500);
+            return;
         }
     }
 
