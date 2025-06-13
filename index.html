@@ -10,9 +10,29 @@
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<!-- Use the compat builds so the global firebase namespace works -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA5CSbcR_DS601s5Ok_f-UOT_dobysD9eU",
+    authDomain: "lb-1file.firebaseapp.com",
+    projectId: "lb-1file",
+    storageBucket: "lb-1file.appspot.com",
+    messagingSenderId: "828776232983",
+    appId: "1:828776232983:web:6a93c19468c9c70124c452"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window.db = db;
+  window.fsCollection = collection;
+  window.fsAddDoc = addDoc;
+  window.fsGetDocs = getDocs;
+  window.fsQuery = query;
+  window.fsOrderBy = orderBy;
+  window.fsLimit = limit;
+</script>
 <title>Orbital Defence Elite v2.34 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
@@ -436,28 +456,6 @@ const THEMES = [
         }
     }
 ];
-</script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA5CSbcR_DS601s5Ok_f-UOT_dobysD9eU",
-  authDomain: "lb-1file.firebaseapp.com",
-  projectId: "lb-1file",
-  storageBucket: "lb-1file.firebasestorage.app",
-  messagingSenderId: "828776232983",
-  appId: "1:828776232983:web:6a93c19468c9c70124c452",
-  measurementId: "G-0279TD72PL"
-};
-let db = null;
-try {
-  if (window.firebase) {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-  } else {
-    console.warn('Firebase SDK failed to load, online leaderboard disabled.');
-  }
-} catch (e) {
-  console.warn('Firebase init error, online leaderboard disabled.', e);
-}
 </script>
 (function(){ // IIFE to encapsulate code
 "use strict";
@@ -1180,10 +1178,9 @@ async function fetchGlobalScores(){
         return [];
     }
     try {
-        const snap = await db.ref("scores").once("value");
-        let arr = snap.val() || [];
-        if(!Array.isArray(arr)) arr = [];
-        arr.sort((a,b)=>b.score-a.score);
+        const q = fsQuery(fsCollection(db, "scores"), fsOrderBy("score", "desc"), fsLimit(10));
+        const snap = await fsGetDocs(q);
+        const arr = snap.docs.map(d => d.data());
         renderHighScores("globalHighScores", arr);
         return arr;
     } catch(e){
@@ -1196,13 +1193,7 @@ async function fetchGlobalScores(){
 async function submitGlobalScore(initials, country, score){
     if(!db) return;
     try {
-        const snap = await db.ref("scores").once("value");
-        let arr = snap.val() || [];
-        if(!Array.isArray(arr)) arr = [];
-        arr.push({initials, country, score, date: formatDate(new Date())});
-        arr.sort((a,b)=>b.score-a.score);
-        arr = arr.slice(0,10);
-        await db.ref("scores").set(arr);
+        await fsAddDoc(fsCollection(db, "scores"), {initials, country, score, date: formatDate(new Date())});
     } catch(e){
         console.error("Failed to submit global score", e);
     }
