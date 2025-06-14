@@ -56,7 +56,7 @@
 *{font-family: var(--font-family); box-sizing:border-box;margin:0;padding:0}
 body{margin:0;overflow:hidden;background: var(--body-bg); color: var(--text-color)}
 #crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;background-image: var(--crt-overlay-bg); background-size:100% 2px;background-blend-mode: var(--crt-overlay-blend)}
-#gameCanvas{background: var(--canvas-bg); position:absolute;top:0;left:0} /* Renamed from #g */
+#gameCanvas{background: var(--canvas-bg); position:absolute;top:0;left:0;touch-action:none} /* Renamed from #g */
 .bg{position:absolute;top:0;left:0;width:100%;height:100%;background: var(--bg-gradient); z-index:-1}
 #hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0; color: var(--hud-color)} /* Renamed from #u */
 #startScreen h1,#gameOverScreen h1{font-size:2rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; color: var(--title-color)} /* Renamed from #s, #o */
@@ -3275,8 +3275,12 @@ window.addEventListener('mouseup', e => {
 // Touch Events
 canvas.addEventListener('touchstart', e => {
     if (e.touches.length === 1) {
-        if (handleDragStart(e.touches[0].clientX, e.touches[0].clientY)) {
+        const touch = e.touches[0];
+        if (handleDragStart(touch.clientX, touch.clientY)) {
             e.preventDefault(); // Prevent scrolling if drag started on base
+        } else {
+            // Treat simple taps as clicks for menu interaction
+            handleCanvasClick(touch.clientX, touch.clientY);
         }
     }
 }, { passive: false });
