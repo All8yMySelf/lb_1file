@@ -10,29 +10,6 @@
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyA5CSbcR_DS601s5Ok_f-UOT_dobysD9eU",
-    authDomain: "lb-1file.firebaseapp.com",
-    projectId: "lb-1file",
-    storageBucket: "lb-1file.appspot.com",
-    messagingSenderId: "828776232983",
-    appId: "1:828776232983:web:6a93c19468c9c70124c452"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  window.db = db;
-  window.fsCollection = collection;
-  window.fsAddDoc = addDoc;
-  window.fsGetDocs = getDocs;
-  window.fsQuery = query;
-  window.fsOrderBy = orderBy;
-  window.fsLimit = limit;
-</script>
 <title>Orbital Defence Elite v2.34 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
@@ -141,13 +118,10 @@ input:checked+.slider:before{transform:translateX(26px)}
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
     <button id="highScoreButton">High Scores</button>
 </div>
-<div id="gameOverScreen" style="display:none">
+<div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
     <h1>Game Over</h1>
-    <div id="finalStats"></div>
-    <h2>Local Top 10</h2>
-    <div id="localHighScores"></div>
-    <h2>Global Top 10 <label style="font-size:14px"><input type="checkbox" id="enableOnlineLeaderboard"> Enable Online Leaderboard</label></h2>
-    <div id="globalHighScores"></div>
+    <div id="finalStats"></div> <!-- Renamed from #f -->
+    <div id="gameOverHighScores"></div>
     <div id="nonHighScoreMessage" style="margin-top:10px"></div>
     <button id="restartButton">Play Again</button> <!-- Renamed from #r -->
 </div>
@@ -457,6 +431,7 @@ const THEMES = [
     }
 ];
 </script>
+<script>
 (function(){ // IIFE to encapsulate code
 "use strict";
 let currentThemeIndex = 0;
@@ -1110,7 +1085,7 @@ function recordHighScore(score) {
         showHighScoreModal(score, beaten);
     } else {
         getElement('nonHighScoreMessage').textContent = `Game Over – You placed #${rank}. Try again to reach the top 10!`;
-        renderHighScores('localHighScores', scores);
+        renderHighScores('gameOverHighScores', scores);
     }
 }
 
@@ -1131,7 +1106,7 @@ function saveHighScoreFromModal() {
     scores.sort((a,b) => b.score - a.score);
     scores = scores.slice(0,10);
     saveHighScores(scores);
-    renderHighScores('localHighScores', scores);
+    renderHighScores('gameOverHighScores', scores);
     getElement('highScoreModal').style.display = 'none';
     getElement('nonHighScoreMessage').textContent = '';
     pendingHighScore = null;
@@ -1172,53 +1147,6 @@ function closeHighScoreScreen() {
 }
 
 // --- Game Initialization & Start ---
-async function fetchGlobalScores(){
-    if(!db){
-        getElement("globalHighScores").innerHTML = "<p>Online leaderboard unavailable</p>";
-        return [];
-    }
-    try {
-        const q = fsQuery(fsCollection(db, "scores"), fsOrderBy("score", "desc"), fsLimit(10));
-        const snap = await fsGetDocs(q);
-        const arr = snap.docs.map(d => d.data());
-        renderHighScores("globalHighScores", arr);
-        return arr;
-    } catch(e){
-        console.error("Failed to fetch global scores", e);
-        getElement("globalHighScores").innerHTML = "<p>Could not connect to server</p>";
-        return [];
-    }
-}
-
-async function submitGlobalScore(initials, country, score){
-    if(!db) return;
-    try {
-        await fsAddDoc(fsCollection(db, "scores"), {initials, country, score, date: formatDate(new Date())});
-    } catch(e){
-        console.error("Failed to submit global score", e);
-    }
-}
-
-async function checkGlobalHighScore(score){
-    if(!db) return;
-    const scores = await fetchGlobalScores();
-    const withPlayer = scores.concat({initials:"", country:"", score, date: formatDate(new Date())});
-    withPlayer.sort((a,b)=>b.score-a.score);
-    const rank = withPlayer.findIndex(s=>s.initials==="" && s.score===score)+1;
-    if(rank<=10){
-        let initials = prompt("Enter initials (3 letters):","") || "???";
-        initials = initials.toUpperCase().slice(0,3);
-        let country = "";
-        try{
-            const res = await fetch("https://ipapi.co/country/");
-            if(res.ok) country = await res.text();
-        }catch(e){}
-        if(!country) country = prompt("Enter country code:","") || "";
-        await submitGlobalScore(initials, country, score);
-    await fetchGlobalScores();
-    }
-}
-
 function initializeGame(shouldTryLoad = true) {
     const initialRange = Math.min(canvasWidth, canvasHeight) / 4;
 
@@ -1459,9 +1387,6 @@ function gameOver() {
     getElement('gameOverScreen').style.display = 'flex';
     getElement('finalStats').textContent = `Final Credits: ${gameState.credits} | Waves Survived: ${gameState.wave} | Score: ${gameState.score}`;
     recordHighScore(gameState.score);
-    if (getElement("enableOnlineLeaderboard").checked) {
-        checkGlobalHighScore(gameState.score);
-    }
     saveGame(); // Save final state on game over
 }
 
@@ -3039,13 +2964,6 @@ getElement('saveHighScoreButton').onclick = saveHighScoreFromModal;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
-getElement('enableOnlineLeaderboard').onchange = e => {
-    if (e.target.checked) {
-        fetchGlobalScores();
-    } else {
-        getElement('globalHighScores').innerHTML = "";
-    }
-};
 
 // Window Resize
 window.addEventListener('resize', () => {
