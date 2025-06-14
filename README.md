@@ -19,6 +19,9 @@ tab when the game is loaded.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v2.36
+- Added Sensors upgrade category with enemy outlines, health bars and targeting AI.
+
 ### v2.35
 - Polished upgrade lines and swapped triangle notches for rectangles.
 
