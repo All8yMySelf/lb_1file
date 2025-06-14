@@ -741,6 +741,8 @@ function resetEnemy(enemy, config) {
     enemy.stunTime = config.stunTime || 0;
     enemy.type = config.type || 'Normal';
 
+    enemy.isTargeted = false;
+
     enemy.allocatedDamage = 0;
 
     // Clear dynamic properties
@@ -942,10 +944,10 @@ function drawParticles() {
     // ctx.globalAlpha = 1; // Reset alpha if applied individually
 }
 
-function drawBracket(x, y, size) {
+function drawBracket(x, y, size, color = '#ffcc00') {
     const pulse = 1 + 0.1 * Math.sin(Date.now() / 200);
     const s = size * pulse;
-    ctx.strokeStyle = '#ffcc00';
+    ctx.strokeStyle = color;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(x - s, y - s * 0.6); ctx.lineTo(x - s, y - s); ctx.lineTo(x - s * 0.6, y - s);
@@ -1557,6 +1559,9 @@ function updateGame(dt) {
     // Apply game speed multiplier to delta time
     const effectiveDt = dt * gameSpeedMultiplier;
 
+    // Reset targeting flags
+    enemyPool.getActiveObjects().forEach(e => e.isTargeted = false);
+
     handleBaseMovement(effectiveDt);
     const baseMoved = updateEnemies(effectiveDt); // Returns true if base drag/return caused global move
     spawnNewEnemies(effectiveDt);
@@ -1748,6 +1753,7 @@ function handlePlayerFiring(dt) {
 
             for (let i = 0; i < base.gunBarrelCount; i++) {
                 const t = targets[i] || nearestEnemy;
+                if (t) t.isTargeted = true;
                 const angle = Math.atan2(t.y - base.y, t.x - base.x);
                 const shade = Math.floor((i - (base.gunBarrelCount - 1) / 2) * 20);
                 bulletPool.get({
@@ -1773,6 +1779,7 @@ function handlePlayerFiring(dt) {
 
         if (targets.length > 0) {
              targets.forEach(target => {
+                target.isTargeted = true;
                 const angle = Math.atan2(target.y - base.y, target.x - base.x);
                 const launchAngle = angle + (Math.random() - 0.5) * (Math.PI / 8); // Launch spread
 
@@ -1807,6 +1814,7 @@ function handlePlayerFiring(dt) {
         );
 
         if (laserTarget) {
+            laserTarget.isTargeted = true;
             laserTarget.health -= base.laserDamage;
             gameState.lastLaserFireTime = currentTime;
             gameState.laserEffectEndTime = currentTime + 200; // Duration of visual effect
@@ -1894,6 +1902,7 @@ function updateProjectiles(dt, baseMoved) {
 
         // 2. Steering Logic
         if (targetEnemy) {
+            targetEnemy.isTargeted = true;
             const dx = targetEnemy.x - missile.x;
             const dy = targetEnemy.y - missile.y;
             const targetAngle = Math.atan2(dy, dx);
@@ -2204,8 +2213,10 @@ function drawGame() {
     const hudInfo = {};
     enemies.forEach(enemy => {
         const bracketSize = sensorUpgrades.enemyVisuals ? enemy.radius + 4 : 8;
-        if (sensorDisplayMode !== 'off') {
-            drawBracket(enemy.x, enemy.y, bracketSize);
+        const showBracket = sensorDisplayMode !== 'off' || enemy.isTargeted;
+        if (showBracket) {
+            const color = enemy.isTargeted ? '#ff0000' : '#ffcc00';
+            drawBracket(enemy.x, enemy.y, bracketSize, color);
         }
 
         if (sensorUpgrades.enemyVisuals) {
