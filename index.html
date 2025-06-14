@@ -564,9 +564,14 @@ const CONFIG = {
     STUN_EFFECT_DURATION: 2000, // ms
     TARGET_LOCK_DURATION: 300, // ms brackets stay red this long after targeting
     AUTO_SAVE_INTERVAL: 60000, // ms (1 minute)
-    DRAG_THRESHOLD: 5, // pixels to initiate drag vs click
+    DRAG_THRESHOLD: 5, // pixels to initiate drag vs click (default)
     CANVAS_CLICK_TOLERANCE: 20 // pixels tolerance for clicking ring UI
 };
+// Increase drag threshold on touch devices to make tapping upgrades easier
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+if (isTouchDevice) {
+    CONFIG.DRAG_THRESHOLD = 20;
+}
 const {
   ENEMY_HEALTH_SCALE_FACTOR,
   BULLET_BASE_SPEED,
