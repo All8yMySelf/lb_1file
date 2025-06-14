@@ -1,5 +1,9 @@
 # Orbital Defence Elite - Change Log
 
+## v2.37
+- Introduced inexpensive "Electronic FOV" upgrade to expand detection radius.
+- Displays a faint sensor ring and hides enemies until they enter this range.
+
 ## v2.36
 - Added "Sensors" upgrade category with enemy outlines, health bars and targeting AI.
 - Targeted enemies now keep solid red brackets briefly after locking on.

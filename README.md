@@ -19,6 +19,10 @@ tab when the game is loaded.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v2.37
+- Added Electronic FOV sensor upgrade with visible radius ring.
+- Enemies outside the sensor radius remain hidden until entering it.
+
 ### v2.36
 - Added Sensors upgrade category with enemy outlines, health bars and targeting AI.
 - Targeted enemies now keep solid red brackets for a short time.

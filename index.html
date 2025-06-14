@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- V2.36: Added Sensors upgrade category and targeting AI -->
+<!-- V2.37: Added Electronic FOV sensor range upgrade -->
 <!-- V2.18: Refactored theme management to use themes.js, reinstated theme cycling -->
 <!-- V2.17.1: Removed theme cycling logic and hid theme button -->
 <!-- V2.17: Removed themes 2-6, updated version number -->
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<title>Orbital Defence Elite v2.36 - Optimised</title>
+<title>Orbital Defence Elite v2.37 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root {
@@ -117,7 +117,7 @@ input:checked+.slider:before{transform:translateX(26px)}
     <span id="healthDisplay"></span> <!-- Renamed from #h -->
 </div>
 <div id="startScreen"> <!-- Renamed from #s -->
-    <h1>Orbital Defence Elite v2.36</h1>
+    <h1>Orbital Defence Elite v2.37</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
     <button id="highScoreButton">High Scores</button>
@@ -617,9 +617,10 @@ const UPGRADE_MISSILE_DAMAGE = 2;
 const UPGRADE_MISSILE_HOMING = 3;
 const UPGRADE_MISSILE_MACROSS = 4;
 const UPGRADE_SPECIAL_STUN = 0;
-const UPGRADE_SENSOR_OUTLINES = 0;
-const UPGRADE_SENSOR_HEALTHBARS = 1;
-const UPGRADE_SENSOR_TARGET_AI = 2;
+const UPGRADE_SENSOR_RANGE = 0;
+const UPGRADE_SENSOR_OUTLINES = 1;
+const UPGRADE_SENSOR_HEALTHBARS = 2;
+const UPGRADE_SENSOR_TARGET_AI = 3;
 
 // Enemy types: [color, speed, health, radius, credits]
 const ENEMY_TYPES = [
@@ -1132,6 +1133,7 @@ function loadGame() {
        base.missileTurnSpeed = savedBase.missileTurnSpeed || 0.05;
       base.missileHomingRadius = savedBase.missileHomingRadius;
         base.focusRadiusSetting = savedBase.focusRadiusSetting || 0;
+        base.sensorRange = savedBase.sensorRange || base.cannonRange;
         base.missileOrbit = false; // Not implemented?
         base.color = savedBase.color;
         base.currentMoveSpeed = savedBase.currentMoveSpeed; // Restore move speed
@@ -1177,7 +1179,7 @@ function loadGame() {
     // Close loadGame function
 }
 
-const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.36';
+const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.37';
 
 function loadHighScores() {
     try {
@@ -1325,6 +1327,7 @@ function initializeGame(shouldTryLoad = true) {
         missileTurnSpeed: 0.05,
         missileHomingRadius: 0,
         focusRadiusSetting: 0,
+        sensorRange: initialRange,
         missileOrbit: false, // Not implemented?
         color: 'rgb(94,79,162)',
         currentMoveSpeed: BASE_INITIAL_MOVE_SPEED // Base speed without upgrades
@@ -1458,6 +1461,13 @@ function initializeGame(shouldTryLoad = true) {
             category: "Sensors",
             expanded: false,
             upgrades: [
+                { name: 'Electronic FOV', cost: 50, level: 0, maxLevel: 20,
+                  f: level => 1 + 0.1 * level,
+                  g: (level, cost, maxLvl) => {
+                      const current = Math.round((1 + 0.1 * level) * 100);
+                      const next = Math.round((1 + 0.1 * (level + 1)) * 100);
+                      return `${current}%${level < maxLvl ? ` > ${next}%` : ''}`;
+                  } },
                 { name: 'Enemy Identification', cost: 100, level: 0, maxLevel: 1,
                   f: level => level > 0,
                   g: (level) => level > 0 ? 'On' : '(Enable)' },
@@ -2117,6 +2127,12 @@ function drawGame() {
         ctx.arc(base.x, base.y, base.cannonRange * base.focusRadiusSetting, 0, Math.PI * 2);
         ctx.stroke();
     }
+    if (base.sensorRange > base.cannonRange) {
+        ctx.strokeStyle = colorWithAlpha(currentTheme.canvasColors.ringSensor, 0.15);
+        ctx.beginPath();
+        ctx.arc(base.x, base.y, base.sensorRange, 0, Math.PI * 2);
+        ctx.stroke();
+    }
 
     // --- Draw Ring UI (Directly on Canvas) ---
     ringClickRegions = []; // Clear regions each frame
@@ -2224,6 +2240,7 @@ function drawGame() {
     ctx.lineWidth = 2;
     const hudInfo = {};
     enemies.forEach(enemy => {
+        if (Math.hypot(enemy.x - base.x, enemy.y - base.y) > base.sensorRange) return;
         const bracketSize = sensorUpgrades.enemyVisuals ? enemy.radius + 4 : 8;
         const showBracket = sensorDisplayMode !== 'off' || enemy.isTargeted;
         if (showBracket) {
@@ -2857,7 +2874,11 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
             switch(upgradeIndex) {
                 case UPGRADE_CANNON_FIRERATE: base.fireRate = upgrade.f(level); break;
                 case UPGRADE_CANNON_DAMAGE: base.bulletDamage = upgrade.f(level); break;
-                case UPGRADE_CANNON_RANGE: base.cannonRange = upgrade.f(level);
+                case UPGRADE_CANNON_RANGE:
+                    base.cannonRange = upgrade.f(level);
+                    // Update sensor range if Electronic FOV purchased
+                    const sensorUpgrade = upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_RANGE];
+                    base.sensorRange = base.cannonRange * sensorUpgrade.f(sensorUpgrade.level);
                     // Also update missile targeting radius if missiles are active
                     if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level > 0) {
                          const missileRangeUpgrade = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE];
@@ -2949,6 +2970,9 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
             break;
         case UPGRADE_CATEGORY_SENSORS:
             switch(upgradeIndex) {
+                case UPGRADE_SENSOR_RANGE:
+                    base.sensorRange = base.cannonRange * upgrade.f(level);
+                    break;
                 case UPGRADE_SENSOR_OUTLINES:
                     sensorUpgrades.enemyVisuals = level > 0;
                     break;
