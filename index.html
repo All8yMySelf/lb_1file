@@ -3077,6 +3077,12 @@ function handleFullscreenChange() {
     canvasHeight = window.innerHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+    if (inFull && base) {
+        base.x = canvasWidth / 2;
+        base.y = canvasHeight / 2;
+        baseStartX = base.x;
+        baseStartY = base.y;
+    }
     drawGame();
 }
 
