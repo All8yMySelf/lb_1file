@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- V2.35: Polished upgrade lines and rectangle focus notches -->
+<!-- V2.36: Added Sensors upgrade category and targeting AI -->
 <!-- V2.18: Refactored theme management to use themes.js, reinstated theme cycling -->
 <!-- V2.17.1: Removed theme cycling logic and hid theme button -->
 <!-- V2.17: Removed themes 2-6, updated version number -->
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<title>Orbital Defence Elite v2.35 - Optimised</title>
+<title>Orbital Defence Elite v2.36 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root {
@@ -113,7 +113,7 @@ input:checked+.slider:before{transform:translateX(26px)}
     <span id="healthDisplay"></span> <!-- Renamed from #h -->
 </div>
 <div id="startScreen"> <!-- Renamed from #s -->
-    <h1>Orbital Defence Elite v2.35</h1>
+    <h1>Orbital Defence Elite v2.36</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
     <button id="highScoreButton">High Scores</button>
@@ -237,6 +237,7 @@ const THEMES = [
             ringLaserUpgrade: 'rgba(255, 0, 0, 0.8)',
             ringStun: 'rgba(0, 255, 255, 0.5)',
             ringStunUpgrade: 'rgba(0, 255, 255, 0.8)',
+            ringSensor: 'rgba(255, 200, 0, 0.6)',
             ringUpgradeBoxBg: 'rgba(50, 50, 50, 0.7)',
             ringUpgradeBoxAvailable: 'rgba(0, 255, 0, 0.7)',
             ringUpgradeBoxText: 'rgba(230, 181, 75, 1)',
@@ -326,6 +327,7 @@ const THEMES = [
             ringLaserUpgrade: 'rgba(255, 0, 255, 0.8)',
             ringStun: 'rgba(0, 255, 255, 0.5)',
             ringStunUpgrade: 'rgba(0, 255, 255, 0.8)',
+            ringSensor: 'rgba(255, 200, 0, 0.6)',
             ringUpgradeBoxBg: 'rgba(0, 0, 0, 0.7)',
             ringUpgradeBoxAvailable: 'rgba(0, 255, 0, 0.7)',
             ringUpgradeBoxText: '#00ffcc',
@@ -413,6 +415,7 @@ const THEMES = [
             ringLaserUpgrade: 'rgba(0, 0, 0, 0.8)',
             ringStun: 'rgba(100, 100, 100, 0.5)',
             ringStunUpgrade: 'rgba(50, 50, 50, 0.8)',
+            ringSensor: 'rgba(255, 200, 0, 0.6)',
             ringUpgradeBoxBg: 'rgba(200, 200, 200, 0.7)',
             ringUpgradeBoxAvailable: 'rgba(0, 255, 0, 0.7)',
             ringUpgradeBoxText: '#000000',
@@ -495,7 +498,8 @@ const UPGRADE_CATEGORY_DEFENSE = 1;
 const UPGRADE_CATEGORY_LASER = 2;
 const UPGRADE_CATEGORY_MISSILE = 3;
 const UPGRADE_CATEGORY_SPECIAL = 4;
-const UPGRADE_CATEGORY_DEBUG = 5;
+const UPGRADE_CATEGORY_SENSORS = 5;
+const UPGRADE_CATEGORY_DEBUG = 6;
 
 // Specific Upgrade Indices (within category)
 const UPGRADE_CANNON_FIRERATE = 0;
@@ -512,6 +516,9 @@ const UPGRADE_MISSILE_DAMAGE = 2;
 const UPGRADE_MISSILE_HOMING = 3;
 const UPGRADE_MISSILE_MACROSS = 4;
 const UPGRADE_SPECIAL_STUN = 0;
+const UPGRADE_SENSOR_OUTLINES = 0;
+const UPGRADE_SENSOR_HEALTHBARS = 1;
+const UPGRADE_SENSOR_TARGET_AI = 2;
 
 // Enemy types: [color, speed, health, radius, credits]
 const ENEMY_TYPES = [
@@ -539,6 +546,7 @@ canvas.height = canvasHeight;
 // --- Game State Variables ---
 let showRingInfo = true;
 let showMissileRadius = false;
+let sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
 let baseCanMove = true;
 let keysPressed = {};
 let particles = [];
@@ -632,6 +640,8 @@ function resetEnemy(enemy, config) {
     enemy.isStunned = config.st || false;
     enemy.stunTime = config.stunTime || 0;
     enemy.type = config.type || 'Normal';
+
+    enemy.allocatedDamage = 0;
 
     // Clear dynamic properties
     enemy.trail = [];
@@ -761,6 +771,7 @@ function getCategoryColor(index){
         case UPGRADE_CATEGORY_LASER: return currentTheme.canvasColors.ringLaser;
         case UPGRADE_CATEGORY_MISSILE: return currentTheme.canvasColors.ringMissile;
         case UPGRADE_CATEGORY_SPECIAL: return currentTheme.canvasColors.ringStun;
+        case UPGRADE_CATEGORY_SENSORS: return currentTheme.canvasColors.ringSensor || currentTheme.canvasColors.ringCannon;
         default: return currentTheme.canvasColors.ringCannon;
     }
 }
@@ -1048,7 +1059,7 @@ function loadGame() {
     // Close loadGame function
 }
 
-const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.35';
+const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.36';
 
 function loadHighScores() {
     try {
@@ -1201,6 +1212,8 @@ function initializeGame(shouldTryLoad = true) {
         currentMoveSpeed: BASE_INITIAL_MOVE_SPEED // Base speed without upgrades
     };
 
+    sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
+
     resetPools();
     getElement('macrossButton').classList.remove('active');
 
@@ -1321,7 +1334,22 @@ function initializeGame(shouldTryLoad = true) {
                   g: (level, cost, maxLvl) => `${level * 10}%${level < maxLvl ? `>${(level + 1) * 10}%` : ''}` }
             ]
         },
-        { // Category 5: Debug
+        { // Category 5: Sensors
+            category: "Sensors",
+            expanded: false,
+            upgrades: [
+                { name: 'Enemy Outlines', cost: 100, level: 0, maxLevel: 1,
+                  f: level => level > 0,
+                  g: (level) => level > 0 ? 'On' : '(Enable)' },
+                { name: 'Show Health Bars', cost: 500, level: 0, maxLevel: 1,
+                  f: level => level > 0,
+                  g: (level) => level > 0 ? 'On' : '(Enable)' },
+                { name: 'Target Analysis AI', cost: 3000, level: 0, maxLevel: 1,
+                  f: level => level > 0,
+                  g: (level) => level > 0 ? 'Active' : '(Install)' }
+            ]
+        },
+        { // Category 6: Debug
             category: "Debug",
             expanded: false,
             upgrades: [
@@ -1517,9 +1545,13 @@ function updateEnemies(dt) {
 
 
         // Update trail for fast enemies
-        if (enemy.speed > 3) { // Threshold for trailing effect
-            enemy.trail.unshift({ x: enemy.x, y: enemy.y });
-            if (enemy.trail.length > 5) enemy.trail.pop();
+        if (sensorUpgrades.enemyVisuals) {
+            if (enemy.speed > 3) { // Threshold for trailing effect
+                enemy.trail.unshift({ x: enemy.x, y: enemy.y });
+                if (enemy.trail.length > 5) enemy.trail.pop();
+            } else {
+                enemy.trail = [];
+            }
         } else {
             enemy.trail = [];
         }
@@ -1583,6 +1615,7 @@ function handlePlayerFiring(dt) {
         if (nearestEnemy && (gameState.autoFire || keysPressed[' '])) {
             let targets = enemies
                 .filter(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange)
+                .filter(e => !sensorUpgrades.targetAI || (e.health - (e.allocatedDamage||0) > 0))
                 .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
             const bigThreat = targets.find(e => e.radius >= 20 && Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * 0.5);
             const focusTarget = targets.find(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * base.focusRadiusSetting);
@@ -1609,6 +1642,7 @@ function handlePlayerFiring(dt) {
                     dy: Math.sin(angle),
                     color: shadeColor(currentTheme.canvasColors.bullet, shade)
                 });
+                if (sensorUpgrades.targetAI) t.allocatedDamage = (t.allocatedDamage||0) + base.bulletDamage;
             }
             gameState.lastBulletFireTime = currentTime;
         }
@@ -1618,6 +1652,7 @@ function handlePlayerFiring(dt) {
     if (base.missileCount > 0 && currentTime - gameState.lastMissileFireTime >= MISSILE_FIRE_INTERVAL / gameSpeedMultiplier) {
         let targets = enemies
             .filter(enemy => Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.missileTargetingRadius)
+            .filter(e => !sensorUpgrades.targetAI || (e.health - (e.allocatedDamage||0) > 0))
             .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y))
             .slice(0, base.missileCount); // Fire up to missileCount missiles
 
@@ -1640,6 +1675,7 @@ function handlePlayerFiring(dt) {
                     startY: base.y,
                     rangeLimit: base.missileTargetingRadius * 1.1
                 });
+                if (sensorUpgrades.targetAI) target.allocatedDamage = (target.allocatedDamage||0) + base.missileDamage;
              });
             createExplosion(base.x, base.y, 'orange', 5 * targets.length, 8); // Bigger launch effect for more missiles
             gameState.lastMissileFireTime = currentTime;
@@ -1651,7 +1687,8 @@ function handlePlayerFiring(dt) {
         // Target Fast or Boss enemies first within laser range
         const laserTarget = enemies.find(enemy =>
             (enemy.type === 'Fast' || enemy.type === 'Boss') &&
-            Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.laserRange
+            Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.laserRange &&
+            (!sensorUpgrades.targetAI || (enemy.health - (enemy.allocatedDamage||0) > 0))
         );
 
         if (laserTarget) {
@@ -1799,6 +1836,7 @@ function checkCollisions(dt) {
             if (distSq < radiiSumSq) {
                 bulletHit = true;
                 enemy.health -= base.bulletDamage;
+                if (sensorUpgrades.targetAI) enemy.allocatedDamage = Math.max(0, (enemy.allocatedDamage||0) - base.bulletDamage);
                 createParticle(bullet.x, bullet.y, currentTheme.canvasColors.particleHit, 2, 0.3, 2); // Hit spark
 
                 if (enemy.health <= 0) {
@@ -1833,6 +1871,7 @@ function checkCollisions(dt) {
                 missileHit = true;
                 const damage = missile.isMacross ? base.macrossMissileDamage : base.missileDamage;
                 enemy.health -= damage;
+                if (sensorUpgrades.targetAI) enemy.allocatedDamage = Math.max(0, (enemy.allocatedDamage||0) - damage);
                  // Small impact explosion
                  createExplosion(missile.x, missile.y, currentTheme.canvasColors.missile, 10, enemy.radius / 2); // Use missile color
 
@@ -2048,48 +2087,60 @@ function drawGame() {
     // --- Draw Enemies ---
     ctx.lineWidth = 2;
     enemies.forEach(enemy => {
-        // Trail for fast enemies
-        if (enemy.trail.length > 1) {
-            ctx.strokeStyle = `${enemy.color}80`; // Semi-transparent color
+        if (sensorUpgrades.enemyVisuals) {
+            if (enemy.trail.length > 1) {
+                ctx.strokeStyle = `${enemy.color}80`;
+                ctx.beginPath();
+                ctx.moveTo(enemy.trail[0].x, enemy.trail[0].y);
+                for(let i = 1; i < enemy.trail.length; i++) {
+                    ctx.globalAlpha = 1 - (i / enemy.trail.length) * 0.7;
+                    ctx.lineTo(enemy.trail[i].x, enemy.trail[i].y);
+                }
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+
+            ctx.fillStyle = enemy.color;
             ctx.beginPath();
-            ctx.moveTo(enemy.trail[0].x, enemy.trail[0].y);
-            for(let i = 1; i < enemy.trail.length; i++) {
-             ctx.globalAlpha = 1 - (i / enemy.trail.length) * 0.7;
-             ctx.lineTo(enemy.trail[i].x, enemy.trail[i].y);
-        }
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-        }
+            ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+            ctx.fill();
 
-        // Enemy body
-        ctx.fillStyle = enemy.color;
-        ctx.beginPath();
-        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Stun effect visual
-        if (enemy.isStunned) {
-            ctx.strokeStyle = currentTheme.canvasColors.enemyStunEffect;
-            ctx.lineWidth = 3;
+            if (enemy.isStunned) {
+                ctx.strokeStyle = currentTheme.canvasColors.enemyStunEffect;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, enemy.radius + 4, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        } else {
+            const grad = ctx.createRadialGradient(enemy.x, enemy.y, 0, enemy.x, enemy.y, 4);
+            grad.addColorStop(0, '#ffcc00');
+            grad.addColorStop(1, '#ff6600');
+            ctx.fillStyle = grad;
             ctx.beginPath();
-            ctx.arc(enemy.x, enemy.y, enemy.radius + 4, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.arc(enemy.x, enemy.y, 4, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        // Health bar
         const healthPercent = Math.max(0, enemy.health / enemy.maxHealth);
-        const barWidth = enemy.radius * 2;
+        const barWidth = (sensorUpgrades.enemyVisuals ? enemy.radius * 2 : 8);
         const barHeight = 4;
-        const barX = enemy.x - enemy.radius;
-        const barY = enemy.y - enemy.radius - 10;
-        ctx.fillStyle = currentTheme.canvasColors.enemyHealthBarBg;
-        ctx.fillRect(barX, barY, barWidth, barHeight);
-        ctx.fillStyle = currentTheme.canvasColors.enemyHealthBarFg;
-        ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
-        // Optional: Theme-based border?
-        // ctx.strokeStyle = 'rgba(0,0,0,0.5)'; // Border
-        // ctx.lineWidth = 1;
-        // ctx.strokeRect(barX, barY, barWidth, barHeight);
+        const barX = enemy.x - barWidth / 2;
+        const barY = enemy.y - (sensorUpgrades.enemyVisuals ? enemy.radius : 4) - 10;
+        if (sensorUpgrades.showHealthBars) {
+            ctx.fillStyle = currentTheme.canvasColors.enemyHealthBarBg;
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+            ctx.fillStyle = currentTheme.canvasColors.enemyHealthBarFg;
+            ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+        }
+
+        if (sensorUpgrades.targetAI) {
+            const shots = Math.max(0, Math.ceil((enemy.health - (enemy.allocatedDamage||0)) / base.bulletDamage));
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(shots, enemy.x, barY - 6);
+        }
     });
 
 
@@ -2691,6 +2742,19 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                  } else {
                      base.stunRadius = 0;
                  }
+            }
+            break;
+        case UPGRADE_CATEGORY_SENSORS:
+            switch(upgradeIndex) {
+                case UPGRADE_SENSOR_OUTLINES:
+                    sensorUpgrades.enemyVisuals = level > 0;
+                    break;
+                case UPGRADE_SENSOR_HEALTHBARS:
+                    sensorUpgrades.showHealthBars = level > 0;
+                    break;
+                case UPGRADE_SENSOR_TARGET_AI:
+                    sensorUpgrades.targetAI = level > 0;
+                    break;
             }
             break;
     }
