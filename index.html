@@ -90,7 +90,7 @@ input:checked+.slider:before{transform:translateX(26px)}
 #hotkeys.show{display:block}
 #sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color: var(--hotkey-text);z-index:10}
 #sensorDisplayToggle{padding:2px 8px;font-size:var(--hotkey-font-size);cursor:pointer}
-#enemyHUD{position:absolute;top:10px;right:10px;background: var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color: var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:0.9}
+#enemyHUD{position:absolute;top:100px;right:10px;background: var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color: var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:0.9}
 #enemyHUD.show{display:block}
 /* Removed styles related to DOM-based ring UI (.ring-upgrade-box, .upgrade-info-panel, .ring-info-container, etc.) */
 #highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse}
@@ -2204,7 +2204,9 @@ function drawGame() {
     const hudInfo = {};
     enemies.forEach(enemy => {
         const bracketSize = sensorUpgrades.enemyVisuals ? enemy.radius + 4 : 8;
-        drawBracket(enemy.x, enemy.y, bracketSize);
+        if (sensorDisplayMode !== 'off') {
+            drawBracket(enemy.x, enemy.y, bracketSize);
+        }
 
         if (sensorUpgrades.enemyVisuals) {
             if (enemy.trail.length > 1) {
@@ -2245,7 +2247,8 @@ function drawGame() {
         const barWidth = sensorUpgrades.enemyVisuals ? enemy.radius * 2 : 8;
         const barHeight = 4;
         const barX = enemy.x - barWidth / 2;
-        const barY = enemy.y - (sensorUpgrades.enemyVisuals ? enemy.radius : 4) - 10;
+        const barYOffset = sensorDisplayMode === 'off' ? 15 : 10;
+        const barY = enemy.y - (sensorUpgrades.enemyVisuals ? enemy.radius : 4) - barYOffset;
 
         if (sensorDisplayMode === 'inline') {
             const infoLines = [];
@@ -2270,7 +2273,7 @@ function drawGame() {
             infoLines.forEach(t => { maxW = Math.max(maxW, ctx.measureText(t).width); });
             const boxWidth = Math.max(maxW + padding * 2, 40);
             let boxHeight = infoLines.length * (fontSize + 2) + padding * 2;
-            if (sensorUpgrades.showHealthBars) boxHeight += 6;
+            if (sensorUpgrades.showHealthBars) boxHeight += barHeight + fontSize + 8;
             const boxX = enemy.x + bracketSize + 10;
             const boxY = enemy.y - boxHeight / 2;
             ctx.fillStyle = 'rgba(255,204,0,0.35)';
@@ -2288,8 +2291,8 @@ function drawGame() {
                 ctx.fillRect(boxX + padding, boxY + padding, (boxWidth - padding * 2) * healthPercent, barHeight);
                 ctx.fillStyle = '#000';
                 ctx.font = '8px monospace';
-                ctx.fillText('HP', boxX + padding, boxY + padding + barHeight + 8);
-                textY = boxY + padding + barHeight + 14;
+                ctx.fillText('HP', boxX + padding, boxY + padding + barHeight + fontSize - 1);
+                textY = boxY + padding + barHeight + fontSize + 4;
             } else {
                 textY = boxY + padding + fontSize;
             }
@@ -3001,6 +3004,15 @@ function cycleSensorDisplayMode() {
 function updateEnemyHUD(info) {
     const hud = getElement('enemyHUD');
     if (sensorDisplayMode !== 'hud') { hud.classList.remove('show'); return; }
+
+    const hudBar = getElement('hud');
+    const hotkeys = getElement('hotkeys');
+    let top = hudBar.offsetHeight + 10;
+    if (hotkeys.classList.contains('show')) {
+        top += hotkeys.offsetHeight + 10;
+    }
+    hud.style.top = top + 'px';
+
     const lines = [];
     if (!sensorUpgrades.enemyVisuals) {
         lines.push('<div>Enemies not identified</div>');
