@@ -944,8 +944,8 @@ function drawParticles() {
     // ctx.globalAlpha = 1; // Reset alpha if applied individually
 }
 
-function drawBracket(x, y, size, color = '#ffcc00') {
-    const pulse = 1 + 0.1 * Math.sin(Date.now() / 200);
+function drawBracket(x, y, size, color = '#ffcc00', pulsing = true) {
+    const pulse = pulsing ? 1 + 0.1 * Math.sin(Date.now() / 200) : 1;
     const s = size * pulse;
     ctx.strokeStyle = color;
     ctx.lineWidth = 1;
@@ -2216,7 +2216,7 @@ function drawGame() {
         const showBracket = sensorDisplayMode !== 'off' || enemy.isTargeted;
         if (showBracket) {
             const color = enemy.isTargeted ? '#ff0000' : '#ffcc00';
-            drawBracket(enemy.x, enemy.y, bracketSize, color);
+            drawBracket(enemy.x, enemy.y, bracketSize, color, !enemy.isTargeted);
         }
 
         if (sensorUpgrades.enemyVisuals) {
