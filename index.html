@@ -74,6 +74,7 @@ button:disabled{background: var(--button-disabled-bg); color: var(--button-disab
 #toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
 #toggleInfoButton.active{background-color: var(--toggle-active-bg); color: var(--toggle-active-text)}
 #playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}
+#fullscreenButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}
 #speedDisplay{display:flex;align-items:center;justify-content:center;width:40px;font-size:18px}
 #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background: var(--toast-bg); color: var(--toast-text); padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity 0.3s ease;pointer-events:none}
 #toast.show{opacity:1}
@@ -155,6 +156,7 @@ input:checked+.slider:before{transform:translateX(26px)}
         <span class="switch-label">Enemy Info:</span>
         <button id="sensorDisplayToggle">Inline</button>
     </div>
+    <button id="fullscreenButton">&#x26F6;</button>
 </div>
 <div id="hotkeys" class="show">
     <div>H: Show/Hide Hotkeys</div>
@@ -3053,6 +3055,31 @@ function cycleSensorDisplayMode() {
     drawGame();
 }
 
+function toggleFullScreen() {
+    const doc = document;
+    if (!doc.fullscreenElement) {
+        const el = doc.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    } else {
+        if (doc.exitFullscreen) doc.exitFullscreen();
+        else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+        else if (doc.msExitFullscreen) doc.msExitFullscreen();
+    }
+}
+
+function handleFullscreenChange() {
+    const btn = getElement('fullscreenButton');
+    const inFull = !!document.fullscreenElement;
+    btn.textContent = inFull ? '\u2715' : '\u26F6';
+    canvasWidth = window.innerWidth;
+    canvasHeight = window.innerHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    drawGame();
+}
+
 function updateEnemyHUD(info) {
     const hud = getElement('enemyHUD');
     if (sensorDisplayMode !== 'hud') { hud.classList.remove('show'); return; }
@@ -3297,6 +3324,9 @@ getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
 getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
+getElement('fullscreenButton').onclick = toggleFullScreen;
+
+document.addEventListener('fullscreenchange', handleFullscreenChange);
 
 // Window Resize
 window.addEventListener('resize', () => {
