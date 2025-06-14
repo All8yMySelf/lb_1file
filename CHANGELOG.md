@@ -2,6 +2,7 @@
 
 ## v2.36
 - Added "Sensors" upgrade category with enemy outlines, health bars and targeting AI.
+- Targeted enemies now keep solid red brackets briefly after locking on.
 
 ## v2.35
 - Polished line connections and made focus radius notches rectangular.
