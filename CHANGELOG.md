@@ -1,5 +1,8 @@
 # Orbital Defence Elite - Change Log
 
+## v2.36
+- Added "Sensors" upgrade category with enemy outlines, health bars and targeting AI.
+
 ## v2.35
 - Polished line connections and made focus radius notches rectangular.
 
