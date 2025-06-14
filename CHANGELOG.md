@@ -1,5 +1,8 @@
 # Orbital Defence Elite - Change Log
 
+## v2.35
+- Polished line connections and made focus radius notches rectangular.
+
 ## v2.34
 - Fire rate button layout and cost highlights for upgrades.
 - Cannon category renamed and menu uses flowchart layout.
