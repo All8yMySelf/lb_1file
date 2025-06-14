@@ -70,7 +70,7 @@ button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-
 button:hover{background: var(--button-hover-bg); transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2)}
 button:active{transform:translateY(1px)}
 button:disabled{background: var(--button-disabled-bg); color: var(--button-disabled-text); cursor:not-allowed;transform:none;box-shadow:none}
-#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10}
+#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}
 #toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px} /* Renamed from #I */
 #toggleInfoButton.active{background-color: var(--toggle-active-bg); color: var(--toggle-active-text)}
 #playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}
@@ -88,8 +88,9 @@ input:checked+.slider:before{transform:translateX(26px)}
 .stats div{border:1px solid var(--stats-border); padding:5px 10px;background: var(--stats-bg); border-radius:5px}
 #hotkeys{position:absolute;top:60px;right:10px;background: var(--hotkey-bg); padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color: var(--hotkey-text); display:none}
 #hotkeys.show{display:block}
-#sensorToggle{position:absolute;bottom:50px;right:10px;display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color: var(--hotkey-text);z-index:10}
-#enemyHUD{position:absolute;top:220px;right:10px;background: var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color: var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10}
+#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color: var(--hotkey-text);z-index:10}
+#sensorDisplayToggle{padding:2px 8px;font-size:var(--hotkey-font-size);cursor:pointer}
+#enemyHUD{position:absolute;top:10px;right:10px;background: var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color: var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:0.9}
 #enemyHUD.show{display:block}
 /* Removed styles related to DOM-based ring UI (.ring-upgrade-box, .upgrade-info-panel, .ring-info-container, etc.) */
 #highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse}
@@ -150,14 +151,10 @@ input:checked+.slider:before{transform:translateX(26px)}
     <button id="macrossButton" style="display:none">Macross Missile Massacre</button> <!-- Renamed from #M -->
     <button id="toggleInfoButton" class="active">i</button> <!-- Renamed from #I -->
     <button id="themeButton">Theme: Orbital Elite</button> <!-- Added Theme Button -->
-</div>
-<div id="sensorToggle">
-    <span class="switch-label">📡 Sensor Display Mode:</span>
-    <label class="switch">
-        <input type="checkbox" id="sensorDisplayToggle">
-        <span class="slider"></span>
-    </label>
-    <span id="sensorDisplayModeLabel">Inline</span>
+    <div id="sensorToggle">
+        <span class="switch-label">Enemy Info:</span>
+        <button id="sensorDisplayToggle">Inline</button>
+    </div>
 </div>
 <div id="hotkeys" class="show">
     <div>H: Show/Hide Hotkeys</div>
@@ -1240,8 +1237,7 @@ function initializeGame(shouldTryLoad = true) {
 
     sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
     sensorDisplayMode = 'inline';
-    getElement('sensorDisplayToggle').checked = false;
-    getElement('sensorDisplayModeLabel').textContent = 'Inline';
+    getElement('sensorDisplayToggle').textContent = 'Inline';
 
     resetPools();
     getElement('macrossButton').classList.remove('active');
@@ -2156,56 +2152,70 @@ function drawGame() {
         }
 
         const healthPercent = Math.max(0, enemy.health / enemy.maxHealth);
+        const barWidth = sensorUpgrades.enemyVisuals ? enemy.radius * 2 : 8;
+        const barHeight = 4;
+        const barX = enemy.x - barWidth / 2;
+        const barY = enemy.y - (sensorUpgrades.enemyVisuals ? enemy.radius : 4) - 10;
 
         if (sensorDisplayMode === 'inline') {
             const infoLines = [];
             if (!sensorUpgrades.enemyVisuals) {
-                infoLines.push('Upgrade Sensor Array to Identify Enemies');
+                infoLines.push('Hannah Undefined');
+                infoLines.push('Upgrade the Sensor Array');
             } else {
                 infoLines.push(enemy.type);
                 infoLines.push(`Speed: ${enemy.speed.toFixed(1)}`);
                 infoLines.push(`Size: ${enemy.radius}`);
-                if (!sensorUpgrades.showHealthBars) {
+                if (sensorUpgrades.showHealthBars) {
+                    infoLines.push(`HP: ${Math.round(enemy.health)}/${Math.round(enemy.maxHealth)}`);
+                } else {
                     infoLines.push("Upgrade Sensors to Calculate Enemies' Health");
                 }
             }
 
-            const fontSize = 10;
+            const fontSize = 9;
             ctx.font = `${fontSize}px monospace`;
             const padding = 3;
             let maxW = 0;
             infoLines.forEach(t => { maxW = Math.max(maxW, ctx.measureText(t).width); });
             const boxWidth = Math.max(maxW + padding * 2, 40);
             let boxHeight = infoLines.length * (fontSize + 2) + padding * 2;
-            if (sensorUpgrades.showHealthBars && sensorUpgrades.enemyVisuals) boxHeight += 10;
+            if (sensorUpgrades.showHealthBars) boxHeight += 6;
             const boxX = enemy.x + bracketSize + 10;
             const boxY = enemy.y - boxHeight / 2;
-            ctx.fillStyle = 'rgba(255,204,0,0.5)';
+            ctx.fillStyle = 'rgba(255,204,0,0.35)';
             ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
             ctx.strokeStyle = '#ffcc00';
             ctx.beginPath();
             ctx.moveTo(enemy.x + bracketSize, enemy.y);
             ctx.lineTo(boxX, boxY + 10);
             ctx.stroke();
+            let textY;
+            if (sensorUpgrades.showHealthBars) {
+                ctx.fillStyle = '#664400';
+                ctx.fillRect(boxX + padding, boxY + padding, boxWidth - padding * 2, barHeight);
+                ctx.fillStyle = '#ffcc00';
+                ctx.fillRect(boxX + padding, boxY + padding, (boxWidth - padding * 2) * healthPercent, barHeight);
+                ctx.fillStyle = '#000';
+                ctx.font = '8px monospace';
+                ctx.fillText('HP', boxX + padding, boxY + padding + barHeight + 8);
+                textY = boxY + padding + barHeight + 14;
+            } else {
+                textY = boxY + padding + fontSize;
+            }
             ctx.fillStyle = '#000';
-            let textY = boxY + padding + fontSize;
             infoLines.forEach(t => { ctx.fillText(t, boxX + padding, textY); textY += fontSize + 2; });
-            if (sensorUpgrades.showHealthBars && sensorUpgrades.enemyVisuals) {
-                const barWidth = boxWidth - padding * 2;
-                const barHeight = 4;
-                const barX = boxX + padding;
-                const barY = boxY + boxHeight - barHeight - padding;
+        } else {
+            if (sensorUpgrades.showHealthBars) {
                 ctx.fillStyle = '#664400';
                 ctx.fillRect(barX, barY, barWidth, barHeight);
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
-                ctx.fillStyle = '#000';
-                ctx.font = '8px monospace';
-                ctx.fillText(`HP: ${Math.round(enemy.health)}/${Math.round(enemy.maxHealth)}`, barX, barY - 2);
             }
-        } else {
-            if (!hudInfo[enemy.type]) {
-                hudInfo[enemy.type] = { speed: enemy.speed.toFixed(1), size: enemy.radius, health: Math.round(enemy.health), max: Math.round(enemy.maxHealth) };
+            if (sensorDisplayMode === 'hud') {
+                if (!hudInfo[enemy.type]) {
+                    hudInfo[enemy.type] = { speed: enemy.speed.toFixed(1), size: enemy.radius, health: Math.round(enemy.health), max: Math.round(enemy.maxHealth) };
+                }
             }
         }
 
@@ -2885,10 +2895,16 @@ function toggleRingInfoDisplay() {
     showToast(showRingInfo ? 'Ring info enabled' : 'Ring info disabled');
 }
 
-function toggleSensorDisplayMode() {
-    sensorDisplayMode = sensorDisplayMode === 'inline' ? 'hud' : 'inline';
-    getElement('sensorDisplayToggle').checked = sensorDisplayMode === 'hud';
-    getElement('sensorDisplayModeLabel').textContent = sensorDisplayMode === 'hud' ? 'HUD' : 'Inline';
+function cycleSensorDisplayMode() {
+    if (sensorDisplayMode === 'inline') {
+        sensorDisplayMode = 'hud';
+    } else if (sensorDisplayMode === 'hud') {
+        sensorDisplayMode = 'off';
+    } else {
+        sensorDisplayMode = 'inline';
+    }
+    const label = sensorDisplayMode.charAt(0).toUpperCase() + sensorDisplayMode.slice(1);
+    getElement('sensorDisplayToggle').textContent = label;
     drawGame();
 }
 
@@ -2896,14 +2912,19 @@ function updateEnemyHUD(info) {
     const hud = getElement('enemyHUD');
     if (sensorDisplayMode !== 'hud') { hud.classList.remove('show'); return; }
     const lines = [];
-    let count = 0;
-    for (const type in info) {
-        const d = info[type];
-        let line = `${type.padEnd(7)}| Speed: ${d.speed}`;
-        if (sensorUpgrades.showHealthBars) line += ` | HP: ${d.health}/${d.max}`;
-        line += ` | Size: ${d.size}`;
-        lines.push(`<div>${line}</div>`);
-        if (++count >= 10) break;
+    if (!sensorUpgrades.enemyVisuals) {
+        lines.push('<div>Enemies not identified</div>');
+        lines.push('<div>Upgrade the Sensor Array</div>');
+    } else {
+        let count = 0;
+        for (const type in info) {
+            const d = info[type];
+            let line = `${type.padEnd(7)}| Speed: ${d.speed}`;
+            if (sensorUpgrades.showHealthBars) line += ` | HP: ${d.health}/${d.max}`;
+            line += ` | Size: ${d.size}`;
+            lines.push(`<div>${line}</div>`);
+            if (++count >= 10) break;
+        }
     }
     hud.innerHTML = lines.join('');
     hud.classList.add('show');
@@ -3121,7 +3142,7 @@ getElement('saveHighScoreButton').onclick = saveHighScoreFromModal;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
-getElement('sensorDisplayToggle').onchange = toggleSensorDisplayMode;
+getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
 
 // Window Resize
 window.addEventListener('resize', () => {
