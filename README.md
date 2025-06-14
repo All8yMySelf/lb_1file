@@ -21,6 +21,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 ### v2.36
 - Added Sensors upgrade category with enemy outlines, health bars and targeting AI.
+- Targeted enemies now keep solid red brackets for a short time.
 
 ### v2.35
 - Polished upgrade lines and swapped triangle notches for rectangles.
