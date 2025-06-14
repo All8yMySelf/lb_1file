@@ -154,7 +154,7 @@ input:checked+.slider:before{transform:translateX(26px)}
     <button id="themeButton">Theme: Orbital Elite</button> <!-- Added Theme Button -->
     <div id="sensorToggle">
         <span class="switch-label">Enemy Info:</span>
-        <button id="sensorDisplayToggle">Inline</button>
+        <button id="sensorDisplayToggle">Hud</button>
     </div>
     <button id="fullscreenButton">&#x26F6;</button>
 </div>
@@ -662,7 +662,7 @@ canvas.height = canvasHeight;
 let showRingInfo = true;
 let showMissileRadius = false;
 let sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
-let sensorDisplayMode = 'inline';
+let sensorDisplayMode = 'hud';
 let baseCanMove = true;
 let keysPressed = {};
 let particles = [];
@@ -1360,8 +1360,8 @@ function initializeGame(shouldTryLoad = true) {
     };
 
     sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
-    sensorDisplayMode = 'inline';
-    getElement('sensorDisplayToggle').textContent = 'Inline';
+    sensorDisplayMode = 'hud';
+    getElement('sensorDisplayToggle').textContent = 'Hud';
 
     resetPools();
     getElement('macrossButton').classList.remove('active');
