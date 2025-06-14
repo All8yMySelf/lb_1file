@@ -19,6 +19,9 @@ tab when the game is loaded.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v2.35
+- Polished upgrade lines and swapped triangle notches for rectangles.
+
 ### v2.34
 - Redesigned upgrade menu with flowchart layout and visible costs.
 - Categories highlight when affordable upgrades are available.
