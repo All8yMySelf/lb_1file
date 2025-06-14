@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- V2.34: Highlight affordable upgrades and fix homing -->
+<!-- V2.35: Polished upgrade lines and rectangle focus notches -->
 <!-- V2.18: Refactored theme management to use themes.js, reinstated theme cycling -->
 <!-- V2.17.1: Removed theme cycling logic and hid theme button -->
 <!-- V2.17: Removed themes 2-6, updated version number -->
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<title>Orbital Defence Elite v2.34 - Optimised</title>
+<title>Orbital Defence Elite v2.35 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root {
@@ -113,7 +113,7 @@ input:checked+.slider:before{transform:translateX(26px)}
     <span id="healthDisplay"></span> <!-- Renamed from #h -->
 </div>
 <div id="startScreen"> <!-- Renamed from #s -->
-    <h1>Orbital Defence Elite v2.34</h1>
+    <h1>Orbital Defence Elite v2.35</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
     <button id="highScoreButton">High Scores</button>
@@ -1048,7 +1048,7 @@ function loadGame() {
     // Close loadGame function
 }
 
-const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.34';
+const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.35';
 
 function loadHighScores() {
     try {
@@ -2439,15 +2439,10 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                     } else {
                         ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
                     }
-                    ctx.beginPath();
-                    ctx.moveTo(boxX + boxSize / 2, barY);
-                    ctx.lineTo(boxX, barY + boxSize);
-                    ctx.lineTo(boxX + boxSize, barY + boxSize);
-                    ctx.closePath();
-                    ctx.fill();
+                    ctx.fillRect(boxX, barY, boxSize, boxSize);
                     ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : (canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)'));
                     ctx.lineWidth = (base.focusRadiusSetting * 100 === value) ? 2 : 1;
-                    ctx.stroke();
+                    ctx.strokeRect(boxX, barY, boxSize, boxSize);
                     if (categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS) {
                         ringClickRegions.push({
                             type: 'focus_notch',
@@ -2509,15 +2504,10 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 } else {
                     ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
                 }
-                ctx.beginPath();
-                ctx.moveTo(boxX + boxSize / 2, barY);
-                ctx.lineTo(boxX, barY + boxSize);
-                ctx.lineTo(boxX + boxSize, barY + boxSize);
-                ctx.closePath();
-                ctx.fill();
+                ctx.fillRect(boxX, barY, boxSize, boxSize);
                 ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : (canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)'));
                 ctx.lineWidth = (base.focusRadiusSetting * 100 === value) ? 2 : 1;
-                ctx.stroke();
+                ctx.strokeRect(boxX, barY, boxSize, boxSize);
                 ringClickRegions.push({
                     type: 'focus_notch',
                     x: boxX,
@@ -2529,9 +2519,11 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             }
             textY += boxSize + padding;
 
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(panelX + buttonWidth, btnY + focusButton.height / 2);
-            ctx.lineTo(subX - 10, btnY + focusButton.height / 2);
+            ctx.lineTo(subX, btnY + focusButton.height / 2);
             ctx.stroke();
 
             ringClickRegions.push({
