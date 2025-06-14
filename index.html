@@ -64,7 +64,7 @@ body{margin:0;overflow:hidden;background: var(--body-bg); color: var(--text-colo
 #hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #hud #creditsDisplay{text-align:left} /* Renamed from #c */
 #hud #healthDisplay{text-align:right} /* Renamed from #h */
-#startScreen,#gameOverScreen,#highScoreScreen,#highScoreModal{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.8);text-align:center;z-index:100} /* Renamed from #s, #o, #m */
+#startScreen,#gameOverScreen,#highScoreScreen,#highScoreModal,#sensorWarning{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.8);text-align:center;z-index:100}
 #gameOverScreen #finalStats{font-size:1.33rem;margin-bottom:1.5rem;color: var(--final-stats-color)} /* Renamed from #f */
 button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background: var(--button-bg); color: var(--button-text); border:2px solid var(--button-border); cursor:pointer;transition:all 0.3s ease}
 button:hover{background: var(--button-hover-bg); transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2)}
@@ -169,6 +169,12 @@ input:checked+.slider:before{transform:translateX(26px)}
     <div>I: Toggle Ring Info</div>
 </div>
 <div id="enemyHUD"></div>
+<div id="sensorWarning" style="display:none">
+    <p>The ring around your base shows your cannon's visual firing range.<br>
+    Upgrade <strong>Electronic FOV</strong> to detect enemies outside this ring.<br>
+    The wave timer has started – enemies approach from beyond your sight.</p>
+    <button id="sensorWarningButton">Continue</button>
+</div>
 <div id="toast"></div>
 <!-- Removed shipSprite image as it wasn't used -->
 
@@ -1015,6 +1021,19 @@ function showToast(message, duration = 2000) {
     }, duration);
 }
 
+function showSensorWarning() {
+    getElement('sensorWarning').style.display = 'flex';
+}
+
+function dismissSensorWarning() {
+    getElement('sensorWarning').style.display = 'none';
+    gameState.waveStartTime = Date.now();
+    gameState.waveElapsedTime = 0;
+    gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+    resumeGame();
+    showToast('Wave timer started! Enemies approaching just outside your range.', 3000);
+}
+
 function updateHUD() {
     getElement('creditsDisplay').textContent = `Credits: ${gameState.credits}`;
     getElement('healthDisplay').textContent = `Health: ${Math.max(0, gameState.currentHealth)}/${gameState.maxHealth}`; // Ensure health doesn't show < 0
@@ -1516,29 +1535,14 @@ function startGame() {
     getElement('gameOverScreen').style.display = 'none';
     getElement('highScoreModal').style.display = 'none';
     getElement('nonHighScoreMessage').textContent = '';
-    // Upgrade menu removed, canvas UI handles upgrades
-    isGameRunning = true;
+    pauseGame(); // Ensure no game loop is running
     gameSpeedMultiplier = 1;
     speedIndex = SPEED_STEPS.indexOf(1);
     updateSpeedDisplay();
-    getElement('playPauseButton').textContent = '\u23F8';
-    gameState.waveStartTime = Date.now(); // Always start fresh timer for new game
-    gameState.waveElapsedTime = 0;
-    gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
-
-    // Removed confirm() pop-up logic
-
-    // Start auto-save timer
-    if (autoSaveTimer) clearInterval(autoSaveTimer);
-    autoSaveTimer = setInterval(() => {
-        if (isGameRunning) {
-            saveGame();
-        }
-    }, AUTO_SAVE_INTERVAL);
-
-    // Start game loop
-    lastTime = 0; // Reset timer for the loop
-    animationFrameId = requestAnimationFrame(gameLoop);
+    getElement('playPauseButton').textContent = '\u25B6'; // Show play icon while paused
+    drawGame();
+    updateHUD();
+    showSensorWarning();
 }
 
 function gameOver() {
@@ -3303,6 +3307,7 @@ window.addEventListener('touchend', e => {
 // UI Button Listeners
 getElement('startButton').onclick = startGame;
 getElement('restartButton').onclick = startGame; // Restart calls startGame to reinitialize
+getElement('sensorWarningButton').onclick = dismissSensorWarning;
 getElement('playPauseButton').onclick = () => {
     if (isGameRunning) pauseGame(); else resumeGame();
 };
@@ -3398,24 +3403,14 @@ function loadAndStartGame() {
     // Common starting logic after initialization/loading
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
-    // Canvas UI upgrades are always available
-    isGameRunning = true;
+    pauseGame();
     gameSpeedMultiplier = 1;
     speedIndex = SPEED_STEPS.indexOf(1);
     updateSpeedDisplay();
-    getElement('playPauseButton').textContent = '\u23F8';
-
-    // Start auto-save timer
-    if (autoSaveTimer) clearInterval(autoSaveTimer);
-    autoSaveTimer = setInterval(() => {
-        if (isGameRunning) {
-            saveGame();
-        }
-    }, AUTO_SAVE_INTERVAL);
-
-    // Start game loop
-    lastTime = 0; // Reset delta time calculation for the loop
-    animationFrameId = requestAnimationFrame(gameLoop);
+    getElement('playPauseButton').textContent = '\u25B6';
+    drawGame();
+    updateHUD();
+    showSensorWarning();
 }
 
 
