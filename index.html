@@ -106,7 +106,7 @@ input:checked+.slider:before{transform:translateX(26px)}
 .crt-container::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background: var(--crt-vignette); pointer-events:none;z-index:1}
 .crt-container::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(rgba(18,16,16,0) 50%, var(--crt-interlace-color) 50%);background-size:100% 4px;pointer-events:none;z-index:2}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Share+Tech+Mono&family=Rajdhani&family=Orbitron&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="bg"></div>
@@ -439,6 +439,96 @@ const THEMES = [
             yellow: ['#000000', '#333333'],
             white: ['#000000', '#333333', '#777777', '#aaaaaa'],
             cyan: ['#333333', '#777777']
+        }
+    },
+    { // Theme 5: Service HUD
+        name: "Service HUD",
+        cssVariables: {
+            '--bg-gradient': '#0a0f13',
+            '--body-bg': '#0a0f13',
+            '--text-color': '#e2eaf3',
+            '--hud-color': '#64f58d',
+            '--title-color': '#00ffe1',
+            '--final-stats-color': '#f3c400',
+            '--button-bg': '#1b2a33',
+            '--button-text': '#00ffe1',
+            '--button-border': '#00ffe1',
+            '--button-hover-bg': '#64f58d',
+            '--button-disabled-bg': '#1b2a33',
+            '--button-disabled-text': '#8899a6',
+            '--upgrade-title-color': '#f3c400',
+            '--toggle-active-bg': '#1b2a33',
+            '--toggle-active-text': '#64f58d',
+            '--toast-bg': 'rgba(10, 15, 19, 0.9)',
+            '--toast-text': '#e2eaf3',
+            '--switch-bg': '#1b2a33',
+            '--switch-slider-color': '#00ffe1',
+            '--switch-checked-bg': '#64f58d',
+            '--switch-label-color': '#e2eaf3',
+            '--stats-border': '#2194f3',
+            '--stats-bg': 'rgba(255,255,255,0.06)',
+            '--hotkey-bg': 'rgba(255,255,255,0.06)',
+            '--hotkey-text': '#8899a6',
+            '--canvas-bg': '#0a0f13',
+            '--crt-overlay-bg': 'linear-gradient(rgba(0,255,255,0.06) 50%, transparent 100%)',
+            '--crt-overlay-blend': 'overlay',
+            '--crt-scanline-color': 'rgba(255, 255, 255, 0.05)',
+            '--crt-vignette': 'radial-gradient(circle, transparent 60%, rgba(0,0,0,0.5) 100%)',
+            '--crt-interlace-color': 'rgba(255, 255, 255, 0.05)',
+            '--font-family': "'Rajdhani', 'Share Tech Mono', monospace",
+            '--button-font-size': '24px',
+            '--upgrade-button-font-size': '16px',
+            '--tab-font-size': '14px',
+            '--ring-ui-font-size': '11px',
+            '--hud-font-size': '28px',
+            '--hotkey-font-size': '14px'
+        },
+        canvasColors: {
+            base: '#64f58d',
+            baseHit: '#fca311',
+            bullet: '#00ffe1',
+            missile: '#fca311',
+            macrossMissile: '#f3c400',
+            missileTrail: 'rgba(252,163,17,0.6)',
+            laser: '#2194f3',
+            laserGlow: 'rgba(0,255,225,0.6)',
+            particleDefault: '#e2eaf3',
+            particleHit: '#00ffe1',
+            particleExplosion: ['#f3c400', '#fca311'],
+            particleStun: '#00ffe1',
+            particleLaunch: '#64f58d',
+            enemyNormal: '#fca311',
+            enemyFast: '#2194f3',
+            enemyTank: '#f3c400',
+            enemyBoss: '#64f58d',
+            enemyHealthBarBg: '#1b2a33',
+            enemyHealthBarFg: '#64f58d',
+            enemyStunEffect: 'rgba(0,255,225,0.8)',
+            ringCannon: 'rgba(100,245,141,0.6)',
+            ringCannonUpgrade: 'rgba(100,245,141,0.8)',
+            ringMissile: 'rgba(252,163,17,0.6)',
+            ringMissileUpgrade: 'rgba(252,163,17,0.8)',
+            ringLaser: 'rgba(33,148,243,0.5)',
+            ringLaserUpgrade: 'rgba(33,148,243,0.8)',
+            ringStun: 'rgba(0,255,225,0.5)',
+            ringStunUpgrade: 'rgba(0,255,225,0.8)',
+            ringSensor: 'rgba(243,196,0,0.6)',
+            ringUpgradeBoxBg: 'rgba(255,255,255,0.06)',
+            ringUpgradeBoxAvailable: 'rgba(100,245,141,0.7)',
+            ringUpgradeBoxText: '#e2eaf3',
+            ringUpgradeBoxMax: '#f3c400',
+            gunBarrel: '#e2eaf3',
+            baseDragIndicator: 'rgba(0,255,225,0.6)',
+            baseReturnIndicator: 'rgba(100,245,141,0.6)',
+            upgradeRingLaser: 'rgba(33,148,243,0.6)',
+            upgradeRingMissile: 'rgba(252,163,17,0.6)'
+        },
+        particlePalettes: {
+            red: ['#fca311', '#d98a0e', '#b3720b', '#8c5b08'],
+            orange: ['#f3c400', '#cfa700', '#a58200', '#7b5e00'],
+            yellow: ['#f3c400', '#cfa700', '#a58200', '#7b5e00'],
+            white: ['#e2eaf3', '#bfc8d4', '#8a959f', '#5b6066'],
+            cyan: ['#00ffe1', '#00ccb4', '#008b7a', '#005540']
         }
     }
 ];
