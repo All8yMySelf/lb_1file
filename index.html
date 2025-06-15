@@ -1213,7 +1213,7 @@ function formatDate(date) {
 function syncLocalScoresToGlobal() {
     const localScores = loadHighScores();
 
-    fetchGlobalLeaderboard().then(globalData => {
+    return fetchGlobalLeaderboard().then(globalData => {
         const globalScores = globalData.map(r => ({
             initials: r[0],
             wave: parseInt(r[1]),
@@ -1320,10 +1320,12 @@ function saveHighScoreFromModal() {
             }
         })
         .finally(() => {
-            updateGameOverLeaderboard();
             if (navigator.onLine) {
-                syncLeaderboard();
-                syncLocalScoresToGlobal();
+                syncLocalScoresToGlobal()
+                    .then(syncLeaderboard)
+                    .then(updateGameOverLeaderboard);
+            } else {
+                updateGameOverLeaderboard();
             }
         });
     pendingHighScore = null;
@@ -1638,7 +1640,9 @@ function gameOver() {
     recordHighScore(gameState.wave, survivalTime);
     saveGame(); // Save final state on game over
     if (navigator.onLine) {
-        syncLocalScoresToGlobal();
+        syncLocalScoresToGlobal()
+            .then(syncLeaderboard)
+            .then(updateGameOverLeaderboard);
     }
 }
 
@@ -3538,10 +3542,10 @@ function loadAndStartGame() {
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       // Try loading save data now, before Start Game is pressed
       tryLoadGame();
-      if (navigator.onLine) {
-          syncLeaderboard();
-          syncLocalScoresToGlobal();
-      }
+        if (navigator.onLine) {
+            syncLocalScoresToGlobal()
+                .then(syncLeaderboard);
+        }
       // Show Load Game button if save data exists
     if (savedGame) {
         getElement('loadButton').style.display = 'block'; // Or 'inline-block' if preferred next to Start
