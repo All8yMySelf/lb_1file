@@ -1129,18 +1129,25 @@ const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbxNdo4XN4XWdpPR
 // Send score to global leaderboard
 function submitScoreToLeaderboard(name, wave, time) {
   const date = new Date().toISOString().split("T")[0];
-  fetch(LEADERBOARD_URL, {
+  const params = new URLSearchParams({
+    name: name.slice(0, 3).toUpperCase(),
+    wave,
+    time,
+    date
+  });
+  return fetch(LEADERBOARD_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: name.slice(0, 3).toUpperCase(),
-      wave,
-      time,
-      date
-    })
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString()
   })
-    .then(res => console.log("Score submitted"))
-    .catch(err => console.error("Score submit failed", err));
+    .then(res => {
+      console.log("Score submitted");
+      return res;
+    })
+    .catch(err => {
+      console.error("Score submit failed", err);
+      throw err;
+    });
 }
 
 // Get global leaderboard scores
@@ -1227,10 +1234,10 @@ function saveHighScoreFromModal() {
     scores.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
     scores = scores.slice(0,10);
     saveHighScores(scores);
-    updateGameOverLeaderboard();
     getElement('highScoreModal').style.display = 'none';
     getElement('nonHighScoreMessage').textContent = '';
-    submitScoreToLeaderboard(initials, pendingHighScore.wave, pendingHighScore.time);
+    submitScoreToLeaderboard(initials, pendingHighScore.wave, pendingHighScore.time)
+        .finally(updateGameOverLeaderboard);
     pendingHighScore = null;
 }
 
