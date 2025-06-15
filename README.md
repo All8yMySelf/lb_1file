@@ -54,3 +54,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full history.
 - Introduced a Debug panel for quickly awarding credits.
 - Added the Focus Radius upgrade and visual ring indicator.
 - Implemented missile homing improvements and toggle controls.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
