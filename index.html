@@ -1127,19 +1127,19 @@ const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.38';
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbxNdo4XN4XWdpPRyRQmxC6yOsEG4MihGrlXDmI1thlaXOwD2QX00b4JHvYBDtqoK9k1/exec";
 
 // Send score to global leaderboard
-function submitScoreToLeaderboard(initials, wave, time) {
+function submitScoreToLeaderboard(name, wave, time) {
   const date = new Date().toISOString().split("T")[0];
-  const params = new URLSearchParams({
-    initials: initials.slice(0, 3).toUpperCase(),
-    wave,
-    time,
-    date
-  });
   fetch(LEADERBOARD_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params.toString()
-  }).then(res => console.log("Score submitted"))
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: name.slice(0, 3).toUpperCase(),
+      wave,
+      time,
+      date
+    })
+  })
+    .then(res => console.log("Score submitted"))
     .catch(err => console.error("Score submit failed", err));
 }
 
