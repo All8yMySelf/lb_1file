@@ -35,6 +35,7 @@
     <h1>Game Over</h1>
     <div id="finalStats"></div> <!-- Renamed from #f -->
     <div id="highScoreArea" style="display:flex;flex-direction:column;align-items:center;gap:20px;">
+        <h2 id="gameOverLeaderboardTitle"></h2>
         <div id="gameOverHighScores"></div>
     </div>
     <div id="nonHighScoreMessage" style="margin-top:10px"></div>
@@ -1202,7 +1203,7 @@ function recordHighScore(wave, time) {
     } else {
         const msg = NON_TOP_MESSAGES[Math.floor(Math.random()*NON_TOP_MESSAGES.length)];
         getElement('nonHighScoreMessage').textContent = msg;
-        renderHighScores('gameOverHighScores', scores);
+        updateGameOverLeaderboard();
     }
 }
 
@@ -1224,7 +1225,7 @@ function saveHighScoreFromModal() {
     scores.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
     scores = scores.slice(0,10);
     saveHighScores(scores);
-    renderHighScores('gameOverHighScores', scores);
+    updateGameOverLeaderboard();
     getElement('highScoreModal').style.display = 'none';
     getElement('nonHighScoreMessage').textContent = '';
     submitScoreToLeaderboard(initials, pendingHighScore.wave, pendingHighScore.time);
@@ -1253,11 +1254,23 @@ function renderHighScores(containerId, scores) {
     container.innerHTML = html;
 }
 
+function updateGameOverLeaderboard() {
+    const title = getElement("gameOverLeaderboardTitle");
+    title.textContent = "Global Leaderboard";
+    fetchGlobalLeaderboard(rows => {
+        const scores = rows.slice(0, 10).map(r => ({ initials: r[0], wave: r[1], time: r[2], date: r[3] }));
+        renderHighScores("gameOverHighScores", scores);
+    }).catch(() => {
+        title.textContent = "Local Leaderboard";
+        renderHighScores("gameOverHighScores", loadHighScores());
+    });
+}
+
 function openHighScoreScreen() {
     const title = getElement("highScoreScreen").querySelector("h1");
     title.textContent = "Global Leaderboard";
     fetchGlobalLeaderboard(rows => {
-        const scores = rows.map(r => ({ initials: r[0], wave: r[1], time: r[2], date: r[3] }));
+        const scores = rows.slice(0, 10).map(r => ({ initials: r[0], wave: r[1], time: r[2], date: r[3] }));
         renderHighScores("highScoreTable", scores);
     }).catch(() => {
         title.textContent = "Local Leaderboard";
