@@ -22,11 +22,13 @@ Scores are automatically synced to a shared Google Sheet whenever you finish a
 run and have an internet connection. The game submits your name, wave, time and
 date to the URL defined by `LEADERBOARD_URL` in
 [`index.html`](index.html), which points to a hosted Apps Script that backs the
-public leaderboard. No additional setup is necessary&mdash;just play and your
-best scores will appear alongside everyone else's.
+public leaderboard. In some environments the request may fail because the
+leaderboard does not provide CORS headers. The code now sends the score using
+`no-cors` mode so the request still completes even if the response cannot be
+read.
 
-If you prefer to maintain your own leaderboard, you can still deploy a copy of
-the script and update `LEADERBOARD_URL` to your URL.
+If you prefer to maintain your own leaderboard or require full CORS support,
+deploy a copy of the script yourself and update `LEADERBOARD_URL` accordingly.
 
 ## Change Log
 
