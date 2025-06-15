@@ -683,6 +683,9 @@ let isGameRunning = false;
 let animationFrameId = null;
 let savedGame = null; // Stores loaded game state
 let autoSaveTimer = null;
+let DEBUG_MODE = false; // Set to true to enable verbose logging
+let lastBaseX = 0;
+let lastBaseY = 0;
 
 // Dragging State
 let isDragging = false;
@@ -1117,14 +1120,14 @@ function tryLoadGame() {
             const parsedData = JSON.parse(savedData);
             // Check if the saved game is a game over state
             if (parsedData.isGameOver) {
-                console.log("Saved game data is from a finished game, ignoring.");
+                if (DEBUG_MODE) console.log("Saved game data is from a finished game, ignoring.");
                 savedGame = null; // Discard finished game save
             } else {
                 savedGame = parsedData;
-                console.log("Saved game data found:", savedGame);
+                if (DEBUG_MODE) console.log("Saved game data found:", savedGame);
             }
         } else {
-            console.log("No saved game data found.");
+            if (DEBUG_MODE) console.log("No saved game data found.");
             savedGame = null;
         }
     } catch (e) {
@@ -1391,6 +1394,8 @@ function initializeGame(shouldTryLoad = true) {
     isDragging = false;
     wasDragging = false;
     isReturningToCenter = false;
+    lastBaseX = base.x;
+    lastBaseY = base.y;
 
 
     // --- Upgrade Tree Definition ---
@@ -1677,12 +1682,20 @@ function updateEnemies(dt) {
     let baseMovedDuringUpdate = false;
 
     const dtScaled = dt * 60;
-
-    // Check if base moved significantly due to drag/return (handled in event handlers/base movement)
-    // We need to shift enemies relative to this movement
-    // TODO: Improve this - ideally movement happens once, then shifts apply.
-    // This currently only handles stun application and movement towards base.
-    // Base movement due to drag is handled in handleDragMove.
+    // Check if base moved since last frame
+    const deltaX = base.x - lastBaseX;
+    const deltaY = base.y - lastBaseY;
+    if (deltaX !== 0 || deltaY !== 0) {
+        baseMovedDuringUpdate = true;
+        // Shift enemies to keep world position consistent
+        enemies.forEach(enemy => {
+            enemy.x -= deltaX;
+            enemy.y -= deltaY;
+            enemy.trail = enemy.trail.map(p => ({ x: p.x - deltaX, y: p.y - deltaY }));
+        });
+    }
+    lastBaseX = base.x;
+    lastBaseY = base.y;
 
     for (let i = enemies.length - 1; i >= 0; i--) {
         const enemy = enemies[i];
