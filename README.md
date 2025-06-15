@@ -16,57 +16,17 @@ The previous `css/` and `js/` folders have been removed as part of the single-fi
 The repository also includes a `favicon.ico` so browsers display an icon in the
 tab when the game is loaded.
 
-## Global Leaderboard Setup
+## Global Leaderboard
 
-High scores can optionally be shared to a public Google Sheet using a small
-Google Apps Script. Scores are posted from the game via the `LEADERBOARD_URL`
-constant in [`index.html`](index.html). Deploying your own script lets you
-control the shared leaderboard location.
+Scores are automatically synced to a shared Google Sheet whenever you finish a
+run and have an internet connection. The game submits your name, wave, time and
+date to the URL defined by `LEADERBOARD_URL` in
+[`index.html`](index.html), which points to a hosted Apps Script that backs the
+public leaderboard. No additional setup is necessary&mdash;just play and your
+best scores will appear alongside everyone else's.
 
-1. Create a new Google Sheet and name its first sheet `Leaderboard`.
-2. Add header cells **A1-D1** labeled `name`, `wave`, `time` and `date`. Incoming
-   scores will appear in these columns.
-3. Open **Extensions → Apps Script** from the sheet and replace the default code
-   with:
-
-   ```javascript
-   function doGet() {
-     const sheet = SpreadsheetApp.getActive().getSheetByName('Leaderboard');
-     const data = sheet.getDataRange().getValues().map(r => {
-       if (r[3] instanceof Date) {
-         r[3] = Utilities.formatDate(r[3], 'GMT', 'yyyy-MM-dd');
-       }
-       return r;
-     });
-     return ContentService.createTextOutput(JSON.stringify(data));
-   }
-
-   function doPost(e) {
-     const sheet = SpreadsheetApp.getActive().getSheetByName('Leaderboard');
-     const row = [e.parameter.name, e.parameter.wave, e.parameter.time,
-                  e.parameter.date];
-     const idx = e.parameter.replaceIndex
-       ? parseInt(e.parameter.replaceIndex, 10) + 2
-       : null;
-     if (idx) {
-       sheet.getRange(idx, 1, 1, 4).setValues([row]);
-     } else {
-       sheet.appendRow(row);
-     }
-     if (sheet.getLastRow() > 11) {
-       sheet.deleteRow(sheet.getLastRow());
-     }
-     return ContentService.createTextOutput('OK');
-   }
-   ```
-
-4. Deploy the script as a **web app** (allow access for *Anyone*) and copy the
-   URL provided.
-5. Replace the value of `LEADERBOARD_URL` in `index.html` with your copied URL so
-   the game can post and fetch scores.
-
-Once deployed, each submitted score populates a row in the sheet with the
-player's name, wave reached, completion time in seconds and submission date.
+If you prefer to maintain your own leaderboard, you can still deploy a copy of
+the script and update `LEADERBOARD_URL` to your URL.
 
 ## Change Log
 
