@@ -31,15 +31,31 @@ control the shared leaderboard location.
 
    ```javascript
    function doGet() {
-     return ContentService.createTextOutput(
-       JSON.stringify(SpreadsheetApp.getActive().getSheetByName('Leaderboard')
-       .getDataRange().getValues()));
+     const sheet = SpreadsheetApp.getActive().getSheetByName('Leaderboard');
+     const data = sheet.getDataRange().getValues().map(r => {
+       if (r[3] instanceof Date) {
+         r[3] = Utilities.formatDate(r[3], 'GMT', 'yyyy-MM-dd');
+       }
+       return r;
+     });
+     return ContentService.createTextOutput(JSON.stringify(data));
    }
 
    function doPost(e) {
-     SpreadsheetApp.getActive().getSheetByName('Leaderboard')
-       .appendRow([e.parameter.name, e.parameter.wave, e.parameter.time,
-                   e.parameter.date]);
+     const sheet = SpreadsheetApp.getActive().getSheetByName('Leaderboard');
+     const row = [e.parameter.name, e.parameter.wave, e.parameter.time,
+                  e.parameter.date];
+     const idx = e.parameter.replaceIndex
+       ? parseInt(e.parameter.replaceIndex, 10) + 2
+       : null;
+     if (idx) {
+       sheet.getRange(idx, 1, 1, 4).setValues([row]);
+     } else {
+       sheet.appendRow(row);
+     }
+     if (sheet.getLastRow() > 11) {
+       sheet.deleteRow(sheet.getLastRow());
+     }
      return ContentService.createTextOutput('OK');
    }
    ```
@@ -56,6 +72,10 @@ player's name, wave reached, completion time in seconds and submission date.
 
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
+
+### v2.38
+- Local high scores replace lower entries on the global leaderboard.
+- Global leaderboard dates no longer include a time value.
 
 ### v2.37
 - Added Electronic FOV sensor upgrade with visible radius ring.

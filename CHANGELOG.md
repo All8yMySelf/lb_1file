@@ -1,5 +1,9 @@
 # Orbital Defence Elite - Change Log
 
+## v2.38
+- Local high scores now replace lower entries on the shared leaderboard instead of adding new rows.
+- Dates returned from the global leaderboard no longer include a time component.
+
 ## v2.37.1
 - Improved touch controls so upgrades open on a single tap.
 
