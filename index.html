@@ -1129,16 +1129,18 @@ const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbxNdo4XN4XWdpPR
 // Send score to global leaderboard
 function submitScoreToLeaderboard(initials, wave, time) {
   const date = new Date().toISOString().split("T")[0];
+  const params = new URLSearchParams({
+    initials: initials.slice(0, 3).toUpperCase(),
+    wave,
+    time,
+    date
+  });
   fetch(LEADERBOARD_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      initials: initials.slice(0, 3).toUpperCase(),
-      wave,
-      time,
-      date
-    })
-  }).then(res => console.log("Score submitted")).catch(() => {});
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString()
+  }).then(res => console.log("Score submitted"))
+    .catch(err => console.error("Score submit failed", err));
 }
 
 // Get global leaderboard scores
