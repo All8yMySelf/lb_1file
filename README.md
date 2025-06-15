@@ -12,8 +12,45 @@ High scores are saved in your browser via `localStorage`, so they persist betwee
 `index.html` now embeds the original `styles.css` and `themes.js` directly inside `<style>` and `<script>` tags. There are no external dependencies besides the Phaser library pulled from a CDN.
 
 The previous `css/` and `js/` folders have been removed as part of the single-file challenge.
+
 The repository also includes a `favicon.ico` so browsers display an icon in the
 tab when the game is loaded.
+
+## Global Leaderboard Setup
+
+High scores can optionally be shared to a public Google Sheet using a small
+Google Apps Script. Scores are posted from the game via the `LEADERBOARD_URL`
+constant in [`index.html`](index.html). Deploying your own script lets you
+control the shared leaderboard location.
+
+1. Create a new Google Sheet and name its first sheet `Leaderboard`.
+2. Add header cells **A1-D1** labeled `name`, `wave`, `time` and `date`. Incoming
+   scores will appear in these columns.
+3. Open **Extensions → Apps Script** from the sheet and replace the default code
+   with:
+
+   ```javascript
+   function doGet() {
+     return ContentService.createTextOutput(
+       JSON.stringify(SpreadsheetApp.getActive().getSheetByName('Leaderboard')
+       .getDataRange().getValues()));
+   }
+
+   function doPost(e) {
+     SpreadsheetApp.getActive().getSheetByName('Leaderboard')
+       .appendRow([e.parameter.name, e.parameter.wave, e.parameter.time,
+                   e.parameter.date]);
+     return ContentService.createTextOutput('OK');
+   }
+   ```
+
+4. Deploy the script as a **web app** (allow access for *Anyone*) and copy the
+   URL provided.
+5. Replace the value of `LEADERBOARD_URL` in `index.html` with your copied URL so
+   the game can post and fetch scores.
+
+Once deployed, each submitted score populates a row in the sheet with the
+player's name, wave reached, completion time in seconds and submission date.
 
 ## Change Log
 
