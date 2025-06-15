@@ -1135,13 +1135,19 @@ function submitScoreToLeaderboard(name, wave, time) {
     time,
     date
   });
-  fetch(LEADERBOARD_URL, {
+  return fetch(LEADERBOARD_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString()
   })
-    .then(res => console.log("Score submitted"))
-    .catch(err => console.error("Score submit failed", err));
+    .then(res => {
+      console.log("Score submitted");
+      return res;
+    })
+    .catch(err => {
+      console.error("Score submit failed", err);
+      throw err;
+    });
 }
 
 // Get global leaderboard scores
@@ -1228,10 +1234,10 @@ function saveHighScoreFromModal() {
     scores.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
     scores = scores.slice(0,10);
     saveHighScores(scores);
-    updateGameOverLeaderboard();
     getElement('highScoreModal').style.display = 'none';
     getElement('nonHighScoreMessage').textContent = '';
-    submitScoreToLeaderboard(initials, pendingHighScore.wave, pendingHighScore.time);
+    submitScoreToLeaderboard(initials, pendingHighScore.wave, pendingHighScore.time)
+        .finally(updateGameOverLeaderboard);
     pendingHighScore = null;
 }
 
