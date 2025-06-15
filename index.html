@@ -60,12 +60,12 @@ body{margin:0;overflow:hidden;background: var(--body-bg); color: var(--text-colo
 .bg{position:absolute;top:0;left:0;width:100%;height:100%;background: var(--bg-gradient); z-index:-1}
 #hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0; color: var(--hud-color)} /* Renamed from #u */
 #startScreen h1,#gameOverScreen h1{font-size:2rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; color: var(--title-color)} /* Renamed from #s, #o */
-#gameOverScreen h1{font-size:3.5rem;margin-bottom:1rem} /* Renamed from #o */
+#gameOverScreen h1{font-size:5rem;margin-bottom:1rem} /* Renamed from #o */
 #hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #hud #creditsDisplay{text-align:left} /* Renamed from #c */
 #hud #healthDisplay{text-align:right} /* Renamed from #h */
 #startScreen,#gameOverScreen,#highScoreScreen,#highScoreModal,#sensorWarning{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.8);text-align:center;z-index:100}
-#gameOverScreen #finalStats{font-size:1.33rem;margin-bottom:1.5rem;color: var(--final-stats-color)} /* Renamed from #f */
+#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color: var(--final-stats-color)} /* Renamed from #f */
 button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background: var(--button-bg); color: var(--button-text); border:2px solid var(--button-border); cursor:pointer;transition:all 0.3s ease}
 button:hover{background: var(--button-hover-bg); transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2)}
 button:active{transform:translateY(1px)}
@@ -94,7 +94,7 @@ input:checked+.slider:before{transform:translateX(26px)}
 #enemyHUD{position:absolute;top:100px;right:10px;background: var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color: var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:0.9}
 #enemyHUD.show{display:block}
 /* Removed styles related to DOM-based ring UI (.ring-upgrade-box, .upgrade-info-panel, .ring-info-container, etc.) */
-#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse}
+#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}
 #highScoreTable th,#highScoreTable td{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}
 #highScoreTable td{white-space:nowrap}
 #highScoreTable th{font-weight:bold}
@@ -126,23 +126,35 @@ input:checked+.slider:before{transform:translateX(26px)}
 <div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
     <h1>Game Over</h1>
     <div id="finalStats"></div> <!-- Renamed from #f -->
-    <div id="gameOverHighScores"></div>
+    <div id="highScoreArea" style="display:flex;gap:20px;align-items:flex-start;">
+        <div id="countryMap" style="width:400px;height:300px;"></div>
+        <div id="gameOverHighScores"></div>
+    </div>
     <div id="nonHighScoreMessage" style="margin-top:10px"></div>
     <button id="restartButton">Play Again</button> <!-- Renamed from #r -->
 </div>
 <div id="highScoreScreen" style="display:none">
     <h1>High Scores</h1>
-    <div id="highScoreTable"></div>
+    <div style="display:flex;gap:20px;align-items:flex-start;">
+        <div id="countryMapHigh" style="width:400px;height:300px;"></div>
+        <div id="highScoreTable"></div>
+    </div>
     <button id="backButton">Back</button>
 </div>
 <div id="highScoreModal" style="display:none">
     <h1>New High Score!</h1>
     <div id="beatenScores" style="margin:10px 0"></div>
-    <div id="initialInputContainer" style="display:flex;align-items:center;gap:5px">
-        <input style="text-transform: uppercase" id="highScoreInitials" maxlength="3" autofocus>
-        <span class="blinking-cursor">_</span>
+    <div style="display:flex;gap:20px;align-items:flex-start;">
+        <div id="countryMapModal" style="width:400px;height:300px;"></div>
+        <div>
+            <div id="initialInputContainer" style="display:flex;align-items:center;gap:5px">
+                <input style="text-transform: uppercase" id="highScoreInitials" maxlength="3" autofocus>
+                <span class="blinking-cursor">_</span>
+            </div>
+            <div id="selectedCountryDisplay" style="margin-top:10px"></div>
+            <button id="saveHighScoreButton">Save</button>
+        </div>
     </div>
-    <button id="saveHighScoreButton">Save</button>
 </div>
 <div id="controls">
     <button id="playPauseButton">&#9654;</button>
@@ -178,6 +190,7 @@ input:checked+.slider:before{transform:translateX(26px)}
 <div id="toast"></div>
 <!-- Removed shipSprite image as it wasn't used -->
 
+<script src="datamaps.all.min.js"></script>
 <script>
 // Orbital Defence Elite - Theme Definitions
 // V2.30.1: Modified black and white themes to have white backgrounds
@@ -669,6 +682,7 @@ let particles = [];
 let lastTime = 0;
 let deltaTime = 0;
 let gameState; // Contains credits, health, wave, score etc.
+let gameStartTime = 0;
 let base; // Contains position, stats, upgrades effects
 let upgradeTree; // Defines upgrade structure, costs, effects
 const SPEED_STEPS = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.5,2,3,4,5,6,7,8,9,10];
@@ -1027,6 +1041,7 @@ function showSensorWarning() {
 
 function dismissSensorWarning() {
     getElement('sensorWarning').style.display = 'none';
+    if (!gameStartTime) gameStartTime = Date.now();
     gameState.waveStartTime = Date.now();
     gameState.waveElapsedTime = 0;
     gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
@@ -1205,7 +1220,7 @@ function loadGame() {
     // Close loadGame function
 }
 
-const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.37';
+const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.38';
 
 function loadHighScores() {
     try {
@@ -1230,27 +1245,44 @@ function formatDate(date) {
 }
 
 let pendingHighScore = null;
+let selectedCountryCode = '';
+const NON_TOP_MESSAGES = [
+    "Nice try! You'll crack the top 10 soon.",
+    "Keep at it, rookie!",
+    "Not bad, but you can do better!",
+    "Getting closer every time!",
+    "The aliens barely noticed you. Next time!",
+    "Practice makes perfect. Give it another go!",
+    "You'll show them who's boss soon enough!",
+    "Almost there, stay determined!",
+    "Good effort! Upgrade those cannons!",
+    "They got the better of you today... for now."
+];
 
-function recordHighScore(score) {
+function recordHighScore(wave, time) {
     let scores = loadHighScores();
-    const withPlayer = scores.concat({ initials: '', score, date: formatDate(new Date()) });
-    withPlayer.sort((a,b) => b.score - a.score);
-    const rank = withPlayer.findIndex(s => s.initials === '' && s.score === score) + 1;
+    const entry = { initials: '', wave, time, country: '', date: formatDate(new Date()) };
+    const withPlayer = scores.concat(entry);
+    withPlayer.sort((a,b) => (b.wave - a.wave) || (b.time - a.time));
+    const rank = withPlayer.findIndex(s => s.initials === '' && s.wave === wave && s.time === time) + 1;
 
     if (rank <= 10) {
         const beaten = withPlayer.slice(rank).filter(s => s.initials);
-        showHighScoreModal(score, beaten);
+        showHighScoreModal(entry, beaten);
     } else {
-        getElement('nonHighScoreMessage').textContent = `Game Over – You placed #${rank}. Try again to reach the top 10!`;
+        const msg = NON_TOP_MESSAGES[Math.floor(Math.random()*NON_TOP_MESSAGES.length)];
+        getElement('nonHighScoreMessage').textContent = msg;
         renderHighScores('gameOverHighScores', scores);
     }
 }
 
-function showHighScoreModal(score, beaten) {
-    pendingHighScore = score;
-    const list = beaten.map(s => `<div>${s.initials} - ${s.score} - ${s.date}</div>`).join('');
+function showHighScoreModal(entry, beaten) {
+    pendingHighScore = entry;
+    const list = beaten.map(s => `<div>${s.initials} - Wave ${s.wave} (${s.time}s) - ${s.date}</div>`).join('');
     getElement('beatenScores').innerHTML = list;
     getElement('highScoreInitials').value = '';
+    selectedCountryCode = '';
+    getElement('selectedCountryDisplay').textContent = '';
     getElement('highScoreModal').style.display = 'flex';
     setTimeout(() => getElement('highScoreInitials').focus(), 50);
 }
@@ -1259,8 +1291,8 @@ function saveHighScoreFromModal() {
     let initials = getElement('highScoreInitials').value.trim().toUpperCase().slice(0,3);
     if (!initials) initials = '???';
     let scores = loadHighScores();
-    scores.push({ initials, score: pendingHighScore, date: formatDate(new Date()) });
-    scores.sort((a,b) => b.score - a.score);
+    scores.push({ initials, wave: pendingHighScore.wave, time: pendingHighScore.time, country: selectedCountryCode || '??', date: formatDate(new Date()) });
+    scores.sort((a,b) => (b.wave - a.wave) || (b.time - a.time));
     scores = scores.slice(0,10);
     saveHighScores(scores);
     renderHighScores('gameOverHighScores', scores);
@@ -1283,9 +1315,9 @@ function renderHighScores(containerId, scores) {
         container.innerHTML = '<p>No high scores yet</p>';
         return;
     }
-    let html = '<table><tr><th>#</th><th>Init</th><th>Score</th><th>Date</th></tr>';
+    let html = '<table><tr><th>#</th><th>Init</th><th>Wave</th><th>Time(s)</th><th>Country</th><th>Date</th></tr>';
     scores.forEach((s,i) => {
-        html += `<tr><td>${i+1}</td><td>${s.initials}</td><td>${s.score}</td><td>${s.date}</td></tr>`;
+        html += `<tr><td>${i+1}</td><td>${s.initials}</td><td>${s.wave}</td><td>${s.time}</td><td>${s.country || ''}</td><td>${s.date}</td></tr>`;
     });
     html += '</table>';
     container.innerHTML = html;
@@ -1301,6 +1333,24 @@ function openHighScoreScreen() {
 function closeHighScoreScreen() {
     getElement('highScoreScreen').style.display = 'none';
     getElement('startScreen').style.display = 'flex';
+}
+
+function initMap(id, onSelect) {
+    const el = getElement(id);
+    if (!el || typeof Datamap === 'undefined') return null;
+    const map = new Datamap({
+        element: el,
+        fills: { defaultFill: '#666', selected: '#0f0' },
+        geographyConfig: {
+            highlightFill: '#0f0',
+            popupTemplate: geo => `<div>${geo.properties.name}</div>`
+        }
+    });
+    map.svg.selectAll('path').on('click', function(geo) {
+        selectedCountryCode = geo.id;
+        if (onSelect) onSelect(selectedCountryCode);
+    });
+    return map;
 }
 
 // --- Game Initialization & Start ---
@@ -1554,8 +1604,9 @@ function gameOver() {
     updateSpeedDisplay();
     getElement('playPauseButton').textContent = '\u25B6';
     getElement('gameOverScreen').style.display = 'flex';
-    getElement('finalStats').textContent = `Final Credits: ${gameState.credits} | Waves Survived: ${gameState.wave} | Score: ${gameState.score}`;
-    recordHighScore(gameState.score);
+    const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
+    getElement('finalStats').textContent = `Final Credits: ${gameState.credits} | Wave: ${gameState.wave} | Time: ${survivalTime}s`;
+    recordHighScore(gameState.wave, survivalTime);
     saveGame(); // Save final state on game over
 }
 
@@ -3432,6 +3483,12 @@ window.onload = () => {
     const savedTheme = localStorage.getItem('orbitalDefenseTheme_v2.9');
     const savedThemeIndex = savedTheme !== null ? parseInt(savedTheme, 10) : 0;
     applyTheme(savedThemeIndex); // Apply saved or default theme
+
+    const map1 = initMap('countryMap');
+    const map2 = initMap('countryMapHigh');
+    const map3 = initMap('countryMapModal', code => {
+        getElement('selectedCountryDisplay').textContent = code;
+    });
 
     updateSpeedDisplay();
 
