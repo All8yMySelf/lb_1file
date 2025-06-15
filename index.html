@@ -1123,6 +1123,35 @@ function loadGame() {
 }
 
 const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.38';
+const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbxNdo4XN4XWdpPRyRQmxC6yOsEG4MihGrlXDmI1thlaXOwD2QX00b4JHvYBDtqoK9k1/exec";
+
+// Send score to global leaderboard
+function submitScoreToLeaderboard(name, wave, time) {
+  const date = new Date().toISOString().split("T")[0];
+  fetch(LEADERBOARD_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: name.slice(0, 3).toUpperCase(),
+      wave,
+      time,
+      date
+    })
+  }).then(res => console.log("Score submitted")).catch(() => {});
+}
+
+// Get global leaderboard scores
+function fetchGlobalLeaderboard(callback) {
+  return fetch(LEADERBOARD_URL)
+    .then(response => response.json())
+    .then(data => {
+      const sorted = data.sort((a, b) => {
+        if (b[1] !== a[1]) return b[1] - a[1];
+        return a[2] - b[2];
+      });
+      callback(sorted);
+    });
+}
 
 function loadHighScores() {
     try {
@@ -1198,6 +1227,7 @@ function saveHighScoreFromModal() {
     renderHighScores('gameOverHighScores', scores);
     getElement('highScoreModal').style.display = 'none';
     getElement('nonHighScoreMessage').textContent = '';
+    submitScoreToLeaderboard(initials, pendingHighScore.wave, pendingHighScore.time);
     pendingHighScore = null;
 }
 
@@ -1224,10 +1254,18 @@ function renderHighScores(containerId, scores) {
 }
 
 function openHighScoreScreen() {
-    renderHighScores('highScoreTable', loadHighScores());
-    getElement('highScoreScreen').style.display = 'flex';
-    getElement('startScreen').style.display = 'none';
-    getElement('gameOverScreen').style.display = 'none';
+    const title = getElement("highScoreScreen").querySelector("h1");
+    title.textContent = "Global Leaderboard";
+    fetchGlobalLeaderboard(rows => {
+        const scores = rows.map(r => ({ initials: r[0], wave: r[1], time: r[2], date: r[3] }));
+        renderHighScores("highScoreTable", scores);
+    }).catch(() => {
+        title.textContent = "Local Leaderboard";
+        renderHighScores("highScoreTable", loadHighScores());
+    });
+    getElement("highScoreScreen").style.display = "flex";
+    getElement("startScreen").style.display = "none";
+    getElement("gameOverScreen").style.display = "none";
 }
 
 function closeHighScoreScreen() {
