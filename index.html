@@ -1128,27 +1128,24 @@ const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.38';
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbxNdo4XN4XWdpPRyRQmxC6yOsEG4MihGrlXDmI1thlaXOwD2QX00b4JHvYBDtqoK9k1/exec";
 
 // Send score to global leaderboard
-function submitScoreToLeaderboard(name, wave, time, replaceIndex) {
-  const params = new URLSearchParams();
-  params.set('name', name.slice(0, 3).toUpperCase());
-  params.set('wave', wave);
-  params.set('time', time);
-  params.set('date', new Date().toISOString().split('T')[0]);
-  if (replaceIndex !== undefined) params.set('replaceIndex', replaceIndex);
+function submitScoreToLeaderboard(initials, wave, time) {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const data = { initials, wave, time, date };
 
-  return fetch(LEADERBOARD_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
-  })
-    .then(res => {
-      console.log('Score submitted');
-      return res;
+    return fetch(LEADERBOARD_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
     })
-    .catch(err => {
-      console.error('Score submit failed', err);
-      throw err;
-    });
+        .then(response => response.text())
+        .then(result => {
+            console.log('Score submitted:', result);
+            return result;
+        })
+        .catch(error => {
+            console.error('Error submitting score:', error);
+            throw error;
+        });
 }
 
 // Get global leaderboard scores
@@ -1212,40 +1209,28 @@ function formatDate(date) {
     return date.toISOString().split('T')[0];
 }
 
-// Sync unsent local scores to the global leaderboard
+// Sync local scores to the global leaderboard if they beat existing entries
 function syncLocalScoresToGlobal() {
-    const scores = loadHighScores();
-    const unsynced = scores.filter(s => !s.synced);
-    if (!unsynced.length) return Promise.resolve();
+    const localScores = loadHighScores();
 
-    return fetchGlobalLeaderboard().then(rows => {
-        let globals = rows.map((r, i) => ({ initials: r[0], wave: parseInt(r[1], 10), time: parseInt(r[2], 10), index: i }));
-        globals.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
-        unsynced.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
+    fetchGlobalLeaderboard().then(globalData => {
+        const globalScores = globalData.map(r => ({
+            initials: r[0],
+            wave: parseInt(r[1]),
+            time: parseInt(r[2])
+        }));
 
-        let changed = false;
-        const tasks = [];
+        localScores.forEach(local => {
+            const existing = globalScores.find(g => g.initials === local.initials);
 
-        unsynced.forEach(local => {
-            const lowest = globals[globals.length - 1];
-            if (globals.length < 10 || local.wave > lowest.wave || (local.wave === lowest.wave && local.time < lowest.time)) {
-                const replaceIndex = globals.length < 10 ? globals.length : lowest.index;
-                tasks.push(
-                    submitScoreToLeaderboard(local.initials, local.wave, local.time, replaceIndex)
-                        .then(() => { local.synced = true; changed = true; })
-                        .catch(err => console.error('Sync failed', err))
-                );
-                if (globals.length < 10) {
-                    globals.push({ wave: local.wave, time: local.time, index: replaceIndex });
-                } else {
-                    globals[globals.findIndex(g => g.index === lowest.index)] = { wave: local.wave, time: local.time, index: replaceIndex };
-                }
-                globals.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
-                globals = globals.slice(0,10);
+            const shouldSubmit = !existing ||
+                local.wave > existing.wave ||
+                (local.wave === existing.wave && local.time < existing.time);
+
+            if (shouldSubmit) {
+                submitScoreToLeaderboard(local.initials, local.wave, local.time);
             }
         });
-
-        return Promise.all(tasks).then(() => { if (changed) saveHighScores(scores); });
     });
 }
 
@@ -1338,6 +1323,7 @@ function saveHighScoreFromModal() {
             updateGameOverLeaderboard();
             if (navigator.onLine) {
                 syncLeaderboard();
+                syncLocalScoresToGlobal();
             }
         });
     pendingHighScore = null;
@@ -3554,6 +3540,7 @@ function loadAndStartGame() {
       tryLoadGame();
       if (navigator.onLine) {
           syncLeaderboard();
+          syncLocalScoresToGlobal();
       }
       // Show Load Game button if save data exists
     if (savedGame) {
