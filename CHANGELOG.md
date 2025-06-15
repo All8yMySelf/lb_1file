@@ -27,9 +27,9 @@
 ## v2.32
 - Added persistent Top 10 High Scores feature
 - Scores include 3-character initials, score, and date
-- Stored in external file `highscores.json`
+- Scores are saved in browser `localStorage`
 - Retro arcade-style visual leaderboard
-- Automatically handles missing or empty high score file
+- Automatically initializes when no high scores exist
 
 ## v2.31
 - Added clickable block-based Focus Radius selector with save persistence
