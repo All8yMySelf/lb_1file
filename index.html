@@ -1162,6 +1162,29 @@ function fetchGlobalLeaderboard(callback) {
     });
 }
 
+// Combine local and global leaderboards
+function getCombinedLeaderboard(callback) {
+    const local = loadHighScores().map(s => ({ ...s, source: 'local' }));
+    return fetchGlobalLeaderboard(rows => {
+        const global = rows.map(r => ({ initials: r[0], wave: r[1], time: r[2], date: r[3], source: 'global' }));
+        const combined = local.concat(global);
+        const bestMap = new Map();
+        combined.forEach(sc => {
+            const key = `${sc.initials}_${sc.wave}_${sc.time}`;
+            const existing = bestMap.get(key);
+            if (!existing || sc.wave > existing.wave || (sc.wave === existing.wave && sc.time < existing.time) || (sc.wave === existing.wave && sc.time === existing.time && existing.source !== 'global' && sc.source === 'global')) {
+                bestMap.set(key, sc);
+            }
+        });
+        const deduped = Array.from(bestMap.values());
+        deduped.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
+        callback(deduped.slice(0,10));
+    }).catch(() => {
+        local.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
+        callback(local.slice(0,10));
+    });
+}
+
 function loadHighScores() {
     try {
         const data = localStorage.getItem(HIGH_SCORES_KEY);
@@ -1182,6 +1205,20 @@ function saveHighScores(scores) {
 
 function formatDate(date) {
     return date.toISOString().split('T')[0];
+}
+
+// Sync unsent local scores to the global leaderboard
+function syncLocalScoresToGlobal() {
+    const scores = loadHighScores();
+    let changed = false;
+    const tasks = scores.map(s => {
+        if (!s.synced) {
+            return submitScoreToLeaderboard(s.initials, s.wave, s.time)
+                .then(() => { s.synced = true; changed = true; })
+                .catch(err => console.error('Sync failed', err));
+        }
+    }).filter(Boolean);
+    return Promise.all(tasks).then(() => { if (changed) saveHighScores(scores); });
 }
 
 let pendingHighScore = null;
@@ -1229,13 +1266,21 @@ function saveHighScoreFromModal() {
     let initials = getElement('highScoreInitials').value.trim().toUpperCase().slice(0,3);
     if (!initials) initials = '???';
     let scores = loadHighScores();
-    scores.push({ initials, wave: pendingHighScore.wave, time: pendingHighScore.time, date: formatDate(new Date()) });
+    scores.push({ initials, wave: pendingHighScore.wave, time: pendingHighScore.time, date: formatDate(new Date()), synced: false });
     scores.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
     scores = scores.slice(0,10);
     saveHighScores(scores);
     getElement('highScoreModal').style.display = 'none';
     getElement('nonHighScoreMessage').textContent = '';
     submitScoreToLeaderboard(initials, pendingHighScore.wave, pendingHighScore.time)
+        .then(() => {
+            const updated = loadHighScores();
+            const entry = updated.find(s => s.initials === initials && s.wave === pendingHighScore.wave && s.time === pendingHighScore.time && !s.synced);
+            if (entry) {
+                entry.synced = true;
+                saveHighScores(updated);
+            }
+        })
         .finally(updateGameOverLeaderboard);
     pendingHighScore = null;
 }
@@ -1254,9 +1299,10 @@ function renderHighScores(containerId, scores) {
         container.innerHTML = '<p>No high scores yet</p>';
         return;
     }
-    let html = '<table><tr><th>#</th><th>Init</th><th>Wave/Time</th><th>Date</th></tr>';
+    let html = '<table><tr><th>#</th><th>Init</th><th>Wave/Time</th><th>Date</th><th>Source</th></tr>';
     scores.forEach((s,i) => {
-        html += `<tr><td>${i+1}</td><td>${s.initials}</td><td>${s.wave}/${s.time}</td><td>${s.date}</td></tr>`;
+        const src = s.source ? (s.source === 'global' ? 'Global' : 'Local') : '';
+        html += `<tr><td>${i+1}</td><td>${s.initials}</td><td>${s.wave}/${s.time}</td><td>${s.date}</td><td>${src}</td></tr>`;
     });
     html += '</table>';
     container.innerHTML = html;
@@ -1264,35 +1310,17 @@ function renderHighScores(containerId, scores) {
 
 function updateGameOverLeaderboard() {
     const title = getElement("gameOverLeaderboardTitle");
-    title.textContent = "Global Leaderboard";
-    fetchGlobalLeaderboard(rows => {
-        const scores = rows.slice(0, 10).map(r => ({ initials: r[0], wave: r[1], time: r[2], date: r[3] }));
-        if (scores.length) {
-            renderHighScores("gameOverHighScores", scores);
-        } else {
-            title.textContent = "Local Leaderboard";
-            renderHighScores("gameOverHighScores", loadHighScores());
-        }
-    }).catch(() => {
-        title.textContent = "Local Leaderboard";
-        renderHighScores("gameOverHighScores", loadHighScores());
+    title.textContent = "Leaderboard";
+    getCombinedLeaderboard(scores => {
+        renderHighScores("gameOverHighScores", scores);
     });
 }
 
 function openHighScoreScreen() {
     const title = getElement("highScoreScreen").querySelector("h1");
-    title.textContent = "Global Leaderboard";
-    fetchGlobalLeaderboard(rows => {
-        const scores = rows.slice(0, 10).map(r => ({ initials: r[0], wave: r[1], time: r[2], date: r[3] }));
-        if (scores.length) {
-            renderHighScores("highScoreTable", scores);
-        } else {
-            title.textContent = "Local Leaderboard";
-            renderHighScores("highScoreTable", loadHighScores());
-        }
-    }).catch(() => {
-        title.textContent = "Local Leaderboard";
-        renderHighScores("highScoreTable", loadHighScores());
+    title.textContent = "Leaderboard";
+    getCombinedLeaderboard(scores => {
+        renderHighScores("highScoreTable", scores);
     });
     getElement("highScoreScreen").style.display = "flex";
     getElement("startScreen").style.display = "none";
@@ -1562,6 +1590,9 @@ function gameOver() {
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
     recordHighScore(gameState.wave, survivalTime);
     saveGame(); // Save final state on game over
+    if (navigator.onLine) {
+        syncLocalScoresToGlobal();
+    }
 }
 
 // --- Main Game Loop ---
