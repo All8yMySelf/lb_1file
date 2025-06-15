@@ -1249,6 +1249,28 @@ function syncLocalScoresToGlobal() {
     });
 }
 
+// Fetch global leaderboard and merge with local scores, then sync any
+// remaining local scores that beat the global leaderboard
+function syncLeaderboard() {
+    if (!navigator.onLine) return Promise.resolve();
+    return fetchGlobalLeaderboard()
+        .then(rows => {
+            const globalScores = rows.map(r => ({
+                initials: r[0],
+                wave: parseInt(r[1], 10),
+                time: parseInt(r[2], 10),
+                date: r[3],
+                synced: true
+            }));
+            let local = loadHighScores();
+            const combined = local.concat(globalScores);
+            combined.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
+            saveHighScores(combined.slice(0,10));
+        })
+        .then(syncLocalScoresToGlobal)
+        .catch(err => console.error('Leaderboard sync failed', err));
+}
+
 let pendingHighScore = null;
 const NON_TOP_MESSAGES = [
     "Nice try! You'll crack the top 10 soon.",
@@ -1264,6 +1286,9 @@ const NON_TOP_MESSAGES = [
 ];
 
 function recordHighScore(wave, time) {
+    if (navigator.onLine) {
+        syncLeaderboard();
+    }
     let scores = loadHighScores();
     const entry = { initials: '', wave, time, date: formatDate(new Date()) };
     const withPlayer = scores.concat(entry);
@@ -1309,7 +1334,12 @@ function saveHighScoreFromModal() {
                 saveHighScores(updated);
             }
         })
-        .finally(updateGameOverLeaderboard);
+        .finally(() => {
+            updateGameOverLeaderboard();
+            if (navigator.onLine) {
+                syncLeaderboard();
+            }
+        });
     pendingHighScore = null;
 }
 
@@ -1591,6 +1621,9 @@ function initializeGame(shouldTryLoad = true) {
 
 function startGame() {
     initializeGame(true); // Initialize with saved game check
+    if (navigator.onLine) {
+        syncLeaderboard();
+    }
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
     getElement('highScoreModal').style.display = 'none';
@@ -3469,6 +3502,9 @@ function cycleTheme() {
 // --- Load and Start Game Function ---
 function loadAndStartGame() {
     initializeGame(false); // Initialize basic structures without trying to load save again
+    if (navigator.onLine) {
+        syncLeaderboard();
+    }
 
     if (!loadGame()) { // Attempt to load the saved game
         showToast("Failed to load saved game.", 2000);
@@ -3491,14 +3527,14 @@ function loadAndStartGame() {
 
 
 // Initial setup on load
-window.onload = () => {
+  window.onload = () => {
     // Preload pixel font if needed (optional, adds dependency)
     // const fontLink = document.createElement('link');
     // fontLink.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
     // fontLink.rel = 'stylesheet';
     // document.head.appendChild(fontLink);
 
-    initializeGame(false); // Initialize without loading saved game yet
+      initializeGame(false); // Initialize without loading saved game yet
 
     // Load saved theme preference, default to "Orbital Elite" (index 0)
     const savedTheme = localStorage.getItem('orbitalDefenseTheme_v2.9');
@@ -3513,10 +3549,13 @@ window.onload = () => {
     getElement('gameOverScreen').style.display = 'none';
     // Draw initial empty state? Or just wait for game start.
     ctx.fillStyle = 'rgb(0, 0, 0)';
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    // Try loading save data now, before Start Game is pressed
-    tryLoadGame();
-    // Show Load Game button if save data exists
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      // Try loading save data now, before Start Game is pressed
+      tryLoadGame();
+      if (navigator.onLine) {
+          syncLeaderboard();
+      }
+      // Show Load Game button if save data exists
     if (savedGame) {
         getElement('loadButton').style.display = 'block'; // Or 'inline-block' if preferred next to Start
     }
