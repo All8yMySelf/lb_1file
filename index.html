@@ -1132,16 +1132,14 @@ function submitScoreToLeaderboard(initials, wave, time) {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const data = { initials, wave, time, date };
 
+    // Using no-cors mode avoids preflight requests which can fail on some
+    // leaderboard deployments. The response becomes opaque, so we simply
+    // fire-and-forget and log any fetch errors.
     return fetch(LEADERBOARD_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'no-cors',
         body: JSON.stringify(data)
     })
-        .then(response => response.text())
-        .then(result => {
-            console.log('Score submitted:', result);
-            return result;
-        })
         .catch(error => {
             console.error('Error submitting score:', error);
             throw error;
