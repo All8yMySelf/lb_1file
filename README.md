@@ -28,7 +28,16 @@ leaderboard does not provide CORS headers. The code now sends the score using
 read.
 
 If you prefer to maintain your own leaderboard or require full CORS support,
-deploy a copy of the script yourself and update `LEADERBOARD_URL` accordingly.
+deploy a copy of the script yourself and update `LEADERBOARD_URL` in both
+`index.html` and `leaderboard_tester.html` to point at your deployment. The file
+[`apps-script.js`](apps-script.js) contains a minimal Apps Script you can paste
+into a new project to back your own sheet. Replace `SHEET_ID` with the ID of a
+Google Sheet and deploy the project as a web app, then use that URL for
+`LEADERBOARD_URL`.
+
+For convenience a small page, [`leaderboard_tester.html`](leaderboard_tester.html),
+is included for manually submitting scores and verifying the leaderboard
+endpoint works as expected.
 
 ## Change Log
 
