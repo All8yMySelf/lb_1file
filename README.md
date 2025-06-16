@@ -28,6 +28,7 @@ leaderboard does not provide CORS headers. The code now sends the score using
 read.
 
 If you prefer to maintain your own leaderboard or require full CORS support,
+
 deploy a copy of the script yourself and update `LEADERBOARD_URL` in both
 `index.html` and `leaderboard_tester.html` to point at your deployment. The file
 [`apps-script.js`](apps-script.js) contains a minimal Apps Script you can paste
