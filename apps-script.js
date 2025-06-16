@@ -10,7 +10,8 @@ function getSheet() {
 function doGet(e) {
   const values = getSheet().getDataRange().getValues();
   return ContentService.createTextOutput(JSON.stringify(values))
-    .setMimeType(ContentService.MimeType.JSON);
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader('Access-Control-Allow-Origin', '*');
 }
 
 function doPost(e) {
@@ -32,5 +33,12 @@ function doPost(e) {
   if (!updated) {
     sheet.appendRow([payload.initials, payload.wave, payload.time, payload.date]);
   }
-  return ContentService.createTextOutput('ok');
+  return ContentService.createTextOutput('ok')
+    .setHeader('Access-Control-Allow-Origin', '*');
+}
+
+function doOptions(e) {
+  return ContentService.createTextOutput('')
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeader('Access-Control-Allow-Origin', '*');
 }
