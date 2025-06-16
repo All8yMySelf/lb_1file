@@ -1151,9 +1151,7 @@ function fetchGlobalLeaderboard() {
   return fetch(LEADERBOARD_URL)
     .then(response => response.json())
     .then(data => data.map(r => {
-      if (r[3]) {
-        try { r[3] = new Date(r[3]).toISOString().split('T')[0]; } catch(e) {}
-      }
+      r[3] = cleanDate(r[3]);
       return r;
     }))
     .then(rows => rows.sort((a, b) => {
@@ -1205,6 +1203,18 @@ function saveHighScores(scores) {
 
 function formatDate(date) {
     return date.toISOString().split('T')[0];
+}
+
+function cleanDate(value) {
+    if (!value) return '';
+    if (/^\d{8}$/.test(value)) {
+        value = `${value.slice(0,4)}-${value.slice(4,6)}-${value.slice(6)}`;
+    }
+    try {
+        return new Date(value).toISOString().split('T')[0];
+    } catch (e) {
+        return '';
+    }
 }
 
 // Sync local scores to the global leaderboard if they beat existing entries
