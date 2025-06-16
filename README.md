@@ -29,6 +29,13 @@ read.
 
 If you prefer to maintain your own leaderboard or require full CORS support,
 deploy a copy of the script yourself and update `LEADERBOARD_URL` accordingly.
+The file [`apps-script.js`](apps-script.js) contains a minimal Apps Script you
+can paste into a new project to back your own sheet. Simply replace
+`SHEET_ID` with the ID of a Google Sheet and deploy it as a web app.
+
+For convenience a small page, [`leaderboard_tester.html`](leaderboard_tester.html),
+is included for manually submitting scores and verifying the leaderboard
+endpoint works as expected.
 
 ## Change Log
 
