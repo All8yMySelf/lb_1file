@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leaderboard Manual Tester</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    form label { margin-right: 10px; }
+    table { border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; }
+  </style>
+</head>
+<body>
+  <h1>Leaderboard Manual Tester</h1>
+  <form id="scoreForm">
+    <label>Initials <input id="initials" maxlength="3" required></label>
+    <label>Wave <input id="wave" type="number" required></label>
+    <label>Time <input id="time" type="number" required></label>
+    <label>Date <input id="date" type="date" required></label>
+    <button type="submit">Submit Score</button>
+  </form>
+  <button id="refreshBtn">Refresh Leaderboard</button>
+  <h2>Global Leaderboard</h2>
+  <table id="leaderboard">
+    <thead>
+      <tr><th>Initials</th><th>Wave</th><th>Time</th><th>Date</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+<script>
+const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbxNdo4XN4XWdpPRyRQmxC6yOsEG4MihGrlXDmI1thlaXOwD2QX00b4JHvYBDtqoK9k1/exec";
+
+function submitScore(initials, wave, time, date) {
+  const data = { initials, wave, time, date };
+  return fetch(LEADERBOARD_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(data)
+  }).catch(err => console.error('Error submitting score:', err));
+}
+
+function fetchLeaderboard() {
+  return fetch(LEADERBOARD_URL)
+    .then(r => r.json())
+    .then(rows => rows.map(r => {
+      if (r[3]) {
+        try { r[3] = new Date(r[3]).toISOString().split('T')[0]; } catch(e) {}
+      }
+      return r;
+    }))
+    .then(rows => rows.sort((a, b) => {
+      if (b[1] !== a[1]) return b[1] - a[1];
+      return a[2] - b[2];
+    }))
+    .catch(err => { console.error('Error fetching leaderboard:', err); return []; });
+}
+
+function renderLeaderboard(rows) {
+  const tbody = document.querySelector('#leaderboard tbody');
+  tbody.innerHTML = '';
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    const dateCell = row[3] ? new Date(row[3]).toISOString().split('T')[0] : '';
+    tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${dateCell}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function loadLeaderboard() {
+  fetchLeaderboard().then(renderLeaderboard);
+}
+
+document.getElementById('scoreForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const initials = document.getElementById('initials').value;
+  const wave = parseInt(document.getElementById('wave').value, 10);
+  const time = parseInt(document.getElementById('time').value, 10);
+  const date = document.getElementById('date').value.replace(/-/g, '');
+  submitScore(initials, wave, time, date).then(loadLeaderboard);
+});
+
+document.getElementById('refreshBtn').addEventListener('click', loadLeaderboard);
+
+document.getElementById('date').valueAsNumber = Date.now() - (new Date()).getTimezoneOffset() * 60000;
+loadLeaderboard();
+</script>
+</body>
+</html>
