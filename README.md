@@ -24,7 +24,7 @@ Follow these steps to set up your own instance:
 1. Go to [https://console.firebase.google.com](https://console.firebase.google.com) and create a new project.
 2. Add a web app and copy the Firebase config values.
 3. In the Firebase console open **Build > Realtime Database** and create a database in **test mode**.
-4. Replace the placeholders in [`firebaseConfig.js`](firebaseConfig.js) with your config object.
+4. Copy `firebaseConfig.template.js` to `firebaseConfig.js` and replace the placeholders with your config values. The new file is ignored by Git so your credentials stay private.
 5. Deploy the game to GitHub Pages or open it locally to test.
 6. Scores will be written under the `scores` path and the top ten will appear in the leaderboard section.
 7. Players submit scores by entering their initials on the Game Over screen.
