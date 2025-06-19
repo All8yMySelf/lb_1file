@@ -1,7 +1,7 @@
 # Orbital Defence Elite - Change Log
 
 ## v2.38
-- Local high scores now replace lower entries on the shared leaderboard instead of adding new rows.
+- Switched to a Firebase-only leaderboard; local storage has been removed.
 - Dates returned from the global leaderboard no longer include a time component.
 
 ## v2.37.1
@@ -31,7 +31,7 @@
 ## v2.32
 - Added persistent Top 10 High Scores feature
 - Scores include 3-character initials, score, and date
-- Scores are saved in browser `localStorage`
+- Scores were initially saved in browser `localStorage` (now replaced by Firebase)
 - Retro arcade-style visual leaderboard
 - Automatically initializes when no high scores exist
 
