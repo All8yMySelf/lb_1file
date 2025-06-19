@@ -11,13 +11,9 @@
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 <script type="module" src="firebaseConfig.js"></script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js";
+
 
 import { firebaseConfig } from "./firebaseConfig.js";
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -31,6 +27,7 @@ window.submitScore = function(initials, wave, timeLeft) {
 };
 
 window.loadTopScores = function(callback) {
+  const message = document.getElementById('leaderboardMessage');
   get(ref(db, 'scores')).then(snapshot => {
     const data = snapshot.val() || {};
     const scores = Object.values(data);
@@ -38,7 +35,11 @@ window.loadTopScores = function(callback) {
       if (b.wave !== a.wave) return b.wave - a.wave;
       return a.timeLeft - b.timeLeft;
     });
+    if (message) message.textContent = '';
     callback(scores.slice(0,10));
+  }).catch(err => {
+    console.error(err);
+    if (message) message.textContent = 'Unable to load leaderboard.';
   });
 };
 </script>
@@ -69,6 +70,7 @@ window.loadTopScores = function(callback) {
     <div id="leaderboardSection" style="display:none;flex-direction:column;align-items:center;gap:20px;">
         <h2>Leaderboard</h2>
         <table id="leaderboardTable"><thead><tr><th>Init</th><th>Wave</th><th>Time</th><th>Date</th></tr></thead><tbody></tbody></table>
+        <p id="leaderboardMessage"></p>
         <button id="leaderboardBack">Back</button>
     </div>
     <button id="restartButton">Play Again</button> <!-- Renamed from #r -->
