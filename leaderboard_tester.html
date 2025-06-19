@@ -54,15 +54,23 @@ function submitScore(initials, wave, timeLeft) {
 }
 
 function loadTopScores() {
-  return get(ref(db, 'scores')).then(snap => {
-    const data = snap.val() || {};
-    const scores = Object.values(data);
-    scores.sort((a,b) => {
-      if (b.wave !== a.wave) return b.wave - a.wave;
-      return a.timeLeft - b.timeLeft;
+  const message = document.getElementById('leaderboardMessage');
+  return get(ref(db, 'scores'))
+    .then(snap => {
+      const data = snap.val() || {};
+      const scores = Object.values(data);
+      scores.sort((a,b) => {
+        if (b.wave !== a.wave) return b.wave - a.wave;
+        return a.timeLeft - b.timeLeft;
+      });
+      if (message) message.textContent = '';
+      return scores.slice(0,10);
+    })
+    .catch(err => {
+      console.error(err);
+      if (message) message.textContent = 'Unable to load leaderboard.';
+      throw err;
     });
-    return scores.slice(0,10);
-  });
 }
 
 function renderLeaderboard(rows) {
