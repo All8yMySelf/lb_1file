@@ -3357,13 +3357,9 @@ function loadAndStartGame() {
 // --- Global Access (for HTML onclick) ---
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
-// Sample leaderboard usage
-submitScore("AAA", 5, 45).then(() => {
-    loadTopScores(scores => console.log("Top scores", scores));
-});
-
-
-
+// Sample leaderboard usage removed to avoid errors if Firebase scripts
+// have not finished loading when this file executes. Use submitScore and
+// loadTopScores within the game flow once Firebase is ready.
 })(); // End IIFE
 </script>
 <div id="crt-overlay"></div>
