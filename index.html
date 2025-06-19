@@ -65,15 +65,15 @@ window.loadTopScores = function(callback) {
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
     <button id="leaderboardButton">Leaderboard</button>
 </div>
+<div id="leaderboardSection" style="display:none;flex-direction:column;align-items:center;gap:20px;">
+    <h2>Leaderboard</h2>
+    <table id="leaderboardTable"><thead><tr><th>Init</th><th>Wave</th><th>Time</th><th>Date</th></tr></thead><tbody></tbody></table>
+    <p id="leaderboardMessage"></p>
+    <button id="leaderboardBack">Back</button>
+</div>
 <div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
     <h1>Game Over</h1>
     <div id="finalStats"></div> <!-- Renamed from #f -->
-    <div id="leaderboardSection" style="display:none;flex-direction:column;align-items:center;gap:20px;">
-        <h2>Leaderboard</h2>
-        <table id="leaderboardTable"><thead><tr><th>Init</th><th>Wave</th><th>Time</th><th>Date</th></tr></thead><tbody></tbody></table>
-        <p id="leaderboardMessage"></p>
-        <button id="leaderboardBack">Back</button>
-    </div>
     <button id="restartButton">Play Again</button> <!-- Renamed from #r -->
 </div>
 <div id="controls">
@@ -1159,13 +1159,10 @@ function renderLeaderboard(scores) {
 function showLeaderboard() {
     loadTopScores(renderLeaderboard);
     getElement('leaderboardSection').style.display = 'flex';
-    getElement('startScreen').style.display = 'none';
-    getElement('gameOverScreen').style.display = 'none';
 }
 
 function hideLeaderboard() {
     getElement('leaderboardSection').style.display = 'none';
-    getElement('startScreen').style.display = 'flex';
 }
 
 function cleanDate(value) {
