@@ -5,7 +5,9 @@ This repository contains a small browser game written entirely in a single HTML 
 ## Playing
 
 Open `index.html` in any modern browser. The game will load immediately with no additional assets required. Use the on-screen instructions or the hotkeys listed on the start screen to play.
-High scores are saved in your browser via `localStorage`, so they persist between sessions. After a game ends you can enter up to three initials on the Game Over screen to submit your score to the online leaderboard.
+
+High scores are stored online using Firebase Realtime Database, so they persist across devices.
+
 
 ## About
 
@@ -36,7 +38,7 @@ The game is under active development. Below is a brief summary of recent updates
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 ### v2.38
-- Local high scores replace lower entries on the global leaderboard.
+- Switched to Firebase-only high scores and removed local storage.
 - Global leaderboard dates no longer include a time value.
 
 ### v2.37
