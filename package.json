@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "Self-contained browser game",
   "private": true,
+  "type": "module",
   "scripts": {
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "devDependencies": {
+    "jest": "^30.0.1"
   }
 }

@@ -39,6 +39,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebas
 import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
 import { firebaseConfig } from "./firebaseConfig.js";
+import { sortScores } from "./leaderboard.js";
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -48,17 +49,14 @@ function submitScore(initials, wave, timeLeft) {
 
 function loadTopScores() {
   const message = document.getElementById('leaderboardMessage');
-  return get(ref(db, 'scores'))
-    .then(snap => {
-      const data = snap.val() || {};
-      const scores = Object.values(data);
-      scores.sort((a,b) => {
-        if (b.wave !== a.wave) return b.wave - a.wave;
-        return a.timeLeft - b.timeLeft;
-      });
-      if (message) message.textContent = '';
-      return scores.slice(0,10);
-    })
+    return get(ref(db, 'scores'))
+      .then(snap => {
+        const data = snap.val() || {};
+        const scores = Object.values(data);
+        sortScores(scores);
+        if (message) message.textContent = '';
+        return scores.slice(0,10);
+      })
     .catch(err => {
       console.error(err);
       if (message) message.textContent = 'Unable to load leaderboard.';
