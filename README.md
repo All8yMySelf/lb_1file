@@ -5,7 +5,7 @@ This repository contains a small browser game written entirely in a single HTML 
 ## Playing
 
 Open `index.html` in any modern browser. The game will load immediately with no additional assets required. Use the on-screen instructions or the hotkeys listed on the start screen to play.
-High scores are saved in your browser via `localStorage`, so they persist between sessions.
+High scores are saved in your browser via `localStorage`, so they persist between sessions. After a game ends you can enter up to three initials on the Game Over screen to submit your score to the online leaderboard.
 
 ## About
 
@@ -27,7 +27,8 @@ Follow these steps to set up your own instance:
 4. Replace the placeholders in [`firebaseConfig.js`](firebaseConfig.js) with your config object.
 5. Deploy the game to GitHub Pages or open it locally to test.
 6. Scores will be written under the `scores` path and the top ten will appear in the leaderboard section.
-7. To prevent unauthorized writes, consider using HTTP referrer restrictions or enabling Firebase App Check.
+7. Players submit scores by entering their initials on the Game Over screen.
+8. To prevent unauthorized writes, consider using HTTP referrer restrictions or enabling Firebase App Check.
 
 ## Change Log
 
