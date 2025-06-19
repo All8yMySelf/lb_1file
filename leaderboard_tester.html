@@ -13,6 +13,7 @@
 </head>
 <body>
   <h1>Leaderboard Manual Tester</h1>
+  <button id="randomBtn" type="button">Random Score</button>
   <form id="scoreForm">
     <label>Initials <input id="initials" maxlength="3" required></label>
     <label>Wave <input id="wave" type="number" required></label>
@@ -75,6 +76,14 @@ function renderLeaderboard(rows) {
   });
 }
 
+function fillRandomScore() {
+  const randLetter = () => String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  document.getElementById('initials').value = randLetter() + randLetter() + randLetter();
+  document.getElementById('wave').value = 8;
+  document.getElementById('time').value = Math.floor(Math.random() * 60) + 1;
+  document.getElementById('date').value = new Date().toISOString().split('T')[0];
+}
+
 document.getElementById('scoreForm').addEventListener('submit', e => {
   e.preventDefault();
   const initials = document.getElementById('initials').value;
@@ -82,6 +91,8 @@ document.getElementById('scoreForm').addEventListener('submit', e => {
   const time = parseInt(document.getElementById('time').value, 10);
   submitScore(initials, wave, time).then(() => loadTopScores().then(renderLeaderboard));
 });
+
+document.getElementById('randomBtn').addEventListener('click', fillRandomScore);
 
 document.getElementById('refreshBtn').addEventListener('click', () => {
   loadTopScores().then(renderLeaderboard);
