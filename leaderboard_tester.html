@@ -28,49 +28,39 @@
     </thead>
     <tbody></tbody>
   </table>
-<script>
-const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbyZx7mMCD4qsYzt1Ga4D6X-znWOK9Gg0USrqgcYp7pObeYzK9Rjn0TG01ODLhm41Ssn/exec";
+</body>
+</html>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "your-app.firebaseapp.com",
+  databaseURL: "https://your-app-default-rtdb.firebaseio.com",
+  projectId: "your-app",
+  storageBucket: "your-app.appspot.com",
+  messagingSenderId: "xxxxxxxxxx",
+  appId: "1:xxxxxxxxxxx:web:xxxxxxxxxxx"
+};
 
-function cleanDate(value) {
-  if (!value) return '';
-  if (/^\d{8}$/.test(value)) {
-    value = `${value.slice(0,4)}-${value.slice(4,6)}-${value.slice(6)}`;
-  }
-  try {
-    return new Date(value).toISOString().split('T')[0];
-  } catch (e) {
-    return '';
-  }
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+function submitScore(initials, wave, timeLeft) {
+  return push(ref(db, 'scores'), { initials: initials.toUpperCase(), wave, timeLeft, timestamp: Date.now() });
 }
 
-function submitScore(initials, wave, time, date) {
-  const data = { initials, wave, time, date };
-  return fetch(LEADERBOARD_URL, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  mode: 'cors',
-  body: JSON.stringify(data)
-});
-
-}
-
-function fetchLeaderboard() {
-  return fetch(LEADERBOARD_URL)
-    .then(r => r.json())
-    .then(rows => rows.map(r => {
-
-      r[3] = cleanDate(r[3]);
-
-      return r;
-    }))
-    .then(rows => rows.sort((a, b) => {
-      if (b[1] !== a[1]) return b[1] - a[1];
-      return a[2] - b[2];
-    }))
-    .catch(err => { console.error('Error fetching leaderboard:', err); return []; });
+function loadTopScores() {
+  return get(ref(db, 'scores')).then(snap => {
+    const data = snap.val() || {};
+    const scores = Object.values(data);
+    scores.sort((a,b) => {
+      if (b.wave !== a.wave) return b.wave - a.wave;
+      return a.timeLeft - b.timeLeft;
+    });
+    return scores.slice(0,10);
+  });
 }
 
 function renderLeaderboard(rows) {
@@ -78,16 +68,10 @@ function renderLeaderboard(rows) {
   tbody.innerHTML = '';
   rows.forEach(row => {
     const tr = document.createElement('tr');
-
-    const dateCell = cleanDate(row[3]);
-
-    tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${dateCell}</td>`;
+    const dateCell = new Date(row.timestamp).toISOString().split('T')[0];
+    tr.innerHTML = `<td>${row.initials}</td><td>${row.wave}</td><td>${row.timeLeft}</td><td>${dateCell}</td>`;
     tbody.appendChild(tr);
   });
-}
-
-function loadLeaderboard() {
-  fetchLeaderboard().then(renderLeaderboard);
 }
 
 document.getElementById('scoreForm').addEventListener('submit', e => {
@@ -95,14 +79,12 @@ document.getElementById('scoreForm').addEventListener('submit', e => {
   const initials = document.getElementById('initials').value;
   const wave = parseInt(document.getElementById('wave').value, 10);
   const time = parseInt(document.getElementById('time').value, 10);
-  const date = document.getElementById('date').value.replace(/-/g, '');
-  submitScore(initials, wave, time, date).then(loadLeaderboard);
+  submitScore(initials, wave, time).then(() => loadTopScores().then(renderLeaderboard));
 });
 
-document.getElementById('refreshBtn').addEventListener('click', loadLeaderboard);
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  loadTopScores().then(renderLeaderboard);
+});
 
-document.getElementById('date').valueAsNumber = Date.now() - (new Date()).getTimezoneOffset() * 60000;
-loadLeaderboard();
+loadTopScores().then(renderLeaderboard);
 </script>
-</body>
-</html>
