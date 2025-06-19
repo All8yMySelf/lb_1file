@@ -74,6 +74,7 @@ window.loadTopScores = function(callback) {
 <div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
     <h1>Game Over</h1>
     <div id="finalStats"></div> <!-- Renamed from #f -->
+    <input id="initialsInput" maxlength="3">
     <button id="restartButton">Play Again</button> <!-- Renamed from #r -->
 </div>
 <div id="controls">
@@ -1418,6 +1419,7 @@ function startGame() {
     }
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
+    getElement('initialsInput').value = '';
     pauseGame(); // Ensure no game loop is running
     gameSpeedMultiplier = 1;
     speedIndex = SPEED_STEPS.indexOf(1);
@@ -1441,7 +1443,10 @@ function gameOver() {
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
     saveGame(); // Save final state on game over
     if (navigator.onLine) {
-        submitScore('AAA', gameState.wave, survivalTime).then(() => {
+        const initialsField = getElement('initialsInput');
+        let initials = (initialsField.value || '').trim().toUpperCase();
+        if (!initials) initials = 'AAA';
+        submitScore(initials, gameState.wave, survivalTime).then(() => {
             loadTopScores(renderLeaderboard);
         });
     }
