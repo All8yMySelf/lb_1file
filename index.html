@@ -10,6 +10,44 @@
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "your-app.firebaseapp.com",
+  databaseURL: "https://your-app-default-rtdb.firebaseio.com",
+  projectId: "your-app",
+  storageBucket: "your-app.appspot.com",
+  messagingSenderId: "xxxxxxxxxx",
+  appId: "1:xxxxxxxxxxx:web:xxxxxxxxxxx"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.submitScore = function(initials, wave, timeLeft) {
+  return push(ref(db, 'scores'), {
+    initials: initials.toUpperCase(),
+    wave,
+    timeLeft,
+    timestamp: Date.now()
+  });
+};
+
+window.loadTopScores = function(callback) {
+  get(ref(db, 'scores')).then(snapshot => {
+    const data = snapshot.val() || {};
+    const scores = Object.values(data);
+    scores.sort((a,b) => {
+      if (b.wave !== a.wave) return b.wave - a.wave;
+      return a.timeLeft - b.timeLeft;
+    });
+    callback(scores.slice(0,10));
+  });
+};
+</script>
 <title>Orbital Defence Elite v2.38 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
@@ -29,34 +67,17 @@
     <h1>Orbital Defence Elite v2.38</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
-    <button id="highScoreButton">High Scores</button>
+    <button id="leaderboardButton">Leaderboard</button>
 </div>
 <div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
     <h1>Game Over</h1>
     <div id="finalStats"></div> <!-- Renamed from #f -->
-    <div id="highScoreArea" style="display:flex;flex-direction:column;align-items:center;gap:20px;">
-        <h2 id="gameOverLeaderboardTitle"></h2>
-        <div id="gameOverHighScores"></div>
+    <div id="leaderboardSection" style="display:none;flex-direction:column;align-items:center;gap:20px;">
+        <h2>Leaderboard</h2>
+        <table id="leaderboardTable"><thead><tr><th>Init</th><th>Wave</th><th>Time</th><th>Date</th></tr></thead><tbody></tbody></table>
+        <button id="leaderboardBack">Back</button>
     </div>
-    <div id="nonHighScoreMessage" style="margin-top:10px"></div>
     <button id="restartButton">Play Again</button> <!-- Renamed from #r -->
-</div>
-<div id="highScoreScreen" style="display:none">
-    <h1>High Scores</h1>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:20px;">
-        <div id="highScoreTable"></div>
-    </div>
-    <button id="backButton">Back</button>
-</div>
-<div id="highScoreModal" style="display:none">
-    <h1>New High Score!</h1>
-    <div id="beatenScores" style="margin:10px 0"></div>
-    <div id="scoreSummary" style="margin-bottom:10px"></div>
-    <div id="initialInputContainer" style="display:flex;align-items:center;gap:5px">
-        <input style="text-transform: uppercase" id="highScoreInitials" maxlength="3" autofocus>
-        <span class="blinking-cursor">_</span>
-    </div>
-    <button id="saveHighScoreButton">Save</button>
 </div>
 <div id="controls">
     <button id="playPauseButton">&#9654;</button>
@@ -1123,86 +1144,31 @@ function loadGame() {
     // Close loadGame function
 }
 
-const HIGH_SCORES_KEY = 'orbitalDefenseHighScores_v2.38';
-// Hosted Google Apps Script backing the shared leaderboard
-const LEADERBOARD_URL = "https://script.google.com/macros/s/YOUR_NEW_DEPLOYMENT_ID/exec";
-
-// Send score to global leaderboard
-function submitScoreToLeaderboard(initials, wave, time) {
-    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const data = { initials, wave, time, date };
-
-    // Using no-cors mode avoids preflight requests which can fail on some
-    // leaderboard deployments. The response becomes opaque, so we simply
-    // fire-and-forget and log any fetch errors.
-    return fetch(LEADERBOARD_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(data)
-    })
-        .catch(error => {
-            console.error('Error submitting score:', error);
-            throw error;
-        });
+function formatDate(date) {
+    return date.toISOString().split('T')[0];
 }
 
-// Get global leaderboard scores
-function fetchGlobalLeaderboard() {
-  return fetch(LEADERBOARD_URL)
-    .then(response => response.json())
-    .then(data => data.map(r => {
-      r[3] = cleanDate(r[3]);
-      return r;
-    }))
-    .then(rows => rows.sort((a, b) => {
-      if (b[1] !== a[1]) return b[1] - a[1];
-      return a[2] - b[2];
-    }));
-}
-
-// Combine local and global leaderboards
-function getCombinedLeaderboard(callback) {
-    const local = loadHighScores().map(s => ({ ...s, source: 'local' }));
-    return fetchGlobalLeaderboard().then(rows => {
-        const global = rows.map(r => ({ initials: r[0], wave: r[1], time: r[2], date: r[3], source: 'global' }));
-        const combined = local.concat(global);
-        const bestMap = new Map();
-        combined.forEach(sc => {
-            const key = `${sc.initials}_${sc.wave}_${sc.time}`;
-            const existing = bestMap.get(key);
-            if (!existing || sc.wave > existing.wave || (sc.wave === existing.wave && sc.time < existing.time) || (sc.wave === existing.wave && sc.time === existing.time && existing.source !== 'global' && sc.source === 'global')) {
-                bestMap.set(key, sc);
-            }
-        });
-        const deduped = Array.from(bestMap.values());
-        deduped.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
-        callback(deduped.slice(0,10));
-    }).catch(() => {
-        local.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
-        callback(local.slice(0,10));
+function renderLeaderboard(scores) {
+    const tbody = getElement('leaderboardTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    scores.forEach(s => {
+        const tr = document.createElement('tr');
+        const date = new Date(s.timestamp).toISOString().split('T')[0];
+        tr.innerHTML = `<td>${s.initials}</td><td>${s.wave}</td><td>${s.timeLeft}</td><td>${date}</td>`;
+        tbody.appendChild(tr);
     });
 }
 
-function loadHighScores() {
-    try {
-        const data = localStorage.getItem(HIGH_SCORES_KEY);
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        console.error('Failed to load high scores:', e);
-        return [];
-    }
+function showLeaderboard() {
+    loadTopScores(renderLeaderboard);
+    getElement('leaderboardSection').style.display = 'flex';
+    getElement('startScreen').style.display = 'none';
+    getElement('gameOverScreen').style.display = 'none';
 }
 
-function saveHighScores(scores) {
-    try {
-        localStorage.setItem(HIGH_SCORES_KEY, JSON.stringify(scores));
-    } catch (e) {
-        console.error('Failed to save high scores:', e);
-    }
-}
-
-function formatDate(date) {
-    return date.toISOString().split('T')[0];
+function hideLeaderboard() {
+    getElement('leaderboardSection').style.display = 'none';
+    getElement('startScreen').style.display = 'flex';
 }
 
 function cleanDate(value) {
@@ -1217,174 +1183,10 @@ function cleanDate(value) {
     }
 }
 
-// Sync local scores to the global leaderboard if they beat existing entries
-function syncLocalScoresToGlobal() {
-    const localScores = loadHighScores();
 
-    return fetchGlobalLeaderboard().then(globalData => {
-        const globalScores = globalData.map(r => ({
-            initials: r[0],
-            wave: parseInt(r[1]),
-            time: parseInt(r[2])
-        }));
 
-        localScores.forEach(local => {
-            const existing = globalScores.find(g => g.initials === local.initials);
 
-            const shouldSubmit = !existing ||
-                local.wave > existing.wave ||
-                (local.wave === existing.wave && local.time < existing.time);
 
-            if (shouldSubmit) {
-                submitScoreToLeaderboard(local.initials, local.wave, local.time);
-            }
-        });
-    });
-}
-
-// Fetch global leaderboard and merge with local scores, then sync any
-// remaining local scores that beat the global leaderboard
-function syncLeaderboard() {
-    if (!navigator.onLine) return Promise.resolve();
-    return fetchGlobalLeaderboard()
-        .then(rows => {
-            const globalScores = rows.map(r => ({
-                initials: r[0],
-                wave: parseInt(r[1], 10),
-                time: parseInt(r[2], 10),
-                date: r[3],
-                synced: true
-            }));
-            let local = loadHighScores();
-            const combined = local.concat(globalScores);
-            combined.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
-            saveHighScores(combined.slice(0,10));
-        })
-        .then(syncLocalScoresToGlobal)
-        .catch(err => console.error('Leaderboard sync failed', err));
-}
-
-let pendingHighScore = null;
-const NON_TOP_MESSAGES = [
-    "Nice try! You'll crack the top 10 soon.",
-    "Keep at it, rookie!",
-    "Not bad, but you can do better!",
-    "Getting closer every time!",
-    "The aliens barely noticed you. Next time!",
-    "Practice makes perfect. Give it another go!",
-    "You'll show them who's boss soon enough!",
-    "Almost there, stay determined!",
-    "Good effort! Upgrade those cannons!",
-    "They got the better of you today... for now."
-];
-
-function recordHighScore(wave, time) {
-    if (navigator.onLine) {
-        syncLeaderboard();
-    }
-    let scores = loadHighScores();
-    const entry = { initials: '', wave, time, date: formatDate(new Date()) };
-    const withPlayer = scores.concat(entry);
-    withPlayer.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
-    const rank = withPlayer.findIndex(s => s.initials === '' && s.wave === wave && s.time === time) + 1;
-
-    if (rank <= 10) {
-        const beaten = withPlayer.slice(rank).filter(s => s.initials);
-        showHighScoreModal(entry, beaten);
-    } else {
-        const msg = NON_TOP_MESSAGES[Math.floor(Math.random()*NON_TOP_MESSAGES.length)];
-        getElement('nonHighScoreMessage').textContent = msg;
-        updateGameOverLeaderboard();
-    }
-}
-
-function showHighScoreModal(entry, beaten) {
-    pendingHighScore = entry;
-    const list = beaten.map(s => `<div>${s.initials} - Wave ${s.wave} (${s.time}s) - ${s.date}</div>`).join('');
-    getElement('beatenScores').innerHTML = list;
-    getElement('highScoreInitials').value = '';
-    getElement('scoreSummary').textContent = `Wave ${entry.wave}/${entry.time}s - ${entry.date}`;
-    getElement('highScoreModal').style.display = 'flex';
-    setTimeout(() => getElement('highScoreInitials').focus(), 50);
-}
-
-function saveHighScoreFromModal() {
-    let initials = getElement('highScoreInitials').value.trim().toUpperCase().slice(0,3);
-    if (!initials) initials = '???';
-    let scores = loadHighScores();
-    scores.push({ initials, wave: pendingHighScore.wave, time: pendingHighScore.time, date: formatDate(new Date()), synced: false });
-    scores.sort((a,b) => (b.wave - a.wave) || (a.time - b.time));
-    scores = scores.slice(0,10);
-    saveHighScores(scores);
-    getElement('highScoreModal').style.display = 'none';
-    getElement('nonHighScoreMessage').textContent = '';
-    submitScoreToLeaderboard(initials, pendingHighScore.wave, pendingHighScore.time)
-        .then(() => {
-            const updated = loadHighScores();
-            const entry = updated.find(s => s.initials === initials && s.wave === pendingHighScore.wave && s.time === pendingHighScore.time && !s.synced);
-            if (entry) {
-                entry.synced = true;
-                saveHighScores(updated);
-            }
-        })
-        .finally(() => {
-            if (navigator.onLine) {
-                syncLocalScoresToGlobal()
-                    .then(syncLeaderboard)
-                    .then(updateGameOverLeaderboard);
-            } else {
-                updateGameOverLeaderboard();
-            }
-        });
-    pendingHighScore = null;
-}
-
-getElement('highScoreInitials').addEventListener('keyup', e => {
-getElement("highScoreInitials").addEventListener("input", e => { e.target.value = e.target.value.toUpperCase(); });
-    if (e.key === 'Enter') {
-        saveHighScoreFromModal();
-    }
-});
-
-function renderHighScores(containerId, scores) {
-    const container = getElement(containerId);
-    if (!container) return;
-    if (!scores.length) {
-        container.innerHTML = '<p>No high scores yet</p>';
-        return;
-    }
-    let html = '<table><tr><th>#</th><th>Init</th><th>Wave/Time</th><th>Date</th><th>Source</th></tr>';
-    scores.forEach((s,i) => {
-        const src = s.source ? (s.source === 'global' ? 'Global' : 'Local') : '';
-        html += `<tr><td>${i+1}</td><td>${s.initials}</td><td>${s.wave}/${s.time}</td><td>${s.date}</td><td>${src}</td></tr>`;
-    });
-    html += '</table>';
-    container.innerHTML = html;
-}
-
-function updateGameOverLeaderboard() {
-    const title = getElement("gameOverLeaderboardTitle");
-    title.textContent = "Leaderboard";
-    getCombinedLeaderboard(scores => {
-        renderHighScores("gameOverHighScores", scores);
-    });
-}
-
-function openHighScoreScreen() {
-    const title = getElement("highScoreScreen").querySelector("h1");
-    title.textContent = "Leaderboard";
-    getCombinedLeaderboard(scores => {
-        renderHighScores("highScoreTable", scores);
-    });
-    getElement("highScoreScreen").style.display = "flex";
-    getElement("startScreen").style.display = "none";
-    getElement("gameOverScreen").style.display = "none";
-}
-
-function closeHighScoreScreen() {
-    getElement('highScoreScreen').style.display = 'none';
-    getElement('startScreen').style.display = 'flex';
-}
 
 
 // --- Game Initialization & Start ---
@@ -1618,12 +1420,10 @@ function initializeGame(shouldTryLoad = true) {
 function startGame() {
     initializeGame(true); // Initialize with saved game check
     if (navigator.onLine) {
-        syncLeaderboard();
+        loadTopScores(renderLeaderboard);
     }
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
-    getElement('highScoreModal').style.display = 'none';
-    getElement('nonHighScoreMessage').textContent = '';
     pauseGame(); // Ensure no game loop is running
     gameSpeedMultiplier = 1;
     speedIndex = SPEED_STEPS.indexOf(1);
@@ -1645,12 +1445,11 @@ function gameOver() {
     getElement('gameOverScreen').style.display = 'flex';
     const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
-    recordHighScore(gameState.wave, survivalTime);
     saveGame(); // Save final state on game over
     if (navigator.onLine) {
-        syncLocalScoresToGlobal()
-            .then(syncLeaderboard)
-            .then(updateGameOverLeaderboard);
+        submitScore('AAA', gameState.wave, survivalTime).then(() => {
+            loadTopScores(renderLeaderboard);
+        });
     }
 }
 
@@ -3435,9 +3234,8 @@ getElement('speedUpButton').onclick = () => {
     }
 };
 getElement('macrossButton').onclick = fireMacrossMissiles;
-getElement('highScoreButton').onclick = openHighScoreScreen;
-getElement('backButton').onclick = closeHighScoreScreen;
-getElement('saveHighScoreButton').onclick = saveHighScoreFromModal;
+getElement('leaderboardButton').onclick = showLeaderboard;
+getElement('leaderboardBack').onclick = hideLeaderboard;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
@@ -3501,7 +3299,7 @@ function cycleTheme() {
 function loadAndStartGame() {
     initializeGame(false); // Initialize basic structures without trying to load save again
     if (navigator.onLine) {
-        syncLeaderboard();
+        loadTopScores(renderLeaderboard);
     }
 
     if (!loadGame()) { // Attempt to load the saved game
@@ -3549,10 +3347,9 @@ function loadAndStartGame() {
     ctx.fillStyle = 'rgb(0, 0, 0)';
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       // Try loading save data now, before Start Game is pressed
-      tryLoadGame();
+        tryLoadGame();
         if (navigator.onLine) {
-            syncLocalScoresToGlobal()
-                .then(syncLeaderboard);
+            loadTopScores(renderLeaderboard);
         }
       // Show Load Game button if save data exists
     if (savedGame) {
@@ -3563,6 +3360,11 @@ function loadAndStartGame() {
 // --- Global Access (for HTML onclick) ---
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
+// Sample leaderboard usage
+submitScore("AAA", 5, 45).then(() => {
+    loadTopScores(scores => console.log("Top scores", scores));
+});
+
 
 
 })(); // End IIFE

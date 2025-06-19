@@ -18,27 +18,15 @@ tab when the game is loaded.
 
 ## Global Leaderboard
 
-Scores are automatically synced to a shared Google Sheet whenever you finish a
-run and have an internet connection. The game submits your name, wave, time and
-date to the URL defined by `LEADERBOARD_URL` in
-[`index.html`](index.html), which points to a hosted Apps Script that backs the
-public leaderboard. In some environments the request may fail because the
-leaderboard does not provide CORS headers. The code now sends the score using
-`no-cors` mode so the request still completes even if the response cannot be
-read.
+This version uses Firebase Realtime Database for the global leaderboard.
+Follow these steps to set up your own instance:
 
-If you prefer to maintain your own leaderboard or require full CORS support,
-
-deploy a copy of the script yourself and update `LEADERBOARD_URL` in both
-`index.html` and `leaderboard_tester.html` to point at your deployment. The file
-[`apps-script.js`](apps-script.js) contains a minimal Apps Script you can paste
-into a new project to back your own sheet. Replace `SHEET_ID` with the ID of a
-Google Sheet and deploy the project as a web app, then use that URL for
-`LEADERBOARD_URL`.
-
-For convenience a small page, [`leaderboard_tester.html`](leaderboard_tester.html),
-is included for manually submitting scores and verifying the leaderboard
-endpoint works as expected.
+1. Go to [https://console.firebase.google.com](https://console.firebase.google.com) and create a new project.
+2. Add a web app and copy the Firebase config values.
+3. In the Firebase console open **Build > Realtime Database** and create a database in **test mode**.
+4. Paste your config object into the placeholder inside [`index.html`](index.html).
+5. Deploy the game to GitHub Pages or open it locally to test.
+6. Scores will be written under the `scores` path and the top ten will appear in the leaderboard section.
 
 ## Change Log
 
