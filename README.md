@@ -18,7 +18,7 @@ tab when the game is loaded.
 ## Leaderboard Setup
 
 A Firebase Realtime Database is required to store and serve the global
-leaderboard. Create a database in your Firebase project and configure the rules
+leaderboard. The global leaderboard is now fully operational. Create a database in your Firebase project and configure the rules
 similar to the example below:
 
 ```json
@@ -43,6 +43,10 @@ rules are misconfigured.
 
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
+
+### v2.40
+- Leaderboard ranking now uses `wave * 100000 - time` and stores only the top 10 scores.
+- The global leaderboard is fully operational.
 
 ### v2.38
 - Minor bug fixes.
@@ -80,22 +84,6 @@ See [CHANGELOG.md](CHANGELOG.md) for the full history.
 - Introduced a Debug panel for quickly awarding credits.
 - Added the Focus Radius upgrade and visual ring indicator.
 - Implemented missile homing improvements and toggle controls.
-
-## Running Tests
-
-To install dependencies and run the Jest test suite, execute:
-
-```bash
-npm install       # install dependencies
-npm test          # runs Jest (no tests by default)
-```
-
-If using a Murrowman config, add the following block:
-
-```yaml
-- run: npm install
-- run: npm test
-```
 
 ## License
 
