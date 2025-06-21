@@ -33,8 +33,11 @@ similar to the example below:
 }
 ```
 
-The client pushes a `secret` field (`MY_SUPER_SECRET_321`) along with each
-score. You can enforce this value in the rules if you wish to restrict writes.
+The database must allow writes at `/scores` so the game can submit new
+entries. The client pushes a `secret` field (`MY_SUPER_SECRET_321`) along with
+each score. You can enforce this value in your rules if you wish to restrict
+writes. A `permission_denied` error in the browser console typically means the
+rules are misconfigured.
 
 ## Change Log
 
