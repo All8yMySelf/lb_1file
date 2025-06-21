@@ -78,6 +78,22 @@ See [CHANGELOG.md](CHANGELOG.md) for the full history.
 - Added the Focus Radius upgrade and visual ring indicator.
 - Implemented missile homing improvements and toggle controls.
 
+## Running Tests
+
+To install dependencies and run the Jest test suite, execute:
+
+```bash
+npm install       # install dependencies
+npm test          # runs Jest (no tests by default)
+```
+
+If using a Murrowman config, add the following block:
+
+```yaml
+- run: npm install
+- run: npm test
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
