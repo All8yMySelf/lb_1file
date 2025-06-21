@@ -89,11 +89,11 @@
   };
 
   // 5) Hook up “Leaderboard” button
-  document.getElementById("show-leaderboard").addEventListener("click", async () => {
-    showHighScores();
+    document.getElementById("show-leaderboard").addEventListener("click", async () => {
+    window.showHighScores();
     const scores = await getTopScores();
     renderLeaderboard(scores);
-  });
+    });
 </script>
 
 <title>Orbital Defence Elite v2.40 - Optimised</title>
@@ -1042,6 +1042,9 @@ function showHighScores() {
     getElement('leaderboard-screen').style.display = 'flex';
     listenToLeaderboard(renderLeaderboard);
 }
+
+// Expose for module script
+window.showHighScores = showHighScores;
 
 function showSensorWarning() {
     getElement('sensorWarning').style.display = 'flex';
