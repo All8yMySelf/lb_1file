@@ -26,17 +26,17 @@ similar to the example below:
   "rules": {
     "scores": {
       ".read": true,
-      ".write": "newData.child('secret').val() === 'MY_SUPER_SECRET_321'",
-      ".indexOn": ["score"]
+      ".write": true,
+      ".indexOn": "ranking"
     }
   }
 }
 ```
 
+Scores are ranked using the formula `ranking = wave * 100000 - time`. Higher waves and faster completion times result in a higher leaderboard position.
+
 The database must allow writes at `/scores` so the game can submit new
-entries. The client pushes a `secret` field (`MY_SUPER_SECRET_321`) along with
-each score. You can enforce this value in your rules if you wish to restrict
-writes. A `permission_denied` error in the browser console typically means the
+entries. A `permission_denied` error in the browser console typically means the
 rules are misconfigured.
 
 ## Change Log
