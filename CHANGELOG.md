@@ -1,5 +1,10 @@
 # Orbital Defence Elite - Change Log
 
+## v2.40
+- Leaderboard ranking formula updated to `wave * 100000 - time`.
+- Leaderboard now only stores the top 10 scores.
+- Cleaned up project files and removed obsolete data.
+
 ## v2.39
 - Leaderboard ranking now uses `wave * 100000 - time` and only stores the top 10 entries.
 
