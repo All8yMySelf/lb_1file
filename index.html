@@ -1028,12 +1028,14 @@ function renderScoreList(id, scores) {
         list.appendChild(li);
         return;
     }
-    scores.forEach(s => {
-        const timeLeft = (s.time ?? 0);
+    for (let i = 0; i < 10; i++) {
         const li = document.createElement('li');
-        li.textContent = `${s.initials} - Wave ${s.wave} (${timeLeft}s left) - ${s.date}`;
+        const entry = scores[i]
+            ? `${scores[i].initials} - Wave ${scores[i].wave} (${scores[i].time ?? 0}s left) - ${scores[i].date}`
+            : "&nbsp;";
+        li.innerHTML = `<span class="rank">${i + 1}.</span> ${entry}`;
         list.appendChild(li);
-    });
+    }
 }
 
 function showHighScores() {
