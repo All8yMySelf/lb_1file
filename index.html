@@ -10,16 +10,74 @@
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+  // 1) Configure Firebase
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "…",
+    appId: "…"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // 2) submitScore writes to /scores
+  window.submitScore = async function({ initials, wave, time, ranking }) {
+    const date = new Date().toLocaleDateString("en-GB", {
+      day: "numeric", month: "long", year: "numeric"
+    });
+    await push(ref(db, "scores"), { initials, wave, time, date, ranking });
+  };
+
+  // 3) getTopScores reads top 10 by ranking, sorts desc, returns array
+  window.getTopScores = async function() {
+    const q = query(ref(db, "scores"), orderByChild("ranking"), limitToLast(10));
+    const snap = await get(q);
+    const list = [];
+    snap.forEach(child => list.push(child.val()));
+    list.sort((a, b) => b.ranking - a.ranking);
+    return list;
+  };
+
+  // 4) renderLeaderboard populates #leaderboard element with 10 rows
+  window.renderLeaderboard = scores => {
+    const container = document.getElementById("leaderboard");
+    container.innerHTML = "";
+    for (let i = 0; i < 10; i++) {
+      const row = scores[i]
+        ? `${scores[i].initials} - Wave ${scores[i].wave} (${scores[i].time}s left) - ${scores[i].date}`
+        : "&nbsp;";
+      const div = document.createElement("div");
+      div.className = "leaderboard-row";
+      div.innerHTML = `<span class="rank">${i + 1}.</span> ${row}`;
+      container.appendChild(div);
+    }
+  };
+
+  // 5) Hook up “Leaderboard” button
+  document.getElementById("show-leaderboard").addEventListener("click", async () => {
+    const scores = await getTopScores();
+    renderLeaderboard(scores);
+    document.getElementById("leaderboard-screen").style.display = "block";
+  });
+</script>
 
 <title>Orbital Defence Elite v2.38 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
-:root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:2rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#highScoreScreen,#sensorWarning,#startScreen{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,.8);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#speedDisplay{display:flex;align-items:center;justify-content:center;width:40px;font-size:18px}#toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}#hotkeys{position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
+:root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:2rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,.8);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#speedDisplay{display:flex;align-items:center;justify-content:center;width:40px;font-size:18px}#toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}#hotkeys{position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Share+Tech+Mono&family=Rajdhani&family=Orbitron&display=swap" rel="stylesheet">
 <style>
-  #highScoreList, #gameOverScoreList { list-style: none; padding: 0; margin: 1rem 0; }
-  #highScoreList li, #gameOverScoreList li { margin: 0.2rem 0; }
+  #highScoreList, #gameOverScoreList, #leaderboard { list-style: none; padding: 0; margin: 1rem 0; }
+  #highScoreList li, #gameOverScoreList li, .leaderboard-row { margin: 0.2rem 0; }
+  .rank { display: inline-block; width: 2ch; }
   #initialsInput { font-size: 2rem; text-align: center; width: 4ch; background: transparent; border: none; border-bottom: 2px solid var(--button-text); color: var(--button-text); caret-color: var(--button-text); }
   #cheekyMessage { margin: 1rem 0; color: var(--button-text); }
 </style>
@@ -36,11 +94,11 @@
     <h1>Orbital Defence Elite v2.38</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
-    <button id="leaderboardButton">Leaderboard</button>
+    <button id="show-leaderboard">Leaderboard</button>
 </div>
-<div id="highScoreScreen" style="display:none">
+<div id="leaderboard-screen" style="display:none">
     <h1>Global Leaderboard</h1>
-    <ol id="highScoreList"></ol>
+    <div id="leaderboard"></div>
     <button id="startFromHighScore">Start Game</button>
 </div>
 <div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
@@ -951,8 +1009,8 @@ function renderScoreList(id, scores) {
 function showHighScores() {
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
-    getElement('highScoreScreen').style.display = 'flex';
-    getTopScores(scores => renderScoreList('highScoreList', scores));
+    getElement('leaderboard-screen').style.display = 'flex';
+    getTopScores().then(renderLeaderboard);
 }
 
 function showSensorWarning() {
@@ -974,11 +1032,10 @@ function manualSubmitTestScore() {
     const initials = Array.from({length:3}, () => letters[Math.floor(Math.random()*26)]).join('');
     const wave = parseInt(prompt('Wave number', gameState.wave)) || gameState.wave;
     const time = parseInt(prompt('Time left (seconds)', 0)) || 0;
-    const date = prompt('Date (YYYY MMMM D)', formatDate(new Date())) || formatDate(new Date());
     const ranking = wave * 100000 - time;
-    submitScore(initials, wave, time, date, ranking).then(() => {
+    submitScore({ initials, wave, time, ranking }).then(() => {
         showToast('Test score submitted');
-        getTopScores(s => renderScoreList('highScoreList', s));
+        getTopScores().then(renderLeaderboard);
     }).catch(err => {
         console.error('Failed to submit score', err);
         showToast('Error saving score', 3000);
@@ -991,10 +1048,10 @@ function submitInitials() {
     if (initials.length < 2) return;
     const remainingTime = Math.floor(Math.max(0, gameState.waveDuration - gameState.waveElapsedTime));
     const ranking = gameState.wave * 100000 - remainingTime;
-    submitScore(initials, gameState.wave, remainingTime, formatDate(new Date()), ranking).then(() => {
+    submitScore({ initials, wave: gameState.wave, time: remainingTime, ranking }).then(() => {
         showToast('Score submitted!');
         getElement('initialsInput').style.display = 'none';
-        getTopScores(scores => renderScoreList('gameOverScoreList', scores));
+        getTopScores().then(scores => renderScoreList('gameOverScoreList', scores));
     }).catch(err => {
         console.error('Failed to submit score', err);
         showToast('Error saving score', 3000);
@@ -1437,7 +1494,7 @@ function initializeGame(shouldTryLoad = true) {
 function startGame() {
     initializeGame(true); // Initialize with saved game check
     getElement('startScreen').style.display = 'none';
-    getElement('highScoreScreen').style.display = 'none';
+    getElement('leaderboard-screen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
     getElement('initialsInput').value = '';
     pauseGame(); // Ensure no game loop is running
@@ -1463,7 +1520,7 @@ function gameOver() {
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
     const remainingTime = Math.floor(Math.max(0, gameState.waveDuration - gameState.waveElapsedTime));
     const playerRank = gameState.wave * 100000 - remainingTime;
-    getTopScores(scores => {
+    getTopScores().then(scores => {
         renderScoreList('gameOverScoreList', scores);
         const qualifies = scores.length < 10 || playerRank > scores[scores.length - 1].ranking;
         if (qualifies) {
@@ -3274,7 +3331,6 @@ getElement('macrossButton').onclick = fireMacrossMissiles;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
-getElement('leaderboardButton').onclick = showHighScores;
 getElement('startFromHighScore').onclick = startGame;
 getElement('initialsInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitInitials();
@@ -3399,52 +3455,6 @@ function loadAndStartGame() {
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
 })(); // End IIFE
-</script>
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js';
-import { getDatabase, ref, push, get, query, orderByChild, limitToFirst, limitToLast, remove } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
-const firebaseConfig = {
-  apiKey: "AIzaSyA5CSbcR_DS601s5Ok_f-UOT_dobysD9eU",
-  authDomain: "lb-1file.firebaseapp.com",
-  databaseURL: "https://lb-1file-default-rtdb.firebaseio.com",
-  projectId: "lb-1file",
-  storageBucket: "lb-1file.appspot.com",
-  messagingSenderId: "828776232983",
-  appId: "1:828776232983:web:a1e7b73bf46b1e5124c452",
-  measurementId: "G-BTTQRHEFSJ"
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-window.submitScore = async (initials, wave, time, date, ranking) => {
-  const scoresRef = ref(db, 'scores');
-  const countSnap = await get(scoresRef);
-  const count = countSnap.size ?? countSnap.numChildren();
-    const lowestSnap = await get(query(scoresRef, orderByChild('ranking'), limitToFirst(1)));
-  let lowestKey = null;
-    let lowestScore = null; // lowest ranking in top list
-    lowestSnap.forEach(c => {
-    lowestKey = c.key;
-    lowestScore = c.val().ranking;
-  });
-  if (count < 10) {
-    await push(scoresRef, { initials, wave, time, date, ranking });
-  } else if (ranking > lowestScore) {
-    await remove(ref(db, `scores/${lowestKey}`));
-    await push(scoresRef, { initials, wave, time, date, ranking });
-  }
-};
-window.getTopScores = cb => {
-  const q = query(ref(db, 'scores'), orderByChild('ranking'), limitToLast(10));
-  get(q).then(snap => {
-    const arr = [];
-    snap.forEach(c => arr.push(c.val()));
-    arr.sort((a, b) => b.ranking - a.ranking);
-    cb(arr);
-  }).catch(err => {
-    console.error('Failed to fetch scores', err);
-    cb([]);
-  });
-};
 </script>
 <div id="crt-overlay"></div>
 </body>
