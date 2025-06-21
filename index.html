@@ -12,7 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-  import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+  import { getDatabase, ref, push, query, orderByChild, limitToLast, get, onValue } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
   // 1) Configure Firebase
   const firebaseConfig = {
@@ -27,6 +27,7 @@
   };
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+  let leaderboardUnsub = null;
 
   // 2) submitScore writes to /scores
   window.submitScore = async function({ initials, wave, time, ranking }) {
@@ -46,6 +47,23 @@
     return list;
   };
 
+  window.listenToLeaderboard = callback => {
+    const q = query(ref(db, "scores"), orderByChild("ranking"), limitToLast(10));
+    leaderboardUnsub = onValue(q, snap => {
+      const list = [];
+      snap.forEach(child => list.push(child.val()));
+      list.sort((a, b) => b.ranking - a.ranking);
+      callback(list);
+    });
+  };
+
+  window.unlistenLeaderboard = () => {
+    if (leaderboardUnsub) {
+      leaderboardUnsub();
+      leaderboardUnsub = null;
+    }
+  };
+
   // 4) renderLeaderboard populates #leaderboard element with 10 rows
   window.renderLeaderboard = scores => {
     const container = document.getElementById("leaderboard");
@@ -62,9 +80,8 @@
   };
 
   // 5) Hook up “Leaderboard” button
-  document.getElementById("show-leaderboard").addEventListener("click", async () => {
-    const scores = await getTopScores();
-    renderLeaderboard(scores);
+  document.getElementById("show-leaderboard").addEventListener("click", () => {
+    listenToLeaderboard(renderLeaderboard);
     document.getElementById("leaderboard-screen").style.display = "block";
   });
 </script>
@@ -1011,7 +1028,7 @@ function showHighScores() {
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
     getElement('leaderboard-screen').style.display = 'flex';
-    getTopScores().then(renderLeaderboard);
+    listenToLeaderboard(renderLeaderboard);
 }
 
 function showSensorWarning() {
@@ -1493,6 +1510,7 @@ function initializeGame(shouldTryLoad = true) {
 }
 
 function startGame() {
+    unlistenLeaderboard();
     initializeGame(true); // Initialize with saved game check
     getElement('startScreen').style.display = 'none';
     getElement('leaderboard-screen').style.display = 'none';
