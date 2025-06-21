@@ -10,38 +10,7 @@
 <!-- V2.9: Major refactor - Canvas Ring UI, Descriptive Names, Constants, Update Loop Split -->
 <!-- Added Phaser library -->
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-<script type="module" src="firebaseConfig.js"></script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-import { firebaseConfig } from "./firebaseConfig.js";
-import { sortScores } from "./leaderboard.js";
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 
-window.submitScore = function(initials, wave, timeLeft) {
-  return push(ref(db, 'scores'), {
-    initials: initials.toUpperCase(),
-    wave,
-    timeLeft,
-    timestamp: Date.now()
-  });
-};
-
-window.loadTopScores = function(callback) {
-  const message = document.getElementById('leaderboardMessage');
-  get(ref(db, 'scores')).then(snapshot => {
-    const data = snapshot.val() || {};
-    const scores = Object.values(data);
-    sortScores(scores);
-    if (message) message.textContent = '';
-    callback(scores.slice(0,10));
-  }).catch(err => {
-    console.error(err);
-    if (message) message.textContent = 'Unable to load leaderboard.';
-  });
-};
-</script>
 <title>Orbital Defence Elite v2.38 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
@@ -61,13 +30,6 @@ window.loadTopScores = function(callback) {
     <h1>Orbital Defence Elite v2.38</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
-    <button id="leaderboardButton">Leaderboard</button>
-</div>
-<div id="leaderboardSection" style="display:none;flex-direction:column;align-items:center;gap:20px;">
-    <h2>Leaderboard</h2>
-    <table id="leaderboardTable"><thead><tr><th>Init</th><th>Wave</th><th>Time</th><th>Date</th></tr></thead><tbody></tbody></table>
-    <p id="leaderboardMessage"></p>
-    <button id="leaderboardBack">Back</button>
 </div>
 <div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
     <h1>Game Over</h1>
@@ -1144,25 +1106,6 @@ function formatDate(date) {
     return date.toISOString().split('T')[0];
 }
 
-function renderLeaderboard(scores) {
-    const tbody = getElement('leaderboardTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    scores.forEach(s => {
-        const tr = document.createElement('tr');
-        const date = new Date(s.timestamp).toISOString().split('T')[0];
-        tr.innerHTML = `<td>${s.initials}</td><td>${s.wave}</td><td>${s.timeLeft}</td><td>${date}</td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-function showLeaderboard() {
-    loadTopScores(renderLeaderboard);
-    getElement('leaderboardSection').style.display = 'flex';
-}
-
-function hideLeaderboard() {
-    getElement('leaderboardSection').style.display = 'none';
-}
 
 function cleanDate(value) {
     if (!value) return '';
@@ -1412,9 +1355,6 @@ function initializeGame(shouldTryLoad = true) {
 
 function startGame() {
     initializeGame(true); // Initialize with saved game check
-    if (navigator.onLine) {
-        loadTopScores(renderLeaderboard);
-    }
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
     getElement('initialsInput').value = '';
@@ -1440,14 +1380,6 @@ function gameOver() {
     const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
     saveGame(); // Save final state on game over
-    if (navigator.onLine) {
-        const initialsField = getElement('initialsInput');
-        let initials = (initialsField.value || '').trim().toUpperCase();
-        if (!initials) initials = 'AAA';
-        submitScore(initials, gameState.wave, survivalTime).then(() => {
-            loadTopScores(renderLeaderboard);
-        });
-    }
 }
 
 // --- Main Game Loop ---
@@ -3231,8 +3163,6 @@ getElement('speedUpButton').onclick = () => {
     }
 };
 getElement('macrossButton').onclick = fireMacrossMissiles;
-getElement('leaderboardButton').onclick = showLeaderboard;
-getElement('leaderboardBack').onclick = hideLeaderboard;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
@@ -3295,9 +3225,6 @@ function cycleTheme() {
 // --- Load and Start Game Function ---
 function loadAndStartGame() {
     initializeGame(false); // Initialize basic structures without trying to load save again
-    if (navigator.onLine) {
-        loadTopScores(renderLeaderboard);
-    }
 
     if (!loadGame()) { // Attempt to load the saved game
         showToast("Failed to load saved game.", 2000);
@@ -3345,10 +3272,7 @@ function loadAndStartGame() {
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       // Try loading save data now, before Start Game is pressed
         tryLoadGame();
-        if (navigator.onLine) {
-            loadTopScores(renderLeaderboard);
-        }
-      // Show Load Game button if save data exists
+        // Show Load Game button if save data exists
     if (savedGame) {
         getElement('loadButton').style.display = 'block'; // Or 'inline-block' if preferred next to Start
     }
@@ -3357,9 +3281,6 @@ function loadAndStartGame() {
 // --- Global Access (for HTML onclick) ---
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
-// Sample leaderboard usage removed to avoid errors if Firebase scripts
-// have not finished loading when this file executes. Use submitScore and
-// loadTopScores within the game flow once Firebase is ready.
 })(); // End IIFE
 </script>
 <div id="crt-overlay"></div>

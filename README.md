@@ -6,9 +6,6 @@ This repository contains a small browser game written entirely in a single HTML 
 
 Open `index.html` in any modern browser. The game will load immediately with no additional assets required. Use the on-screen instructions or the hotkeys listed on the start screen to play.
 
-High scores are stored online using Firebase Realtime Database, so they persist across devices.
-
-
 ## About
 
 `index.html` now embeds the original `styles.css` and `themes.js` directly inside `<style>` and `<script>` tags. There are no external dependencies besides the Phaser library pulled from a CDN.
@@ -18,28 +15,13 @@ The previous `css/` and `js/` folders have been removed as part of the single-fi
 The repository also includes a `favicon.ico` so browsers display an icon in the
 tab when the game is loaded.
 
-## Global Leaderboard
-
-This version uses Firebase Realtime Database for the global leaderboard.
-Follow these steps to set up your own instance:
-
-1. Go to [https://console.firebase.google.com](https://console.firebase.google.com) and create a new project.
-2. Add a web app and copy the Firebase config values.
-3. In the Firebase console open **Build > Realtime Database** and create a database in **test mode**.
-4. Copy `firebaseConfig.template.js` to `firebaseConfig.js` and replace the placeholders with your config values. The new file is ignored by Git so your credentials stay private.
-5. Deploy the game to GitHub Pages or open it locally to test.
-6. Scores will be written under the `scores` path and the top ten will appear in the leaderboard section.
-7. Players submit scores by entering their initials on the Game Over screen.
-8. To prevent unauthorized writes, consider using HTTP referrer restrictions or enabling Firebase App Check.
-
 ## Change Log
 
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 ### v2.38
-- Switched to Firebase-only high scores and removed local storage.
-- Global leaderboard dates no longer include a time value.
+- Minor bug fixes.
 
 ### v2.37
 - Added Electronic FOV sensor upgrade with visible radius ring.
@@ -63,7 +45,6 @@ See [CHANGELOG.md](CHANGELOG.md) for the full history.
 - Removed redundant code for a leaner single-file build.
 
 ### v2.32
-- Added persistent Top 10 High Scores feature.
 - Minor optimizations.
 
 ### v2.33
