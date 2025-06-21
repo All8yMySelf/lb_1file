@@ -1,5 +1,8 @@
 # Orbital Defence Elite - Change Log
 
+## v2.39
+- Leaderboard ranking now uses `wave * 100000 - time` and only stores the top 10 entries.
+
 ## v2.38
 - Switched to a Firebase-only leaderboard; local storage has been removed.
 - Dates returned from the global leaderboard no longer include a time component.
