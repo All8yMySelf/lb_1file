@@ -934,6 +934,13 @@ function showToast(message, duration = 2000) {
 function renderScoreList(id, scores) {
     const list = getElement(id);
     list.innerHTML = '';
+    if (scores.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No scores available';
+        list.appendChild(li);
+        showToast('No scores available');
+        return;
+    }
     scores.forEach(s => {
         const li = document.createElement('li');
         li.textContent = `${s.initials} - ${s.score}`;
@@ -3408,6 +3415,9 @@ window.getTopScores = cb => {
     snap.forEach(c => arr.push(c.val()));
     arr.sort((a,b) => b.score - a.score);
     cb(arr);
+  }).catch(err => {
+    console.error('Failed to fetch scores', err);
+    cb([]);
   });
 };
 </script>
