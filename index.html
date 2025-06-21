@@ -90,11 +90,9 @@
 
   // 5) Hook up “Leaderboard” button
   document.getElementById("show-leaderboard").addEventListener("click", async () => {
-    document.getElementById("startScreen").style.display = "none";
+    showHighScores();
     const scores = await getTopScores();
     renderLeaderboard(scores);
-    listenToLeaderboard(renderLeaderboard);
-    document.getElementById("leaderboard-screen").style.display = "block";
   });
 </script>
 
