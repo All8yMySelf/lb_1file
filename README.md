@@ -26,7 +26,7 @@ similar to the example below:
   "rules": {
     "scores": {
       ".read": true,
-      ".write": true,
+      ".write": "newData.child('secret').val() === 'MY_SUPER_SECRET_321'",
       ".indexOn": ["score"]
     }
   }
