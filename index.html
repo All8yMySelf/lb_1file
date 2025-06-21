@@ -3392,7 +3392,7 @@ window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category togglin
 </script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js';
-import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
+import { getDatabase, ref, push, get } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
 const firebaseConfig = {
   apiKey: "AIzaSyA5CSbcR_DS601s5Ok_f-UOT_dobysD9eU",
   authDomain: "lb-1file.firebaseapp.com",
@@ -3407,15 +3407,14 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 window.submitScore = (initials, wave, time, date, score) => push(ref(db, 'scores'), { initials, wave, time, date, score, secret: 'MY_SUPER_SECRET_321' });
 window.getTopScores = cb => {
-  const q = query(ref(db, 'scores'), orderByChild('score'), limitToLast(10));
-  get(q).then(snap => {
+  get(ref(db, 'scores')).then(snap => {
     const arr = [];
     snap.forEach(c => arr.push(c.val()));
-    arr.sort((a,b) => {
+    arr.sort((a, b) => {
       if (b.wave !== a.wave) return b.wave - a.wave;
       return a.time - b.time;
     });
-    cb(arr);
+    cb(arr.slice(0, 10));
   }).catch(err => {
     console.error('Failed to fetch scores', err);
     cb([]);
