@@ -941,8 +941,9 @@ function renderScoreList(id, scores) {
         return;
     }
     scores.forEach(s => {
+        const timeLeft = (s.time ?? 0);
         const li = document.createElement('li');
-        li.textContent = `${s.initials} - Wave ${s.wave} (${s.time}s left)`;
+        li.textContent = `${s.initials} - Wave ${s.wave} (${timeLeft}s left)`;
         list.appendChild(li);
     });
 }
