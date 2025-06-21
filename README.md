@@ -13,7 +13,8 @@ Open `index.html` in any modern browser. The game will load immediately with no 
 The previous `css/` and `js/` folders have been removed as part of the single-file challenge.
 
 The repository also includes a `favicon.ico` so browsers display an icon in the
-tab when the game is loaded.
+tab when the game is loaded. A `database.rules.json` file is provided as an
+example Firebase security rules configuration.
 
 ## Leaderboard Setup
 
@@ -38,6 +39,9 @@ Scores are ranked using the formula `ranking = wave * 100000 - time`. Higher wav
 The database must allow writes at `/scores` so the game can submit new
 entries. A `permission_denied` error in the browser console typically means the
 rules are misconfigured.
+
+`database.rules.json` contains the same example configuration shown above. This
+file is only a reference and is not read by the game directly.
 
 ## Change Log
 
