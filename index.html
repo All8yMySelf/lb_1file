@@ -1465,7 +1465,7 @@ function gameOver() {
     const playerRank = gameState.wave * 100000 - remainingTime;
     getTopScores(scores => {
         renderScoreList('gameOverScoreList', scores);
-        const qualifies = scores.length < 10 || playerRank > scores[scores.length - 1].score;
+        const qualifies = scores.length < 10 || playerRank > scores[scores.length - 1].ranking;
         if (qualifies) {
             getElement('initialsInput').style.display = 'block';
             getElement('cheekyMessage').textContent = '';
@@ -3415,29 +3415,30 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-window.submitScore = async (initials, wave, time, date, score) => {
+window.submitScore = async (initials, wave, time, date, ranking) => {
   const scoresRef = ref(db, 'scores');
   const countSnap = await get(scoresRef);
   const count = countSnap.size ?? countSnap.numChildren();
-  const lowestSnap = await get(query(scoresRef, orderByChild('score'), limitToFirst(1)));
+    const lowestSnap = await get(query(scoresRef, orderByChild('ranking'), limitToFirst(1)));
   let lowestKey = null;
-  let lowestScore = null;
-  lowestSnap.forEach(c => {
+    let lowestScore = null; // lowest ranking in top list
+    lowestSnap.forEach(c => {
     lowestKey = c.key;
-    lowestScore = c.val().score;
+    lowestScore = c.val().ranking;
   });
   if (count < 10) {
-    await push(scoresRef, { initials, wave, time, date, score, secret: 'MY_SUPER_SECRET_321' });
-  } else if (score > lowestScore) {
+    await push(scoresRef, { initials, wave, time, date, ranking });
+  } else if (ranking > lowestScore) {
     await remove(ref(db, `scores/${lowestKey}`));
-    await push(scoresRef, { initials, wave, time, date, score, secret: 'MY_SUPER_SECRET_321' });
+    await push(scoresRef, { initials, wave, time, date, ranking });
   }
 };
 window.getTopScores = cb => {
-  get(query(ref(db, 'scores'), orderByChild('score'), limitToLast(10))).then(snap => {
+  const q = query(ref(db, 'scores'), orderByChild('ranking'), limitToLast(10));
+  get(q).then(snap => {
     const arr = [];
     snap.forEach(c => arr.push(c.val()));
-    arr.sort((a, b) => b.score - a.score);
+    arr.sort((a, b) => b.ranking - a.ranking);
     cb(arr);
   }).catch(err => {
     console.error('Failed to fetch scores', err);
