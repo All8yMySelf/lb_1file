@@ -942,7 +942,7 @@ function renderScoreList(id, scores) {
     }
     scores.forEach(s => {
         const li = document.createElement('li');
-        li.textContent = `${s.initials} - ${s.score}`;
+        li.textContent = `${s.initials} - Wave ${s.wave} (${s.time}s left)`;
         list.appendChild(li);
     });
 }
@@ -969,18 +969,15 @@ function dismissSensorWarning() {
 }
 
 function manualSubmitTestScore() {
-    getTopScores(scores => {
-        const tenth = scores[9] ? scores[9].score : 0;
-        const score = tenth + 1;
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const initials = Array.from({length:3}, () => letters[Math.floor(Math.random()*26)]).join('');
-        const wave = parseInt(prompt('Wave number', gameState.wave)) || gameState.wave;
-        const time = parseInt(prompt('Time (seconds)', 0)) || 0;
-        const date = prompt('Date (YYYYMMDD)', formatDate(new Date())) || formatDate(new Date());
-        submitScore(initials, wave, time, date, score).then(() => {
-            showToast('Test score submitted');
-            getTopScores(s => renderScoreList('highScoreList', s));
-        });
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const initials = Array.from({length:3}, () => letters[Math.floor(Math.random()*26)]).join('');
+    const wave = parseInt(prompt('Wave number', gameState.wave)) || gameState.wave;
+    const time = parseInt(prompt('Time left (seconds)', 0)) || 0;
+    const date = prompt('Date (YYYYMMDD)', formatDate(new Date())) || formatDate(new Date());
+    const ranking = wave * 100000 - time;
+    submitScore(initials, wave, time, date, ranking).then(() => {
+        showToast('Test score submitted');
+        getTopScores(s => renderScoreList('highScoreList', s));
     });
 }
 
@@ -988,8 +985,9 @@ function submitInitials() {
     let initials = getElement('initialsInput').value.toUpperCase();
     if (initials.length === 2) initials += '_';
     if (initials.length < 2) return;
-    const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
-    submitScore(initials, gameState.wave, survivalTime, formatDate(new Date()), gameState.score).then(() => {
+    const remainingTime = Math.floor(Math.max(0, gameState.waveDuration - gameState.waveElapsedTime));
+    const ranking = gameState.wave * 100000 - remainingTime;
+    submitScore(initials, gameState.wave, remainingTime, formatDate(new Date()), ranking).then(() => {
         showToast('Score submitted!');
         getElement('initialsInput').style.display = 'none';
         getTopScores(scores => renderScoreList('gameOverScoreList', scores));
@@ -1453,10 +1451,11 @@ function gameOver() {
     getElement('gameOverScreen').style.display = 'flex';
     const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
-    const currentScore = gameState.score;
+    const remainingTime = Math.floor(Math.max(0, gameState.waveDuration - gameState.waveElapsedTime));
+    const playerRank = gameState.wave * 100000 - remainingTime;
     getTopScores(scores => {
         renderScoreList('gameOverScoreList', scores);
-        const qualifies = scores.length < 10 || currentScore > scores[scores.length - 1].score;
+        const qualifies = scores.length < 10 || playerRank > scores[scores.length - 1].score;
         if (qualifies) {
             getElement('initialsInput').style.display = 'block';
             getElement('cheekyMessage').textContent = '';
@@ -3412,7 +3411,10 @@ window.getTopScores = cb => {
   get(q).then(snap => {
     const arr = [];
     snap.forEach(c => arr.push(c.val()));
-    arr.sort((a,b) => b.score - a.score);
+    arr.sort((a,b) => {
+      if (b.wave !== a.wave) return b.wave - a.wave;
+      return a.time - b.time;
+    });
     cb(arr);
   }).catch(err => {
     console.error('Failed to fetch scores', err);
