@@ -979,6 +979,9 @@ function manualSubmitTestScore() {
     submitScore(initials, wave, time, date, ranking).then(() => {
         showToast('Test score submitted');
         getTopScores(s => renderScoreList('highScoreList', s));
+    }).catch(err => {
+        console.error('Failed to submit score', err);
+        showToast('Error saving score', 3000);
     });
 }
 
@@ -992,6 +995,9 @@ function submitInitials() {
         showToast('Score submitted!');
         getElement('initialsInput').style.display = 'none';
         getTopScores(scores => renderScoreList('gameOverScoreList', scores));
+    }).catch(err => {
+        console.error('Failed to submit score', err);
+        showToast('Error saving score', 3000);
     });
 }
 
