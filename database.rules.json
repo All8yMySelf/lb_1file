@@ -2,8 +2,8 @@
   "rules": {
     "scores": {
       ".read": true,
-      ".write": "newData.child('secret').val() === 'MY_SUPER_SECRET_321'",
-      ".indexOn": ["score"]
+      ".write": true,
+      ".indexOn": "ranking"
     }
   }
 }
