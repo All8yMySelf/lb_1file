@@ -3399,7 +3399,7 @@ window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category togglin
 </script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js';
-import { getDatabase, ref, push, get } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
+import { getDatabase, ref, push, get, query, orderByChild, limitToFirst, limitToLast, remove } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
 const firebaseConfig = {
   apiKey: "AIzaSyA5CSbcR_DS601s5Ok_f-UOT_dobysD9eU",
   authDomain: "lb-1file.firebaseapp.com",
@@ -3412,16 +3412,30 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-window.submitScore = (initials, wave, time, date, score) => push(ref(db, 'scores'), { initials, wave, time, date, score, secret: 'MY_SUPER_SECRET_321' });
+window.submitScore = async (initials, wave, time, date, score) => {
+  const scoresRef = ref(db, 'scores');
+  const countSnap = await get(scoresRef);
+  const count = countSnap.size ?? countSnap.numChildren();
+  const lowestSnap = await get(query(scoresRef, orderByChild('score'), limitToFirst(1)));
+  let lowestKey = null;
+  let lowestScore = null;
+  lowestSnap.forEach(c => {
+    lowestKey = c.key;
+    lowestScore = c.val().score;
+  });
+  if (count < 10) {
+    await push(scoresRef, { initials, wave, time, date, score, secret: 'MY_SUPER_SECRET_321' });
+  } else if (score > lowestScore) {
+    await remove(ref(db, `scores/${lowestKey}`));
+    await push(scoresRef, { initials, wave, time, date, score, secret: 'MY_SUPER_SECRET_321' });
+  }
+};
 window.getTopScores = cb => {
-  get(ref(db, 'scores')).then(snap => {
+  get(query(ref(db, 'scores'), orderByChild('score'), limitToLast(10))).then(snap => {
     const arr = [];
     snap.forEach(c => arr.push(c.val()));
-    arr.sort((a, b) => {
-      if (b.wave !== a.wave) return b.wave - a.wave;
-      return a.time - b.time;
-    });
-    cb(arr.slice(0, 10));
+    arr.sort((a, b) => b.score - a.score);
+    cb(arr);
   }).catch(err => {
     console.error('Failed to fetch scores', err);
     cb([]);
