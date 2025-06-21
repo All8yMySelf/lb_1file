@@ -15,6 +15,27 @@ The previous `css/` and `js/` folders have been removed as part of the single-fi
 The repository also includes a `favicon.ico` so browsers display an icon in the
 tab when the game is loaded.
 
+## Leaderboard Setup
+
+A Firebase Realtime Database is required to store and serve the global
+leaderboard. Create a database in your Firebase project and configure the rules
+similar to the example below:
+
+```json
+{
+  "rules": {
+    "scores": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["score"]
+    }
+  }
+}
+```
+
+The client pushes a `secret` field (`MY_SUPER_SECRET_321`) along with each
+score. You can enforce this value in the rules if you wish to restrict writes.
+
 ## Change Log
 
 The game is under active development. Below is a brief summary of recent updates.
