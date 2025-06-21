@@ -19,7 +19,7 @@ example Firebase security rules configuration.
 ## Leaderboard Setup
 
 A Firebase Realtime Database is required to store and serve the global
-leaderboard. Create a database in your Firebase project and configure the rules
+leaderboard. The global leaderboard is now fully operational. Create a database in your Firebase project and configure the rules
 similar to the example below:
 
 ```json
@@ -47,6 +47,10 @@ file is only a reference and is not read by the game directly.
 
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
+
+### v2.40
+- Leaderboard ranking now uses `wave * 100000 - time` and stores only the top 10 scores.
+- The global leaderboard is fully operational.
 
 ### v2.38
 - Minor bug fixes.
