@@ -936,9 +936,8 @@ function renderScoreList(id, scores) {
     list.innerHTML = '';
     if (scores.length === 0) {
         const li = document.createElement('li');
-        li.textContent = 'No scores available';
+        li.textContent = 'No scores yet';
         list.appendChild(li);
-        showToast('No scores available');
         return;
     }
     scores.forEach(s => {
