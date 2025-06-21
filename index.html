@@ -943,7 +943,7 @@ function renderScoreList(id, scores) {
     scores.forEach(s => {
         const timeLeft = (s.time ?? 0);
         const li = document.createElement('li');
-        li.textContent = `${s.initials} - Wave ${s.wave} (${timeLeft}s left)`;
+        li.textContent = `${s.initials} - Wave ${s.wave} (${timeLeft}s left) - ${s.date}`;
         list.appendChild(li);
     });
 }
@@ -974,7 +974,7 @@ function manualSubmitTestScore() {
     const initials = Array.from({length:3}, () => letters[Math.floor(Math.random()*26)]).join('');
     const wave = parseInt(prompt('Wave number', gameState.wave)) || gameState.wave;
     const time = parseInt(prompt('Time left (seconds)', 0)) || 0;
-    const date = prompt('Date (YYYYMMDD)', formatDate(new Date())) || formatDate(new Date());
+    const date = prompt('Date (YYYY MMMM D)', formatDate(new Date())) || formatDate(new Date());
     const ranking = wave * 100000 - time;
     submitScore(initials, wave, time, date, ranking).then(() => {
         showToast('Test score submitted');
@@ -1173,7 +1173,10 @@ function loadGame() {
 }
 
 function formatDate(date) {
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const day = date.getDate();
+    return `${year} ${month} ${day}`;
 }
 
 
