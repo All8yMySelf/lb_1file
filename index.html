@@ -1065,6 +1065,11 @@ function spawnEnemy(isBoss = false) {
         stunTime: 0,
         type: isBoss ? 'Boss' : (enemyTypeIndex === ENEMY_TYPE_TANK ? 'Tank' : (enemyTypeIndex === ENEMY_TYPE_FAST ? 'Fast' : 'Normal'))
     });
+
+    if (enemyIntel.active && enemyIntel.known[enemy.type]) {
+        enemyIntel.known[enemy.type].health = Math.round(health);
+        updateEnemyStatsPanel();
+    }
     gameState.enemiesSpawnedThisWave++;
 }
 
