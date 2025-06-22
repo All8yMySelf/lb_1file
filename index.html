@@ -2907,6 +2907,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         const buttons = [];
         let focusButton = null;
         let targetButton = null;
+        let manualButton = null;
         let maxTextWidth = 0;
         category.upgrades.forEach((u, idx) => {
             if (categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS) {
@@ -2933,6 +2934,18 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 maxTextWidth = Math.max(maxTextWidth, textWidth);
                 const buttonHeight = lines.length * fontSize + padding * 2;
                 targetButton = {u, lines, height: buttonHeight, idx};
+            } else if (categoryIndex === UPGRADE_CATEGORY_LASER && idx === UPGRADE_LASER_MANUAL) {
+                const stats = u.g(u.level, u.cost, u.maxLevel);
+                const lines = `${u.name}: ${stats}`.split('\n');
+                if (u.level < u.maxLevel) {
+                    lines.push(`Cost: $${u.cost}`);
+                } else {
+                    lines.push('MAX');
+                }
+                const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+                maxTextWidth = Math.max(maxTextWidth, textWidth);
+                const buttonHeight = lines.length * fontSize + padding * 2;
+                manualButton = {u, lines, height: buttonHeight, idx};
             } else if (u.progressBar) {
                 const lines = [u.name];
                 if (u.level < u.maxLevel) {
@@ -2965,6 +2978,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         const centers = [];
         let gunButtonY = null;
         let calcHealthButtonY = null;
+        let laserButtonY = null;
 
         // Compute center positions
         let tempY = y;
@@ -2976,6 +2990,9 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             }
             if (categoryIndex === UPGRADE_CATEGORY_SENSORS && b.idx === UPGRADE_SENSOR_HEALTHBARS) {
                 calcHealthButtonY = tempY;
+            }
+            if (categoryIndex === UPGRADE_CATEGORY_LASER && b.idx === UPGRADE_LASER_DAMAGE) {
+                laserButtonY = tempY;
             }
             tempY += b.height + 10;
         });
@@ -3171,6 +3188,45 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 height: targetButton.height,
                 categoryIndex: categoryIndex,
                 upgradeIndex: targetButton.idx
+            });
+        }
+
+        if (manualButton) {
+            const subX = panelX + buttonWidth + 40;
+            const btnY = laserButtonY !== null ? laserButtonY : currentY;
+            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+            ctx.fillRect(subX, btnY, buttonWidth, manualButton.height);
+            ctx.strokeStyle = color;
+            ctx.strokeRect(subX, btnY, buttonWidth, manualButton.height);
+
+            let canAfford = gameState.credits >= manualButton.u.cost && manualButton.u.level < manualButton.u.maxLevel &&
+                             upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level > 0;
+            if (canAfford) {
+                ctx.fillStyle = 'rgba(0,255,0,0.2)';
+                ctx.fillRect(subX, btnY, buttonWidth, manualButton.height);
+            }
+            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            let textY = btnY + padding;
+            manualButton.lines.forEach(line => {
+                ctx.fillText(line, subX + padding, textY);
+                textY += fontSize;
+            });
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(panelX + buttonWidth, btnY + manualButton.height / 2);
+            ctx.lineTo(subX, btnY + manualButton.height / 2);
+            ctx.stroke();
+
+            ringClickRegions.push({
+                type: 'collapsible_upgrade_button',
+                x: subX,
+                y: btnY,
+                width: buttonWidth,
+                height: manualButton.height,
+                categoryIndex: categoryIndex,
+                upgradeIndex: manualButton.idx
             });
         }
     }
