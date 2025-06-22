@@ -2094,6 +2094,7 @@ function spawnNewEnemies(dt) {
         }
 
         if (!state.isBossWave && state.elapsedTime >= state.duration) {
+            console.log(`[wave ${waveStr}] boss spawned`);
             spawnEnemy(true, Number(waveStr));
             state.isBossWave = true;
             showToast('Boss Wave!', 3000);
@@ -3635,6 +3636,7 @@ function fireMacrossMissiles() {
 
 function sendNextWave() {
     // Simply initiate the next wave without spawning the current boss early
+    console.log('sendNextWave triggered; current wave: ' + gameState.wave);
     startNextWave();
 }
 
