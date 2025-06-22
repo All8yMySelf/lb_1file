@@ -164,6 +164,7 @@
   #enemyStatsHeader { cursor: pointer; }
   #enemyStatsHeader .arrow { margin-left: 4px; }
   #overlayContainer,
+
   #cssOverlay {
       position: absolute;
       inset: 0;
@@ -796,7 +797,9 @@ function applyOverlay(radius) {
             break;
         case 2:
             if (cssOverlay) {
-                cssOverlay.style.clipPath = `circle(${radius}px at ${base.x}px ${base.y}px)`;
+                const mask = `radial-gradient(circle at ${base.x}px ${base.y}px, transparent 0, transparent ${radius}px, black ${radius}px)`;
+                cssOverlay.style.maskImage = mask;
+                cssOverlay.style.webkitMaskImage = mask;
             }
             break;
         case 3:
