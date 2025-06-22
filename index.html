@@ -3220,6 +3220,16 @@ window.addEventListener('keydown', e => {
         getElement('startScreen').style.display = 'flex';
     }
 
+    // Restart game from game over or leaderboard screens with "r"
+    if (e.key.toLowerCase() === 'r') {
+        const gameOverVisible = getElement('gameOverScreen').style.display !== 'none';
+        const leaderboardVisible = getElement('leaderboard-screen').style.display !== 'none';
+        if (gameOverVisible || leaderboardVisible) {
+            getElement('restartButton').click();
+            return; // Prevent handling below
+        }
+    }
+
     // Handle single-press actions only if game is running
     if (isGameRunning) {
         switch (e.key.toLowerCase()) {
