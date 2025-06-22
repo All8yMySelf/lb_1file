@@ -1070,10 +1070,12 @@ function showToast(message, duration = 2000) {
     const toast = getElement('toast');
     toast.textContent = message;
     toast.classList.add('show');
+
     setTimeout(() => {
         toast.classList.remove('show');
     }, duration);
 }
+window.showToast = showToast;
 
 function playSound(audio) {
     if (isMuted) return;
