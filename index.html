@@ -764,6 +764,8 @@ let xpCardShown = false;
 // Track which waves are currently active and whether their bosses live
 let activeWaves = [];
 let waveBossAlive = {};
+// Per-wave timers and state so multiple waves can run concurrently
+let waveStates = {};
 
 // Cache width of the hotkeys panel for enemy stats alignment
 let hotkeysWidth = null;
@@ -1077,19 +1079,19 @@ function drawBracket(x, y, size, color = '#ffcc00', pulsing = true) {
 }
 
 // --- Enemy Spawning ---
-function spawnEnemy(isBoss = false) {
+function spawnEnemy(isBoss = false, waveNumber = gameState.wave) {
     const spawnAngle = Math.random() * Math.PI * 2;
     const spawnRadius = Math.max(canvasWidth, canvasHeight) / 2 + 50; // Spawn slightly off-screen
     const enemyTypeIndex = isBoss ? ENEMY_TYPE_BOSS : Math.floor(Math.random() * ENEMY_TYPE_BOSS); // Don't randomly spawn boss
     const enemyTemplate = ENEMY_TYPES[enemyTypeIndex];
-    const difficultyScaling = Math.pow(ENEMY_HEALTH_SCALE_FACTOR, gameState.wave - 1);
+    const difficultyScaling = Math.pow(ENEMY_HEALTH_SCALE_FACTOR, waveNumber - 1);
 
     let health, speed, credits, radius = enemyTemplate[3];
     if (isBoss) {
-        health = (BOSS_HEALTH_BASE + gameState.wave * BOSS_HEALTH_WAVE_MULTIPLIER) * difficultyScaling;
+        health = (BOSS_HEALTH_BASE + waveNumber * BOSS_HEALTH_WAVE_MULTIPLIER) * difficultyScaling;
         speed = enemyTemplate[1] * Math.sqrt(difficultyScaling); // Boss gets faster too
         credits = Math.floor(enemyTemplate[4] * Math.sqrt(difficultyScaling) * 5); // Boss gives more credits
-        radius += (gameState.wave - 1) * BOSS_RADIUS_INCREMENT;
+        radius += (waveNumber - 1) * BOSS_RADIUS_INCREMENT;
     } else {
         health = enemyTemplate[2] * difficultyScaling;
         speed = enemyTemplate[1] * Math.sqrt(difficultyScaling);
@@ -1109,21 +1111,29 @@ function spawnEnemy(isBoss = false) {
         st: false, // isStunned
         stunTime: 0,
         type: isBoss ? 'Boss' : (enemyTypeIndex === ENEMY_TYPE_TANK ? 'Tank' : (enemyTypeIndex === ENEMY_TYPE_FAST ? 'Fast' : 'Normal')),
-        wave: gameState.wave
+        wave: waveNumber
     });
 
     if (isBoss) {
-        waveBossAlive[gameState.wave] = true;
+        waveBossAlive[waveNumber] = true;
+        if (waveStates[waveNumber]) {
+            waveStates[waveNumber].bossAlive = true;
+        }
     }
 
     if (enemyIntel.active && enemyIntel.known[enemy.type]) {
         enemyIntel.known[enemy.type].health = Math.round(health);
         updateEnemyStatsPanel();
     }
-    gameState.enemiesSpawnedThisWave++;
+    if (waveStates[waveNumber]) {
+        waveStates[waveNumber].spawned = (waveStates[waveNumber].spawned || 0) + 1;
+    }
+    if (waveNumber === gameState.wave) {
+        gameState.enemiesSpawnedThisWave++;
+    }
 }
 
-function spawnXPEnemy() {
+function spawnXPEnemy(waveNumber) {
     const padding = 50;
     const angle = Math.random() * Math.PI * 2;
     const spawnRadius = Math.max(canvasWidth, canvasHeight) / 2 + padding;
@@ -1144,13 +1154,16 @@ function spawnXPEnemy() {
         dx,
         dy,
         type: 'XP',
-        wave: gameState.wave
+        wave: waveNumber
     });
 }
 
 function handleEnemyKilled(enemy) {
     if (enemy.type === 'Boss') {
         waveBossAlive[enemy.wave] = false;
+        if (waveStates[enemy.wave]) {
+            waveStates[enemy.wave].bossAlive = false;
+        }
         enemyPool.getActiveObjects().forEach(e => {
             if (e.xp) enemyPool.release(e);
         });
@@ -1225,11 +1238,17 @@ function showSensorWarning() {
 function dismissSensorWarning() {
     getElement('sensorWarning').style.display = 'none';
     if (!gameStartTime) gameStartTime = Date.now();
+    const state = waveStates[gameState.wave];
+    state.elapsedTime = 0;
+    state.duration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+    state.isBossWave = false;
+    state.xpSpawned = false;
+    state.xpSpawnTime = Math.random() * (state.duration - 2);
     gameState.waveStartTime = Date.now();
     gameState.waveElapsedTime = 0;
-    gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+    gameState.waveDuration = state.duration;
     gameState.xpEnemySpawned = false;
-    gameState.xpEnemySpawnTime = Math.random() * (gameState.waveDuration - 2);
+    gameState.xpEnemySpawnTime = state.xpSpawnTime;
     resumeGame();
     showToast('Wave timer started! Enemies approaching just outside your range.', 3000);
 }
@@ -1262,13 +1281,14 @@ function updateHUD() {
     getElement('creditsDisplay').textContent = `Credits: ${gameState.credits}`;
     getElement('healthDisplay').textContent = `Health: ${Math.max(0, gameState.currentHealth)}/${gameState.maxHealth}`; // Ensure health doesn't show < 0
 
-    const elapsedTime = gameState.waveElapsedTime;
+    const state = waveStates[gameState.wave] || {};
+    const elapsedTime = state.elapsedTime || 0;
     let countdownText;
 
-    if (gameState.isBossWave) {
+    if (state.isBossWave) {
         countdownText = "Boss!";
     } else {
-        const remainingTime = Math.max(0, gameState.waveDuration - elapsedTime);
+        const remainingTime = Math.max(0, (state.duration || 0) - elapsedTime);
         const minutes = Math.floor(remainingTime / 60);
         const seconds = Math.floor(remainingTime % 60);
         countdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -1277,6 +1297,7 @@ function updateHUD() {
     const waveText = gameState.wave;
     getElement('waveDisplay').textContent = `Wave: ${waveText} | ${countdownText}`;
 
+    // Button state can be adjusted elsewhere if needed
 }
 
 
@@ -1501,6 +1522,17 @@ function initializeGame(shouldTryLoad = true) {
 
     activeWaves = [1];
     waveBossAlive = { 1: false };
+    waveStates = {
+        1: {
+            elapsedTime: 0,
+            duration: WAVE_BASE_DURATION,
+            isBossWave: false,
+            xpSpawnTime: Math.random() * (WAVE_BASE_DURATION - 2),
+            xpSpawned: false,
+            bossAlive: false,
+            spawned: 0
+        }
+    };
 
     base = {
         x: canvasWidth / 2,
@@ -1749,7 +1781,8 @@ function gameOver() {
     getElement('deathOverlay').style.display = 'block';
     const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
-    const remainingTime = Math.floor(Math.max(0, gameState.waveDuration - gameState.waveElapsedTime));
+    const finalState = waveStates[gameState.wave] || {};
+    const remainingTime = Math.floor(Math.max(0, (finalState.duration || 0) - (finalState.elapsedTime || 0)));
     const playerRank = gameState.wave * 100000 - remainingTime;
     window.pendingScore = { wave: gameState.wave, time: remainingTime, ranking: playerRank, saved: false };
     getTopScores().then(scores => {
@@ -1993,29 +2026,37 @@ function updateEnemies(dt) {
 
 
 function spawnNewEnemies(dt) {
-    gameState.waveElapsedTime += dt;
-    const elapsedTime = gameState.waveElapsedTime;
     const enemies = enemyPool.getActiveObjects();
     const dtScaled = dt * 60;
 
-    if (!gameState.xpEnemySpawned && elapsedTime >= gameState.xpEnemySpawnTime) {
-        spawnXPEnemy();
-        gameState.xpEnemySpawned = true;
-        if (!xpCardShown) {
-            showToast('XP Enemy spotted! Use Manual Laser to destroy.', 4000);
-            xpCardShown = true;
+    for (const [waveStr, state] of Object.entries(waveStates)) {
+        state.elapsedTime += dt;
+
+        if (!state.xpSpawned && state.elapsedTime >= state.xpSpawnTime) {
+            spawnXPEnemy(Number(waveStr));
+            state.xpSpawned = true;
+            if (!xpCardShown) {
+                showToast('XP Enemy spotted! Use Manual Laser to destroy.', 4000);
+                xpCardShown = true;
+            }
+        }
+
+        if (!state.isBossWave && state.elapsedTime >= state.duration) {
+            spawnEnemy(true, Number(waveStr));
+            state.isBossWave = true;
+            showToast('Boss Wave!', 3000);
+        } else if (!state.isBossWave && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) {
+            spawnEnemy(false, Number(waveStr));
         }
     }
 
-    // Boss spawning
-    if (!gameState.isBossWave && elapsedTime >= gameState.waveDuration) {
-        spawnEnemy(true); // Spawn the boss
-        gameState.isBossWave = true;
-        showToast('Boss Wave!', 3000);
-    }
-    // Regular enemy spawning (if not boss wave and below limit)
-    else if (!gameState.isBossWave && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) { // Slightly increased spawn rate
-        spawnEnemy(false);
+    const currentState = waveStates[gameState.wave];
+    if (currentState) {
+        gameState.waveElapsedTime = currentState.elapsedTime;
+        gameState.waveDuration = currentState.duration;
+        gameState.isBossWave = currentState.isBossWave;
+        gameState.xpEnemySpawned = currentState.xpSpawned;
+        gameState.xpEnemySpawnTime = currentState.xpSpawnTime;
     }
 }
 
@@ -2355,11 +2396,21 @@ function startNextWave() {
     gameState.enemiesSpawnedThisWave = 0;
     gameState.isBossWave = false;
     gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
-    gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+    const duration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+    gameState.waveDuration = duration;
     gameState.waveStartTime = Date.now();
     gameState.waveElapsedTime = 0;
     gameState.xpEnemySpawned = false;
-    gameState.xpEnemySpawnTime = Math.random() * (gameState.waveDuration - 2);
+    gameState.xpEnemySpawnTime = Math.random() * (duration - 2);
+    waveStates[gameState.wave] = {
+        elapsedTime: 0,
+        duration,
+        isBossWave: false,
+        xpSpawnTime: gameState.xpEnemySpawnTime,
+        xpSpawned: false,
+        bossAlive: false,
+        spawned: 0
+    };
     activeWaves.push(gameState.wave);
     waveBossAlive[gameState.wave] = false;
     showToast(`Wave ${gameState.wave} started! +10% Health`, 3000);
@@ -2369,13 +2420,16 @@ function startNextWave() {
 
 function checkWaveCompletion(dt) {
     const enemies = enemyPool.getActiveObjects().filter(e => !e.xp);
-    // Remove finished waves from display but keep current wave even if empty
-    activeWaves = activeWaves.filter(w =>
-        w === gameState.wave || waveBossAlive[w] || enemies.some(e => e.wave === w)
-    );
-    // If all spawned enemies have been cleared, start the next wave
-    // but only after at least one enemy was actually spawned in this wave
-    if (enemies.length === 0 && gameState.enemiesSpawnedThisWave > 0) {
+    activeWaves = activeWaves.filter(w => {
+        const state = waveStates[w];
+        const hasEnemies = enemies.some(e => e.wave === w);
+        if (!hasEnemies && state && state.spawned > 0 && !state.bossAlive) {
+            delete waveStates[w];
+            return false;
+        }
+        return true;
+    });
+    if (enemies.length === 0 && activeWaves.length === 0) {
         startNextWave();
     }
 }
@@ -3511,9 +3565,7 @@ function fireMacrossMissiles() {
 }
 
 function sendNextWave() {
-    if (!waveBossAlive[gameState.wave]) {
-        spawnEnemy(true);
-    }
+    // Simply initiate the next wave without spawning the current boss early
     startNextWave();
 }
 
