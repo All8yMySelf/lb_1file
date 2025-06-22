@@ -1313,7 +1313,7 @@ function updateHUD() {
         countdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    const waveText = activeWaves.join(' + ');
+    const waveText = gameState.wave;
     getElement('waveDisplay').textContent = `Wave: ${waveText} | ${countdownText}`;
 
 }
