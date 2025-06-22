@@ -172,7 +172,12 @@
     inset: 0;
     pointer-events: none;
   }
-  #cssOverlay { background: rgba(0,0,0,0.6); display:none; }
+  #cssOverlay {
+    background: rgba(0,0,0,0.6);
+    display:none;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+  }
   #phaserCanvas { display:none; }
   #overlayButton { margin-left:4px; }
 </style>
@@ -832,7 +837,9 @@ function applyOverlay(radius) {
             break;
         case 3:
             if (cssOverlay) {
-                cssOverlay.style.clipPath = `circle(${radius}px at ${base.x}px ${base.y}px)`;
+                const mask = `radial-gradient(circle at ${base.x}px ${base.y}px, transparent 0, transparent ${radius}px, black ${radius}px)`;
+                cssOverlay.style.maskImage = mask;
+                cssOverlay.style.webkitMaskImage = mask;
             }
             break;
         case 4:
