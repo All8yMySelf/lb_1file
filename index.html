@@ -2761,6 +2761,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
 
         const buttons = [];
         let focusButton = null;
+        let targetButton = null;
         let maxTextWidth = 0;
         category.upgrades.forEach((u, idx) => {
             if (categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS) {
@@ -2775,6 +2776,18 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 maxTextWidth = Math.max(maxTextWidth, textWidth, barWidth);
                 const buttonHeight = lines.length * fontSize + padding * 3 + 10;
                 focusButton = {u, lines, height: buttonHeight, progressBar: true, idx};
+            } else if (categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_TARGET_AI) {
+                const stats = u.g(u.level, u.cost, u.maxLevel);
+                const lines = `${u.name}: ${stats}`.split('\n');
+                if (u.level < u.maxLevel) {
+                    lines.push(`Cost: $${u.cost}`);
+                } else {
+                    lines.push('MAX');
+                }
+                const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+                maxTextWidth = Math.max(maxTextWidth, textWidth);
+                const buttonHeight = lines.length * fontSize + padding * 2;
+                targetButton = {u, lines, height: buttonHeight, idx};
             } else if (u.progressBar) {
                 const lines = [u.name];
                 if (u.level < u.maxLevel) {
@@ -2806,6 +2819,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let currentY = y;
         const centers = [];
         let gunButtonY = null;
+        let calcHealthButtonY = null;
 
         // Compute center positions
         let tempY = y;
@@ -2814,6 +2828,9 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             centers.push(center);
             if (categoryIndex === UPGRADE_CATEGORY_CANNON && b.idx === UPGRADE_CANNON_MULTIBARREL) {
                 gunButtonY = tempY;
+            }
+            if (categoryIndex === UPGRADE_CATEGORY_SENSORS && b.idx === UPGRADE_SENSOR_HEALTHBARS) {
+                calcHealthButtonY = tempY;
             }
             tempY += b.height + 10;
         });
@@ -2972,6 +2989,45 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 upgradeIndex: focusButton.idx
             });
         }
+
+        if (targetButton) {
+            const subX = panelX + buttonWidth + 40;
+            const btnY = calcHealthButtonY !== null ? calcHealthButtonY : currentY;
+            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+            ctx.fillRect(subX, btnY, buttonWidth, targetButton.height);
+            ctx.strokeStyle = color;
+            ctx.strokeRect(subX, btnY, buttonWidth, targetButton.height);
+
+            let canAfford = gameState.credits >= targetButton.u.cost && targetButton.u.level < targetButton.u.maxLevel &&
+                             upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_HEALTHBARS].level > 0;
+            if (canAfford) {
+                ctx.fillStyle = 'rgba(0,255,0,0.2)';
+                ctx.fillRect(subX, btnY, buttonWidth, targetButton.height);
+            }
+            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            let textY = btnY + padding;
+            targetButton.lines.forEach(line => {
+                ctx.fillText(line, subX + padding, textY);
+                textY += fontSize;
+            });
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(panelX + buttonWidth, btnY + targetButton.height / 2);
+            ctx.lineTo(subX, btnY + targetButton.height / 2);
+            ctx.stroke();
+
+            ringClickRegions.push({
+                type: 'collapsible_upgrade_button',
+                x: subX,
+                y: btnY,
+                width: buttonWidth,
+                height: targetButton.height,
+                categoryIndex: categoryIndex,
+                upgradeIndex: targetButton.idx
+            });
+        }
     }
 
     ringClickRegions.push({
@@ -3008,6 +3064,12 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS) {
         if (upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_MULTIBARREL].level === 0) {
             showToast("Requires Guns upgrade first!", 2500);
+            return;
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_SENSORS && upgradeIndex === UPGRADE_SENSOR_TARGET_AI) {
+        if (upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_HEALTHBARS].level === 0) {
+            showToast("Requires Calculate Enemies' Health first!", 2500);
             return;
         }
     }
