@@ -3135,6 +3135,13 @@ window.addEventListener('keydown', e => {
 
     keysPressed[e.key.toLowerCase()] = true; // Use lower case for consistency
 
+    // Close leaderboard screen with Escape
+    if (e.key === 'Escape' && getElement('leaderboard-screen').style.display !== 'none') {
+        getElement('leaderboard-screen').style.display = 'none';
+        unlistenLeaderboard();
+        getElement('startScreen').style.display = 'flex';
+    }
+
     // Handle single-press actions only if game is running
     if (isGameRunning) {
         switch (e.key.toLowerCase()) {
