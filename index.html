@@ -4207,9 +4207,9 @@ window.addEventListener('touchend', e => {
     }
 });
 
-
+window.addEventListener('load', () => {
 // UI Button Listeners
-getElement('startButton').onclick = startGame;
+  getElement('startButton').onclick = startGame;
 getElement('restartButton').onclick = async () => {
     if (window.pendingScore && !window.pendingScore.saved) {
         try {
@@ -4303,6 +4303,8 @@ Object.entries(tooltipTexts).forEach(([id,text])=>{
   el.addEventListener('mouseleave', hideTooltip);
 });
 
+});
+
 // Window Resize
 window.addEventListener('resize', () => {
     canvasWidth = window.innerWidth;
@@ -4381,7 +4383,7 @@ function loadAndStartGame() {
 
 
 // Initial setup on load
-  window.onload = () => {
+  window.addEventListener('load', () => {
     // Preload pixel font if needed (optional, adds dependency)
     // const fontLink = document.createElement('link');
     // fontLink.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
@@ -4414,7 +4416,7 @@ function loadAndStartGame() {
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       // Try loading save data now, before Start Game is pressed
     tryLoadGame(); // Button visibility handled within
-};
+  });
 
 // --- Global Access (for HTML onclick) ---
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
