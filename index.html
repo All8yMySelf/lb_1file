@@ -163,6 +163,12 @@
   #enemyStatsPanel.collapsed #enemyStatsContent { display: none; }
   #enemyStatsHeader { cursor: pointer; }
   #enemyStatsHeader .arrow { margin-left: 4px; }
+  #xpStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; }
+  #xpStatsPanel.collapsed #xpStatsContent { display: none; }
+  #xpStatsHeader { cursor: pointer; }
+  #xpStatsHeader .arrow { margin-left: 4px; }
+  .timer-blink { animation: timerBlink 1s steps(2,end) infinite; }
+  @keyframes timerBlink { 50% { opacity: 0; } }
 
 </style>
 </head>
@@ -224,6 +230,10 @@
     <div>O: Toggle Ring Info</div>
 </div>
 <div id="enemyStatsPanel"><div id="enemyStatsHeader">Enemy Stats <span id="enemyStatsToggle" class="arrow">▾</span></div><div id="enemyStatsContent"></div></div>
+<div id="xpStatsPanel" class="collapsed">
+  <div id="xpStatsHeader">XP Status <span id="xpStatsToggle" class="arrow">▾</span></div>
+  <div id="xpStatsContent"></div>
+</div>
 <div id="sensorWarning" style="display:none">
     <p>The ring around your base shows your cannon's visual firing range. The cannon cannot target enemies beyond this radius. Click on the "Cannon" to upgrade the cannon's abilities.</p>
     <p>Upgrade "Sensors" Electronic FOV to see enemies outside this ring. The wave timer has started – enemies approach from beyond your sight.</p>
@@ -1156,6 +1166,8 @@ function spawnXPEnemy(waveNumber) {
         type: 'XP',
         wave: waveNumber
     });
+    gameState.xpEnemiesSpawned++;
+    updateXPStatsPanel();
 }
 
 function handleEnemyKilled(enemy) {
@@ -1296,6 +1308,8 @@ function updateHUD() {
 
     const waveText = gameState.wave;
     getElement('waveDisplay').textContent = `Wave: ${waveText} | ${countdownText}`;
+
+    updateXPStatsPanel();
 
     // Button state can be adjusted elsewhere if needed
 }
@@ -1516,6 +1530,8 @@ function initializeGame(shouldTryLoad = true) {
         enemiesKilled: 0,
         autoFire: true,
         doubleFireRateEndTime: 0,
+        xpEnemiesSpawned: 0,
+        xpEnemiesDestroyed: 0,
         xpEnemySpawnTime: 0,
         xpEnemySpawned: false
     };
@@ -3523,6 +3539,8 @@ function fireLaserAt(target) {
         enemyPool.release(target);
         if (target.xp) {
             gameState.doubleFireRateEndTime = Date.now() + 20000;
+            gameState.xpEnemiesDestroyed++;
+            updateXPStatsPanel();
             showToast('Fire rate doubled!', 3000);
         }
         updateHUD();
@@ -3677,6 +3695,35 @@ function updateEnemyStatsPanel(){
 function toggleEnemyStatsPanel(){
     const p=getElement("enemyStatsPanel");
     const arrow=getElement("enemyStatsToggle");
+    p.classList.toggle("collapsed");
+    arrow.textContent=p.classList.contains("collapsed")?'▸':'▾';
+}
+
+function updateXPStatsPanel(){
+    const panel=getElement("xpStatsPanel");
+    if(!panel) return;
+    const content=getElement("xpStatsContent");
+    if(gameState.xpEnemiesSpawned===0){
+        panel.style.display="none";
+        return;
+    }
+    panel.style.display="block";
+    const enemyPanel=getElement("enemyStatsPanel");
+    panel.style.width="";
+    panel.style.maxWidth=hotkeysWidth===null?"" : hotkeysWidth+"px";
+    panel.style.top=(enemyPanel.offsetTop+enemyPanel.offsetHeight+10)+"px";
+    let html=`<div>XP Enemies: ${gameState.xpEnemiesDestroyed}/${gameState.xpEnemiesSpawned}</div>`;
+    html+=`<div>Destroy with Manual Laser to double fire rate for 20 s.</div>`;
+    if(Date.now()<gameState.doubleFireRateEndTime){
+        const remaining=((gameState.doubleFireRateEndTime-Date.now())/1000).toFixed(1);
+        html+=`<div class="timer-blink">${remaining}s at 2x fire rate</div>`;
+    }
+    content.innerHTML=html;
+}
+
+function toggleXPStatsPanel(){
+    const p=getElement("xpStatsPanel");
+    const arrow=getElement("xpStatsToggle");
     p.classList.toggle("collapsed");
     arrow.textContent=p.classList.contains("collapsed")?'▸':'▾';
 }
@@ -3961,6 +4008,7 @@ getElement('restartButton').onclick = async () => {
 getElement('sensorWarningButton').onclick = dismissSensorWarning;
 getElement("enemyIntelContinue").onclick=hideEnemyIntelPopup;
 getElement("enemyStatsHeader").onclick=toggleEnemyStatsPanel;
+getElement("xpStatsHeader").onclick=toggleXPStatsPanel;
 getElement('playPauseButton').onclick = () => {
     if (isGameRunning) pauseGame(); else resumeGame();
 };
