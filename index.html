@@ -1632,6 +1632,7 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Fire Rate', cost: 100, level: 0, maxLevel: 15,
+                  description: 'Reduces seconds between shots. Recommended along with Damage before wave 1.',
                   f: level => 1000 / (5 + level),
                   g: (level, cost, maxLvl) => {
                       const currentRate = 5 + level;
@@ -1639,15 +1640,19 @@ function initializeGame(shouldTryLoad = true) {
                       return `${currentRate}s${level < maxLvl ? ` > ${nextRate}s` : ''}`;
                   }},
                 { name: 'Damage', cost: 150, level: 0, maxLevel: 10,
+                  description: 'Increases bullet damage. Pair with Fire Rate early.',
                   f: level => 1 + level, // Damage = 1 + level
                   g: (level, cost, maxLvl) => `${1 + level}${level < maxLvl ? ` > ${2 + level}` : ''}` },
                 { name: 'Range', cost: 250, level: 0, maxLevel: 10,
+                  description: 'Extends cannon range by 5% each level.',
                   f: level => initialRange * Math.pow(1.05, level),
                   g: (level, cost, maxLvl) => `${Math.round(initialRange * Math.pow(1.05, level))}${level < maxLvl ? ` > ${Math.round(initialRange * Math.pow(1.05, level + 1))}` : ''}` },
                 { name: 'Guns', cost: 12000, level: 0, maxLevel: 5, // Starts at 1 gun implicitly
+                  description: 'Adds an extra barrel for more bullets.',
                   f: level => level + 1, // Guns = 1 + level
                   g: (level, cost, maxLvl) => `${1 + level}${level < maxLvl ? ` > ${2 + level}` : ''} guns` },
                 { name: 'Focus Radius', cost: 500, level: 0, maxLevel: 9, progressBar: true,
+                  description: 'Prioritize enemies within this portion of range.',
                   f: level => level === 0 ? 0 : 0.2 + 0.1 * (level - 1),
                   g: (level, cost, maxLvl) => {
                       const current = level === 0 ? 0 : 20 + (level - 1) * 10;
@@ -1661,9 +1666,11 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Health', cost: 200, level: 0, maxLevel: 10,
+                  description: 'Raises base health by 50 per level.',
                   f: level => 100 + 50 * level,
                   g: (level, cost, maxLvl) => `${100 + 50 * level}${level < maxLvl ? ` > ${150 + 50 * level}` : ''}` },
                 { name: 'Movement', cost: 300, level: 0, maxLevel: 5,
+                  description: 'Improves movement speed for easier dodging.',
                   f: level => BASE_INITIAL_MOVE_SPEED + level * BASE_MOVE_SPEED_INCREMENT,
                   g: (level, cost, maxLvl) => {
                       const current = BASE_INITIAL_MOVE_SPEED + level * BASE_MOVE_SPEED_INCREMENT;
@@ -1677,6 +1684,7 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Damage', cost: 2000, level: 0, maxLevel: 6,
+                  description: 'Unlocks and doubles laser damage each level.',
                   f: level => level === 0 ? 0 : 15 * Math.pow(2, level - 1), // Damage doubles
                   g: (level, cost, maxLvl) => {
                       const currentDmg = level === 0 ? 0 : 15 * Math.pow(2, level - 1);
@@ -1685,6 +1693,7 @@ function initializeGame(shouldTryLoad = true) {
                       return `${currentDmg}${level < maxLvl ? ` > ${nextDmg}` : ''}`;
                    }},
                 { name: 'Manual Targeting', cost: 2000, level: 0, maxLevel: 1,
+                  description: 'Control laser aim with the mouse.',
                   f: level => level,
                   g: (level) => level > 0 ? 'Enabled' : 'Off' }
             ]
@@ -1694,6 +1703,7 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Missiles', cost: 2000, level: 0, maxLevel: 6,
+                  description: 'Activates missile launcher and adds one missile.',
                   f: level => level,
                   g: (level, cost, maxLvl) => {
                        if (level === 0) return '(Activate)';
@@ -1702,12 +1712,15 @@ function initializeGame(shouldTryLoad = true) {
                        return `${currentCount}${level < maxLvl ? ` > ${nextCount}` : ''}`;
                   }},
                 { name: 'Radius', cost: 1500, level: 0, maxLevel: 5, // Requires missile system active
+                  description: 'Extends targeting radius for missiles.',
                   f: level => base.cannonRange * (1 + 0.1 * level), // Scales with cannon range
                   g: (level, cost, maxLvl) => `${Math.round(base.cannonRange * (1 + 0.1 * level))}${level < maxLvl ? ` > ${Math.round(base.cannonRange * (1 + 0.1 * (level + 1)))}` : ''}` },
                 { name: 'Damage', cost: 2500, level: 0, maxLevel: 5, // Requires missile system active
+                  description: 'Adds 5 damage to each missile.',
                   f: level => 10 + 5 * level,
                   g: (level, cost, maxLvl) => `${10 + 5 * level}${level < maxLvl ? ` > ${15 + 5 * level}` : ''}` },
                 { name: 'Homing', cost: 3000, level: 0, maxLevel: 5, // Requires missile system active
+                  description: 'Missiles turn faster toward targets.',
                   f: level => level === 0 ? 0 : 20 * level,
                   g: (level, cost, maxLvl) => {
                       if (level === 0) return '(Activate)';
@@ -1716,6 +1729,7 @@ function initializeGame(shouldTryLoad = true) {
                       return `${currentPct}%${level < maxLvl ? ` > ${nextPct}%` : ''}`;
                   }},
                 { name: 'Macros', cost: 5000, level: 0, maxLevel: 5,
+                  description: 'Launch huge barrages with shorter cooldown.',
                   f: level => level === 0 ? 0 : 50 * Math.pow(2, level - 1), // Num missiles 0 -> 50 -> 100 -> ...
                   g: (level, cost, maxLvl) => {
                       if (level === 0) return '(Activate)';
@@ -1734,6 +1748,7 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Stun Field', cost: 2000, level: 0, maxLevel: 9, // Max 90% slow
+                  description: 'Creates a field that slows nearby enemies.',
                   f: level => level * 0.1, // Returns the slow factor (0 to 0.9)
                   g: (level, cost, maxLvl) => `${level * 10}%${level < maxLvl ? `>${(level + 1) * 10}%` : ''}` }
             ]
@@ -1743,6 +1758,7 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Electronic FOV', cost: 50, level: 0, maxLevel: 20,
+                  description: 'Expands sensor radius by 10% per level.',
                   f: level => 1 + 0.1 * level,
                   g: (level, cost, maxLvl) => {
                       const current = Math.round((1 + 0.1 * level) * 100);
@@ -1750,12 +1766,15 @@ function initializeGame(shouldTryLoad = true) {
                       return `${current}%${level < maxLvl ? ` > ${next}%` : ''}`;
                   } },
                 { name: 'Enemy Identification', cost: 100, level: 0, maxLevel: 1,
+                  description: 'Shows outlines around enemies.',
                   f: level => level > 0,
                   g: (level) => level > 0 ? 'On' : '(Enable)' },
                 { name: 'Calculate Enemies\u2019 Health', cost: 500, level: 0, maxLevel: 1,
+                  description: 'Displays health bars over foes.',
                   f: level => level > 0,
                   g: (level) => level > 0 ? 'On' : '(Enable)' },
                 { name: 'Target Analysis AI', cost: 3000, level: 0, maxLevel: 1,
+                  description: 'Prevents overkill by tracking damage.',
                   f: level => level > 0,
                   g: (level) => level > 0 ? 'Active' : '(Install)' }
             ]
@@ -1765,6 +1784,7 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Info / How To Play', cost: 0, level: 0, maxLevel: 1,
+                  description: 'Opens a quick reference guide.',
                   f: level => level,
                   g: level => level ? 'Active' : '(Start)' }
             ]
@@ -1778,6 +1798,7 @@ function initializeGame(shouldTryLoad = true) {
                     cost: 0,
                     level: 0,
                     maxLevel: Infinity,
+                    description: 'Grants credits instantly for testing.',
                     f: () => {},
                     g: () => ''
                 }
@@ -4015,7 +4036,11 @@ function showTooltipForCanvas(e) {
                 if (region.categoryIndex === UPGRADE_CATEGORY_INFO && region.upgradeIndex === UPGRADE_INFO_HELP) {
                     text = 'Hover over elements for tips. Click again or press Play to resume.';
                 } else {
-                    text = up.name + ': ' + up.g(up.level, up.cost, up.maxLevel);
+                    let details = up.g(up.level, up.cost, up.maxLevel);
+                    if (up.description) {
+                        details = details ? `${details} - ${up.description}` : up.description;
+                    }
+                    text = up.name + ': ' + details;
                 }
             } else if (region.type === 'focus_notch') {
                 text = 'Set focus radius';
