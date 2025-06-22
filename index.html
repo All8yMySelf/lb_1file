@@ -3680,7 +3680,11 @@ function beep(){
 
 function showEnemyIntelPopup(type,stats){
     const c=getElement("enemyIntelContent");
-    c.innerHTML=`<div>${type}</div><div>Speed: ${stats.speed}</div><div>Health: ${stats.health}</div><div>Pattern: ${stats.attack}</div>`;
+    let html=`<div>${type}</div><div>Speed: ${stats.speed}</div><div>Health: ${stats.health}</div><div>Pattern: ${stats.attack}</div>`;
+    if(type==='XP'){
+        html+=`<div>You need the Laser and Manual Targeting upgrades to hit this enemy. Click it before it escapes to double your fire rate for 20s.</div>`;
+    }
+    c.innerHTML=html;
     getElement("enemyIdentificationPopup").style.display="flex";
     beep();
 }
@@ -3692,7 +3696,9 @@ function hideEnemyIntelPopup(){
 
 function identifyEnemy(enemy){
     if(!enemyIntel.active||enemyIntel.known[enemy.type]) return;
-    enemyIntel.known[enemy.type]={speed:enemy.speed.toFixed(1),health:Math.round(enemy.maxHealth),attack:"Unknown"};
+    const baseStats={speed:enemy.speed.toFixed(1),health:Math.round(enemy.maxHealth),attack:"Unknown"};
+    if(enemy.type==="XP"){baseStats.attack="Flees";}
+    enemyIntel.known[enemy.type]=baseStats;
     enemyIntel.order.push(enemy.type);
     pauseGame();
     showEnemyIntelPopup(enemy.type,enemyIntel.known[enemy.type]);
