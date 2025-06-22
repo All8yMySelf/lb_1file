@@ -2850,6 +2850,33 @@ function drawGame() {
     // --- Draw Ring UI (Directly on Canvas) ---
     ringClickRegions = []; // Clear regions each frame
 
+    // Map visible range rings to descriptions for tooltips
+    const ringInfo = [
+        {radius: base.cannonRange, text: 'Cannon range'},
+        base.missileCount > 0 && base.missileTargetingRadius > 0 ?
+            {radius: base.missileTargetingRadius, text: 'Missile homing radius'} : null,
+        base.laserDamage > 0 && base.laserRange > 0 ?
+            {radius: base.laserRange, text: 'Laser range'} : null,
+        base.stunLevel > 0 && base.stunRadius > 0 ?
+            {radius: base.stunRadius, text: 'Stun radius'} : null,
+        base.focusRadiusSetting > 0 ?
+            {radius: base.cannonRange * base.focusRadiusSetting, text: 'Focused cannon radius'} : null,
+        base.sensorRange > base.cannonRange ?
+            {radius: base.sensorRange, text: 'Sensor range'} : null
+    ].filter(Boolean);
+
+    ringInfo.forEach(r => {
+        ringClickRegions.push({
+            type: 'radius_ring',
+            x: base.x - r.radius,
+            y: base.y - r.radius,
+            width: r.radius * 2,
+            height: r.radius * 2,
+            radius: r.radius,
+            text: r.text
+        });
+    });
+
     // --- Draw Collapsible Upgrade Categories ---
     const menuX = 10;
     let currentY = 60;
@@ -4006,8 +4033,14 @@ function showTooltipForCanvas(e) {
 
     let text = null;
     for (const region of ringClickRegions) {
-        if (x >= region.x && x <= region.x + (region.width||0) &&
-            y >= region.y && y <= region.y + (region.height||0)) {
+        if (region.type === 'radius_ring') {
+            const dist = Math.hypot(x - base.x, y - base.y);
+            if (Math.abs(dist - region.radius) <= 5) {
+                text = region.text;
+                break;
+            }
+        } else if (x >= region.x && x <= region.x + (region.width||0) &&
+                   y >= region.y && y <= region.y + (region.height||0)) {
             if (region.type === 'collapsible_upgrade_header') {
                 text = upgradeTree[region.categoryIndex].category;
             } else if (region.type === 'upgrade_button' || region.type === 'collapsible_upgrade_button') {
@@ -4156,7 +4189,14 @@ const tooltipTexts = {
   sensorDisplayToggle: 'Switch enemy info mode',
   fullscreenButton: 'Toggle fullscreen',
   muteButton: 'Mute sounds',
-  sendWaveButton: 'Send the next enemy wave'
+  sendWaveButton: 'Send the next enemy wave',
+  startButton: 'Begin a new game',
+  restartButton: 'Restart after game over',
+  loadButton: 'Load saved progress',
+  clearSaveButton: 'Delete saved progress',
+  startFromHighScore: 'Play starting from this score',
+  sensorWarningButton: 'Dismiss warning',
+  enemyIntelContinue: 'Close intel popup'
 };
 Object.entries(tooltipTexts).forEach(([id,text])=>{
   const el=getElement(id);
