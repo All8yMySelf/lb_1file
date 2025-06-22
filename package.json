@@ -1,0 +1,10 @@
+{
+  "name": "lb-1file",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node scripts/check-scripts.js"
+  },
+  "devDependencies": {
+    "acorn": "^8.11.3"
+  }
+}
