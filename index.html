@@ -778,6 +778,7 @@ const OVERLAY_METHODS = ['None','Canvas','CSS','Fog'];
 let overlayMode = 0;
 let fogCanvas = null, fogCtx = null;
 let cssOverlay = null, overlayButton = null;
+const UPGRADE_MASK_WIDTH = 600; // width of the left-side upgrade panel
 
 function cycleOverlay() {
     overlayMode = (overlayMode + 1) % OVERLAY_METHODS.length;
@@ -800,9 +801,19 @@ function applyOverlay(radius) {
             break;
         case 2:
             if (cssOverlay) {
-                const mask = `radial-gradient(circle at ${base.x}px ${base.y}px, transparent 0, transparent ${radius}px, black ${radius}px)`;
+                const radial = `radial-gradient(circle at ${base.x}px ${base.y}px, transparent 0, transparent ${radius}px, black ${radius}px)`;
+                const rect = 'linear-gradient(black, black)';
+                const mask = `${radial}, ${rect}`;
                 cssOverlay.style.maskImage = mask;
                 cssOverlay.style.webkitMaskImage = mask;
+                cssOverlay.style.maskSize = `100% 100%, ${UPGRADE_MASK_WIDTH}px 100%`;
+                cssOverlay.style.webkitMaskSize = `100% 100%, ${UPGRADE_MASK_WIDTH}px 100%`;
+                cssOverlay.style.maskPosition = `0 0, 0 0`;
+                cssOverlay.style.webkitMaskPosition = `0 0, 0 0`;
+                cssOverlay.style.maskRepeat = 'no-repeat, no-repeat';
+                cssOverlay.style.webkitMaskRepeat = 'no-repeat, no-repeat';
+                cssOverlay.style.maskComposite = 'subtract';
+                cssOverlay.style.webkitMaskComposite = 'xor';
             }
             break;
         case 3:
