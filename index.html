@@ -687,6 +687,7 @@ const UPGRADE_CANNON_FOCUS_RADIUS = 4;
 const UPGRADE_DEFENSE_HEALTH = 0;
 const UPGRADE_DEFENSE_MOVEMENT = 1;
 const UPGRADE_LASER_DAMAGE = 0; // Only one laser upgrade
+const UPGRADE_LASER_MANUAL = 1; // Manual laser targeting
 const UPGRADE_MISSILE_COUNT = 0;
 const UPGRADE_MISSILE_RANGE = 1;
 const UPGRADE_MISSILE_DAMAGE = 2;
@@ -765,6 +766,8 @@ let centerReturnStartTime = 0;
 
 // Ring UI Clickable Regions (calculated during draw)
 let ringClickRegions = [];
+
+let xpCardShown = false;
 
 // Cache width of the hotkeys panel for enemy stats alignment
 let hotkeysWidth = null;
@@ -885,6 +888,8 @@ function resetEnemy(enemy, config) {
     enemy.isStunned = config.st || false;
     enemy.stunTime = config.stunTime || 0;
     enemy.type = config.type || 'Normal';
+    enemy.xp = config.xp || false;
+    enemy.dir = config.dir || 1;
 
     enemy.isTargeted = false;
     enemy.targetLockTime = 0;
@@ -1145,6 +1150,23 @@ function spawnEnemy(isBoss = false) {
     gameState.enemiesSpawnedThisWave++;
 }
 
+function spawnXPEnemy() {
+    const y = base.y - canvasHeight / 2 + 40;
+    enemyPool.get({
+        x: base.x - canvasWidth / 2 - 30,
+        y,
+        c: '#00ffff',
+        s: 2,
+        h: 5,
+        m: 5,
+        r: 12,
+        C: 0,
+        xp: true,
+        dir: 1,
+        type: 'XP'
+    });
+}
+
 // --- UI & HUD Updates ---
 function showToast(message, duration = 2000) {
     const toast = getElement('toast');
@@ -1210,6 +1232,8 @@ function dismissSensorWarning() {
     gameState.waveStartTime = Date.now();
     gameState.waveElapsedTime = 0;
     gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+    gameState.xpEnemySpawned = false;
+    gameState.xpEnemySpawnTime = Math.random() * (gameState.waveDuration - 2);
     resumeGame();
     showToast('Wave timer started! Enemies approaching just outside your range.', 3000);
 }
@@ -1472,7 +1496,10 @@ function initializeGame(shouldTryLoad = true) {
         waveDuration: WAVE_BASE_DURATION,
         score: 0,
         enemiesKilled: 0,
-        autoFire: true
+        autoFire: true,
+        doubleFireRateEndTime: 0,
+        xpEnemySpawnTime: 0,
+        xpEnemySpawned: false
     };
 
     base = {
@@ -1485,6 +1512,7 @@ function initializeGame(shouldTryLoad = true) {
         laserDamage: 0, // Needs upgrade
         laserRange: 0, // Needs upgrade
         laserTargetX: 0, laserTargetY: 0, // For visual effect
+        manualTargeting: false,
         gunBarrelCount: 1,
         missileCount: 0, // Needs upgrade
         missileDamage: 0,
@@ -1580,7 +1608,10 @@ function initializeGame(shouldTryLoad = true) {
                       const nextDmg = level < maxLvl ? 15 * Math.pow(2, level) : currentDmg;
                       if (level === 0) return '(Activate)';
                       return `${currentDmg}${level < maxLvl ? ` > ${nextDmg}` : ''}`;
-                   }}
+                   }},
+                { name: 'Manual Targeting', cost: 2000, level: 0, maxLevel: 1,
+                  f: level => level,
+                  g: (level) => level > 0 ? 'Enabled' : 'Off' }
             ]
         },
         { // Category 3: Missiles
@@ -1884,6 +1915,14 @@ function updateEnemies(dt) {
         const enemy = enemies[i];
         const distToBase = Math.hypot(base.x - enemy.x, base.y - enemy.y);
 
+        if (enemy.xp) {
+            enemy.x += enemy.dir * enemy.speed * dtScaled;
+            if (enemy.x > base.x + canvasWidth / 2 - enemy.radius || enemy.x < base.x - canvasWidth / 2 + enemy.radius) {
+                enemy.dir *= -1;
+            }
+            continue; // Skip normal behaviour
+        }
+
         // Apply stun field effect
         if (base.stunLevel > 0 && distToBase <= base.stunRadius && !enemy.isStunned) {
             enemy.isStunned = true;
@@ -1954,6 +1993,15 @@ function spawnNewEnemies(dt) {
     const enemies = enemyPool.getActiveObjects();
     const dtScaled = dt * 60;
 
+    if (!gameState.xpEnemySpawned && elapsedTime >= gameState.xpEnemySpawnTime) {
+        spawnXPEnemy();
+        gameState.xpEnemySpawned = true;
+        if (!xpCardShown) {
+            showToast('XP Enemy spotted! Use Manual Laser to destroy.', 4000);
+            xpCardShown = true;
+        }
+    }
+
     // Boss spawning
     if (!gameState.isBossWave && elapsedTime >= gameState.waveDuration) {
         spawnEnemy(true); // Spawn the boss
@@ -1971,7 +2019,8 @@ function handlePlayerFiring(dt) {
     const enemies = enemyPool.getActiveObjects();
 
     // --- Bullet Firing ---
-    if (currentTime - gameState.lastBulletFireTime >= base.fireRate / gameSpeedMultiplier) { // Adjust fire rate by speed
+    const rate = base.fireRate / (currentTime < gameState.doubleFireRateEndTime ? 2 : 1);
+    if (currentTime - gameState.lastBulletFireTime >= rate / gameSpeedMultiplier) {
         // Find nearest enemy within cannon range
         let nearestEnemy = null;
         let minDistanceSq = base.cannonRange * base.cannonRange;
@@ -2066,7 +2115,7 @@ function handlePlayerFiring(dt) {
     if (base.laserDamage > 0 && currentTime - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
         // Target Fast or Boss enemies first within laser range
         const laserTarget = enemies.find(enemy =>
-            (enemy.type === 'Fast' || enemy.type === 'Boss') &&
+            !enemy.xp && (enemy.type === 'Fast' || enemy.type === 'Boss') &&
             Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.laserRange &&
             (!sensorUpgrades.targetAI || (enemy.health - (enemy.allocatedDamage||0) > 0))
         );
@@ -2211,6 +2260,8 @@ function checkCollisions(dt) {
         let bulletHit = false;
         for (let j = enemies.length - 1; j >= 0; j--) {
             const enemy = enemies[j];
+            if (enemy.xp) continue;
+            if (enemy.xp) continue;
             // Simple circle collision check
             const dx = bullet.x - enemy.x;
             const dy = bullet.y - enemy.y;
@@ -2305,6 +2356,8 @@ function checkWaveCompletion(dt) {
         gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
         gameState.waveStartTime = Date.now(); // Reset timer for next wave
         gameState.waveElapsedTime = 0;
+        gameState.xpEnemySpawned = false;
+        gameState.xpEnemySpawnTime = Math.random() * (gameState.waveDuration - 2);
         showToast(`Wave ${gameState.wave} started! +10% Health`, 3000);
         updateHUD();
         saveGame(); // Save at the end of a wave
@@ -2502,9 +2555,13 @@ function drawGame() {
             }
 
             ctx.fillStyle = enemy.color;
-            ctx.beginPath();
-            ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-            ctx.fill();
+            if (enemy.xp) {
+                ctx.fillRect(enemy.x - enemy.radius, enemy.y - enemy.radius, enemy.radius * 2, enemy.radius * 2);
+            } else {
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
             if (enemy.isStunned) {
                 ctx.strokeStyle = currentTheme.canvasColors.enemyStunEffect;
@@ -2518,9 +2575,13 @@ function drawGame() {
             grad.addColorStop(0, '#ffcc00');
             grad.addColorStop(1, '#ff6600');
             ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(enemy.x, enemy.y, 4, 0, Math.PI * 2);
-            ctx.fill();
+            if (enemy.xp) {
+                ctx.fillRect(enemy.x - 4, enemy.y - 4, 8, 8);
+            } else {
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
         const healthPercent = Math.max(0, enemy.health / enemy.maxHealth);
@@ -3151,6 +3212,12 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
             return;
         }
     }
+    if (categoryIndex === UPGRADE_CATEGORY_LASER && upgradeIndex === UPGRADE_LASER_MANUAL) {
+        if (upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level === 0) {
+            showToast("Requires Laser upgrade first!", 2500);
+            return;
+        }
+    }
 
     if (gameState.credits >= upgrade.cost && upgrade.level < upgrade.maxLevel) {
         gameState.credits -= upgrade.cost;
@@ -3220,6 +3287,8 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                  } else {
                      base.laserRange = 0; // Turn off if somehow level becomes 0
                  }
+             } else if (upgradeIndex === UPGRADE_LASER_MANUAL) {
+                 base.manualTargeting = level > 0;
              }
              break;
         case UPGRADE_CATEGORY_MISSILE:
@@ -3297,6 +3366,38 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
 
 
 // --- Special Actions ---
+function fireLaserAt(target) {
+    target.isTargeted = true;
+    target.targetLockTime = TARGET_LOCK_DURATION;
+    target.health -= base.laserDamage;
+    const now = Date.now();
+    gameState.lastLaserFireTime = now;
+    gameState.laserEffectEndTime = now + 200;
+    base.laserTargetX = target.x;
+    base.laserTargetY = target.y;
+    for (let i = 0; i < 5; i++) {
+        const t = i / 5;
+        createParticle(
+            base.x + (target.x - base.x) * t,
+            base.y + (target.y - base.y) * t,
+            currentTheme.canvasColors.laser, 1, 0.2, 3
+        );
+    }
+    if (target.health <= 0) {
+        gameState.credits += target.creditsValue;
+        gameState.score += target.creditsValue * 20;
+        gameState.enemiesKilled++;
+        createExplosion(target.x, target.y, target.color, 40, target.radius);
+        enemyPool.release(target);
+        if (target.xp) {
+            gameState.doubleFireRateEndTime = Date.now() + 20000;
+            showToast('Fire rate doubled!', 3000);
+        }
+        updateHUD();
+        updateUpgradeAvailabilityFlags();
+    }
+}
+
 function fireMacrossMissiles() {
     if (gameState.macrossCooldownTimer <= 0 && base.macrossMissileCount > 0) {
         const count = base.macrossMissileCount;
@@ -3627,6 +3728,14 @@ function handleCanvasClick(clientX, clientY) {
                 purchaseUpgrade(region.categoryIndex, region.upgradeIndex);
                 return; // Handle click and exit
             }
+        }
+    }
+
+    if (base.manualTargeting && base.laserDamage > 0 && Date.now() - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
+        const target = enemyPool.getActiveObjects().find(e => e.xp && Math.hypot(e.x - clickX, e.y - clickY) <= e.radius);
+        if (target) {
+            fireLaserAt(target);
+            return;
         }
     }
 
