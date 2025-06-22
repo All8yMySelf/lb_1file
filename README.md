@@ -8,7 +8,7 @@ Open `index.html` in any modern browser. The game will load immediately with no 
 
 ## About
 
-`index.html` now embeds the original `styles.css` and `themes.js` directly inside `<style>` and `<script>` tags. There are no external dependencies besides the Phaser library pulled from a CDN.
+`index.html` now embeds the original `styles.css` and `themes.js` directly inside `<style>` and `<script>` tags. There are no external dependencies beyond the Firebase scripts loaded from a CDN.
 
 The previous `css/` and `js/` folders have been removed as part of the single-file challenge.
 
