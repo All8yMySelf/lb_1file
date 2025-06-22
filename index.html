@@ -154,6 +154,9 @@
   @keyframes slowBlink { 50% { opacity: 0; } }
   .sub-message { margin-bottom: 1rem; color: var(--button-text); }
   .overlay-desaturate { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: grayscale(1); pointer-events: none; z-index: 99; }
+  #enemyStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; }
+  #enemyStatsPanel.collapsed #enemyStatsContent { display: none; }
+  #enemyStatsHeader { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -1061,7 +1064,6 @@ function spawnEnemy(isBoss = false) {
         stunTime: 0,
         type: isBoss ? 'Boss' : (enemyTypeIndex === ENEMY_TYPE_TANK ? 'Tank' : (enemyTypeIndex === ENEMY_TYPE_FAST ? 'Fast' : 'Normal'))
     });
-    identifyEnemy(enemy);
     gameState.enemiesSpawnedThisWave++;
 }
 
@@ -1796,6 +1798,9 @@ function updateEnemies(dt) {
     lastBaseX = base.x;
     lastBaseY = base.y;
 
+    let closest = null;
+    let closestDist = Infinity;
+    const detectionRange = Math.max(base.cannonRange, base.missileTargetingRadius, base.laserRange, base.sensorRange, base.stunRadius);
     for (let i = enemies.length - 1; i >= 0; i--) {
         const enemy = enemies[i];
         const distToBase = Math.hypot(base.x - enemy.x, base.y - enemy.y);
@@ -1838,6 +1843,12 @@ function updateEnemies(dt) {
             enemy.trail = [];
         }
 
+        // Mark candidate for enemy identification
+        if(enemyIntel.active && !enemyIntel.known[enemy.type] && distToBase <= detectionRange && distToBase < closestDist){
+            closest = enemy;
+            closestDist = distToBase;
+        }
+
         // Check collision with base
         if (distToBase < base.radius + enemy.radius) {
             gameState.currentHealth -= enemy.type === 'Fast' ? Math.ceil(gameState.maxHealth * 0.25) : enemy.radius; // Fast enemies do % damage
@@ -1852,6 +1863,8 @@ function updateEnemies(dt) {
             continue; // Skip rest of loop for this enemy
         }
     }
+
+    if(closest) identifyEnemy(closest);
     return baseMovedDuringUpdate;
 }
 
@@ -3122,7 +3135,7 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                 case UPGRADE_SENSOR_OUTLINES:
                     sensorUpgrades.enemyVisuals = level > 0;
                     enemyIntel.active = level > 0;
-                    if(level===1 && isNewPurchase){ enemyIntel.known = {}; enemyIntel.order = []; }
+                    if(level===1 && isNewPurchase){ enemyIntel.known = {}; enemyIntel.order = []; identifyClosestEnemyInRange(); }
                     break;
                 case UPGRADE_SENSOR_HEALTHBARS:
                     sensorUpgrades.showHealthBars = level > 0;
@@ -3314,6 +3327,20 @@ function identifyEnemy(enemy){
     enemyIntel.order.push(enemy.type);
     pauseGame();
     showEnemyIntelPopup(enemy.type,enemyIntel.known[enemy.type]);
+}
+
+function identifyClosestEnemyInRange(){
+    if(!enemyIntel.active) return;
+    const enemies = enemyPool.getActiveObjects();
+    const range = Math.max(base.cannonRange, base.missileTargetingRadius, base.laserRange, base.sensorRange, base.stunRadius);
+    let closest=null,dist=Infinity;
+    enemies.forEach(e=>{
+        if(!enemyIntel.known[e.type]){
+            const d=Math.hypot(base.x-e.x,base.y-e.y);
+            if(d<=range && d<dist){closest=e;dist=d;}
+        }
+    });
+    if(closest) identifyEnemy(closest);
 }
 
 
