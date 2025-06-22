@@ -709,6 +709,8 @@ let DEBUG_MODE = false; // Set to true to enable verbose logging
 let lastBaseX = 0;
 let lastBaseY = 0;
 let pendingScore = null; // Store score awaiting initials
+let isDeathSequence = false; // True during slow-motion before game over
+let deathSequenceStartTime = 0;
 
 // Dragging State
 let isDragging = false;
@@ -1584,8 +1586,17 @@ function startGame() {
     showSensorWarning();
 }
 
+function startDeathSequence() {
+    if (!isDeathSequence) {
+        isDeathSequence = true;
+        deathSequenceStartTime = Date.now();
+    }
+}
+
 function gameOver() {
     isGameRunning = 0;
+    isDeathSequence = false;
+    deathSequenceStartTime = 0;
     cancelAnimationFrame(animationFrameId);
     if (autoSaveTimer) clearInterval(autoSaveTimer);
     gameSpeedMultiplier = 1;
@@ -1633,14 +1644,25 @@ function gameLoop(timestamp) {
     lastTime = timestamp;
 
     if (isGameRunning) {
+        if (isDeathSequence) {
+            gameSpeedMultiplier = 0.2;
+        }
+
         updateGame(deltaTime); // Update game state
         drawGame(); // Draw game elements
         updateHUD(); // Update UI text
 
-        if (gameState.currentHealth > 0) {
+        if (isDeathSequence) {
+            if (Date.now() - deathSequenceStartTime >= 1500) {
+                gameOver();
+            } else {
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+        } else if (gameState.currentHealth > 0) {
             animationFrameId = requestAnimationFrame(gameLoop);
         } else {
-            gameOver();
+            startDeathSequence();
+            animationFrameId = requestAnimationFrame(gameLoop);
         }
     }
 }
@@ -1786,7 +1808,7 @@ function updateEnemies(dt) {
             updateHUD(); // Update health display immediately
             enemyPool.release(enemy);
             if (gameState.currentHealth <= 0) {
-                 gameOver(); // End game immediately if base destroyed
+                 startDeathSequence(); // Begin slow-motion before game over
                  return baseMovedDuringUpdate; // Exit early
             }
             continue; // Skip rest of loop for this enemy
