@@ -907,6 +907,8 @@ function resetEnemy(enemy, config) {
     enemy.xp = config.xp || false;
     enemy.dir = config.dir || 1;
     enemy.wave = config.wave || 0;
+    enemy.dx = config.dx || 0;
+    enemy.dy = config.dy || 0;
 
     enemy.isTargeted = false;
     enemy.targetLockTime = 0;
@@ -1173,9 +1175,15 @@ function spawnEnemy(isBoss = false) {
 }
 
 function spawnXPEnemy() {
-    const y = base.y - canvasHeight / 2 + 40;
+    const padding = 50;
+    const angle = Math.random() * Math.PI * 2;
+    const spawnRadius = Math.max(canvasWidth, canvasHeight) / 2 + padding;
+    const x = base.x + Math.cos(angle) * spawnRadius;
+    const y = base.y + Math.sin(angle) * spawnRadius;
+    const dx = -Math.cos(angle);
+    const dy = -Math.sin(angle);
     enemyPool.get({
-        x: base.x - canvasWidth / 2 - 30,
+        x,
         y,
         c: '#00ffff',
         s: 2,
@@ -1184,7 +1192,8 @@ function spawnXPEnemy() {
         r: 12,
         C: 0,
         xp: true,
-        dir: 1,
+        dx,
+        dy,
         type: 'XP',
         wave: gameState.wave
     });
@@ -1955,9 +1964,13 @@ function updateEnemies(dt) {
         const distToBase = Math.hypot(base.x - enemy.x, base.y - enemy.y);
 
         if (enemy.xp) {
-            enemy.x += enemy.dir * enemy.speed * dtScaled;
-            if (enemy.x > base.x + canvasWidth / 2 - enemy.radius || enemy.x < base.x - canvasWidth / 2 + enemy.radius) {
-                enemy.dir *= -1;
+            enemy.x += enemy.dx * enemy.speed * dtScaled;
+            enemy.y += enemy.dy * enemy.speed * dtScaled;
+            const offScreen = Math.max(canvasWidth, canvasHeight) / 2 + 60;
+            if (enemy.x < base.x - offScreen || enemy.x > base.x + offScreen ||
+                enemy.y < base.y - offScreen || enemy.y > base.y + offScreen) {
+                enemyPool.release(enemy);
+                continue;
             }
             continue; // Skip normal behaviour
         }
@@ -2007,7 +2020,7 @@ function updateEnemies(dt) {
         }
 
         // Check collision with base
-        if (distToBase < base.radius + enemy.radius) {
+        if (!enemy.xp && distToBase < base.radius + enemy.radius) {
             gameState.currentHealth -= enemy.type === 'Fast' ? Math.ceil(gameState.maxHealth * 0.25) : enemy.radius; // Fast enemies do % damage
             gameState.lastDamageTime = Date.now();
             createExplosion(enemy.x, enemy.y, enemy.color, 20, enemy.radius);
