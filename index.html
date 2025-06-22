@@ -147,6 +147,7 @@
         <button id="sensorDisplayToggle">Hud</button>
     </div>
     <button id="fullscreenButton">&#x26F6;</button>
+    <button id="muteButton">&#128266;</button>
 </div>
 <div id="hotkeys" class="show">
     <div>H: Show/Hide Hotkeys</div>
@@ -665,6 +666,7 @@ const SPEED_STEPS = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.5,2,3,4,5,6,7,8,9,1
 let speedIndex = SPEED_STEPS.indexOf(1);
 let gameSpeedMultiplier = SPEED_STEPS[speedIndex];
 let isGameRunning = false;
+let isMuted = localStorage.getItem('ode_isMuted') === 'true';
 let animationFrameId = null;
 let savedGame = null; // Stores loaded game state
 let autoSaveTimer = null;
@@ -1012,6 +1014,14 @@ function showToast(message, duration = 2000) {
     setTimeout(() => {
         toast.classList.remove('show');
     }, duration);
+}
+
+function playSound(audio) {
+    if (isMuted) return;
+    if (audio && typeof audio.play === 'function') {
+        audio.currentTime = 0;
+        audio.play();
+    }
 }
 
 function renderScoreList(id, scores) {
@@ -3094,6 +3104,13 @@ function handleFullscreenChange() {
     drawGame();
 }
 
+function toggleMute() {
+    isMuted = !isMuted;
+    localStorage.setItem('ode_isMuted', isMuted);
+    const btn = getElement('muteButton');
+    btn.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
+}
+
 function updateEnemyHUD(info) {
     const hud = getElement('enemyHUD');
     if (sensorDisplayMode !== 'hud') { hud.classList.remove('show'); return; }
@@ -3349,6 +3366,7 @@ getElement('initialsInput').addEventListener('input', e => {
 });
 getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
 getElement('fullscreenButton').onclick = toggleFullScreen;
+getElement('muteButton').onclick = toggleMute;
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
 
@@ -3441,6 +3459,12 @@ function loadAndStartGame() {
     const savedTheme = localStorage.getItem('orbitalDefenseTheme_v2.9');
     const savedThemeIndex = savedTheme !== null ? parseInt(savedTheme, 10) : 0;
     applyTheme(savedThemeIndex); // Apply saved or default theme
+
+    // Set mute button state
+    const muteBtn = getElement('muteButton');
+    if (muteBtn) {
+      muteBtn.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
+    }
 
 
 
