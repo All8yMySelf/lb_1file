@@ -1,5 +1,8 @@
 # Orbital Defence Elite - Change Log
 
+## v2.41
+- XP enemy despawns instantly when a boss is destroyed.
+
 ## v2.40
 - Leaderboard ranking formula updated to `wave * 100000 - time`.
 - Leaderboard now only stores the top 10 scores.
