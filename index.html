@@ -169,6 +169,17 @@
   #xpStatsHeader .arrow { margin-left: 4px; }
   .timer-blink { animation: timerBlink 1s steps(2,end) infinite; }
   @keyframes timerBlink { 50% { opacity: 0; } }
+  #tooltip {
+    position: absolute;
+    background: var(--toast-bg);
+    color: var(--toast-text);
+    padding: 4px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+    display: none;
+    font-size: 12px;
+    z-index: 100;
+  }
 
 </style>
 </head>
@@ -241,6 +252,7 @@
 </div>
 <div id="enemyIdentificationPopup" style="display:none"><div class="card"><h2>Enemy Identified</h2><div id="enemyIntelContent"></div><button id="enemyIntelContinue">Continue</button></div></div>
 <div id="toast"></div>
+<div id="tooltip"></div>
 <!-- Removed shipSprite image as it wasn't used -->
 
 <script>
@@ -678,7 +690,8 @@ const UPGRADE_CATEGORY_LASER = 2;
 const UPGRADE_CATEGORY_MISSILE = 3;
 const UPGRADE_CATEGORY_SPECIAL = 4;
 const UPGRADE_CATEGORY_SENSORS = 5;
-const UPGRADE_CATEGORY_DEBUG = 6;
+const UPGRADE_CATEGORY_INFO = 6;
+const UPGRADE_CATEGORY_DEBUG = 7;
 
 // Specific Upgrade Indices (within category)
 const UPGRADE_CANNON_FIRERATE = 0;
@@ -700,6 +713,8 @@ const UPGRADE_SENSOR_RANGE = 0;
 const UPGRADE_SENSOR_OUTLINES = 1;
 const UPGRADE_SENSOR_HEALTHBARS = 2;
 const UPGRADE_SENSOR_TARGET_AI = 3;
+// Info mode upgrade moved to its own category
+const UPGRADE_INFO_HELP = 0;
 
 // Enemy types: [color, speed, health, radius, credits]
 const ENEMY_TYPES = [
@@ -770,6 +785,7 @@ let centerReturnStartTime = 0;
 let ringClickRegions = [];
 
 let xpCardShown = false;
+let infoModeActive = false;
 
 // Track which waves are currently active and whether their bosses live
 let activeWaves = [];
@@ -1005,6 +1021,7 @@ function getCategoryColor(index){
         case UPGRADE_CATEGORY_MISSILE: return currentTheme.canvasColors.ringMissile;
         case UPGRADE_CATEGORY_SPECIAL: return currentTheme.canvasColors.ringStun;
         case UPGRADE_CATEGORY_SENSORS: return currentTheme.canvasColors.ringSensor || currentTheme.canvasColors.ringCannon;
+        case UPGRADE_CATEGORY_INFO: return currentTheme.canvasColors.ringSensor || currentTheme.canvasColors.ringCannon;
         default: return currentTheme.canvasColors.ringCannon;
     }
 }
@@ -1200,6 +1217,15 @@ function showToast(message, duration = 2000) {
 }
 window.showToast = showToast;
 
+const tooltip = getElement('tooltip');
+function showTooltip(text, x, y) {
+    tooltip.textContent = text;
+    tooltip.style.left = x + 10 + 'px';
+    tooltip.style.top = y + 10 + 'px';
+    tooltip.style.display = 'block';
+}
+function hideTooltip() { tooltip.style.display = 'none'; }
+
 function playSound(audio) {
     if (isMuted) return;
     if (audio && typeof audio.play === 'function') {
@@ -1341,6 +1367,7 @@ function resumeGame() {
     if (autoSaveTimer) clearInterval(autoSaveTimer);
     autoSaveTimer = setInterval(() => { if (isGameRunning) saveGame(); }, AUTO_SAVE_INTERVAL);
     getElement('playPauseButton').textContent = '\u23F8';
+    hideTooltip();
 }
 
 // --- Game State Management ---
@@ -1733,7 +1760,16 @@ function initializeGame(shouldTryLoad = true) {
                   g: (level) => level > 0 ? 'Active' : '(Install)' }
             ]
         },
-        { // Category 6: Debug
+        { // Category 6: Info
+            category: "Info / How To Play",
+            expanded: false,
+            upgrades: [
+                { name: 'Info / How To Play', cost: 0, level: 0, maxLevel: 1,
+                  f: level => level,
+                  g: level => level ? 'Active' : '(Start)' }
+            ]
+        },
+        { // Category 7: Debug
             category: "Debug",
             expanded: false,
             upgrades: [
@@ -3509,6 +3545,18 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     break;
             }
             break;
+        case UPGRADE_CATEGORY_INFO:
+            if (upgradeIndex === UPGRADE_INFO_HELP) {
+                infoModeActive = !infoModeActive;
+                upgrade.level = infoModeActive ? 1 : 0;
+                if (infoModeActive) {
+                    pauseGame();
+                } else {
+                    resumeGame();
+                }
+                drawGame();
+            }
+            break;
     }
 }
 
@@ -3893,7 +3941,7 @@ function handleDragEnd() {
 
 // Canvas Click (handles base click for menu, ring UI clicks)
 function handleCanvasClick(clientX, clientY) {
-    if (!isGameRunning) return;
+    if (!isGameRunning && !infoModeActive) return;
 
     const rect = canvas.getBoundingClientRect();
     const clickX = clientX - rect.left;
@@ -3942,6 +3990,36 @@ function handleCanvasClick(clientX, clientY) {
     // Removed base click to open full-screen upgrade menu
 }
 
+function showTooltipForCanvas(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    let text = null;
+    for (const region of ringClickRegions) {
+        if (x >= region.x && x <= region.x + (region.width||0) &&
+            y >= region.y && y <= region.y + (region.height||0)) {
+            if (region.type === 'collapsible_upgrade_header') {
+                text = upgradeTree[region.categoryIndex].category;
+            } else if (region.type === 'upgrade_button' || region.type === 'collapsible_upgrade_button') {
+                const up = upgradeTree[region.categoryIndex].upgrades[region.upgradeIndex];
+                if (region.categoryIndex === UPGRADE_CATEGORY_INFO && region.upgradeIndex === UPGRADE_INFO_HELP) {
+                    text = 'Hover over elements for tips. Click again or press Play to resume.';
+                } else {
+                    text = up.name + ': ' + up.g(up.level, up.cost, up.maxLevel);
+                }
+            } else if (region.type === 'focus_notch') {
+                text = 'Set focus radius';
+            }
+            break;
+        }
+    }
+    if (!text && Math.hypot(x - base.x, y - base.y) <= base.radius) {
+        text = 'Your base. Drag to move. Click upgrades.';
+    }
+    if (text) showTooltip(text, e.pageX, e.pageY); else hideTooltip();
+}
+
 
 // Attach Specific Event Listeners
 canvas.addEventListener('mousedown', e => {
@@ -3951,6 +4029,9 @@ canvas.addEventListener('mousedown', e => {
 });
 window.addEventListener('mousemove', e => {
     handleDragMove(e.clientX, e.clientY);
+    if (infoModeActive) {
+        showTooltipForCanvas(e);
+    }
 });
 window.addEventListener('mouseup', e => {
      if(e.button === 0) {
@@ -4010,7 +4091,15 @@ getElement("enemyIntelContinue").onclick=hideEnemyIntelPopup;
 getElement("enemyStatsHeader").onclick=toggleEnemyStatsPanel;
 getElement("xpStatsHeader").onclick=toggleXPStatsPanel;
 getElement('playPauseButton').onclick = () => {
-    if (isGameRunning) pauseGame(); else resumeGame();
+    if (infoModeActive) {
+        infoModeActive = false;
+        const infoUpgrade = upgradeTree[UPGRADE_CATEGORY_INFO].upgrades[UPGRADE_INFO_HELP];
+        infoUpgrade.level = 0;
+        resumeGame();
+        drawGame();
+    } else {
+        if (isGameRunning) pauseGame(); else resumeGame();
+    }
 };
 getElement('slowDownButton').onclick = () => {
     if (!isGameRunning) return;
@@ -4047,6 +4136,27 @@ getElement('muteButton').onclick = toggleMute;
 getElement('sendWaveButton').onclick = sendNextWave;
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+const tooltipTexts = {
+  playPauseButton: 'Play or pause the game',
+  slowDownButton: 'Slow down game speed',
+  speedUpButton: 'Speed up game speed',
+  macrossButton: 'Fire all missiles',
+  toggleInfoButton: 'Toggle ring info text',
+  themeButton: 'Change visual theme',
+  sensorDisplayToggle: 'Switch enemy info mode',
+  fullscreenButton: 'Toggle fullscreen',
+  muteButton: 'Mute sounds',
+  sendWaveButton: 'Send the next enemy wave'
+};
+Object.entries(tooltipTexts).forEach(([id,text])=>{
+  const el=getElement(id);
+  if(!el) return;
+  ['mouseenter','mousemove'].forEach(evt=>{
+    el.addEventListener(evt,e=>{ if(infoModeActive) showTooltip(text,e.pageX,e.pageY); });
+  });
+  el.addEventListener('mouseleave', hideTooltip);
+});
 
 // Window Resize
 window.addEventListener('resize', () => {
