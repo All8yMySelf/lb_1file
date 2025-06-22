@@ -3250,8 +3250,8 @@ function updateEnemyHUD(info) {
 
     const lines = [];
     if (!sensorUpgrades.enemyVisuals) {
-        lines.push('<div>Enemies not identified</div>');
-        lines.push('<div>Upgrade the Sensor Array</div>');
+        lines.push('Enemies not identified');
+        lines.push('Upgrade the Sensor Array');
     } else {
         let count = 0;
         for (const type in info) {
@@ -3259,11 +3259,16 @@ function updateEnemyHUD(info) {
             let line = `${type.padEnd(7)}| Speed: ${d.speed}`;
             if (sensorUpgrades.showHealthBars) line += ` | HP: ${d.health}/${d.max}`;
             line += ` | Size: ${d.size}`;
-            lines.push(`<div>${line}</div>`);
+            lines.push(line);
             if (++count >= 10) break;
         }
     }
-    hud.innerHTML = lines.join('');
+    hud.innerHTML = '';
+    lines.forEach(text => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        hud.appendChild(div);
+    });
     hud.classList.add('show');
 }
 function updateEnemyStatsPanel(){
