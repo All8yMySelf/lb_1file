@@ -85,14 +85,18 @@
   // 4) renderLeaderboard populates #leaderboard element with 10 rows
   window.renderLeaderboard = scores => {
     const container = document.getElementById("leaderboard");
-    container.innerHTML = "";
+    container.textContent = "";
     for (let i = 0; i < 10; i++) {
       const row = scores[i]
         ? `${scores[i].initials} - Wave ${scores[i].wave} (${scores[i].time}s left) - ${scores[i].date}`
         : "&nbsp;";
       const div = document.createElement("div");
       div.className = "leaderboard-row";
-      div.innerHTML = `<span class="rank">${i + 1}.</span> ${row}`;
+      const rankSpan = document.createElement("span");
+      rankSpan.className = "rank";
+      rankSpan.textContent = `${i + 1}.`;
+      div.appendChild(rankSpan);
+      div.appendChild(document.createTextNode(" " + (row === "&nbsp;" ? "\u00A0" : row)));
       container.appendChild(div);
     }
     document.getElementById("leaderboardLoading").style.display = "none";
@@ -1064,7 +1068,7 @@ function playSound(audio) {
 
 function renderScoreList(id, scores) {
     const list = getElement(id);
-    list.innerHTML = '';
+    list.textContent = '';
     if (scores.length === 0) {
         const li = document.createElement('li');
         li.textContent = 'No scores yet';
@@ -1076,7 +1080,11 @@ function renderScoreList(id, scores) {
         const entry = scores[i]
             ? `${scores[i].initials} - Wave ${scores[i].wave} (${scores[i].time ?? 0}s left) - ${scores[i].date}`
             : "&nbsp;";
-        li.innerHTML = `<span class="rank">${i + 1}.</span> ${entry}`;
+        const rankSpan = document.createElement('span');
+        rankSpan.className = 'rank';
+        rankSpan.textContent = `${i + 1}.`;
+        li.appendChild(rankSpan);
+        li.appendChild(document.createTextNode(' ' + (entry === "&nbsp;" ? "\u00A0" : entry)));
         list.appendChild(li);
     }
 }
@@ -1107,7 +1115,7 @@ function dismissSensorWarning() {
 }
 
 async function submitInitials() {
-    let initials = getElement('initialsInput').value.toUpperCase();
+    let initials = getElement('initialsInput').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (initials.length === 2) initials += '_';
     if (initials.length < 2) return;
     if (!pendingScore) return;
@@ -3472,7 +3480,7 @@ getElement('initialsInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitInitials();
 });
 getElement('initialsInput').addEventListener('input', e => {
-    e.target.value = e.target.value.toUpperCase();
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (e.target.value.length >= 3) submitInitials();
 });
 getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
