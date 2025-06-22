@@ -2124,6 +2124,7 @@ function handlePlayerFiring(dt) {
         let minDistanceSq = base.cannonRange * base.cannonRange;
 
         enemies.forEach(enemy => {
+            if (enemy.xp) return;
             const dx = enemy.x - base.x;
             const dy = enemy.y - base.y;
             const distSq = dx * dx + dy * dy;
@@ -2136,6 +2137,7 @@ function handlePlayerFiring(dt) {
         if (nearestEnemy && (gameState.autoFire || keysPressed[' '])) {
             let targets = enemies
                 .filter(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange)
+                .filter(e => !e.xp)
                 .filter(e => !sensorUpgrades.targetAI || (e.health - (e.allocatedDamage||0) > 0))
                 .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
             const bigThreat = targets.find(e => e.radius >= 20 && Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * 0.5);
@@ -2177,6 +2179,7 @@ function handlePlayerFiring(dt) {
     if (base.missileCount > 0 && currentTime - gameState.lastMissileFireTime >= MISSILE_FIRE_INTERVAL / gameSpeedMultiplier) {
         let targets = enemies
             .filter(enemy => Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.missileTargetingRadius)
+            .filter(enemy => !enemy.xp)
             .filter(e => !sensorUpgrades.targetAI || (e.health - (e.allocatedDamage||0) > 0))
             .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y))
             .slice(0, base.missileCount); // Fire up to missileCount missiles
@@ -3978,7 +3981,11 @@ function handleCanvasClick(clientX, clientY) {
     }
 
     if (base.manualTargeting && base.laserDamage > 0 && Date.now() - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
-        const target = enemyPool.getActiveObjects().find(e => e.xp && Math.hypot(e.x - clickX, e.y - clickY) <= e.radius);
+        const target = enemyPool.getActiveObjects().find(e =>
+            e.xp &&
+            clickX >= e.x - e.radius && clickX <= e.x + e.radius &&
+            clickY >= e.y - e.radius && clickY <= e.y + e.radius
+        );
         if (target) {
             fireLaserAt(target);
             return;
