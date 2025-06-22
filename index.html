@@ -729,7 +729,7 @@ let autoSaveTimer = null;
 let DEBUG_MODE = false; // Set to true to enable verbose logging
 let lastBaseX = 0;
 let lastBaseY = 0;
-let pendingScore = null; // Store score awaiting initials
+window.pendingScore = null; // Store score awaiting initials
 let isDeathSequence = false; // True during slow-motion before game over
 let deathSequenceStartTime = 0;
 
@@ -1137,13 +1137,13 @@ async function submitInitials() {
     let initials = getElement('initialsInput').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (initials.length === 2) initials += '_';
     if (initials.length < 2) return;
-    if (!pendingScore) return;
-    const { wave, time, ranking } = pendingScore;
+    if (!window.pendingScore) return;
+    const { wave, time, ranking } = window.pendingScore;
     try {
         await submitScore({ initials, wave, time, ranking });
         showToast('Score submitted!');
         getElement('initialsInput').style.display = 'none';
-        pendingScore.saved = true;
+        window.pendingScore.saved = true;
         const scores = await getTopScores();
         const index = scores.findIndex(s => s.ranking === ranking && s.initials === initials);
         renderScoreList('gameOverScoreList', scores, index);
@@ -1598,7 +1598,7 @@ function initializeGame(shouldTryLoad = true) {
 }
 
 function startGame() {
-    pendingScore = null;
+    window.pendingScore = null;
     unlistenLeaderboard();
     initializeGame(true); // Initialize with saved game check
     getElement('startScreen').style.display = 'none';
@@ -1639,7 +1639,7 @@ function gameOver() {
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
     const remainingTime = Math.floor(Math.max(0, gameState.waveDuration - gameState.waveElapsedTime));
     const playerRank = gameState.wave * 100000 - remainingTime;
-    pendingScore = { wave: gameState.wave, time: remainingTime, ranking: playerRank, saved: false };
+    window.pendingScore = { wave: gameState.wave, time: remainingTime, ranking: playerRank, saved: false };
     getTopScores().then(scores => {
         let index = scores.findIndex(s => playerRank > s.ranking);
         if (index === -1 && scores.length < 10) index = scores.length;
@@ -1669,7 +1669,7 @@ function gameOver() {
             ];
             getElement('initialsInput').style.display = 'none';
             getElement('cheekyMessage').textContent = phrases[Math.floor(Math.random()*phrases.length)];
-            pendingScore.saved = true; // No need to save if not top 10
+            window.pendingScore.saved = true; // No need to save if not top 10
         }
     });
     saveGame(); // Save final state on game over
@@ -3525,13 +3525,13 @@ window.addEventListener('touchend', e => {
 // UI Button Listeners
 getElement('startButton').onclick = startGame;
 getElement('restartButton').onclick = async () => {
-    if (pendingScore && !pendingScore.saved) {
+    if (window.pendingScore && !window.pendingScore.saved) {
         try {
-            await submitScore({ initials: '???', wave: pendingScore.wave, time: pendingScore.time, ranking: pendingScore.ranking });
+            await submitScore({ initials: '???', wave: window.pendingScore.wave, time: window.pendingScore.time, ranking: window.pendingScore.ranking });
         } catch (err) {
             console.error('Auto-save failed', err);
         }
-        pendingScore.saved = true;
+        window.pendingScore.saved = true;
     }
     startGame();
 };
