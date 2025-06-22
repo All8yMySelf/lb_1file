@@ -89,7 +89,7 @@
     for (let i = 0; i < 10; i++) {
       const row = scores[i]
         ? `${scores[i].initials} - Wave ${scores[i].wave} (${scores[i].time}s left) - ${scores[i].date}`
-        : "&nbsp;";
+        : "---";
       const div = document.createElement("div");
       div.className = "leaderboard-row";
       div.innerHTML = `<span class="rank">${i + 1}.</span> ${row}`;
@@ -1080,13 +1080,12 @@ function renderScoreList(id, scores, highlightIndex = -1) {
         const li = document.createElement('li');
         li.textContent = 'No scores yet';
         list.appendChild(li);
-        return;
     }
     for (let i = 0; i < 10; i++) {
         const li = document.createElement('li');
         const entry = scores[i]
             ? `${scores[i].initials} - Wave ${scores[i].wave} (${scores[i].time ?? 0}s left) - ${scores[i].date}`
-            : "&nbsp;";
+            : "---";
         li.innerHTML = `<span class="rank">${i + 1}.</span> ${entry}`;
         if (i === highlightIndex) li.classList.add('highlight');
         list.appendChild(li);
