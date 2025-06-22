@@ -671,6 +671,7 @@ let autoSaveTimer = null;
 let DEBUG_MODE = false; // Set to true to enable verbose logging
 let lastBaseX = 0;
 let lastBaseY = 0;
+let pendingScore = null; // Store score awaiting initials
 
 // Dragging State
 let isDragging = false;
@@ -1057,20 +1058,28 @@ function dismissSensorWarning() {
     showToast('Wave timer started! Enemies approaching just outside your range.', 3000);
 }
 
-function submitInitials() {
+async function submitInitials() {
     let initials = getElement('initialsInput').value.toUpperCase();
     if (initials.length === 2) initials += '_';
     if (initials.length < 2) return;
-    const remainingTime = Math.floor(Math.max(0, gameState.waveDuration - gameState.waveElapsedTime));
-    const ranking = gameState.wave * 100000 - remainingTime;
-    submitScore({ initials, wave: gameState.wave, time: remainingTime, ranking }).then(() => {
+    if (!pendingScore) return;
+    const { wave, time, ranking } = pendingScore;
+    try {
+        await submitScore({ initials, wave, time, ranking });
         showToast('Score submitted!');
         getElement('initialsInput').style.display = 'none';
-        getTopScores().then(scores => renderScoreList('gameOverScoreList', scores));
-    }).catch(err => {
+        pendingScore.saved = true;
+        const scores = await getTopScores();
+        renderScoreList('gameOverScoreList', scores);
+        const refreshed = await getTopScores();
+        const position = refreshed.findIndex(s => s.ranking === ranking) + 1;
+        if (position > 0) {
+            getElement('cheekyMessage').textContent = `You placed #${position}!`;
+        }
+    } catch (err) {
         console.error('Failed to submit score', err);
         showToast('Error saving score', 3000);
-    });
+    }
 }
 
 function updateHUD() {
@@ -1499,6 +1508,7 @@ function initializeGame(shouldTryLoad = true) {
 }
 
 function startGame() {
+    pendingScore = null;
     unlistenLeaderboard();
     initializeGame(true); // Initialize with saved game check
     getElement('startScreen').style.display = 'none';
@@ -1528,12 +1538,13 @@ function gameOver() {
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
     const remainingTime = Math.floor(Math.max(0, gameState.waveDuration - gameState.waveElapsedTime));
     const playerRank = gameState.wave * 100000 - remainingTime;
+    pendingScore = { wave: gameState.wave, time: remainingTime, ranking: playerRank, saved: false };
     getTopScores().then(scores => {
         renderScoreList('gameOverScoreList', scores);
         const qualifies = scores.length < 10 || playerRank > scores[scores.length - 1].ranking;
         if (qualifies) {
             getElement('initialsInput').style.display = 'block';
-            getElement('cheekyMessage').textContent = '';
+            getElement('cheekyMessage').textContent = 'Hey, you scored in the top 10! Please enter your initials.';
             getElement('initialsInput').focus();
         } else {
             const phrases = [
@@ -1550,6 +1561,7 @@ function gameOver() {
             ];
             getElement('initialsInput').style.display = 'none';
             getElement('cheekyMessage').textContent = phrases[Math.floor(Math.random()*phrases.length)];
+            pendingScore.saved = true; // No need to save if not top 10
         }
     });
     saveGame(); // Save final state on game over
@@ -3314,7 +3326,17 @@ window.addEventListener('touchend', e => {
 
 // UI Button Listeners
 getElement('startButton').onclick = startGame;
-getElement('restartButton').onclick = startGame; // Restart calls startGame to reinitialize
+getElement('restartButton').onclick = async () => {
+    if (pendingScore && !pendingScore.saved) {
+        try {
+            await submitScore({ initials: '???', wave: pendingScore.wave, time: pendingScore.time, ranking: pendingScore.ranking });
+        } catch (err) {
+            console.error('Auto-save failed', err);
+        }
+        pendingScore.saved = true;
+    }
+    startGame();
+};
 getElement('sensorWarningButton').onclick = dismissSensorWarning;
 getElement('playPauseButton').onclick = () => {
     if (isGameRunning) pauseGame(); else resumeGame();
