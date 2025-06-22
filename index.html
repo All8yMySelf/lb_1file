@@ -40,25 +40,39 @@
   // 3) getTopScores reads top 10 by ranking, sorts desc, returns array
   window.getTopScores = async function() {
     const q = query(ref(db, "scores"), orderByChild("ranking"), limitToLast(10));
-    const snap = await get(q);
-    const list = [];
-    snap.forEach(child => {
-      list.push(child.val());
-    });
-    list.sort((a, b) => b.ranking - a.ranking);
-    return list;
-  };
-
-  window.listenToLeaderboard = callback => {
-    const q = query(ref(db, "scores"), orderByChild("ranking"), limitToLast(10));
-    leaderboardUnsub = onValue(q, snap => {
+    try {
+      const snap = await get(q);
       const list = [];
       snap.forEach(child => {
         list.push(child.val());
       });
       list.sort((a, b) => b.ranking - a.ranking);
-      callback(list);
-    });
+      return list;
+    } catch (err) {
+      console.error('Failed to fetch scores', err);
+      showToast('Failed to fetch scores', 3000);
+      return [];
+    }
+  };
+
+  window.listenToLeaderboard = callback => {
+    const q = query(ref(db, "scores"), orderByChild("ranking"), limitToLast(10));
+    try {
+      leaderboardUnsub = onValue(q, snap => {
+        const list = [];
+        snap.forEach(child => {
+          list.push(child.val());
+        });
+        list.sort((a, b) => b.ranking - a.ranking);
+        callback(list);
+      }, err => {
+        console.error('Failed to fetch scores', err);
+        showToast('Failed to fetch scores', 3000);
+      });
+    } catch (err) {
+      console.error('Failed to fetch scores', err);
+      showToast('Failed to fetch scores', 3000);
+    }
   };
 
   window.unlistenLeaderboard = () => {
