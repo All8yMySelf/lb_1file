@@ -1,11 +1,10 @@
 {
-  "name": "lb_1file",
+  "name": "lb-1file",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "test": "node test/test.js"
+    "test": "node scripts/check-scripts.js"
   },
   "devDependencies": {
-    "jsdom": "^22.1.0"
+    "acorn": "^8.11.3"
   }
 }
