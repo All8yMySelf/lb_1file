@@ -83,16 +83,20 @@
   };
 
   // 4) renderLeaderboard populates #leaderboard element with 10 rows
-  window.renderLeaderboard = scores => {
+  window.renderLeaderboard = (scores, highlightIndex = -1) => {
     const container = document.getElementById("leaderboard");
-    container.innerHTML = "";
+    container.textContent = "";
     for (let i = 0; i < 10; i++) {
       const row = scores[i]
         ? `${scores[i].initials} - Wave ${scores[i].wave} (${scores[i].time}s left) - ${scores[i].date}`
-        : "&nbsp;";
+        : "---";
       const div = document.createElement("div");
       div.className = "leaderboard-row";
-      div.innerHTML = `<span class="rank">${i + 1}.</span> ${row}`;
+      const rankSpan = document.createElement("span");
+      rankSpan.className = "rank";
+      rankSpan.textContent = `${i + 1}.`;
+      div.appendChild(rankSpan);
+      div.appendChild(document.createTextNode(" " + (row === "&nbsp;" ? "\u00A0" : row)));
       container.appendChild(div);
     }
     document.getElementById("leaderboardLoading").style.display = "none";
@@ -103,7 +107,11 @@
     document.getElementById("show-leaderboard").addEventListener("click", async () => {
     window.showHighScores();
     const scores = await getTopScores();
-    renderLeaderboard(scores);
+    let idx = -1;
+    if (pendingScore && pendingScore.saved) {
+      idx = scores.findIndex(s => s.ranking === pendingScore.ranking);
+    }
+    renderLeaderboard(scores, idx);
     });
 </script>
 
@@ -118,6 +126,7 @@
   #highScoreList li, #gameOverScoreList li, .leaderboard-row { margin: 0.2rem 0; }
   #gameOverScoreList li, .leaderboard-row { text-align: left; }
   .rank { display: inline-block; width: 2ch; }
+  .highlight { background: rgba(255,255,255,0.2); }
   #initialsInput { font-size: 2rem; text-align: center; width: 4ch; background: transparent; border: none; border-bottom: 2px solid var(--button-text); color: var(--button-text); caret-color: var(--button-text); }
   #cheekyMessage { margin: 1rem 0; color: var(--button-text); }
   #leaderboardLoading {
@@ -139,6 +148,7 @@
     #speedDisplay { width: 32px; font-size: 14px; }
   }
 </style>
+
 <style>
   .slow-blink { animation: slowBlink 2s steps(2,end) infinite; }
   @keyframes slowBlink { 50% { opacity: 0; } }
@@ -182,7 +192,7 @@
     <span id="speedDisplay">1x</span>
     <button id="speedUpButton">&#187;</button>
     <button id="macrossButton" style="display:none">Macross Missile Massacre</button> <!-- Renamed from #M -->
-    <button id="toggleInfoButton" class="active">i</button> <!-- Renamed from #I -->
+    <button id="toggleInfoButton" class="active">o</button> <!-- Renamed from #I -->
     <button id="themeButton">Theme: Orbital Elite</button> <!-- Added Theme Button -->
     <div id="sensorToggle">
         <span class="switch-label">Enemy Info:</span>
@@ -199,14 +209,17 @@
     <div>Space/Auto: Fire</div>
     <div>M: Macross Missiles</div>
     <div>F: Toggle Auto-fire</div>
-    <div>I: Toggle Ring Info</div>
+    <div>I: Toggle Enemy Stats</div>
+    <div>O: Toggle Ring Info</div>
 </div>
+<div id="enemyStatsPanel" class="collapsed"><div id="enemyStatsHeader">Enemy Stats</div><div id="enemyStatsContent"></div></div>
 <div id="enemyHUD"></div>
 <div id="sensorWarning" style="display:none">
     <p>The ring around your base shows your cannon's visual firing range. The cannon cannot target enemies beyond this radius. Click on the "Cannon" to upgrade the cannon's abilities.</p>
     <p>Upgrade "Sensors" Electronic FOV to see enemies outside this ring. The wave timer has started – enemies approach from beyond your sight.</p>
     <button id="sensorWarningButton">Continue</button>
 </div>
+<div id="enemyIdentificationPopup"><div class="card"><h2>Enemy Identified</h2><div id="enemyIntelContent"></div><button id="enemyIntelContinue">Continue</button></div></div>
 <div id="toast"></div>
 <!-- Removed shipSprite image as it wasn't used -->
 
@@ -696,6 +709,7 @@ let showMissileRadius = false;
 let sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
 let sensorDisplayMode = 'hud';
 let baseCanMove = true;
+let enemyIntel = { active:false, known:{}, order:[] };
 let keysPressed = {};
 let particles = [];
 let lastTime = 0;
@@ -1034,13 +1048,12 @@ function spawnEnemy(isBoss = false) {
         credits = Math.floor(enemyTemplate[4] * Math.sqrt(difficultyScaling));
     }
 
-    enemyPool.get({
+    const enemy = enemyPool.get({
         x: base.x + Math.cos(spawnAngle) * spawnRadius,
         y: base.y + Math.sin(spawnAngle) * spawnRadius,
         c: enemyTemplate[0], // color
         s: speed,
         h: health,
-        m: health, // max health
         r: radius,
         C: credits, // creditsValue
         T: [], // trail
@@ -1048,6 +1061,7 @@ function spawnEnemy(isBoss = false) {
         stunTime: 0,
         type: isBoss ? 'Boss' : (enemyTypeIndex === ENEMY_TYPE_TANK ? 'Tank' : (enemyTypeIndex === ENEMY_TYPE_FAST ? 'Fast' : 'Normal'))
     });
+    identifyEnemy(enemy);
     gameState.enemiesSpawnedThisWave++;
 }
 
@@ -1069,21 +1083,24 @@ function playSound(audio) {
     }
 }
 
-function renderScoreList(id, scores) {
+function renderScoreList(id, scores, highlightIndex = -1) {
     const list = getElement(id);
-    list.innerHTML = '';
+    list.textContent = '';
     if (scores.length === 0) {
         const li = document.createElement('li');
         li.textContent = 'No scores yet';
         list.appendChild(li);
-        return;
     }
     for (let i = 0; i < 10; i++) {
         const li = document.createElement('li');
         const entry = scores[i]
             ? `${scores[i].initials} - Wave ${scores[i].wave} (${scores[i].time ?? 0}s left) - ${scores[i].date}`
             : "&nbsp;";
-        li.innerHTML = `<span class="rank">${i + 1}.</span> ${entry}`;
+        const rankSpan = document.createElement('span');
+        rankSpan.className = 'rank';
+        rankSpan.textContent = `${i + 1}.`;
+        li.appendChild(rankSpan);
+        li.appendChild(document.createTextNode(' ' + (entry === "&nbsp;" ? "\u00A0" : entry)));
         list.appendChild(li);
     }
 }
@@ -1115,7 +1132,7 @@ function dismissSensorWarning() {
 }
 
 async function submitInitials() {
-    let initials = getElement('initialsInput').value.toUpperCase();
+    let initials = getElement('initialsInput').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (initials.length === 2) initials += '_';
     if (initials.length < 2) return;
     if (!pendingScore) return;
@@ -1126,9 +1143,9 @@ async function submitInitials() {
         getElement('initialsInput').style.display = 'none';
         pendingScore.saved = true;
         const scores = await getTopScores();
-        renderScoreList('gameOverScoreList', scores);
-        const refreshed = await getTopScores();
-        const position = refreshed.findIndex(s => s.ranking === ranking) + 1;
+        const index = scores.findIndex(s => s.ranking === ranking && s.initials === initials);
+        renderScoreList('gameOverScoreList', scores, index);
+        const position = index + 1;
         if (position > 0) {
             getElement('cheekyMessage').textContent = `You placed #${position}!`;
         }
@@ -1406,8 +1423,10 @@ function initializeGame(shouldTryLoad = true) {
 
     sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
     sensorDisplayMode = 'hud';
+    enemyIntel = { active:false, known:{}, order:[] };
     getElement('sensorDisplayToggle').textContent = 'Hud';
 
+    updateEnemyStatsPanel();
     resetPools();
     getElement('macrossButton').classList.remove('active');
 
@@ -1620,8 +1639,15 @@ function gameOver() {
     const playerRank = gameState.wave * 100000 - remainingTime;
     pendingScore = { wave: gameState.wave, time: remainingTime, ranking: playerRank, saved: false };
     getTopScores().then(scores => {
-        renderScoreList('gameOverScoreList', scores);
-        const qualifies = scores.length < 10 || playerRank > scores[scores.length - 1].ranking;
+        let index = scores.findIndex(s => playerRank > s.ranking);
+        if (index === -1 && scores.length < 10) index = scores.length;
+        let list = scores.slice();
+        if (index !== -1) {
+            list.splice(index, 0, { initials: '???', wave: gameState.wave, time: remainingTime, date: formatDate(new Date()) });
+            list = list.slice(0, 10);
+        }
+        renderScoreList('gameOverScoreList', list, index);
+        const qualifies = index !== -1;
         if (qualifies) {
             getElement('initialsInput').style.display = 'block';
             getElement('cheekyMessage').textContent = 'Hey, you scored in the top 10! Please enter your initials.';
@@ -3093,6 +3119,8 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     break;
                 case UPGRADE_SENSOR_OUTLINES:
                     sensorUpgrades.enemyVisuals = level > 0;
+                    enemyIntel.active = level > 0;
+                    if(level===1 && isNewPurchase){ enemyIntel.known = {}; enemyIntel.order = []; }
                     break;
                 case UPGRADE_SENSOR_HEALTHBARS:
                     sensorUpgrades.showHealthBars = level > 0;
@@ -3234,6 +3262,49 @@ function updateEnemyHUD(info) {
     hud.innerHTML = lines.join('');
     hud.classList.add('show');
 }
+function updateEnemyStatsPanel(){
+    const panel=getElement("enemyStatsPanel");
+    const list=getElement("enemyStatsContent");
+    let html="";
+    enemyIntel.order.forEach(t=>{const d=enemyIntel.known[t];html+=`<div>${t}: Spd ${d.speed} HP ${d.health}</div>`;});
+    list.innerHTML=html||"<div>No data</div>";
+    const hudBar=getElement("hud");
+    const hotkeys=getElement("hotkeys");
+    let top=hudBar.offsetHeight+10;
+    if(hotkeys.classList.contains("show")) top+=hotkeys.offsetHeight+10;
+    panel.style.top=top+"px";
+}
+
+function toggleEnemyStatsPanel(){
+    const p=getElement("enemyStatsPanel");
+    p.classList.toggle("collapsed");
+}
+
+function beep(){
+    if(isMuted) return;
+    try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();o.type="square";o.frequency.value=800;o.connect(c.destination);o.start();setTimeout(()=>{o.stop();c.close();},100);}catch(e){}
+}
+
+function showEnemyIntelPopup(type,stats){
+    const c=getElement("enemyIntelContent");
+    c.innerHTML=`<div>${type}</div><div>Speed: ${stats.speed}</div><div>Health: ${stats.health}</div><div>Pattern: ${stats.attack}</div>`;
+    getElement("enemyIdentificationPopup").style.display="flex";
+    beep();
+}
+function hideEnemyIntelPopup(){
+    getElement("enemyIdentificationPopup").style.display="none";
+    resumeGame();
+    updateEnemyStatsPanel();
+}
+
+function identifyEnemy(enemy){
+    if(!enemyIntel.active||enemyIntel.known[enemy.type]) return;
+    enemyIntel.known[enemy.type]={speed:enemy.speed.toFixed(1),health:Math.round(enemy.maxHealth),attack:"Unknown"};
+    enemyIntel.order.push(enemy.type);
+    pauseGame();
+    showEnemyIntelPopup(enemy.type,enemyIntel.known[enemy.type]);
+}
+
 
 function toggleUpgradeCategory(index) {
     upgradeTree.forEach((cat,i)=>{cat.expanded = i===index ? !cat.expanded : false;});
@@ -3273,7 +3344,8 @@ window.addEventListener('keydown', e => {
                     showToast(gameState.autoFire ? 'Auto-fire enabled' : 'Auto-fire disabled');
                 }
                 break;
-            case 'i': toggleRingInfoDisplay(); break; // Toggle info anytime
+            case 'i': toggleEnemyStatsPanel(); break;
+            case 'o': toggleRingInfoDisplay(); break; // Toggle info anytime
         }
     }
 });
@@ -3453,6 +3525,8 @@ getElement('restartButton').onclick = async () => {
     startGame();
 };
 getElement('sensorWarningButton').onclick = dismissSensorWarning;
+getElement("enemyIntelContinue").onclick=hideEnemyIntelPopup;
+getElement("enemyStatsHeader").onclick=toggleEnemyStatsPanel;
 getElement('playPauseButton').onclick = () => {
     if (isGameRunning) pauseGame(); else resumeGame();
 };
@@ -3482,7 +3556,7 @@ getElement('initialsInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitInitials();
 });
 getElement('initialsInput').addEventListener('input', e => {
-    e.target.value = e.target.value.toUpperCase();
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (e.target.value.length >= 3) submitInitials();
 });
 getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
