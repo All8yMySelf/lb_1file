@@ -2404,8 +2404,10 @@ function startNextWave() {
 
 function checkWaveCompletion(dt) {
     const enemies = enemyPool.getActiveObjects();
-    // Remove finished waves from display
-    activeWaves = activeWaves.filter(w => waveBossAlive[w] || enemies.some(e => e.wave === w));
+    // Remove finished waves from display but keep current wave even if empty
+    activeWaves = activeWaves.filter(w =>
+        w === gameState.wave || waveBossAlive[w] || enemies.some(e => e.wave === w)
+    );
     // If all spawned enemies have been cleared, start the next wave
     // but only after at least one enemy was actually spawned in this wave
     if (enemies.length === 0 && gameState.enemiesSpawnedThisWave > 0) {
