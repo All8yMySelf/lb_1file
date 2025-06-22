@@ -48,6 +48,9 @@ file is only a reference and is not read by the game directly.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v2.41
+- XP enemy despawns instantly when a boss is destroyed.
+
 ### v2.40
 - Leaderboard ranking now uses `wave * 100000 - time` and stores only the top 10 scores.
 - The global leaderboard is fully operational.
