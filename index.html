@@ -2346,21 +2346,26 @@ function updateCooldowns(dt) {
 }
 
 function checkWaveCompletion(dt) {
-    // Wave completes when boss is defeated
-    if (gameState.isBossWave && enemyPool.getActiveObjects().length === 0) {
-        gameState.wave++;
-        gameState.enemiesSpawnedThisWave = 0;
-        gameState.isBossWave = false;
-        // Heal base slightly
-        gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
-        gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
-        gameState.waveStartTime = Date.now(); // Reset timer for next wave
-        gameState.waveElapsedTime = 0;
-        gameState.xpEnemySpawned = false;
-        gameState.xpEnemySpawnTime = Math.random() * (gameState.waveDuration - 2);
-        showToast(`Wave ${gameState.wave} started! +10% Health`, 3000);
-        updateHUD();
-        saveGame(); // Save at the end of a wave
+    // Wave completes when all regular enemies are defeated
+    if (gameState.isBossWave) {
+        const remaining = enemyPool.getActiveObjects().filter(e => !e.xp);
+        if (remaining.length === 0) {
+            // Remove any leftover XP enemies so they don't carry over
+            enemyPool.getActiveObjects().filter(e => e.xp).forEach(e => enemyPool.release(e));
+            gameState.wave++;
+            gameState.enemiesSpawnedThisWave = 0;
+            gameState.isBossWave = false;
+            // Heal base slightly
+            gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
+            gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+            gameState.waveStartTime = Date.now(); // Reset timer for next wave
+            gameState.waveElapsedTime = 0;
+            gameState.xpEnemySpawned = false;
+            gameState.xpEnemySpawnTime = Math.random() * (gameState.waveDuration - 2);
+            showToast(`Wave ${gameState.wave} started! +10% Health`, 3000);
+            updateHUD();
+            saveGame(); // Save at the end of a wave
+        }
     }
 }
 
