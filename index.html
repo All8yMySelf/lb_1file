@@ -2430,6 +2430,13 @@ function drawGame() {
     // Clear canvas (using theme color)
     ctx.fillStyle = currentTheme.cssVariables['--canvas-bg'] || 'rgba(0, 0, 0, 0.3)'; // Use theme canvas bg or default
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    const visibleRadius = Math.max(
+        base.cannonRange,
+        base.missileTargetingRadius,
+        base.laserRange,
+        base.sensorRange,
+        base.stunRadius
+    );
 
     // --- Draw Range Rings ---
     ctx.lineWidth = 2;
@@ -2476,22 +2483,6 @@ function drawGame() {
         ctx.arc(base.x, base.y, base.sensorRange, 0, Math.PI * 2);
         ctx.stroke();
     }
-
-    // --- Draw Ring UI (Directly on Canvas) ---
-    ringClickRegions = []; // Clear regions each frame
-
-    // --- Draw Collapsible Upgrade Categories ---
-    const menuX = 10;
-    let currentY = 60;
-    const categorySpacing = 10;
-
-    upgradeTree.forEach((category, i) => {
-        if (i === UPGRADE_CATEGORY_DEBUG && !debugUpgradesVisible) return;
-        const color = getCategoryColor(i);
-        const hasAvailable = category.upgrades.some(u => gameState.credits >= u.cost && u.level < u.maxLevel);
-        const h = drawCollapsibleUpgradeElement(menuX, currentY, category.category, category, i, category.expanded, color, hasAvailable);
-        currentY += h + categorySpacing;
-    });
 
 
     // --- Draw Base ---
@@ -2780,14 +2771,23 @@ function drawGame() {
     // --- Draw Particles ---
     drawParticles();
 
-    const visibleRadius = Math.max(
-        base.cannonRange,
-        base.missileTargetingRadius,
-        base.laserRange,
-        base.sensorRange,
-        base.stunRadius
-    );
     applyOverlay(visibleRadius);
+    // --- Draw Ring UI (Directly on Canvas) ---
+    ringClickRegions = []; // Clear regions each frame
+
+    // --- Draw Collapsible Upgrade Categories ---
+    const menuX = 10;
+    let currentY = 60;
+    const categorySpacing = 10;
+
+    upgradeTree.forEach((category, i) => {
+        if (i === UPGRADE_CATEGORY_DEBUG && !debugUpgradesVisible) return;
+        const color = getCategoryColor(i);
+        const hasAvailable = category.upgrades.some(u => gameState.credits >= u.cost && u.level < u.maxLevel);
+        const h = drawCollapsibleUpgradeElement(menuX, currentY, category.category, category, i, category.expanded, color, hasAvailable);
+        currentY += h + categorySpacing;
+    });
+
 }
 
 // --- Canvas Ring UI Drawing Helper ---
