@@ -41,10 +41,8 @@
   window.getTopScores = async function() {
     const q = query(ref(db, "scores"), orderByChild("ranking"), limitToLast(10));
     const snap = await get(q);
-    console.log("getTopScores snapshot size:", snap.size);
     const list = [];
     snap.forEach(child => {
-      console.log("  key:", child.key, "->", child.val().ranking);
       list.push(child.val());
     });
     list.sort((a, b) => b.ranking - a.ranking);
@@ -54,14 +52,11 @@
   window.listenToLeaderboard = callback => {
     const q = query(ref(db, "scores"), orderByChild("ranking"), limitToLast(10));
     leaderboardUnsub = onValue(q, snap => {
-      console.log("listen snapshot children:", snap.size);
       const list = [];
       snap.forEach(child => {
-        console.log("  key:", child.key, "->", child.val().ranking);
         list.push(child.val());
       });
       list.sort((a, b) => b.ranking - a.ranking);
-      console.log("sorted list length:", list.length, list);
       callback(list);
     });
   };
