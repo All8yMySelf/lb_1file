@@ -224,7 +224,6 @@
     <div>O: Toggle Ring Info</div>
 </div>
 <div id="enemyStatsPanel"><div id="enemyStatsHeader">Enemy Stats <span id="enemyStatsToggle" class="arrow">▾</span></div><div id="enemyStatsContent"></div></div>
-<div id="enemyHUD"></div>
 <div id="sensorWarning" style="display:none">
     <p>The ring around your base shows your cannon's visual firing range. The cannon cannot target enemies beyond this radius. Click on the "Cannon" to upgrade the cannon's abilities.</p>
     <p>Upgrade "Sensors" Electronic FOV to see enemies outside this ring. The wave timer has started – enemies approach from beyond your sight.</p>
@@ -3329,42 +3328,10 @@ function toggleMute() {
 
 function updateEnemyHUD(info) {
     const hud = getElement('enemyHUD');
-    if (sensorDisplayMode !== 'hud') { hud.classList.remove('show'); return; }
-
-    const hudBar = getElement('hud');
-    const hotkeys = getElement('hotkeys');
-    const panel = getElement('enemyStatsPanel');
-    let top = hudBar.offsetHeight + 10;
-    if (hotkeys.classList.contains('show')) {
-        top += hotkeys.offsetHeight + 10;
-    }
-    if (panel) {
-        top += panel.offsetHeight + 10;
-    }
-    hud.style.top = top + 'px';
-
-    const lines = [];
-    if (!sensorUpgrades.enemyVisuals) {
-        lines.push('Enemies not identified');
-        lines.push('Upgrade the Sensor Array');
-    } else {
-        let count = 0;
-        for (const type in info) {
-            const d = info[type];
-            let line = `${type.padEnd(7)}| Speed: ${d.speed}`;
-            if (sensorUpgrades.showHealthBars) line += ` | HP: ${d.health}/${d.max}`;
-            line += ` | Size: ${d.size}`;
-            lines.push(line);
-            if (++count >= 10) break;
-        }
-    }
-    hud.innerHTML = '';
-    lines.forEach(text => {
-        const div = document.createElement('div');
-        div.textContent = text;
-        hud.appendChild(div);
-    });
-    hud.classList.add('show');
+    if (!hud) return;
+    hud.classList.remove('show');
+    if (sensorDisplayMode !== 'hud') return;
+    // HUD mode no longer displays a popup since enemy stats panel replaces it
 }
 function updateEnemyStatsPanel(){
     const panel=getElement("enemyStatsPanel");
