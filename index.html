@@ -219,6 +219,7 @@
     <button id="fullscreenButton">&#x26F6;</button>
     <button id="muteButton">&#128266;</button>
     <button id="overlayButton">Overlay: None</button>
+    <button id="sendWaveButton">Send Next Wave</button>
 </div>
 <div id="hotkeys" class="show">
     <div>H: Show/Hide Hotkeys</div>
@@ -769,6 +770,10 @@ let ringClickRegions = [];
 
 let xpCardShown = false;
 
+// Track which waves are currently active and whether their bosses live
+let activeWaves = [];
+let waveBossAlive = {};
+
 // Cache width of the hotkeys panel for enemy stats alignment
 let hotkeysWidth = null;
 
@@ -890,6 +895,7 @@ function resetEnemy(enemy, config) {
     enemy.type = config.type || 'Normal';
     enemy.xp = config.xp || false;
     enemy.dir = config.dir || 1;
+    enemy.wave = config.wave || 0;
 
     enemy.isTargeted = false;
     enemy.targetLockTime = 0;
@@ -1140,8 +1146,13 @@ function spawnEnemy(isBoss = false) {
         T: [], // trail
         st: false, // isStunned
         stunTime: 0,
-        type: isBoss ? 'Boss' : (enemyTypeIndex === ENEMY_TYPE_TANK ? 'Tank' : (enemyTypeIndex === ENEMY_TYPE_FAST ? 'Fast' : 'Normal'))
+        type: isBoss ? 'Boss' : (enemyTypeIndex === ENEMY_TYPE_TANK ? 'Tank' : (enemyTypeIndex === ENEMY_TYPE_FAST ? 'Fast' : 'Normal')),
+        wave: gameState.wave
     });
+
+    if (isBoss) {
+        waveBossAlive[gameState.wave] = true;
+    }
 
     if (enemyIntel.active && enemyIntel.known[enemy.type]) {
         enemyIntel.known[enemy.type].health = Math.round(health);
@@ -1163,8 +1174,21 @@ function spawnXPEnemy() {
         C: 0,
         xp: true,
         dir: 1,
-        type: 'XP'
+        type: 'XP',
+        wave: gameState.wave
     });
+}
+
+function handleEnemyKilled(enemy) {
+    if (enemy.type === 'Boss') {
+        waveBossAlive[enemy.wave] = false;
+    }
+    const enemies = enemyPool.getActiveObjects();
+    if (!enemies.some(e => e.wave === enemy.wave)) {
+        const idx = activeWaves.indexOf(enemy.wave);
+        if (idx !== -1) activeWaves.splice(idx, 1);
+    }
+    updateHUD();
 }
 
 // --- UI & HUD Updates ---
@@ -1278,7 +1302,8 @@ function updateHUD() {
         countdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    getElement('waveDisplay').textContent = `Wave: ${gameState.wave} | ${countdownText}`;
+    const waveText = activeWaves.join(' + ');
+    getElement('waveDisplay').textContent = `Wave: ${waveText} | ${countdownText}`;
 
 }
 
@@ -1501,6 +1526,9 @@ function initializeGame(shouldTryLoad = true) {
         xpEnemySpawnTime: 0,
         xpEnemySpawned: false
     };
+
+    activeWaves = [1];
+    waveBossAlive = { 1: false };
 
     base = {
         x: canvasWidth / 2,
@@ -1974,6 +2002,7 @@ function updateEnemies(dt) {
             createExplosion(enemy.x, enemy.y, enemy.color, 20, enemy.radius);
             updateHUD(); // Update health display immediately
             enemyPool.release(enemy);
+            handleEnemyKilled(enemy);
             if (gameState.currentHealth <= 0) {
                  startDeathSequence(); // Begin slow-motion before game over
                  return baseMovedDuringUpdate; // Exit early
@@ -2146,7 +2175,7 @@ function handlePlayerFiring(dt) {
                  gameState.enemiesKilled++;
                  createExplosion(laserTarget.x, laserTarget.y, laserTarget.color, 40, laserTarget.radius);
                  enemyPool.release(laserTarget);
-                 updateHUD();
+                 handleEnemyKilled(laserTarget);
                  updateUpgradeAvailabilityFlags();
              }
         }
@@ -2280,7 +2309,7 @@ function checkCollisions(dt) {
                     gameState.enemiesKilled++;
                     createExplosion(enemy.x, enemy.y, enemy.color, 30, enemy.radius);
                     enemyPool.release(enemy); // Remove enemy
-                    updateHUD(); // Update score/credits
+                    handleEnemyKilled(enemy);
                     updateUpgradeAvailabilityFlags();
                 }
                 break; // Bullet hits one enemy max
@@ -2316,7 +2345,7 @@ function checkCollisions(dt) {
                     gameState.enemiesKilled++;
                     createExplosion(enemy.x, enemy.y, enemy.color, 35, enemy.radius); // Bigger death explosion
                     enemyPool.release(enemy);
-                    updateHUD();
+                    handleEnemyKilled(enemy);
                     updateUpgradeAvailabilityFlags();
                 }
                  // Missile only hits one enemy, but doesn't necessarily get destroyed?
@@ -2345,22 +2374,30 @@ function updateCooldowns(dt) {
     }
 }
 
+function startNextWave() {
+    gameState.wave++;
+    gameState.enemiesSpawnedThisWave = 0;
+    gameState.isBossWave = false;
+    gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
+    gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+    gameState.waveStartTime = Date.now();
+    gameState.waveElapsedTime = 0;
+    gameState.xpEnemySpawned = false;
+    gameState.xpEnemySpawnTime = Math.random() * (gameState.waveDuration - 2);
+    activeWaves.push(gameState.wave);
+    waveBossAlive[gameState.wave] = false;
+    showToast(`Wave ${gameState.wave} started! +10% Health`, 3000);
+    updateHUD();
+    saveGame();
+}
+
 function checkWaveCompletion(dt) {
-    // Wave completes when boss is defeated
-    if (gameState.isBossWave && enemyPool.getActiveObjects().length === 0) {
-        gameState.wave++;
-        gameState.enemiesSpawnedThisWave = 0;
-        gameState.isBossWave = false;
-        // Heal base slightly
-        gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
-        gameState.waveDuration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
-        gameState.waveStartTime = Date.now(); // Reset timer for next wave
-        gameState.waveElapsedTime = 0;
-        gameState.xpEnemySpawned = false;
-        gameState.xpEnemySpawnTime = Math.random() * (gameState.waveDuration - 2);
-        showToast(`Wave ${gameState.wave} started! +10% Health`, 3000);
-        updateHUD();
-        saveGame(); // Save at the end of a wave
+    const enemies = enemyPool.getActiveObjects();
+    // Remove finished waves from display
+    activeWaves = activeWaves.filter(w => waveBossAlive[w] || enemies.some(e => e.wave === w));
+    // If no enemies remain, start the next wave automatically
+    if (enemies.length === 0) {
+        startNextWave();
     }
 }
 
@@ -3494,6 +3531,13 @@ function fireMacrossMissiles() {
     }
 }
 
+function sendNextWave() {
+    if (!waveBossAlive[gameState.wave]) {
+        spawnEnemy(true);
+    }
+    startNextWave();
+}
+
 // --- Menu Toggles ---
 function toggleHotkeys() {
     getElement('hotkeys').classList.toggle('show');
@@ -3907,6 +3951,7 @@ getElement('initialsInput').addEventListener('input', e => {
 getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
 getElement('fullscreenButton').onclick = toggleFullScreen;
 getElement('muteButton').onclick = toggleMute;
+getElement('sendWaveButton').onclick = sendNextWave;
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
 
