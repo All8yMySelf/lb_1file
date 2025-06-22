@@ -2668,7 +2668,13 @@ function drawGame() {
     // --- Draw Particles ---
     drawParticles();
 
-    const visibleRadius = Math.max(base.cannonRange, base.sensorRange);
+    const visibleRadius = Math.max(
+        base.cannonRange,
+        base.missileTargetingRadius,
+        base.laserRange,
+        base.sensorRange,
+        base.stunRadius
+    );
     applyOverlay(visibleRadius);
 }
 
