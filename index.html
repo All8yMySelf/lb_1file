@@ -730,6 +730,7 @@ let animationFrameId = null;
 let savedGame = null; // Stores loaded game state
 let autoSaveTimer = null;
 let DEBUG_MODE = false; // Set to true to enable verbose logging
+let debugUpgradesVisible = false; // Hidden debug upgrade category toggle
 let lastBaseX = 0;
 let lastBaseY = 0;
 window.pendingScore = null; // Store score awaiting initials
@@ -2239,10 +2240,11 @@ function checkWaveCompletion(dt) {
 }
 
 function updateUpgradeAvailabilityFlags() {
-    // Check if any upgrade is affordable
-    gameState.upgradesAvailable = upgradeTree.some(category =>
-        category.upgrades.some(u => gameState.credits >= u.cost && u.level < u.maxLevel)
-    );
+    // Check if any upgrade is affordable, ignoring hidden debug category
+    gameState.upgradesAvailable = upgradeTree.some((category, idx) => {
+        if (idx === UPGRADE_CATEGORY_DEBUG && !debugUpgradesVisible) return false;
+        return category.upgrades.some(u => gameState.credits >= u.cost && u.level < u.maxLevel);
+    });
     // Base color change removed, could be added back if desired
 }
 
@@ -2308,6 +2310,7 @@ function drawGame() {
     const categorySpacing = 10;
 
     upgradeTree.forEach((category, i) => {
+        if (i === UPGRADE_CATEGORY_DEBUG && !debugUpgradesVisible) return;
         const color = getCategoryColor(i);
         const hasAvailable = category.upgrades.some(u => gameState.credits >= u.cost && u.level < u.maxLevel);
         const h = drawCollapsibleUpgradeElement(menuX, currentY, category.category, category, i, category.expanded, color, hasAvailable);
@@ -3451,6 +3454,10 @@ window.addEventListener('keydown', e => {
                 }
                 break;
             case 'i': toggleEnemyStatsPanel(); break;
+            case 'q':
+                debugUpgradesVisible = !debugUpgradesVisible;
+                drawGame();
+                break; // Hidden toggle for debug upgrades
             case 'o': toggleRingInfoDisplay(); break; // Toggle info anytime
         }
     }
