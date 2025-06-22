@@ -139,6 +139,7 @@
     #speedDisplay { width: 32px; font-size: 14px; }
   }
 </style>
+<style>#enemyStatsPanel{position:absolute;right:10px;top:150px;background:var(--hotkey-bg);color:var(--hotkey-text);font-size:var(--hotkey-font-size);border-radius:5px;padding:5px 10px;line-height:1.2;z-index:10;max-width:200px;transition:max-height .3s ease;overflow:hidden}#enemyStatsPanel.collapsed #enemyStatsContent{display:none}#enemyStatsPanel.collapsed{cursor:pointer}#enemyIdentificationPopup{position:absolute;top:0;left:0;right:0;bottom:0;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,.8);z-index:200}#enemyIdentificationPopup .card{background:var(--hotkey-bg);color:var(--hotkey-text);padding:20px;border:2px solid var(--stats-border);box-shadow:0 0 10px var(--hotkey-text);text-align:center}</style>
 </head>
 <body>
 <div class="bg"></div>
@@ -175,7 +176,7 @@
     <span id="speedDisplay">1x</span>
     <button id="speedUpButton">&#187;</button>
     <button id="macrossButton" style="display:none">Macross Missile Massacre</button> <!-- Renamed from #M -->
-    <button id="toggleInfoButton" class="active">i</button> <!-- Renamed from #I -->
+    <button id="toggleInfoButton" class="active">o</button> <!-- Renamed from #I -->
     <button id="themeButton">Theme: Orbital Elite</button> <!-- Added Theme Button -->
     <div id="sensorToggle">
         <span class="switch-label">Enemy Info:</span>
@@ -192,14 +193,17 @@
     <div>Space/Auto: Fire</div>
     <div>M: Macross Missiles</div>
     <div>F: Toggle Auto-fire</div>
-    <div>I: Toggle Ring Info</div>
+    <div>I: Toggle Enemy Stats</div>
+    <div>O: Toggle Ring Info</div>
 </div>
+<div id="enemyStatsPanel" class="collapsed"><div id="enemyStatsHeader">Enemy Stats</div><div id="enemyStatsContent"></div></div>
 <div id="enemyHUD"></div>
 <div id="sensorWarning" style="display:none">
     <p>The ring around your base shows your cannon's visual firing range. The cannon cannot target enemies beyond this radius. Click on the "Cannon" to upgrade the cannon's abilities.</p>
     <p>Upgrade "Sensors" Electronic FOV to see enemies outside this ring. The wave timer has started – enemies approach from beyond your sight.</p>
     <button id="sensorWarningButton">Continue</button>
 </div>
+<div id="enemyIdentificationPopup"><div class="card"><h2>Enemy Identified</h2><div id="enemyIntelContent"></div><button id="enemyIntelContinue">Continue</button></div></div>
 <div id="toast"></div>
 <!-- Removed shipSprite image as it wasn't used -->
 
@@ -689,6 +693,7 @@ let showMissileRadius = false;
 let sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
 let sensorDisplayMode = 'hud';
 let baseCanMove = true;
+let enemyIntel = { active:false, known:{}, order:[] };
 let keysPressed = {};
 let particles = [];
 let lastTime = 0;
@@ -1025,13 +1030,12 @@ function spawnEnemy(isBoss = false) {
         credits = Math.floor(enemyTemplate[4] * Math.sqrt(difficultyScaling));
     }
 
-    enemyPool.get({
+    const enemy = enemyPool.get({
         x: base.x + Math.cos(spawnAngle) * spawnRadius,
         y: base.y + Math.sin(spawnAngle) * spawnRadius,
         c: enemyTemplate[0], // color
         s: speed,
         h: health,
-        m: health, // max health
         r: radius,
         C: credits, // creditsValue
         T: [], // trail
@@ -1039,6 +1043,7 @@ function spawnEnemy(isBoss = false) {
         stunTime: 0,
         type: isBoss ? 'Boss' : (enemyTypeIndex === ENEMY_TYPE_TANK ? 'Tank' : (enemyTypeIndex === ENEMY_TYPE_FAST ? 'Fast' : 'Normal'))
     });
+    identifyEnemy(enemy);
     gameState.enemiesSpawnedThisWave++;
 }
 
@@ -1396,8 +1401,10 @@ function initializeGame(shouldTryLoad = true) {
 
     sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
     sensorDisplayMode = 'hud';
+    enemyIntel = { active:false, known:{}, order:[] };
     getElement('sensorDisplayToggle').textContent = 'Hud';
 
+    updateEnemyStatsPanel();
     resetPools();
     getElement('macrossButton').classList.remove('active');
 
@@ -3061,6 +3068,8 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     break;
                 case UPGRADE_SENSOR_OUTLINES:
                     sensorUpgrades.enemyVisuals = level > 0;
+                    enemyIntel.active = level > 0;
+                    if(level===1 && isNewPurchase){ enemyIntel.known = {}; enemyIntel.order = []; }
                     break;
                 case UPGRADE_SENSOR_HEALTHBARS:
                     sensorUpgrades.showHealthBars = level > 0;
@@ -3202,6 +3211,49 @@ function updateEnemyHUD(info) {
     hud.innerHTML = lines.join('');
     hud.classList.add('show');
 }
+function updateEnemyStatsPanel(){
+    const panel=getElement("enemyStatsPanel");
+    const list=getElement("enemyStatsContent");
+    let html="";
+    enemyIntel.order.forEach(t=>{const d=enemyIntel.known[t];html+=`<div>${t}: Spd ${d.speed} HP ${d.health}</div>`;});
+    list.innerHTML=html||"<div>No data</div>";
+    const hudBar=getElement("hud");
+    const hotkeys=getElement("hotkeys");
+    let top=hudBar.offsetHeight+10;
+    if(hotkeys.classList.contains("show")) top+=hotkeys.offsetHeight+10;
+    panel.style.top=top+"px";
+}
+
+function toggleEnemyStatsPanel(){
+    const p=getElement("enemyStatsPanel");
+    p.classList.toggle("collapsed");
+}
+
+function beep(){
+    if(isMuted) return;
+    try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();o.type="square";o.frequency.value=800;o.connect(c.destination);o.start();setTimeout(()=>{o.stop();c.close();},100);}catch(e){}
+}
+
+function showEnemyIntelPopup(type,stats){
+    const c=getElement("enemyIntelContent");
+    c.innerHTML=`<div>${type}</div><div>Speed: ${stats.speed}</div><div>Health: ${stats.health}</div><div>Pattern: ${stats.attack}</div>`;
+    getElement("enemyIdentificationPopup").style.display="flex";
+    beep();
+}
+function hideEnemyIntelPopup(){
+    getElement("enemyIdentificationPopup").style.display="none";
+    resumeGame();
+    updateEnemyStatsPanel();
+}
+
+function identifyEnemy(enemy){
+    if(!enemyIntel.active||enemyIntel.known[enemy.type]) return;
+    enemyIntel.known[enemy.type]={speed:enemy.speed.toFixed(1),health:Math.round(enemy.maxHealth),attack:"Unknown"};
+    enemyIntel.order.push(enemy.type);
+    pauseGame();
+    showEnemyIntelPopup(enemy.type,enemyIntel.known[enemy.type]);
+}
+
 
 function toggleUpgradeCategory(index) {
     upgradeTree.forEach((cat,i)=>{cat.expanded = i===index ? !cat.expanded : false;});
@@ -3231,7 +3283,8 @@ window.addEventListener('keydown', e => {
                     showToast(gameState.autoFire ? 'Auto-fire enabled' : 'Auto-fire disabled');
                 }
                 break;
-            case 'i': toggleRingInfoDisplay(); break; // Toggle info anytime
+            case 'i': toggleEnemyStatsPanel(); break;
+            case 'o': toggleRingInfoDisplay(); break; // Toggle info anytime
         }
     }
 });
@@ -3411,6 +3464,8 @@ getElement('restartButton').onclick = async () => {
     startGame();
 };
 getElement('sensorWarningButton').onclick = dismissSensorWarning;
+getElement("enemyIntelContinue").onclick=hideEnemyIntelPopup;
+getElement("enemyStatsHeader").onclick=toggleEnemyStatsPanel;
 getElement('playPauseButton').onclick = () => {
     if (isGameRunning) pauseGame(); else resumeGame();
 };
