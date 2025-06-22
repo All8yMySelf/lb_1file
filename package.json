@@ -1,0 +1,11 @@
+{
+  "name": "lb_1file",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^22.1.0"
+  }
+}
