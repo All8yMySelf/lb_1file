@@ -139,6 +139,12 @@
     #speedDisplay { width: 32px; font-size: 14px; }
   }
 </style>
+<style>
+  .slow-blink { animation: slowBlink 2s steps(2,end) infinite; }
+  @keyframes slowBlink { 50% { opacity: 0; } }
+  .sub-message { margin-bottom: 1rem; color: var(--button-text); }
+  .overlay-desaturate { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: grayscale(1); pointer-events: none; z-index: 99; }
+</style>
 </head>
 <body>
 <div class="bg"></div>
@@ -162,7 +168,8 @@
   <button id="startFromHighScore">Start Game</button>
 </div>
 <div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
-    <h1>Game Over</h1>
+    <h1 class="slow-blink">GAME OVER</h1>
+    <p class="sub-message">You were defeated...</p>
     <div id="finalStats"></div> <!-- Renamed from #f -->
     <ol id="gameOverScoreList"></ol>
     <div id="cheekyMessage"></div>
@@ -1086,6 +1093,7 @@ function showHighScores() {
     getElement('gameOverScreen').style.display = 'none';
     getElement('leaderboard-screen').style.display = 'flex';
     getElement('leaderboardLoading').style.display = 'block';
+    getElement('deathOverlay').style.display = 'none';
     listenToLeaderboard(renderLeaderboard);
 }
 
@@ -1575,6 +1583,7 @@ function startGame() {
     getElement('startScreen').style.display = 'none';
     getElement('leaderboard-screen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
+    getElement('deathOverlay').style.display = 'none';
     getElement('initialsInput').value = '';
     pauseGame(); // Ensure no game loop is running
     gameSpeedMultiplier = 1;
@@ -1604,6 +1613,7 @@ function gameOver() {
     updateSpeedDisplay();
     getElement('playPauseButton').textContent = '\u25B6';
     getElement('gameOverScreen').style.display = 'flex';
+    getElement('deathOverlay').style.display = 'block';
     const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
     const remainingTime = Math.floor(Math.max(0, gameState.waveDuration - gameState.waveElapsedTime));
@@ -3545,6 +3555,7 @@ function loadAndStartGame() {
     // Common starting logic after initialization/loading
     getElement('startScreen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
+    getElement('deathOverlay').style.display = 'none';
     pauseGame();
     gameSpeedMultiplier = 1;
     speedIndex = SPEED_STEPS.indexOf(1);
@@ -3595,6 +3606,7 @@ window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for b
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
 })(); // End IIFE
 </script>
+<div id="deathOverlay" class="overlay-desaturate" style="display:none"></div>
 <div id="crt-overlay"></div>
 </body>
 </html>
