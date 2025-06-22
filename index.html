@@ -1763,6 +1763,7 @@ function initializeGame(shouldTryLoad = true) {
         { // Category 6: Info
             category: "Info / How To Play",
             expanded: false,
+            standalone: true,
             upgrades: [
                 { name: 'Info / How To Play', cost: 0, level: 0, maxLevel: 1,
                   f: level => level,
@@ -3027,8 +3028,51 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
     ctx.textAlign = 'left';
 
     if (isExpanded) {
-        const connectX = x + boxWidth + 10;
-        const panelX = connectX + 10;
+        if (category.standalone) {
+            const u = category.upgrades[0];
+            const stats = u.g(u.level, u.cost, u.maxLevel);
+            const lines = `${u.name}: ${stats}`.split('\n');
+            if (u.level < u.maxLevel) {
+                if (u.cost > 0) {
+                    lines.push(`Cost: $${u.cost}`);
+                }
+            } else {
+                lines.push('MAX');
+            }
+            const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+            const buttonWidth = Math.max(150, textWidth + padding * 2);
+            const buttonHeight = lines.length * fontSize + padding * 2;
+            const btnX = x + boxWidth + 20;
+            const btnY = y;
+            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+            ctx.fillRect(btnX, btnY, buttonWidth, buttonHeight);
+            ctx.strokeStyle = color;
+            ctx.strokeRect(btnX, btnY, buttonWidth, buttonHeight);
+
+            let canAfford = gameState.credits >= u.cost && u.level < u.maxLevel;
+            if (canAfford) {
+                ctx.fillStyle = 'rgba(0,255,0,0.2)';
+                ctx.fillRect(btnX, btnY, buttonWidth, buttonHeight);
+            }
+            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            let textY = btnY + padding;
+            lines.forEach(line => {
+                ctx.fillText(line, btnX + padding, textY);
+                textY += fontSize;
+            });
+
+            ringClickRegions.push({
+                type: 'collapsible_upgrade_button',
+                x: btnX,
+                y: btnY,
+                width: buttonWidth,
+                height: buttonHeight,
+                categoryIndex: categoryIndex,
+                upgradeIndex: 0
+            });
+        } else {
+            const connectX = x + boxWidth + 10;
+            const panelX = connectX + 10;
 
         const buttons = [];
         let focusButton = null;
