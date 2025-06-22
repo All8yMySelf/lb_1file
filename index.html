@@ -165,6 +165,16 @@
   #enemyStatsPanel.collapsed #enemyStatsContent { display: none; }
   #enemyStatsHeader { cursor: pointer; }
   #enemyStatsHeader .arrow { margin-left: 4px; }
+  #overlayContainer,
+  #cssOverlay,
+  #phaserCanvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  #cssOverlay { background: rgba(0,0,0,0.6); display:none; }
+  #phaserCanvas { display:none; }
+  #overlayButton { margin-left:4px; }
 </style>
 </head>
 <body>
@@ -211,6 +221,7 @@
     </div>
     <button id="fullscreenButton">&#x26F6;</button>
     <button id="muteButton">&#128266;</button>
+    <button id="overlayButton">Overlay: None</button>
 </div>
 <div id="hotkeys" class="show">
     <div>H: Show/Hide Hotkeys</div>
@@ -757,6 +768,88 @@ let centerReturnStartTime = 0;
 
 // Ring UI Clickable Regions (calculated during draw)
 let ringClickRegions = [];
+
+// --- Overlay System ---
+const OVERLAY_METHODS = ['None','Canvas','Phaser','CSS','Fog'];
+let overlayMode = 0;
+let fogCanvas = null, fogCtx = null;
+let phaserGame = null, phaserOverlay = null, phaserMask = null;
+let cssOverlay = null, phaserCanvas = null, overlayButton = null;
+
+function cycleOverlay() {
+    overlayMode = (overlayMode + 1) % OVERLAY_METHODS.length;
+    if (overlayButton) overlayButton.textContent = 'Overlay: ' + OVERLAY_METHODS[overlayMode];
+    if (overlayMode !== 2 && phaserGame) { phaserGame.destroy(true); phaserGame = null; }
+    if (cssOverlay) cssOverlay.style.display = overlayMode === 3 ? 'block' : 'none';
+    if (phaserCanvas) phaserCanvas.style.display = overlayMode === 2 ? 'block' : 'none';
+}
+
+function setupPhaserOverlay() {
+    if (phaserGame) return;
+    phaserGame = new Phaser.Game({
+        type: Phaser.CANVAS,
+        width: canvasWidth,
+        height: canvasHeight,
+        transparent: true,
+        canvas: phaserCanvas,
+        scene: {
+            create: function() {
+                phaserOverlay = this.add.graphics();
+                phaserMask = this.add.graphics();
+                const mask = phaserMask.createGeometryMask();
+                phaserOverlay.setMask(mask);
+            }
+        }
+    });
+}
+
+function applyOverlay(radius) {
+    switch (overlayMode) {
+        case 1:
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(0,0,canvasWidth,canvasHeight);
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(base.x, base.y, radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.restore();
+            break;
+        case 2:
+            setupPhaserOverlay();
+            phaserOverlay.clear();
+            phaserOverlay.fillStyle(0x000000, 0.6);
+            phaserOverlay.fillRect(0,0,canvasWidth,canvasHeight);
+            phaserMask.clear();
+            phaserMask.fillStyle(0xffffff);
+            phaserMask.beginPath();
+            phaserMask.arc(base.x, base.y, radius);
+            phaserMask.fillPath();
+            break;
+        case 3:
+            if (cssOverlay) {
+                cssOverlay.style.clipPath = `circle(${radius}px at ${base.x}px ${base.y}px)`;
+            }
+            break;
+        case 4:
+            if (!fogCanvas) {
+                fogCanvas = document.createElement('canvas');
+                fogCanvas.width = canvasWidth;
+                fogCanvas.height = canvasHeight;
+                fogCtx = fogCanvas.getContext('2d');
+            }
+            fogCtx.clearRect(0,0,canvasWidth,canvasHeight);
+            fogCtx.fillStyle = 'rgba(0,0,0,0.8)';
+            fogCtx.fillRect(0,0,canvasWidth,canvasHeight);
+            fogCtx.globalCompositeOperation = 'destination-out';
+            fogCtx.beginPath();
+            fogCtx.arc(base.x, base.y, radius, 0, Math.PI*2);
+            fogCtx.fill();
+            fogCtx.globalCompositeOperation = 'source-over';
+            ctx.drawImage(fogCanvas,0,0);
+            break;
+    }
+}
 
 // --- Object Pooling ---
 const ObjectPool = function(objectType, initialSize = 20, resetFunction) {
@@ -2603,6 +2696,9 @@ function drawGame() {
 
     // --- Draw Particles ---
     drawParticles();
+
+    const visibleRadius = Math.max(base.cannonRange, base.sensorRange);
+    applyOverlay(visibleRadius);
 }
 
 // --- Canvas Ring UI Drawing Helper ---
@@ -3310,6 +3406,14 @@ function handleFullscreenChange() {
     canvasHeight = window.innerHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+    if (phaserCanvas) {
+        phaserCanvas.width = canvasWidth;
+        phaserCanvas.height = canvasHeight;
+    }
+    if (fogCanvas) {
+        fogCanvas.width = canvasWidth;
+        fogCanvas.height = canvasHeight;
+    }
     if (base) {
         base.x = canvasWidth / 2;
         base.y = canvasHeight / 2;
@@ -3748,10 +3852,20 @@ function loadAndStartGame() {
     applyTheme(savedThemeIndex); // Apply saved or default theme
 
     // Set mute button state
-    const muteBtn = getElement('muteButton');
-    if (muteBtn) {
-      muteBtn.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
-    }
+  const muteBtn = getElement('muteButton');
+  if (muteBtn) {
+    muteBtn.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
+  }
+
+  overlayButton = getElement('overlayButton');
+  cssOverlay = getElement('cssOverlay');
+  phaserCanvas = getElement('phaserCanvas');
+  if (overlayButton) {
+    overlayButton.addEventListener('click', cycleOverlay);
+    overlayButton.textContent = 'Overlay: ' + OVERLAY_METHODS[overlayMode];
+  }
+  if (cssOverlay) cssOverlay.style.display = 'none';
+  if (phaserCanvas) phaserCanvas.style.display = 'none';
 
 
 
@@ -3771,6 +3885,9 @@ window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for b
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
 })(); // End IIFE
 </script>
+<div id="overlayContainer"></div>
+<canvas id="phaserCanvas"></canvas>
+<div id="cssOverlay"></div>
 <div id="deathOverlay" class="overlay-desaturate" style="display:none"></div>
 <div id="crt-overlay"></div>
 </body>
