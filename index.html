@@ -4207,7 +4207,7 @@ window.addEventListener('touchend', e => {
     }
 });
 
-window.addEventListener('load', () => {
+window.addEventListener('DOMContentLoaded', () => {
 // UI Button Listeners
   getElement('startButton').onclick = startGame;
 getElement('restartButton').onclick = async () => {
