@@ -1061,21 +1061,6 @@ function dismissSensorWarning() {
     showToast('Wave timer started! Enemies approaching just outside your range.', 3000);
 }
 
-function manualSubmitTestScore() {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const initials = Array.from({length:3}, () => letters[Math.floor(Math.random()*26)]).join('');
-    const wave = parseInt(prompt('Wave number', gameState.wave)) || gameState.wave;
-    const time = parseInt(prompt('Time left (seconds)', 0)) || 0;
-    const ranking = wave * 100000 - time;
-    submitScore({ initials, wave, time, ranking }).then(() => {
-        showToast('Test score submitted');
-        getTopScores().then(renderLeaderboard);
-    }).catch(err => {
-        console.error('Failed to submit score', err);
-        showToast('Error saving score', 3000);
-    });
-}
-
 function submitInitials() {
     let initials = getElement('initialsInput').value.toUpperCase();
     if (initials.length === 2) initials += '_';
@@ -1503,14 +1488,6 @@ function initializeGame(shouldTryLoad = true) {
                     level: 0,
                     maxLevel: Infinity,
                     f: () => {},
-                    g: () => ''
-                },
-                {
-                    name: 'Manual Submit Test Score',
-                    cost: 0,
-                    level: 0,
-                    maxLevel: Infinity,
-                    f: manualSubmitTestScore,
                     g: () => ''
                 }
             ]
