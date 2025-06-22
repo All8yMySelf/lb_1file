@@ -3595,8 +3595,15 @@ function updateEnemyStatsPanel(){
     const panel=getElement("enemyStatsPanel");
     const list=getElement("enemyStatsContent");
     let html="";
-    enemyIntel.order.forEach(t=>{const d=enemyIntel.known[t];html+=`<div>${t}: Spd ${d.speed} HP ${d.health}</div>`;});
+    enemyIntel.order.forEach(t=>{
+        const d=enemyIntel.known[t];
+        const hp=sensorUpgrades.showHealthBars?d.health:'?';
+        html+=`<div>${t}: Spd ${d.speed} HP ${hp}</div>`;
+    });
     if(html){
+        if(!sensorUpgrades.showHealthBars){
+            html+=`<div>Purchase Calculate Enemies' Health under Sensors upgrades</div>`;
+        }
         list.innerHTML=html;
     }else if(enemyIntel.active){
         list.innerHTML="<div>Ready - awaiting first enemy scan</div>";
@@ -3629,7 +3636,8 @@ function beep(){
 
 function showEnemyIntelPopup(type,stats){
     const c=getElement("enemyIntelContent");
-    let html=`<div>${type}</div><div>Speed: ${stats.speed}</div><div>Health: ${stats.health}</div><div>Pattern: ${stats.attack}</div>`;
+    const hp=sensorUpgrades.showHealthBars?stats.health:'?';
+    let html=`<div>${type}</div><div>Speed: ${stats.speed}</div><div>Health: ${hp}</div><div>Pattern: ${stats.attack}</div>`;
     if(type==='XP'){
         html+=`<div>You need the Laser and Manual Targeting upgrades to hit this enemy. Click it before it escapes to double your fire rate for 20s.</div>`;
     }
