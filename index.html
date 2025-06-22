@@ -161,7 +161,7 @@
   @keyframes slowBlink { 50% { opacity: 0; } }
   .sub-message { margin-bottom: 1rem; color: var(--button-text); }
   .overlay-desaturate { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: grayscale(1); pointer-events: none; z-index: 99; }
-  #enemyStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; }
+  #enemyStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; }
   #enemyStatsPanel.collapsed #enemyStatsContent { display: none; }
   #enemyStatsHeader { cursor: pointer; }
   #enemyStatsHeader .arrow { margin-left: 4px; }
@@ -757,6 +757,9 @@ let centerReturnStartTime = 0;
 
 // Ring UI Clickable Regions (calculated during draw)
 let ringClickRegions = [];
+
+// Width of the hotkeys panel (measured once when visible)
+let hotkeysWidth = null;
 
 // --- Object Pooling ---
 const ObjectPool = function(objectType, initialSize = 20, resetFunction) {
@@ -3341,6 +3344,11 @@ function updateEnemyStatsPanel(){
     list.innerHTML=html||"<div>Purchase Enemy Identification under Sensors upgrades</div>";
     const hudBar=getElement("hud");
     const hotkeys=getElement("hotkeys");
+    if(hotkeysWidth===null){
+        hotkeysWidth=hotkeys.offsetWidth;
+    }
+    panel.style.width="";
+    panel.style.maxWidth=hotkeysWidth+"px";
     let top=hudBar.offsetHeight+10;
     if(hotkeys.classList.contains("show")) top+=hotkeys.offsetHeight+10;
     panel.style.top=top+"px";
