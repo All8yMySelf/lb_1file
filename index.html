@@ -3238,9 +3238,13 @@ function updateEnemyHUD(info) {
 
     const hudBar = getElement('hud');
     const hotkeys = getElement('hotkeys');
+    const panel = getElement('enemyStatsPanel');
     let top = hudBar.offsetHeight + 10;
     if (hotkeys.classList.contains('show')) {
         top += hotkeys.offsetHeight + 10;
+    }
+    if (panel) {
+        top += panel.offsetHeight + 10;
     }
     hud.style.top = top + 'px';
 
