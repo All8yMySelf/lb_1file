@@ -3215,6 +3215,7 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     sensorUpgrades.enemyVisuals = level > 0;
                     enemyIntel.active = level > 0;
                     if(level===1 && isNewPurchase){ enemyIntel.known = {}; enemyIntel.order = []; identifyClosestEnemyInRange(); }
+                    updateEnemyStatsPanel();
                     break;
                 case UPGRADE_SENSOR_HEALTHBARS:
                     sensorUpgrades.showHealthBars = level > 0;
@@ -3338,7 +3339,13 @@ function updateEnemyStatsPanel(){
     const list=getElement("enemyStatsContent");
     let html="";
     enemyIntel.order.forEach(t=>{const d=enemyIntel.known[t];html+=`<div>${t}: Spd ${d.speed} HP ${d.health}</div>`;});
-    list.innerHTML=html||"<div>Purchase Enemy Identification under Sensors upgrades</div>";
+    if(html){
+        list.innerHTML=html;
+    }else if(enemyIntel.active){
+        list.innerHTML="<div>Ready - awaiting first enemy scan</div>";
+    }else{
+        list.innerHTML="<div>Purchase Enemy Identification under Sensors upgrades</div>";
+    }
     const hudBar=getElement("hud");
     const hotkeys=getElement("hotkeys");
     let top=hudBar.offsetHeight+10;
