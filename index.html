@@ -4106,6 +4106,19 @@ function showTooltipForCanvas(e) {
     if (!text && Math.hypot(x - base.x, y - base.y) <= base.radius) {
         text = 'Your base. Drag to move. Click upgrades.';
     }
+
+    if (!text) {
+        const hovered = enemyPool.getActiveObjects().find(en => Math.hypot(x - en.x, y - en.y) <= en.radius);
+        if (hovered) {
+            if (!sensorUpgrades.enemyVisuals) {
+                text = 'Unknown enemy \u2013 upgrade Sensors for details.';
+            } else {
+                const hp = `${Math.round(hovered.health)}/${Math.round(hovered.maxHealth)}`;
+                text = `${hovered.type}: Spd ${hovered.speed.toFixed(1)} Size ${hovered.radius} HP ${hp}`;
+            }
+        }
+    }
+
     if (text) showTooltip(text, e.pageX, e.pageY); else hideTooltip();
 }
 
