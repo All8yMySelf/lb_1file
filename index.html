@@ -119,6 +119,7 @@
     <h1>Orbital Defence Elite v2.40</h1>
     <button id="startButton">Start Game</button> <!-- Renamed from #b -->
     <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
+    <button id="clearSaveButton" style="display:none;">Clear Save</button>
     <button id="show-leaderboard">Leaderboard</button>
 </div>
 <div id="leaderboard-screen" style="display:none">
@@ -1164,6 +1165,10 @@ function tryLoadGame() {
         console.error('Error loading saved game:', e);
         savedGame = null;
     }
+    // Update visibility of Load and Clear buttons based on save presence
+    const display = savedGame ? 'block' : 'none';
+    getElement('loadButton').style.display = display;
+    getElement('clearSaveButton').style.display = display;
 }
 
 function loadGame() {
@@ -1242,6 +1247,15 @@ function loadGame() {
     }
 
     // Close loadGame function
+}
+
+function clearSavedGame() {
+    localStorage.removeItem('orbitalDefenseGame_v2.9');
+    localStorage.removeItem('orbitalDefenseTheme_v2.9');
+    savedGame = null;
+    getElement('loadButton').style.display = 'none';
+    getElement('clearSaveButton').style.display = 'none';
+    showToast('Save data cleared.');
 }
 
 function formatDate(date) {
@@ -3339,6 +3353,7 @@ getElement('macrossButton').onclick = fireMacrossMissiles;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
 getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
+getElement('clearSaveButton').onclick = clearSavedGame;
 getElement('startFromHighScore').onclick = startGame;
 getElement('initialsInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitInitials();
@@ -3452,11 +3467,7 @@ function loadAndStartGame() {
     ctx.fillStyle = 'rgb(0, 0, 0)';
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       // Try loading save data now, before Start Game is pressed
-        tryLoadGame();
-        // Show Load Game button if save data exists
-    if (savedGame) {
-        getElement('loadButton').style.display = 'block'; // Or 'inline-block' if preferred next to Start
-    }
+    tryLoadGame(); // Button visibility handled within
 };
 
 // --- Global Access (for HTML onclick) ---
