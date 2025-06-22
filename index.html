@@ -83,7 +83,7 @@
   };
 
   // 4) renderLeaderboard populates #leaderboard element with 10 rows
-  window.renderLeaderboard = scores => {
+  window.renderLeaderboard = (scores, highlightIndex = -1) => {
     const container = document.getElementById("leaderboard");
     container.innerHTML = "";
     for (let i = 0; i < 10; i++) {
@@ -93,6 +93,7 @@
       const div = document.createElement("div");
       div.className = "leaderboard-row";
       div.innerHTML = `<span class="rank">${i + 1}.</span> ${row}`;
+      if (i === highlightIndex) div.classList.add('highlight');
       container.appendChild(div);
     }
     document.getElementById("leaderboardLoading").style.display = "none";
@@ -103,7 +104,11 @@
     document.getElementById("show-leaderboard").addEventListener("click", async () => {
     window.showHighScores();
     const scores = await getTopScores();
-    renderLeaderboard(scores);
+    let idx = -1;
+    if (pendingScore && pendingScore.saved) {
+      idx = scores.findIndex(s => s.ranking === pendingScore.ranking);
+    }
+    renderLeaderboard(scores, idx);
     });
 </script>
 
@@ -118,6 +123,7 @@
   #highScoreList li, #gameOverScoreList li, .leaderboard-row { margin: 0.2rem 0; }
   #gameOverScoreList li, .leaderboard-row { text-align: left; }
   .rank { display: inline-block; width: 2ch; }
+  .highlight { background: rgba(255,255,255,0.2); }
   #initialsInput { font-size: 2rem; text-align: center; width: 4ch; background: transparent; border: none; border-bottom: 2px solid var(--button-text); color: var(--button-text); caret-color: var(--button-text); }
   #cheekyMessage { margin: 1rem 0; color: var(--button-text); }
   #leaderboardLoading {
@@ -1062,7 +1068,7 @@ function playSound(audio) {
     }
 }
 
-function renderScoreList(id, scores) {
+function renderScoreList(id, scores, highlightIndex = -1) {
     const list = getElement(id);
     list.innerHTML = '';
     if (scores.length === 0) {
@@ -1077,6 +1083,7 @@ function renderScoreList(id, scores) {
             ? `${scores[i].initials} - Wave ${scores[i].wave} (${scores[i].time ?? 0}s left) - ${scores[i].date}`
             : "&nbsp;";
         li.innerHTML = `<span class="rank">${i + 1}.</span> ${entry}`;
+        if (i === highlightIndex) li.classList.add('highlight');
         list.appendChild(li);
     }
 }
@@ -1118,9 +1125,9 @@ async function submitInitials() {
         getElement('initialsInput').style.display = 'none';
         pendingScore.saved = true;
         const scores = await getTopScores();
-        renderScoreList('gameOverScoreList', scores);
-        const refreshed = await getTopScores();
-        const position = refreshed.findIndex(s => s.ranking === ranking) + 1;
+        const index = scores.findIndex(s => s.ranking === ranking && s.initials === initials);
+        renderScoreList('gameOverScoreList', scores, index);
+        const position = index + 1;
         if (position > 0) {
             getElement('cheekyMessage').textContent = `You placed #${position}!`;
         }
@@ -1610,8 +1617,15 @@ function gameOver() {
     const playerRank = gameState.wave * 100000 - remainingTime;
     pendingScore = { wave: gameState.wave, time: remainingTime, ranking: playerRank, saved: false };
     getTopScores().then(scores => {
-        renderScoreList('gameOverScoreList', scores);
-        const qualifies = scores.length < 10 || playerRank > scores[scores.length - 1].ranking;
+        let index = scores.findIndex(s => playerRank > s.ranking);
+        if (index === -1 && scores.length < 10) index = scores.length;
+        let list = scores.slice();
+        if (index !== -1) {
+            list.splice(index, 0, { initials: '???', wave: gameState.wave, time: remainingTime, date: formatDate(new Date()) });
+            list = list.slice(0, 10);
+        }
+        renderScoreList('gameOverScoreList', list, index);
+        const qualifies = index !== -1;
         if (qualifies) {
             getElement('initialsInput').style.display = 'block';
             getElement('cheekyMessage').textContent = 'Hey, you scored in the top 10! Please enter your initials.';
