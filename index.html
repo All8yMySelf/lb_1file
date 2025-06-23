@@ -176,6 +176,10 @@
   #xpStatsPanel.collapsed #xpStatsContent { display: none; }
   #xpStatsHeader { cursor: pointer; }
   #xpStatsHeader .arrow { margin-left: 4px; }
+  #waveStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; }
+  #waveStatsPanel.collapsed #waveStatsContent { display: none; }
+  #waveStatsHeader { cursor: pointer; }
+  #waveStatsHeader .arrow { margin-left: 4px; }
   .timer-blink { animation: timerBlink 1s steps(2,end) infinite; }
   @keyframes timerBlink { 50% { opacity: 0; } }
   #tooltip {
@@ -255,6 +259,10 @@
 <div id="xpStatsPanel" class="collapsed">
   <div id="xpStatsHeader">XP Status <span id="xpStatsToggle" class="arrow">▾</span></div>
   <div id="xpStatsContent"></div>
+</div>
+<div id="waveStatsPanel" class="collapsed">
+  <div id="waveStatsHeader">Wave Status <span id="waveStatsToggle" class="arrow">▾</span></div>
+  <div id="waveStatsContent"></div>
 </div>
 <div id="sensorWarning" style="display:none">
     <p>The ring around your base shows your cannon's visual firing range. The cannon cannot target enemies beyond this radius. Click on the "Cannon" to upgrade the cannon's abilities.</p>
@@ -1212,6 +1220,7 @@ function spawnXPEnemy(waveNumber) {
     });
     gameState.xpEnemiesSpawned++;
     updateXPStatsPanel();
+    updateWaveStatsPanel();
 }
 
 function handleEnemyKilled(enemy) {
@@ -1366,6 +1375,7 @@ function updateHUD() {
     getElement('waveDisplay').textContent = `Wave: ${waveText} | ${countdownText}`;
 
     updateXPStatsPanel();
+    updateWaveStatsPanel();
 
     // Button state can be adjusted elsewhere if needed
 }
@@ -1810,6 +1820,14 @@ function initializeGame(shouldTryLoad = true) {
                     cost: 0,
                     level: 0,
                     maxLevel: Infinity,
+                    f: () => {},
+                    g: () => ''
+                },
+                {
+                    name: 'Toggle Wave Status',
+                    cost: 0,
+                    level: 0,
+                    maxLevel: 1,
                     f: () => {},
                     g: () => ''
                 }
@@ -3415,9 +3433,13 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     const upgrade = upgradeTree[categoryIndex].upgrades[upgradeIndex];
 
     if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
-        gameState.credits += 100000;
-        updateHUD();
-        showToast('Cheated 100,000 credits!');
+        if (upgradeIndex === 0) {
+            gameState.credits += 100000;
+            updateHUD();
+            showToast('Cheated 100,000 credits!');
+        } else {
+            toggleWaveStatsPanel();
+        }
         return;
     }
 
@@ -3636,6 +3658,7 @@ function fireLaserAt(target) {
             gameState.doubleFireRateEndTime = Date.now() + 20000;
             gameState.xpEnemiesDestroyed++;
             updateXPStatsPanel();
+            updateWaveStatsPanel();
             showToast('Fire rate doubled!', 3000);
         }
         updateHUD();
@@ -3841,6 +3864,40 @@ function updateXPStatsPanel(){
 function toggleXPStatsPanel(){
     const p=getElement("xpStatsPanel");
     const arrow=getElement("xpStatsToggle");
+    p.classList.toggle("collapsed");
+    arrow.textContent=p.classList.contains("collapsed")?'▸':'▾';
+}
+
+function updateWaveStatsPanel(){
+    const panel=getElement("waveStatsPanel");
+    if(!panel) return;
+    const content=getElement("waveStatsContent");
+    if(activeWaves.length===0){
+        panel.style.display="none";
+        return;
+    }
+    panel.style.display="block";
+    const xpPanel=getElement("xpStatsPanel");
+    panel.style.width="";
+    panel.style.maxWidth=hotkeysWidth===null?"" : hotkeysWidth+"px";
+    panel.style.top=(xpPanel.offsetTop+xpPanel.offsetHeight+10)+"px";
+    const enemies=enemyPool.getActiveObjects().filter(e=>!e.xp);
+    let html="";
+    activeWaves.forEach(w=>{
+        const state=waveStates[w]||{};
+        const count=enemies.filter(e=>e.wave===w).length;
+        const boss=waveBossAlive[w]?1:0;
+        const rem=Math.max(0,(state.duration||0)-(state.elapsedTime||0));
+        const m=Math.floor(rem/60);
+        const s=Math.floor(rem%60).toString().padStart(2,'0');
+        html+=`<div>Wave ${w}: ${count}/${boss} - ${m}:${s}</div>`;
+    });
+    content.innerHTML=html;
+}
+
+function toggleWaveStatsPanel(){
+    const p=getElement("waveStatsPanel");
+    const arrow=getElement("waveStatsToggle");
     p.classList.toggle("collapsed");
     arrow.textContent=p.classList.contains("collapsed")?'▸':'▾';
 }
@@ -4162,6 +4219,7 @@ getElement('sensorWarningButton').onclick = dismissSensorWarning;
 getElement("enemyIntelContinue").onclick=hideEnemyIntelPopup;
 getElement("enemyStatsHeader").onclick=toggleEnemyStatsPanel;
 getElement("xpStatsHeader").onclick=toggleXPStatsPanel;
+getElement("waveStatsHeader").onclick=toggleWaveStatsPanel;
 getElement('playPauseButton').onclick = () => {
     if (infoModeActive) {
         infoModeActive = false;
