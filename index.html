@@ -1224,7 +1224,7 @@ function handleEnemyKilled(enemy) {
             if (e.xp) enemyPool.release(e);
         });
     }
-    const enemies = enemyPool.getActiveObjects();
+    const enemies = enemyPool.getActiveObjects().filter(e => !e.xp);
     if (!enemies.some(e => e.wave === enemy.wave)) {
         const idx = activeWaves.indexOf(enemy.wave);
         if (idx !== -1) activeWaves.splice(idx, 1);
