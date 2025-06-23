@@ -1840,7 +1840,13 @@ function startGame() {
     getElement('playPauseButton').textContent = '\u25B6'; // Show play icon while paused
     drawGame();
     updateHUD();
-    showSensorWarning();
+    // Show the sensor tutorial only once per browser
+    if (!localStorage.getItem('sensorIntroSeen')) {
+        showSensorWarning();
+        localStorage.setItem('sensorIntroSeen', 'yes');
+    } else {
+        dismissSensorWarning();   // jump straight into the game
+    }
 }
 
 function startDeathSequence() {
