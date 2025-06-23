@@ -1287,6 +1287,7 @@ function showHighScores() {
     getElement('leaderboard-screen').style.display = 'flex';
     getElement('leaderboardLoading').style.display = 'block';
     getElement('deathOverlay').style.display = 'none';
+    playCurrentTrack();
     listenToLeaderboard(renderLeaderboard);
 }
 
@@ -1821,6 +1822,7 @@ function startGame() {
     window.pendingScore = null;
     unlistenLeaderboard();
     initializeGame(true); // Initialize with saved game check
+    playCurrentTrack();
     getElement('startScreen').style.display = 'none';
     getElement('leaderboard-screen').style.display = 'none';
     getElement('gameOverScreen').style.display = 'none';
@@ -4319,7 +4321,6 @@ function loadAndStartGame() {
   const volumeSlider = getElement("musicVolume");
   if(volumeSlider) volumeSlider.value = musicVolume;
   updateTrackDisplay();
-  playCurrentTrack();
 
     updateSpeedDisplay();
 
