@@ -3887,9 +3887,13 @@ function updateWaveStatsPanel(){
     }
     panel.style.display="block";
     const xpPanel=getElement("xpStatsPanel");
+    const enemyPanel=getElement("enemyStatsPanel");
     panel.style.width="";
     panel.style.maxWidth=hotkeysWidth===null?"" : hotkeysWidth+"px";
-    panel.style.top=(xpPanel.offsetTop+xpPanel.offsetHeight+10)+"px";
+    const baseTop=(xpPanel.style.display==="none"||xpPanel.offsetHeight===0)
+        ? enemyPanel.offsetTop+enemyPanel.offsetHeight
+        : xpPanel.offsetTop+xpPanel.offsetHeight;
+    panel.style.top=(baseTop+10)+"px";
     const enemies=enemyPool.getActiveObjects().filter(e=>!e.xp);
     let html="";
     activeWaves.forEach(w=>{
