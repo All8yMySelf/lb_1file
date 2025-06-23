@@ -3880,8 +3880,8 @@ function updateWaveStatsPanel(){
     const panel=getElement("waveStatsPanel");
     if(!panel) return;
     const content=getElement("waveStatsContent");
-    const showPanel = debugUpgradesVisible || activeWaves.length > 1;
-    if(!showPanel || activeWaves.length === 0){
+    const showPanel = activeWaves.length > 0;
+    if(!showPanel){
         panel.style.display="none";
         return;
     }
@@ -4002,12 +4002,6 @@ window.addEventListener('keydown', e => {
             case 'i': toggleEnemyStatsPanel(); break;
             case 'q':
                 debugUpgradesVisible = !debugUpgradesVisible;
-                const wavePanel=getElement('waveStatsPanel');
-                if(debugUpgradesVisible){
-                    wavePanel.style.display='block';
-                }else{
-                    wavePanel.style.display='none';
-                }
                 updateWaveStatsPanel();
                 drawGame();
                 break; // Hidden toggle for debug upgrades
