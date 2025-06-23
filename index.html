@@ -2505,7 +2505,10 @@ function startNextWave() {
 }
 
 function checkWaveCompletion(dt) {
-    const enemies = enemyPool.getActiveObjects().filter(e => !e.xp);
+    const allEnemies = enemyPool.getActiveObjects();
+    const xpEnemyActive = allEnemies.some(e => e.xp);
+    const enemies = allEnemies.filter(e => !e.xp);
+
     activeWaves = activeWaves.filter(w => {
         const state = waveStates[w];
         const hasEnemies = enemies.some(e => e.wave === w);
@@ -2518,7 +2521,8 @@ function checkWaveCompletion(dt) {
         }
         return true;
     });
-    if (enemies.length === 0 && activeWaves.length === 0) {
+
+    if (enemies.length === 0 && activeWaves.length === 0 && !xpEnemyActive) {
         startNextWave();
     }
 }
