@@ -47,7 +47,8 @@ await new Promise((resolve) => {
 
 // Extract required game logic from the HTML
 const showWarnMatch = html.match(/function showSensorWarning\(\)[\s\S]*?\}/);
-const startGameMatch = html.match(/function startGame\(\)[\s\S]*?showSensorWarning\(\);\n\}/);
+// Grab the entire startGame function regardless of internal contents
+const startGameMatch = html.match(/function startGame\(\)[\s\S]*?\n\}/);
 if (!showWarnMatch || !startGameMatch) {
   throw new Error('Required game functions not found');
 }
