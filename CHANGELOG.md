@@ -1,8 +1,5 @@
 # Orbital Defence Elite - Change Log
 
-## v2.42
-- Info upgrade uses a standalone layout without connecting lines.
-
 ## v2.41
 - XP enemy despawns instantly when a boss is destroyed.
 
