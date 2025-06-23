@@ -260,7 +260,7 @@
   <div id="xpStatsHeader">XP Status <span id="xpStatsToggle" class="arrow">▾</span></div>
   <div id="xpStatsContent"></div>
 </div>
-<div id="waveStatsPanel" class="collapsed">
+<div id="waveStatsPanel" style="display:none">
   <div id="waveStatsHeader">Wave Status <span id="waveStatsToggle" class="arrow">▾</span></div>
   <div id="waveStatsContent"></div>
 </div>
@@ -677,7 +677,8 @@ const CONFIG = {
     TARGET_LOCK_DURATION: 300, // ms brackets stay red this long after targeting
     AUTO_SAVE_INTERVAL: 60000, // ms (1 minute)
     DRAG_THRESHOLD: 5, // pixels to initiate drag vs click (default)
-    CANVAS_CLICK_TOLERANCE: 20 // pixels tolerance for clicking ring UI
+    CANVAS_CLICK_TOLERANCE: 20, // pixels tolerance for clicking ring UI
+    ENEMY_SPAWN_RATE_PER_SECOND: 1.8
 };
 // Increase drag threshold on touch devices to make tapping upgrades easier
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -708,7 +709,8 @@ const {
   TARGET_LOCK_DURATION,
   AUTO_SAVE_INTERVAL,
   DRAG_THRESHOLD,
-  CANVAS_CLICK_TOLERANCE
+  CANVAS_CLICK_TOLERANCE,
+  ENEMY_SPAWN_RATE_PER_SECOND
 } = CONFIG;
 // Upgrade Category Indices
 const UPGRADE_CATEGORY_CANNON = 0;
@@ -1228,6 +1230,7 @@ function handleEnemyKilled(enemy) {
         waveBossAlive[enemy.wave] = false;
         if (waveStates[enemy.wave]) {
             waveStates[enemy.wave].bossAlive = false;
+            waveStates[enemy.wave].remainingBosses = 0;
         }
         if (enemy.wave === gameState.wave) {
             startNextWave();
@@ -1235,6 +1238,11 @@ function handleEnemyKilled(enemy) {
         enemyPool.getActiveObjects().forEach(e => {
             if (e.xp) enemyPool.release(e);
         });
+    }
+    if (!enemy.xp && waveStates[enemy.wave]) {
+        if (enemy.type !== 'Boss' && waveStates[enemy.wave].remainingEnemies > 0) {
+            waveStates[enemy.wave].remainingEnemies--;
+        }
     }
     const enemies = enemyPool.getActiveObjects().filter(e => !e.xp);
     if (!enemies.some(e => e.wave === enemy.wave)) {
@@ -1605,6 +1613,7 @@ function initializeGame(shouldTryLoad = true) {
 
     activeWaves = [1];
     waveBossAlive = { 1: false };
+    const initialTotalEnemies = Math.round(WAVE_BASE_DURATION * ENEMY_SPAWN_RATE_PER_SECOND);
     waveStates = {
         1: {
             elapsedTime: 0,
@@ -1613,7 +1622,11 @@ function initializeGame(shouldTryLoad = true) {
             xpSpawnTime: Math.random() * (WAVE_BASE_DURATION - 2),
             xpSpawned: false,
             bossAlive: false,
-            spawned: 0
+            spawned: 0,
+            totalEnemies: initialTotalEnemies,
+            remainingEnemies: initialTotalEnemies,
+            totalBosses: 1,
+            remainingBosses: 1
         }
     };
     completedWaves = {};
@@ -1820,14 +1833,6 @@ function initializeGame(shouldTryLoad = true) {
                     cost: 0,
                     level: 0,
                     maxLevel: Infinity,
-                    f: () => {},
-                    g: () => ''
-                },
-                {
-                    name: 'Toggle Wave Status',
-                    cost: 0,
-                    level: 0,
-                    maxLevel: 1,
                     f: () => {},
                     g: () => ''
                 }
@@ -2144,12 +2149,12 @@ function spawnNewEnemies(dt) {
             }
         }
 
-        if (!state.isBossWave && state.elapsedTime >= state.duration) {
+        if (!state.isBossWave && state.elapsedTime >= state.duration && state.spawned >= state.totalEnemies) {
             console.log(`[wave ${waveStr}] boss spawned`);
             spawnEnemy(true, Number(waveStr));
             state.isBossWave = true;
             showToast('Boss Wave!', 3000);
-        } else if (!state.isBossWave && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) {
+        } else if (!state.isBossWave && state.spawned < state.totalEnemies && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) {
             spawnEnemy(false, Number(waveStr));
         }
     }
@@ -2509,6 +2514,7 @@ function startNextWave() {
     gameState.waveElapsedTime = 0;
     gameState.xpEnemySpawned = false;
     gameState.xpEnemySpawnTime = Math.random() * (duration - 2);
+    const totalEnemies = Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND);
     waveStates[gameState.wave] = {
         elapsedTime: 0,
         duration,
@@ -2516,7 +2522,11 @@ function startNextWave() {
         xpSpawnTime: gameState.xpEnemySpawnTime,
         xpSpawned: false,
         bossAlive: false,
-        spawned: 0
+        spawned: 0,
+        totalEnemies,
+        remainingEnemies: totalEnemies,
+        totalBosses: 1,
+        remainingBosses: 1
     };
     activeWaves.push(gameState.wave);
     waveBossAlive[gameState.wave] = false;
@@ -2527,13 +2537,12 @@ function startNextWave() {
 
 function checkWaveCompletion(dt) {
     const allEnemies = enemyPool.getActiveObjects();
-    const xpEnemyActive = allEnemies.some(e => e.xp);
     const enemies = allEnemies.filter(e => !e.xp);
 
     activeWaves = activeWaves.filter(w => {
         const state = waveStates[w];
         const hasEnemies = enemies.some(e => e.wave === w);
-        if (!hasEnemies && state && state.spawned > 0 && !state.bossAlive) {
+        if (state && state.remainingEnemies <= 0 && state.remainingBosses <= 0 && !hasEnemies) {
             const remaining = Math.floor(Math.max(0, state.duration - state.elapsedTime));
             completedWaves[w] = remaining;
             if (w > completedWave) completedWave = w;
@@ -2543,7 +2552,7 @@ function checkWaveCompletion(dt) {
         return true;
     });
 
-    if (enemies.length === 0 && activeWaves.length === 0 && !xpEnemyActive) {
+    if (activeWaves.length === 0) {
         startNextWave();
     }
 }
@@ -3872,7 +3881,7 @@ function updateWaveStatsPanel(){
     const panel=getElement("waveStatsPanel");
     if(!panel) return;
     const content=getElement("waveStatsContent");
-    if(activeWaves.length===0){
+    if(!debugUpgradesVisible || activeWaves.length===0){
         panel.style.display="none";
         return;
     }
@@ -3885,8 +3894,8 @@ function updateWaveStatsPanel(){
     let html="";
     activeWaves.forEach(w=>{
         const state=waveStates[w]||{};
-        const count=enemies.filter(e=>e.wave===w).length;
-        const boss=waveBossAlive[w]?1:0;
+        const count=state.remainingEnemies!==undefined?state.remainingEnemies:enemies.filter(e=>e.wave===w).length;
+        const boss=state.remainingBosses!==undefined?state.remainingBosses:(waveBossAlive[w]?1:0);
         const rem=Math.max(0,(state.duration||0)-(state.elapsedTime||0));
         const m=Math.floor(rem/60);
         const s=Math.floor(rem%60).toString().padStart(2,'0');
@@ -3989,6 +3998,13 @@ window.addEventListener('keydown', e => {
             case 'i': toggleEnemyStatsPanel(); break;
             case 'q':
                 debugUpgradesVisible = !debugUpgradesVisible;
+                const wavePanel=getElement('waveStatsPanel');
+                if(debugUpgradesVisible){
+                    wavePanel.style.display='block';
+                }else{
+                    wavePanel.style.display='none';
+                }
+                updateWaveStatsPanel();
                 drawGame();
                 break; // Hidden toggle for debug upgrades
             case 'o': toggleRingInfoDisplay(); break; // Toggle info anytime
