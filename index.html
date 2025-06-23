@@ -1220,6 +1220,9 @@ function handleEnemyKilled(enemy) {
         if (waveStates[enemy.wave]) {
             waveStates[enemy.wave].bossAlive = false;
         }
+        if (enemy.wave === gameState.wave) {
+            startNextWave();
+        }
         enemyPool.getActiveObjects().forEach(e => {
             if (e.xp) enemyPool.release(e);
         });
