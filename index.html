@@ -1640,7 +1640,6 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Fire Rate', cost: 100, level: 0, maxLevel: 15,
-                  description: 'Reduces seconds between shots. Recommended along with Damage before wave 1.',
                   f: level => 1000 / (5 + level),
                   g: (level, cost, maxLvl) => {
                       const currentRate = 5 + level;
@@ -1648,19 +1647,15 @@ function initializeGame(shouldTryLoad = true) {
                       return `${currentRate}s${level < maxLvl ? ` > ${nextRate}s` : ''}`;
                   }},
                 { name: 'Damage', cost: 150, level: 0, maxLevel: 10,
-                  description: 'Increases bullet damage. Pair with Fire Rate early.',
                   f: level => 1 + level, // Damage = 1 + level
                   g: (level, cost, maxLvl) => `${1 + level}${level < maxLvl ? ` > ${2 + level}` : ''}` },
                 { name: 'Range', cost: 250, level: 0, maxLevel: 10,
-                  description: 'Extends cannon range by 5% each level.',
                   f: level => initialRange * Math.pow(1.05, level),
                   g: (level, cost, maxLvl) => `${Math.round(initialRange * Math.pow(1.05, level))}${level < maxLvl ? ` > ${Math.round(initialRange * Math.pow(1.05, level + 1))}` : ''}` },
                 { name: 'Guns', cost: 12000, level: 0, maxLevel: 5, // Starts at 1 gun implicitly
-                  description: 'Adds an extra barrel for more bullets.',
                   f: level => level + 1, // Guns = 1 + level
                   g: (level, cost, maxLvl) => `${1 + level}${level < maxLvl ? ` > ${2 + level}` : ''} guns` },
                 { name: 'Focus Radius', cost: 500, level: 0, maxLevel: 9, progressBar: true,
-                  description: 'Prioritize enemies within this portion of range.',
                   f: level => level === 0 ? 0 : 0.2 + 0.1 * (level - 1),
                   g: (level, cost, maxLvl) => {
                       const current = level === 0 ? 0 : 20 + (level - 1) * 10;
@@ -1674,11 +1669,9 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Health', cost: 200, level: 0, maxLevel: 10,
-                  description: 'Raises base health by 50 per level.',
                   f: level => 100 + 50 * level,
                   g: (level, cost, maxLvl) => `${100 + 50 * level}${level < maxLvl ? ` > ${150 + 50 * level}` : ''}` },
                 { name: 'Movement', cost: 300, level: 0, maxLevel: 5,
-                  description: 'Improves movement speed for easier dodging.',
                   f: level => BASE_INITIAL_MOVE_SPEED + level * BASE_MOVE_SPEED_INCREMENT,
                   g: (level, cost, maxLvl) => {
                       const current = BASE_INITIAL_MOVE_SPEED + level * BASE_MOVE_SPEED_INCREMENT;
@@ -1692,7 +1685,6 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Damage', cost: 2000, level: 0, maxLevel: 6,
-                  description: 'Unlocks and doubles laser damage each level.',
                   f: level => level === 0 ? 0 : 15 * Math.pow(2, level - 1), // Damage doubles
                   g: (level, cost, maxLvl) => {
                       const currentDmg = level === 0 ? 0 : 15 * Math.pow(2, level - 1);
@@ -1701,7 +1693,6 @@ function initializeGame(shouldTryLoad = true) {
                       return `${currentDmg}${level < maxLvl ? ` > ${nextDmg}` : ''}`;
                    }},
                 { name: 'Manual Targeting', cost: 2000, level: 0, maxLevel: 1,
-                  description: 'Control laser aim with the mouse.',
                   f: level => level,
                   g: (level) => level > 0 ? 'Enabled' : 'Off' }
             ]
@@ -1711,7 +1702,6 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Missiles', cost: 2000, level: 0, maxLevel: 6,
-                  description: 'Activates missile launcher and adds one missile.',
                   f: level => level,
                   g: (level, cost, maxLvl) => {
                        if (level === 0) return '(Activate)';
@@ -1720,15 +1710,12 @@ function initializeGame(shouldTryLoad = true) {
                        return `${currentCount}${level < maxLvl ? ` > ${nextCount}` : ''}`;
                   }},
                 { name: 'Radius', cost: 1500, level: 0, maxLevel: 5, // Requires missile system active
-                  description: 'Extends targeting radius for missiles.',
                   f: level => base.cannonRange * (1 + 0.1 * level), // Scales with cannon range
                   g: (level, cost, maxLvl) => `${Math.round(base.cannonRange * (1 + 0.1 * level))}${level < maxLvl ? ` > ${Math.round(base.cannonRange * (1 + 0.1 * (level + 1)))}` : ''}` },
                 { name: 'Damage', cost: 2500, level: 0, maxLevel: 5, // Requires missile system active
-                  description: 'Adds 5 damage to each missile.',
                   f: level => 10 + 5 * level,
                   g: (level, cost, maxLvl) => `${10 + 5 * level}${level < maxLvl ? ` > ${15 + 5 * level}` : ''}` },
                 { name: 'Homing', cost: 3000, level: 0, maxLevel: 5, // Requires missile system active
-                  description: 'Missiles turn faster toward targets.',
                   f: level => level === 0 ? 0 : 20 * level,
                   g: (level, cost, maxLvl) => {
                       if (level === 0) return '(Activate)';
@@ -1737,7 +1724,6 @@ function initializeGame(shouldTryLoad = true) {
                       return `${currentPct}%${level < maxLvl ? ` > ${nextPct}%` : ''}`;
                   }},
                 { name: 'Macros', cost: 5000, level: 0, maxLevel: 5,
-                  description: 'Launch huge barrages with shorter cooldown.',
                   f: level => level === 0 ? 0 : 50 * Math.pow(2, level - 1), // Num missiles 0 -> 50 -> 100 -> ...
                   g: (level, cost, maxLvl) => {
                       if (level === 0) return '(Activate)';
@@ -1756,7 +1742,6 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Stun Field', cost: 2000, level: 0, maxLevel: 9, // Max 90% slow
-                  description: 'Creates a field that slows nearby enemies.',
                   f: level => level * 0.1, // Returns the slow factor (0 to 0.9)
                   g: (level, cost, maxLvl) => `${level * 10}%${level < maxLvl ? `>${(level + 1) * 10}%` : ''}` }
             ]
@@ -1766,7 +1751,6 @@ function initializeGame(shouldTryLoad = true) {
             expanded: false,
             upgrades: [
                 { name: 'Electronic FOV', cost: 50, level: 0, maxLevel: 20,
-                  description: 'Expands sensor radius by 10% per level.',
                   f: level => 1 + 0.1 * level,
                   g: (level, cost, maxLvl) => {
                       const current = Math.round((1 + 0.1 * level) * 100);
@@ -1774,15 +1758,12 @@ function initializeGame(shouldTryLoad = true) {
                       return `${current}%${level < maxLvl ? ` > ${next}%` : ''}`;
                   } },
                 { name: 'Enemy Identification', cost: 100, level: 0, maxLevel: 1,
-                  description: 'Shows outlines around enemies.',
                   f: level => level > 0,
                   g: (level) => level > 0 ? 'On' : '(Enable)' },
                 { name: 'Calculate Enemies\u2019 Health', cost: 500, level: 0, maxLevel: 1,
-                  description: 'Displays health bars over foes.',
                   f: level => level > 0,
                   g: (level) => level > 0 ? 'On' : '(Enable)' },
                 { name: 'Target Analysis AI', cost: 3000, level: 0, maxLevel: 1,
-                  description: 'Prevents overkill by tracking damage.',
                   f: level => level > 0,
                   g: (level) => level > 0 ? 'Active' : '(Install)' }
             ]
@@ -1790,10 +1771,8 @@ function initializeGame(shouldTryLoad = true) {
         { // Category 6: Info
             category: "Info / How To Play",
             expanded: false,
-            standalone: true,
             upgrades: [
                 { name: 'Info / How To Play', cost: 0, level: 0, maxLevel: 1,
-                  description: 'Opens a quick reference guide.',
                   f: level => level,
                   g: level => level ? 'Active' : '(Start)' }
             ]
@@ -1807,7 +1786,6 @@ function initializeGame(shouldTryLoad = true) {
                     cost: 0,
                     level: 0,
                     maxLevel: Infinity,
-                    description: 'Grants credits instantly for testing.',
                     f: () => {},
                     g: () => ''
                 }
@@ -1840,13 +1818,7 @@ function startGame() {
     getElement('playPauseButton').textContent = '\u25B6'; // Show play icon while paused
     drawGame();
     updateHUD();
-    // Show the sensor tutorial only once per browser
-    if (!localStorage.getItem('sensorIntroSeen')) {
-        showSensorWarning();
-        localStorage.setItem('sensorIntroSeen', 'yes');
-    } else {
-        dismissSensorWarning();   // jump straight into the game
-    }
+    showSensorWarning();
 }
 
 function startDeathSequence() {
@@ -2887,33 +2859,6 @@ function drawGame() {
     // --- Draw Ring UI (Directly on Canvas) ---
     ringClickRegions = []; // Clear regions each frame
 
-    // Map visible range rings to descriptions for tooltips
-    const ringInfo = [
-        {radius: base.cannonRange, text: 'Cannon range'},
-        base.missileCount > 0 && base.missileTargetingRadius > 0 ?
-            {radius: base.missileTargetingRadius, text: 'Missile homing radius'} : null,
-        base.laserDamage > 0 && base.laserRange > 0 ?
-            {radius: base.laserRange, text: 'Laser range'} : null,
-        base.stunLevel > 0 && base.stunRadius > 0 ?
-            {radius: base.stunRadius, text: 'Stun radius'} : null,
-        base.focusRadiusSetting > 0 ?
-            {radius: base.cannonRange * base.focusRadiusSetting, text: 'Focused cannon radius'} : null,
-        base.sensorRange > base.cannonRange ?
-            {radius: base.sensorRange, text: 'Sensor range'} : null
-    ].filter(Boolean);
-
-    ringInfo.forEach(r => {
-        ringClickRegions.push({
-            type: 'radius_ring',
-            x: base.x - r.radius,
-            y: base.y - r.radius,
-            width: r.radius * 2,
-            height: r.radius * 2,
-            radius: r.radius,
-            text: r.text
-        });
-    });
-
     // --- Draw Collapsible Upgrade Categories ---
     const menuX = 10;
     let currentY = 60;
@@ -3091,51 +3036,8 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
     ctx.textAlign = 'left';
 
     if (isExpanded) {
-        if (category.standalone) {
-            const u = category.upgrades[0];
-            const stats = u.g(u.level, u.cost, u.maxLevel);
-            const lines = `${u.name}: ${stats}`.split('\n');
-            if (u.level < u.maxLevel) {
-                if (u.cost > 0) {
-                    lines.push(`Cost: $${u.cost}`);
-                }
-            } else {
-                lines.push('MAX');
-            }
-            const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
-            const buttonWidth = Math.max(150, textWidth + padding * 2);
-            const buttonHeight = lines.length * fontSize + padding * 2;
-            const btnX = x + boxWidth + 20;
-            const btnY = y;
-            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
-            ctx.fillRect(btnX, btnY, buttonWidth, buttonHeight);
-            ctx.strokeStyle = color;
-            ctx.strokeRect(btnX, btnY, buttonWidth, buttonHeight);
-
-            let canAfford = gameState.credits >= u.cost && u.level < u.maxLevel;
-            if (canAfford) {
-                ctx.fillStyle = 'rgba(0,255,0,0.2)';
-                ctx.fillRect(btnX, btnY, buttonWidth, buttonHeight);
-            }
-            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
-            let textY = btnY + padding;
-            lines.forEach(line => {
-                ctx.fillText(line, btnX + padding, textY);
-                textY += fontSize;
-            });
-
-            ringClickRegions.push({
-                type: 'collapsible_upgrade_button',
-                x: btnX,
-                y: btnY,
-                width: buttonWidth,
-                height: buttonHeight,
-                categoryIndex: categoryIndex,
-                upgradeIndex: 0
-            });
-        } else {
-            const connectX = x + boxWidth + 10;
-            const panelX = connectX + 10;
+        const connectX = x + boxWidth + 10;
+        const panelX = connectX + 10;
 
         const buttons = [];
         let focusButton = null;
@@ -4115,14 +4017,8 @@ function showTooltipForCanvas(e) {
 
     let text = null;
     for (const region of ringClickRegions) {
-        if (region.type === 'radius_ring') {
-            const dist = Math.hypot(x - base.x, y - base.y);
-            if (Math.abs(dist - region.radius) <= 5) {
-                text = region.text;
-                break;
-            }
-        } else if (x >= region.x && x <= region.x + (region.width||0) &&
-                   y >= region.y && y <= region.y + (region.height||0)) {
+        if (x >= region.x && x <= region.x + (region.width||0) &&
+            y >= region.y && y <= region.y + (region.height||0)) {
             if (region.type === 'collapsible_upgrade_header') {
                 text = upgradeTree[region.categoryIndex].category;
             } else if (region.type === 'upgrade_button' || region.type === 'collapsible_upgrade_button') {
@@ -4130,11 +4026,7 @@ function showTooltipForCanvas(e) {
                 if (region.categoryIndex === UPGRADE_CATEGORY_INFO && region.upgradeIndex === UPGRADE_INFO_HELP) {
                     text = 'Hover over elements for tips. Click again or press Play to resume.';
                 } else {
-                    let details = up.g(up.level, up.cost, up.maxLevel);
-                    if (up.description) {
-                        details = details ? `${details} - ${up.description}` : up.description;
-                    }
-                    text = up.name + ': ' + details;
+                    text = up.name + ': ' + up.g(up.level, up.cost, up.maxLevel);
                 }
             } else if (region.type === 'focus_notch') {
                 text = 'Set focus radius';
@@ -4145,19 +4037,6 @@ function showTooltipForCanvas(e) {
     if (!text && Math.hypot(x - base.x, y - base.y) <= base.radius) {
         text = 'Your base. Drag to move. Click upgrades.';
     }
-
-    if (!text) {
-        const hovered = enemyPool.getActiveObjects().find(en => Math.hypot(x - en.x, y - en.y) <= en.radius);
-        if (hovered) {
-            if (!sensorUpgrades.enemyVisuals) {
-                text = 'Unknown enemy \u2013 upgrade Sensors for details.';
-            } else {
-                const hp = `${Math.round(hovered.health)}/${Math.round(hovered.maxHealth)}`;
-                text = `${hovered.type}: Spd ${hovered.speed.toFixed(1)} Size ${hovered.radius} HP ${hp}`;
-            }
-        }
-    }
-
     if (text) showTooltip(text, e.pageX, e.pageY); else hideTooltip();
 }
 
@@ -4213,9 +4092,9 @@ window.addEventListener('touchend', e => {
     }
 });
 
-window.addEventListener('DOMContentLoaded', () => {
+
 // UI Button Listeners
-  getElement('startButton').onclick = startGame;
+getElement('startButton').onclick = startGame;
 getElement('restartButton').onclick = async () => {
     if (window.pendingScore && !window.pendingScore.saved) {
         try {
@@ -4289,16 +4168,7 @@ const tooltipTexts = {
   sensorDisplayToggle: 'Switch enemy info mode',
   fullscreenButton: 'Toggle fullscreen',
   muteButton: 'Mute sounds',
-  sendWaveButton: 'Send the next enemy wave',
-
-  startButton: 'Begin a new game',
-  restartButton: 'Restart after game over',
-  loadButton: 'Load saved progress',
-  clearSaveButton: 'Delete saved progress',
-  startFromHighScore: 'Play starting from this score',
-  sensorWarningButton: 'Dismiss warning',
-  enemyIntelContinue: 'Close intel popup'
-
+  sendWaveButton: 'Send the next enemy wave'
 };
 Object.entries(tooltipTexts).forEach(([id,text])=>{
   const el=getElement(id);
@@ -4307,8 +4177,6 @@ Object.entries(tooltipTexts).forEach(([id,text])=>{
     el.addEventListener(evt,e=>{ if(infoModeActive) showTooltip(text,e.pageX,e.pageY); });
   });
   el.addEventListener('mouseleave', hideTooltip);
-});
-
 });
 
 // Window Resize
@@ -4389,7 +4257,7 @@ function loadAndStartGame() {
 
 
 // Initial setup on load
-  window.addEventListener('load', () => {
+  window.onload = () => {
     // Preload pixel font if needed (optional, adds dependency)
     // const fontLink = document.createElement('link');
     // fontLink.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
@@ -4422,12 +4290,12 @@ function loadAndStartGame() {
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       // Try loading save data now, before Start Game is pressed
     tryLoadGame(); // Button visibility handled within
-  });
+};
 
 // --- Global Access (for HTML onclick) ---
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
-}})(); // End IIFE
+})(); // End IIFE
 </script>
 <div id="deathOverlay" class="overlay-desaturate" style="display:none"></div>
 <div id="crt-overlay"></div>
