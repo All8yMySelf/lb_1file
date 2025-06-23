@@ -34,14 +34,15 @@ similar to the example below:
 }
 ```
 
+Before deploying your own version, open `index.html` and replace the example values in the `firebaseConfig` object with your project credentials. Use `database.rules.json` as a template for defining your security rules.
+
 Scores are ranked using the formula `ranking = wave * 100000 - time`. Higher waves and faster completion times result in a higher leaderboard position.
 
 The database must allow writes at `/scores` so the game can submit new
 entries. A `permission_denied` error in the browser console typically means the
 rules are misconfigured.
 
-`database.rules.json` contains the same example configuration shown above. This
-file is only a reference and is not read by the game directly.
+`database.rules.json` contains the same example configuration shown above and can be used as a template for your security rules. This file is only a reference and is not read by the game directly.
 
 ## Change Log
 
