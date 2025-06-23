@@ -2114,8 +2114,8 @@ function updateEnemies(dt) {
             gameState.lastDamageTime = Date.now();
             createExplosion(enemy.x, enemy.y, enemy.color, 20, enemy.radius);
             updateHUD(); // Update health display immediately
-            enemyPool.release(enemy);
             handleEnemyKilled(enemy);
+            enemyPool.release(enemy);
             if (gameState.currentHealth <= 0) {
                  startDeathSequence(); // Begin slow-motion before game over
                  return baseMovedDuringUpdate; // Exit early
@@ -2299,8 +2299,8 @@ function handlePlayerFiring(dt) {
                  gameState.score += laserTarget.creditsValue * 20; // More points for laser kills
                  gameState.enemiesKilled++;
                  createExplosion(laserTarget.x, laserTarget.y, laserTarget.color, 40, laserTarget.radius);
-                 enemyPool.release(laserTarget);
                  handleEnemyKilled(laserTarget);
+                 enemyPool.release(laserTarget);
                  updateUpgradeAvailabilityFlags();
              }
         }
@@ -2433,8 +2433,8 @@ function checkCollisions(dt) {
                     gameState.score += enemy.creditsValue * 10;
                     gameState.enemiesKilled++;
                     createExplosion(enemy.x, enemy.y, enemy.color, 30, enemy.radius);
-                    enemyPool.release(enemy); // Remove enemy
                     handleEnemyKilled(enemy);
+                    enemyPool.release(enemy); // Remove enemy
                     updateUpgradeAvailabilityFlags();
                 }
                 break; // Bullet hits one enemy max
@@ -2469,8 +2469,8 @@ function checkCollisions(dt) {
                     gameState.score += enemy.creditsValue * 15; // More points for missile kills
                     gameState.enemiesKilled++;
                     createExplosion(enemy.x, enemy.y, enemy.color, 35, enemy.radius); // Bigger death explosion
-                    enemyPool.release(enemy);
                     handleEnemyKilled(enemy);
+                    enemyPool.release(enemy);
                     updateUpgradeAvailabilityFlags();
                 }
                  // Missile only hits one enemy, but doesn't necessarily get destroyed?
@@ -3660,8 +3660,8 @@ function fireLaserAt(target) {
         gameState.score += target.creditsValue * 20;
         gameState.enemiesKilled++;
         createExplosion(target.x, target.y, target.color, 40, target.radius);
-        enemyPool.release(target);
         handleEnemyKilled(target);
+        enemyPool.release(target);
         if (target.xp) {
             gameState.doubleFireRateEndTime = Date.now() + 20000;
             gameState.xpEnemiesDestroyed++;
