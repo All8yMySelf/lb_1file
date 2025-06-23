@@ -7,6 +7,10 @@ This repository contains a small browser game written entirely in a single HTML 
 Open `index.html` in any modern browser. The game will load immediately with no additional assets required. Use the on-screen instructions or the hotkeys listed on the start screen to play.
 For detailed controls and tips see [HOW_TO_PLAY.md](HOW_TO_PLAY.md).
 
+The start screen also includes a background music selector. Use the arrows to
+cycle through the available tracks or choose **Off** to disable it entirely.
+The slider beside the selector adjusts the music volume and defaults to 25%.
+
 ## About
 
 `index.html` now embeds the original `styles.css` and `themes.js` directly inside `<style>` and `<script>` tags. There are no external dependencies beyond the Firebase scripts loaded from a CDN.
