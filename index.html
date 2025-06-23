@@ -1243,11 +1243,8 @@ function handleEnemyKilled(enemy) {
             waveStates[enemy.wave].remainingEnemies--;
         }
     }
-    const enemies = enemyPool.getActiveObjects().filter(e => !e.xp);
-    if (!enemies.some(e => e.wave === enemy.wave)) {
-        const idx = activeWaves.indexOf(enemy.wave);
-        if (idx !== -1) activeWaves.splice(idx, 1);
-    }
+    // Keep wave in the active list until completion so the HUD counter
+    // properly counts down to 0/0 before the next wave begins
     updateHUD();
 }
 
