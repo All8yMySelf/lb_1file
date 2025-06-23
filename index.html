@@ -230,7 +230,9 @@
         <button id="sensorDisplayToggle">Hud</button>
     </div>
     <button id="fullscreenButton">&#x26F6;</button>
+
     <div id="musicControls"><button id="prevTrack">&#9664;</button><div id="trackDisplay">Off</div><button id="nextTrack">&#9654;</button><input id="musicVolume" type="range" min="0" max="1" step="0.01"></div>
+
     <button id="sendWaveButton">Send Next Wave</button>
 </div>
 <div id="hotkeys" class="show">
@@ -1245,7 +1247,6 @@ function showTooltip(text, x, y) {
 function hideTooltip() { tooltip.style.display = 'none'; }
 
 function playSound(audio) {
-    if (isMuted) return;
     if (audio && typeof audio.play === 'function') {
         audio.currentTime = 0;
         audio.play();
@@ -3721,6 +3722,7 @@ function handleFullscreenChange() {
     drawGame();
 }
 
+
 function setTrack(index){
     currentTrackIndex=(index+musicTracks.length)%musicTracks.length;
     localStorage.setItem("ode_musicTrack",currentTrackIndex);
@@ -3745,6 +3747,7 @@ function updateTrackDisplay(){
         d.textContent=currentTrackIndex===0?"Off":`Track ${currentTrackIndex}`;
     }
 }
+
 
 
 function updateEnemyHUD(info) {
@@ -3822,7 +3825,6 @@ function toggleXPStatsPanel(){
 }
 
 function beep(){
-    if(isMuted) return;
     try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();o.type="square";o.frequency.value=800;o.connect(c.destination);o.start();setTimeout(()=>{o.stop();c.close();},100);}catch(e){}
 }
 
@@ -4182,9 +4184,11 @@ getElement('initialsInput').addEventListener('input', e => {
 });
 getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
 getElement('fullscreenButton').onclick = toggleFullScreen;
+
 getElement("prevTrack").onclick=()=>setTrack(currentTrackIndex-1);
 getElement("nextTrack").onclick=()=>setTrack(currentTrackIndex+1);
 getElement("musicVolume").oninput=e=>{musicVolume=parseFloat(e.target.value);localStorage.setItem("ode_musicVolume",musicVolume);musicAudio.volume=musicVolume;};
+
 getElement('sendWaveButton').onclick = sendNextWave;
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -4198,9 +4202,11 @@ const tooltipTexts = {
   themeButton: 'Change visual theme',
   sensorDisplayToggle: 'Switch enemy info mode',
   fullscreenButton: 'Toggle fullscreen',
+
   prevTrack: 'Previous music track',
   nextTrack: 'Next music track',
   musicVolume: 'Music volume',
+
   sendWaveButton: 'Send the next enemy wave'
 };
 Object.entries(tooltipTexts).forEach(([id,text])=>{
@@ -4304,14 +4310,11 @@ function loadAndStartGame() {
     const savedThemeIndex = savedTheme !== null ? parseInt(savedTheme, 10) : 0;
     applyTheme(savedThemeIndex); // Apply saved or default theme
 
+
   const volumeSlider = getElement("musicVolume");
   if(volumeSlider) volumeSlider.value = musicVolume;
   updateTrackDisplay();
   playCurrentTrack();
-
-
-
-
 
     updateSpeedDisplay();
 
