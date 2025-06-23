@@ -1369,12 +1369,12 @@ function updateHUD() {
     const elapsedTime = state.elapsedTime || 0;
     let countdownText;
 
-    if (state.isBossWave) {
-        countdownText = "Boss!";
+    const remaining = (state.duration || 0) - elapsedTime;
+    if (state.isBossWave || remaining <= 0) {
+        countdownText = "Boss!!";
     } else {
-        const remainingTime = Math.max(0, (state.duration || 0) - elapsedTime);
-        const minutes = Math.floor(remainingTime / 60);
-        const seconds = Math.floor(remainingTime % 60);
+        const minutes = Math.floor(remaining / 60);
+        const seconds = Math.floor(remaining % 60);
         countdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
