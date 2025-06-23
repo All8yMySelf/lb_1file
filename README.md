@@ -80,17 +80,17 @@ See [CHANGELOG.md](CHANGELOG.md) for the full history.
 - Categories highlight when affordable upgrades are available.
 - Missile homing fixed with range limit and wave timer resumes correctly.
 
-### v2.31
-- Added a clickable Focus Radius selector that saves your preference.
-- Updated version references and refined notch visuals.
-- Removed redundant code for a leaner single-file build.
+### v2.33
+- Upgrade categories can now be expanded or collapsed.
+- Reduced upgrade button font size so long labels fit.
 
 ### v2.32
 - Minor optimizations.
 
-### v2.33
-- Upgrade categories can now be expanded or collapsed.
-- Reduced upgrade button font size so long labels fit.
+### v2.31
+- Added a clickable Focus Radius selector that saves your preference.
+- Updated version references and refined notch visuals.
+- Removed redundant code for a leaner single-file build.
 
 ### v2.30
 - Major UI overhaul with a more compact HUD and screens.
