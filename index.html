@@ -817,6 +817,8 @@ let activeWaves = [];
 let waveBossAlive = {};
 // Per-wave timers and state so multiple waves can run concurrently
 let waveStates = {};
+let completedWaves = {};
+let completedWave = 0;
 
 // Cache width of the hotkeys panel for enemy stats alignment
 let hotkeysWidth = null;
@@ -1601,6 +1603,8 @@ function initializeGame(shouldTryLoad = true) {
             spawned: 0
         }
     };
+    completedWaves = {};
+    completedWave = 0;
 
     base = {
         x: canvasWidth / 2,
@@ -1860,16 +1864,15 @@ function gameOver() {
     getElement('deathOverlay').style.display = 'block';
     const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
-    const finalState = waveStates[gameState.wave] || {};
-    const remainingTime = Math.floor(Math.max(0, (finalState.duration || 0) - (finalState.elapsedTime || 0)));
-    const playerRank = gameState.wave * 100000 - remainingTime;
-    window.pendingScore = { wave: gameState.wave, time: remainingTime, ranking: playerRank, saved: false };
+    const remainingTime = completedWaves[completedWave] ?? 0;
+    const playerRank = completedWave * 100000 - remainingTime;
+    window.pendingScore = { wave: completedWave, time: remainingTime, ranking: playerRank, saved: false };
     getTopScores().then(scores => {
         let index = scores.findIndex(s => playerRank > s.ranking);
         if (index === -1 && scores.length < 10) index = scores.length;
         let list = scores.slice();
         if (index !== -1) {
-            list.splice(index, 0, { initials: '???', wave: gameState.wave, time: remainingTime, date: formatDate(new Date()) });
+            list.splice(index, 0, { initials: '???', wave: completedWave, time: remainingTime, date: formatDate(new Date()) });
             list = list.slice(0, 10);
         }
         renderScoreList('gameOverScoreList', list, index);
@@ -2507,6 +2510,9 @@ function checkWaveCompletion(dt) {
         const state = waveStates[w];
         const hasEnemies = enemies.some(e => e.wave === w);
         if (!hasEnemies && state && state.spawned > 0 && !state.bossAlive) {
+            const remaining = Math.floor(Math.max(0, state.duration - state.elapsedTime));
+            completedWaves[w] = remaining;
+            if (w > completedWave) completedWave = w;
             delete waveStates[w];
             return false;
         }
