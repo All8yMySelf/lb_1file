@@ -5,6 +5,7 @@ This repository contains a small browser game written entirely in a single HTML 
 ## Playing
 
 Open `index.html` in any modern browser. The game will load immediately with no additional assets required. Use the on-screen instructions or the hotkeys listed on the start screen to play.
+For detailed controls and tips see [HOW_TO_PLAY.md](HOW_TO_PLAY.md).
 
 ## About
 
