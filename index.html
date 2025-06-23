@@ -226,7 +226,6 @@
         <button id="sensorDisplayToggle">Hud</button>
     </div>
     <button id="fullscreenButton">&#x26F6;</button>
-    <button id="muteButton">&#128266;</button>
     <button id="sendWaveButton">Send Next Wave</button>
 </div>
 <div id="hotkeys" class="show">
@@ -766,7 +765,6 @@ const SPEED_STEPS = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.5,2,3,4,5,6,7,8,9,1
 let speedIndex = SPEED_STEPS.indexOf(1);
 let gameSpeedMultiplier = SPEED_STEPS[speedIndex];
 let isGameRunning = false;
-let isMuted = localStorage.getItem('ode_isMuted') === 'true';
 let animationFrameId = null;
 let savedGame = null; // Stores loaded game state
 let autoSaveTimer = null;
@@ -1235,7 +1233,6 @@ function showTooltip(text, x, y) {
 function hideTooltip() { tooltip.style.display = 'none'; }
 
 function playSound(audio) {
-    if (isMuted) return;
     if (audio && typeof audio.play === 'function') {
         audio.currentTime = 0;
         audio.play();
@@ -3711,13 +3708,6 @@ function handleFullscreenChange() {
     drawGame();
 }
 
-function toggleMute() {
-    isMuted = !isMuted;
-    localStorage.setItem('ode_isMuted', isMuted);
-    const btn = getElement('muteButton');
-    btn.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
-}
-
 function updateEnemyHUD(info) {
     const hud = getElement('enemyHUD');
     if (!hud) return;
@@ -3793,7 +3783,6 @@ function toggleXPStatsPanel(){
 }
 
 function beep(){
-    if(isMuted) return;
     try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();o.type="square";o.frequency.value=800;o.connect(c.destination);o.start();setTimeout(()=>{o.stop();c.close();},100);}catch(e){}
 }
 
@@ -4153,7 +4142,6 @@ getElement('initialsInput').addEventListener('input', e => {
 });
 getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
 getElement('fullscreenButton').onclick = toggleFullScreen;
-getElement('muteButton').onclick = toggleMute;
 getElement('sendWaveButton').onclick = sendNextWave;
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -4167,7 +4155,6 @@ const tooltipTexts = {
   themeButton: 'Change visual theme',
   sensorDisplayToggle: 'Switch enemy info mode',
   fullscreenButton: 'Toggle fullscreen',
-  muteButton: 'Mute sounds',
   sendWaveButton: 'Send the next enemy wave'
 };
 Object.entries(tooltipTexts).forEach(([id,text])=>{
@@ -4271,11 +4258,6 @@ function loadAndStartGame() {
     const savedThemeIndex = savedTheme !== null ? parseInt(savedTheme, 10) : 0;
     applyTheme(savedThemeIndex); // Apply saved or default theme
 
-    // Set mute button state
-  const muteBtn = getElement('muteButton');
-  if (muteBtn) {
-    muteBtn.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
-  }
 
 
 
