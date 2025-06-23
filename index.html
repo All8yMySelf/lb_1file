@@ -3900,10 +3900,11 @@ function updateWaveStatsPanel(){
         const state=waveStates[w]||{};
         const count=state.remainingEnemies!==undefined?state.remainingEnemies:enemies.filter(e=>e.wave===w).length;
         const boss=state.remainingBosses!==undefined?state.remainingBosses:(waveBossAlive[w]?1:0);
+        const total=count+boss;
         const rem=Math.max(0,(state.duration||0)-(state.elapsedTime||0));
         const m=Math.floor(rem/60);
         const s=Math.floor(rem%60).toString().padStart(2,'0');
-        html+=`<div>Wave ${w}: ${count}/${boss} - ${m}:${s}</div>`;
+        html+=`<div>Wave ${w}: ${total} enemies - ${m}:${s}</div>`;
     });
     content.innerHTML=html;
 }
