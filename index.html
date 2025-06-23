@@ -3618,6 +3618,7 @@ function fireLaserAt(target) {
         gameState.enemiesKilled++;
         createExplosion(target.x, target.y, target.color, 40, target.radius);
         enemyPool.release(target);
+        handleEnemyKilled(target);
         if (target.xp) {
             gameState.doubleFireRateEndTime = Date.now() + 20000;
             gameState.xpEnemiesDestroyed++;
