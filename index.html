@@ -1232,9 +1232,8 @@ function handleEnemyKilled(enemy) {
             waveStates[enemy.wave].bossAlive = false;
             waveStates[enemy.wave].remainingBosses = 0;
         }
-        if (enemy.wave === gameState.wave) {
-            startNextWave();
-        }
+        // Boss death alone no longer advances the wave. Progression is handled
+        // centrally when remaining enemies and bosses reach zero.
         enemyPool.getActiveObjects().forEach(e => {
             if (e.xp) enemyPool.release(e);
         });
@@ -2535,6 +2534,7 @@ function startNextWave() {
     saveGame();
 }
 
+// Update active wave states and trigger new waves when the current one is finished
 function checkWaveCompletion(dt) {
     const allEnemies = enemyPool.getActiveObjects();
     const enemies = allEnemies.filter(e => !e.xp);
@@ -2552,7 +2552,9 @@ function checkWaveCompletion(dt) {
         return true;
     });
 
-    if (activeWaves.length === 0) {
+    // If the current wave has finished and the player hasn't manually
+    // started the next one, automatically begin it
+    if (!waveStates[gameState.wave]) {
         startNextWave();
     }
 }
