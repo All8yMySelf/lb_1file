@@ -14,6 +14,9 @@
   - **I** – display detailed enemy statistics.
   - **O** – toggle ring upgrade information.
   - **Full Screen** and **Mute** buttons are available on the HUD.
+  - **Music:** use the arrow buttons to cycle through tracks. The slider next
+    to the selector controls volume, starting at 25%. Choose **Off** to disable
+    the background music.
 
 ## Surviving Waves
 Each wave spawns a group of enemies that approach from beyond your sensor range. The faint ring around your base shows the cannon's firing radius. Upgrade the **Sensors** category to detect enemies earlier. Destroy enemies to earn credits and purchase new abilities.
