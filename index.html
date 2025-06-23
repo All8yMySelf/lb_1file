@@ -3883,7 +3883,8 @@ function updateWaveStatsPanel(){
     const panel=getElement("waveStatsPanel");
     if(!panel) return;
     const content=getElement("waveStatsContent");
-    if(!debugUpgradesVisible || activeWaves.length===0){
+    const showPanel = debugUpgradesVisible || activeWaves.length > 1;
+    if(!showPanel || activeWaves.length === 0){
         panel.style.display="none";
         return;
     }
