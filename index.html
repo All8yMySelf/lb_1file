@@ -117,7 +117,7 @@
 <title>Orbital Defence Elite v2.44 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
-:root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:2rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,.8);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#speedDisplay{display:flex;align-items:center;justify-content:center;width:40px;font-size:18px}#toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
+:root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:2rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,.8);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#speedDisplay{display:flex;align-items:center;justify-content:center;width:40px;font-size:18px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
 #musicControls{display:flex;align-items:center;gap:4px;}
 #trackDisplay{min-width:50px;text-align:center;}
 #musicVolume{
@@ -180,6 +180,10 @@
   #waveStatsPanel.collapsed #waveStatsContent { display: none; }
   #waveStatsHeader { cursor: pointer; }
   #waveStatsHeader .arrow { margin-left: 4px; }
+  #hotkeys { word-wrap: break-word; }
+  #hotkeys.collapsed #hotkeysContent { display: none; }
+  #hotkeysHeader { cursor: pointer; }
+  #hotkeysHeader .arrow { margin-left: 4px; }
   .timer-blink { animation: timerBlink 1s steps(2,end) infinite; }
   @keyframes timerBlink { 50% { opacity: 0; } }
   #tooltip {
@@ -245,6 +249,8 @@
     <button id="sendWaveButton">Send Next Wave</button>
 </div>
 <div id="hotkeys" class="show">
+  <div id="hotkeysHeader">Hotkeys <span id="hotkeysToggle" class="arrow">▾</span></div>
+  <div id="hotkeysContent">
     <div>H: Show/Hide Hotkeys</div>
     <div>WASD/Arrows/Drag: Move Base</div>
     <div>Click Base: Upgrades</div>
@@ -254,6 +260,7 @@
     <div>F: Toggle Auto-fire</div>
     <div>I: Toggle Enemy Stats</div>
     <div>O: Toggle Ring Info</div>
+  </div>
 </div>
 <div id="enemyStatsPanel"><div id="enemyStatsHeader">Enemy Stats <span id="enemyStatsToggle" class="arrow">▾</span></div><div id="enemyStatsContent"></div></div>
 <div id="xpStatsPanel" class="collapsed">
@@ -1140,6 +1147,29 @@ function drawBracket(x, y, size, color = '#ffcc00', pulsing = true) {
     ctx.moveTo(x - s, y + s * 0.6); ctx.lineTo(x - s, y + s); ctx.lineTo(x - s * 0.6, y + s);
     ctx.moveTo(x + s, y + s * 0.6); ctx.lineTo(x + s, y + s); ctx.lineTo(x + s * 0.6, y + s);
     ctx.stroke();
+}
+
+// Display a small info box connected to a ring, styled like enemy inline info
+function drawRingInfoPanel(radius, label, offset) {
+    const fontSize = 9;
+    const padding = 3;
+    ctx.font = `${fontSize}px monospace`;
+    const textWidth = ctx.measureText(label).width;
+    const boxWidth = Math.max(textWidth + padding * 2, 40);
+    const boxHeight = fontSize + padding * 2;
+    const baseX = base.x + radius;
+    const baseY = base.y;
+    const boxX = baseX + 10;
+    const boxY = base.y - offset * (boxHeight + 4) - boxHeight / 2;
+    ctx.fillStyle = 'rgba(255,204,0,0.35)';
+    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+    ctx.strokeStyle = '#ffcc00';
+    ctx.beginPath();
+    ctx.moveTo(baseX, baseY);
+    ctx.lineTo(boxX, boxY + boxHeight / 2);
+    ctx.stroke();
+    ctx.fillStyle = '#000';
+    ctx.fillText(label, boxX + padding, boxY + padding + fontSize - 1);
 }
 
 // --- Enemy Spawning ---
@@ -2422,7 +2452,6 @@ function checkCollisions(dt) {
         for (let j = enemies.length - 1; j >= 0; j--) {
             const enemy = enemies[j];
             if (enemy.xp) continue;
-            if (enemy.xp) continue;
             // Simple circle collision check
             const dx = bullet.x - enemy.x;
             const dy = bullet.y - enemy.y;
@@ -2458,6 +2487,7 @@ function checkCollisions(dt) {
         let missileHit = false;
         for (let j = enemies.length - 1; j >= 0; j--) {
             const enemy = enemies[j];
+            if (enemy.xp) continue; // XP enemies should only be destroyed by manual laser
             const dx = missile.x - enemy.x;
             const dy = missile.y - enemy.y;
             const distSq = dx * dx + dy * dy;
@@ -2631,6 +2661,29 @@ function drawGame() {
         ctx.arc(base.x, base.y, base.sensorRange, 0, Math.PI * 2);
         ctx.stroke();
     }
+
+    // Display simple pop-up panels describing each ring when ring info is enabled
+    if (showRingInfo) {
+        let offset = 0;
+        drawRingInfoPanel(base.cannonRange, 'Cannon Range', offset++);
+        if (base.missileCount > 0 && base.missileTargetingRadius > 0) {
+            drawRingInfoPanel(base.missileTargetingRadius, 'Missile Range', offset++);
+        }
+        if (base.laserDamage > 0 && base.laserRange > 0) {
+            drawRingInfoPanel(base.laserRange, 'Laser Range', offset++);
+        }
+        if (base.stunLevel > 0 && base.stunRadius > 0) {
+            drawRingInfoPanel(base.stunRadius, 'Stun Radius', offset++);
+        }
+        if (base.sensorRange > base.cannonRange) {
+            drawRingInfoPanel(base.sensorRange, 'Sensor Range', offset++);
+        }
+        if (base.focusRadiusSetting > 0) {
+            drawRingInfoPanel(base.cannonRange * base.focusRadiusSetting, 'Focus Radius', offset++);
+        }
+    }
+
+
 
 
     // --- Draw Base ---
@@ -2920,6 +2973,28 @@ function drawGame() {
     drawParticles();
 
     applyOverlay(visibleRadius);
+
+    // Display simple pop-up panels describing each ring when ring info is enabled
+    if (showRingInfo) {
+        let offset = 0;
+        drawRingInfoPanel(base.cannonRange, 'Cannon Range', offset++);
+        if (base.missileCount > 0 && base.missileTargetingRadius > 0) {
+            drawRingInfoPanel(base.missileTargetingRadius, 'Missile Range', offset++);
+        }
+        if (base.laserDamage > 0 && base.laserRange > 0) {
+            drawRingInfoPanel(base.laserRange, 'Laser Range', offset++);
+        }
+        if (base.stunLevel > 0 && base.stunRadius > 0) {
+            drawRingInfoPanel(base.stunRadius, 'Stun Radius', offset++);
+        }
+        if (base.sensorRange > base.cannonRange) {
+            drawRingInfoPanel(base.sensorRange, 'Sensor Range', offset++);
+        }
+        if (base.focusRadiusSetting > 0) {
+            drawRingInfoPanel(base.cannonRange * base.focusRadiusSetting, 'Focus Radius', offset++);
+        }
+    }
+
     // --- Draw Ring UI (Directly on Canvas) ---
     ringClickRegions = []; // Clear regions each frame
 
@@ -3668,7 +3743,6 @@ function fireLaserAt(target) {
         gameState.enemiesKilled++;
         createExplosion(target.x, target.y, target.color, 40, target.radius);
         handleEnemyKilled(target);
-        enemyPool.release(target);
         if (target.xp) {
             gameState.doubleFireRateEndTime = Date.now() + 20000;
             gameState.xpEnemiesDestroyed++;
@@ -3676,6 +3750,7 @@ function fireLaserAt(target) {
             updateWaveStatsPanel();
             showToast('Fire rate doubled!', 3000);
         }
+        enemyPool.release(target);
         updateHUD();
         updateUpgradeAvailabilityFlags();
     }
@@ -3724,6 +3799,13 @@ function sendNextWave() {
 // --- Menu Toggles ---
 function toggleHotkeys() {
     getElement('hotkeys').classList.toggle('show');
+}
+
+function toggleHotkeysPanel(){
+    const p=getElement('hotkeys');
+    const arrow=getElement('hotkeysToggle');
+    p.classList.toggle('collapsed');
+    arrow.textContent=p.classList.contains('collapsed')?'▸':'▾';
 }
 
 function toggleRingInfoDisplay() {
@@ -4088,7 +4170,7 @@ function handleDragEnd() {
 
 // Canvas Click (handles base click for menu, ring UI clicks)
 function handleCanvasClick(clientX, clientY) {
-    if (!isGameRunning && !infoModeActive) return;
+    const paused = !isGameRunning && !infoModeActive;
 
     const rect = canvas.getBoundingClientRect();
     const clickX = clientX - rect.left;
@@ -4123,8 +4205,9 @@ function handleCanvasClick(clientX, clientY) {
             }
         }
     }
+    if (paused) return;
 
-    if (base.manualTargeting && base.laserDamage > 0 && Date.now() - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
+    if (isGameRunning && base.manualTargeting && base.laserDamage > 0 && Date.now() - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
         const target = enemyPool.getActiveObjects().find(e =>
             e.xp &&
             clickX >= e.x - e.radius && clickX <= e.x + e.radius &&
@@ -4239,6 +4322,7 @@ getElement('restartButton').onclick = async () => {
 };
 getElement('sensorWarningButton').onclick = dismissSensorWarning;
 getElement("enemyIntelContinue").onclick=hideEnemyIntelPopup;
+getElement("hotkeysHeader").onclick=toggleHotkeysPanel;
 getElement("enemyStatsHeader").onclick=toggleEnemyStatsPanel;
 getElement("xpStatsHeader").onclick=toggleXPStatsPanel;
 getElement("waveStatsHeader").onclick=toggleWaveStatsPanel;
