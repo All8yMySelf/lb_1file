@@ -1142,6 +1142,29 @@ function drawBracket(x, y, size, color = '#ffcc00', pulsing = true) {
     ctx.stroke();
 }
 
+// Display a small info box connected to a ring, styled like enemy inline info
+function drawRingInfoPanel(radius, label, offset) {
+    const fontSize = 9;
+    const padding = 3;
+    ctx.font = `${fontSize}px monospace`;
+    const textWidth = ctx.measureText(label).width;
+    const boxWidth = Math.max(textWidth + padding * 2, 40);
+    const boxHeight = fontSize + padding * 2;
+    const baseX = base.x + radius;
+    const baseY = base.y;
+    const boxX = baseX + 10;
+    const boxY = base.y - offset * (boxHeight + 4) - boxHeight / 2;
+    ctx.fillStyle = 'rgba(255,204,0,0.35)';
+    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+    ctx.strokeStyle = '#ffcc00';
+    ctx.beginPath();
+    ctx.moveTo(baseX, baseY);
+    ctx.lineTo(boxX, boxY + boxHeight / 2);
+    ctx.stroke();
+    ctx.fillStyle = '#000';
+    ctx.fillText(label, boxX + padding, boxY + padding + fontSize - 1);
+}
+
 // --- Enemy Spawning ---
 function spawnEnemy(isBoss = false, waveNumber = gameState.wave) {
     const spawnAngle = Math.random() * Math.PI * 2;
@@ -2630,6 +2653,27 @@ function drawGame() {
         ctx.beginPath();
         ctx.arc(base.x, base.y, base.sensorRange, 0, Math.PI * 2);
         ctx.stroke();
+    }
+
+    // Display simple pop-up panels describing each ring when ring info is enabled
+    if (showRingInfo) {
+        let offset = 0;
+        drawRingInfoPanel(base.cannonRange, 'Cannon Range', offset++);
+        if (base.missileCount > 0 && base.missileTargetingRadius > 0) {
+            drawRingInfoPanel(base.missileTargetingRadius, 'Missile Range', offset++);
+        }
+        if (base.laserDamage > 0 && base.laserRange > 0) {
+            drawRingInfoPanel(base.laserRange, 'Laser Range', offset++);
+        }
+        if (base.stunLevel > 0 && base.stunRadius > 0) {
+            drawRingInfoPanel(base.stunRadius, 'Stun Radius', offset++);
+        }
+        if (base.sensorRange > base.cannonRange) {
+            drawRingInfoPanel(base.sensorRange, 'Sensor Range', offset++);
+        }
+        if (base.focusRadiusSetting > 0) {
+            drawRingInfoPanel(base.cannonRange * base.focusRadiusSetting, 'Focus Radius', offset++);
+        }
     }
 
 
