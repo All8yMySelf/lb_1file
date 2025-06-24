@@ -2452,7 +2452,6 @@ function checkCollisions(dt) {
         for (let j = enemies.length - 1; j >= 0; j--) {
             const enemy = enemies[j];
             if (enemy.xp) continue;
-            if (enemy.xp) continue;
             // Simple circle collision check
             const dx = bullet.x - enemy.x;
             const dy = bullet.y - enemy.y;
@@ -2488,6 +2487,7 @@ function checkCollisions(dt) {
         let missileHit = false;
         for (let j = enemies.length - 1; j >= 0; j--) {
             const enemy = enemies[j];
+            if (enemy.xp) continue; // XP enemies should only be destroyed by manual laser
             const dx = missile.x - enemy.x;
             const dy = missile.y - enemy.y;
             const distSq = dx * dx + dy * dy;
@@ -3743,7 +3743,6 @@ function fireLaserAt(target) {
         gameState.enemiesKilled++;
         createExplosion(target.x, target.y, target.color, 40, target.radius);
         handleEnemyKilled(target);
-        enemyPool.release(target);
         if (target.xp) {
             gameState.doubleFireRateEndTime = Date.now() + 20000;
             gameState.xpEnemiesDestroyed++;
@@ -3751,6 +3750,7 @@ function fireLaserAt(target) {
             updateWaveStatsPanel();
             showToast('Fire rate doubled!', 3000);
         }
+        enemyPool.release(target);
         updateHUD();
         updateUpgradeAvailabilityFlags();
     }
