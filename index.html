@@ -2684,6 +2684,8 @@ function drawGame() {
     }
 
 
+
+
     // --- Draw Base ---
     const baseHitTime = 200;
     const flashColor = currentTheme.canvasColors.baseHit;
@@ -2971,6 +2973,28 @@ function drawGame() {
     drawParticles();
 
     applyOverlay(visibleRadius);
+
+    // Display simple pop-up panels describing each ring when ring info is enabled
+    if (showRingInfo) {
+        let offset = 0;
+        drawRingInfoPanel(base.cannonRange, 'Cannon Range', offset++);
+        if (base.missileCount > 0 && base.missileTargetingRadius > 0) {
+            drawRingInfoPanel(base.missileTargetingRadius, 'Missile Range', offset++);
+        }
+        if (base.laserDamage > 0 && base.laserRange > 0) {
+            drawRingInfoPanel(base.laserRange, 'Laser Range', offset++);
+        }
+        if (base.stunLevel > 0 && base.stunRadius > 0) {
+            drawRingInfoPanel(base.stunRadius, 'Stun Radius', offset++);
+        }
+        if (base.sensorRange > base.cannonRange) {
+            drawRingInfoPanel(base.sensorRange, 'Sensor Range', offset++);
+        }
+        if (base.focusRadiusSetting > 0) {
+            drawRingInfoPanel(base.cannonRange * base.focusRadiusSetting, 'Focus Radius', offset++);
+        }
+    }
+
     // --- Draw Ring UI (Directly on Canvas) ---
     ringClickRegions = []; // Clear regions each frame
 
