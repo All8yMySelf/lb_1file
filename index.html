@@ -1432,9 +1432,6 @@ function pauseGame() {
 
 function resumeGame() {
     if (isGameRunning) return;
-    gameSpeedMultiplier = 1;
-    speedIndex = SPEED_STEPS.indexOf(1);
-    updateSpeedDisplay();
     isGameRunning = true;
     lastTime = 0;
     animationFrameId = requestAnimationFrame(gameLoop);
@@ -4339,7 +4336,6 @@ getElement('playPauseButton').onclick = () => {
     }
 };
 getElement('slowDownButton').onclick = () => {
-    if (!isGameRunning) return;
     if (speedIndex > 0) {
         speedIndex--;
         gameSpeedMultiplier = SPEED_STEPS[speedIndex];
@@ -4347,7 +4343,6 @@ getElement('slowDownButton').onclick = () => {
     }
 };
 getElement('speedUpButton').onclick = () => {
-    if (!isGameRunning) return;
     if (speedIndex < SPEED_STEPS.length - 1) {
         speedIndex++;
         gameSpeedMultiplier = SPEED_STEPS[speedIndex];
