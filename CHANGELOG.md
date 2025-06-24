@@ -1,4 +1,8 @@
-# Orbital Defence Elite - Change Log
+# Orbital Defense - Change Log
+
+## v2.45
+- Added a development warning on the start screen.
+- Game title increased in size and renamed to "Orbital Defense".
 
 ## v2.44
 - Show lowest undefeated wave in Game Over statistics.

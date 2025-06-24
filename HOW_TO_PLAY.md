@@ -1,4 +1,4 @@
-# How to Play Orbital Defence Elite
+# How to Play Orbital Defense
 
 ## Launching the Game
 1. Open `index.html` in any modern browser. The game loads immediately with no additional downloads.
