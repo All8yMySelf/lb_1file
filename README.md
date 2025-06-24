@@ -39,7 +39,10 @@ similar to the example below:
 }
 ```
 
-Scores are ranked using the formula `ranking = wave * 100000 - time`. Higher waves and faster completion times result in a higher leaderboard position.
+Scores are ranked using the formula `ranking = wave * 100000 - time` where
+`wave` is the lowest wave that was still active when the player was defeated.
+This ensures sending multiple waves early will not inflate scores. Higher waves
+and faster completion times result in a better leaderboard position.
 
 The database must allow writes at `/scores` so the game can submit new
 entries. A `permission_denied` error in the browser console typically means the
