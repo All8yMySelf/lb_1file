@@ -180,6 +180,10 @@
   #waveStatsPanel.collapsed #waveStatsContent { display: none; }
   #waveStatsHeader { cursor: pointer; }
   #waveStatsHeader .arrow { margin-left: 4px; }
+  #hotkeys { word-wrap: break-word; }
+  #hotkeys.collapsed #hotkeysContent { display: none; }
+  #hotkeysHeader { cursor: pointer; }
+  #hotkeysHeader .arrow { margin-left: 4px; }
   .timer-blink { animation: timerBlink 1s steps(2,end) infinite; }
   @keyframes timerBlink { 50% { opacity: 0; } }
   #tooltip {
@@ -245,6 +249,8 @@
     <button id="sendWaveButton">Send Next Wave</button>
 </div>
 <div id="hotkeys" class="show">
+  <div id="hotkeysHeader">Hotkeys <span id="hotkeysToggle" class="arrow">▾</span></div>
+  <div id="hotkeysContent">
     <div>H: Show/Hide Hotkeys</div>
     <div>WASD/Arrows/Drag: Move Base</div>
     <div>Click Base: Upgrades</div>
@@ -254,6 +260,7 @@
     <div>F: Toggle Auto-fire</div>
     <div>I: Toggle Enemy Stats</div>
     <div>O: Toggle Ring Info</div>
+  </div>
 </div>
 <div id="enemyStatsPanel"><div id="enemyStatsHeader">Enemy Stats <span id="enemyStatsToggle" class="arrow">▾</span></div><div id="enemyStatsContent"></div></div>
 <div id="xpStatsPanel" class="collapsed">
@@ -3770,6 +3777,13 @@ function toggleHotkeys() {
     getElement('hotkeys').classList.toggle('show');
 }
 
+function toggleHotkeysPanel(){
+    const p=getElement('hotkeys');
+    const arrow=getElement('hotkeysToggle');
+    p.classList.toggle('collapsed');
+    arrow.textContent=p.classList.contains('collapsed')?'▸':'▾';
+}
+
 function toggleRingInfoDisplay() {
     showRingInfo = !showRingInfo;
     getElement('toggleInfoButton').classList.toggle('active', showRingInfo);
@@ -4283,6 +4297,7 @@ getElement('restartButton').onclick = async () => {
 };
 getElement('sensorWarningButton').onclick = dismissSensorWarning;
 getElement("enemyIntelContinue").onclick=hideEnemyIntelPopup;
+getElement("hotkeysHeader").onclick=toggleHotkeysPanel;
 getElement("enemyStatsHeader").onclick=toggleEnemyStatsPanel;
 getElement("xpStatsHeader").onclick=toggleXPStatsPanel;
 getElement("waveStatsHeader").onclick=toggleWaveStatsPanel;
