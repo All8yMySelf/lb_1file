@@ -11,6 +11,11 @@ The start screen also includes a background music selector. Use the arrows to
 cycle through the available tracks or choose **Off** to disable it entirely.
 The slider beside the selector adjusts the music volume and defaults to 25%.
 
+## Controls
+
+- **Theme** — cycles through different visual styles.
+- **Mute** — turns game sounds on or off.
+
 ## About
 
 `index.html` now embeds the original `styles.css` and `themes.js` directly inside `<style>` and `<script>` tags. There are no external dependencies beyond the Firebase scripts loaded from a CDN.
@@ -48,8 +53,7 @@ The database must allow writes at `/scores` so the game can submit new
 entries. A `permission_denied` error in the browser console typically means the
 rules are misconfigured.
 
-`database.rules.json` contains the same example configuration shown above. This
-file is only a reference and is not read by the game directly.
+`database.rules.json` contains the same example configuration shown above and can be used as a template for your security rules. This file is only a reference and is not read by the game directly.
 
 ## Change Log
 
@@ -93,17 +97,17 @@ See [CHANGELOG.md](CHANGELOG.md) for the full history.
 - Categories highlight when affordable upgrades are available.
 - Missile homing fixed with range limit and wave timer resumes correctly.
 
-### v2.31
-- Added a clickable Focus Radius selector that saves your preference.
-- Updated version references and refined notch visuals.
-- Removed redundant code for a leaner single-file build.
+### v2.33
+- Upgrade categories can now be expanded or collapsed.
+- Reduced upgrade button font size so long labels fit.
 
 ### v2.32
 - Minor optimizations.
 
-### v2.33
-- Upgrade categories can now be expanded or collapsed.
-- Reduced upgrade button font size so long labels fit.
+### v2.31
+- Added a clickable Focus Radius selector that saves your preference.
+- Updated version references and refined notch visuals.
+- Removed redundant code for a leaner single-file build.
 
 ### v2.30
 - Major UI overhaul with a more compact HUD and screens.
