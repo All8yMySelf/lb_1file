@@ -176,6 +176,10 @@
   #xpStatsPanel.collapsed #xpStatsContent { display: none; }
   #xpStatsHeader { cursor: pointer; }
   #xpStatsHeader .arrow { margin-left: 4px; }
+  #waveStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; }
+  #waveStatsPanel.collapsed #waveStatsContent { display: none; }
+  #waveStatsHeader { cursor: pointer; }
+  #waveStatsHeader .arrow { margin-left: 4px; }
   .timer-blink { animation: timerBlink 1s steps(2,end) infinite; }
   @keyframes timerBlink { 50% { opacity: 0; } }
   #tooltip {
@@ -255,6 +259,10 @@
 <div id="xpStatsPanel" class="collapsed">
   <div id="xpStatsHeader">XP Status <span id="xpStatsToggle" class="arrow">▾</span></div>
   <div id="xpStatsContent"></div>
+</div>
+<div id="waveStatsPanel" style="display:none">
+  <div id="waveStatsHeader">Wave Status <span id="waveStatsToggle" class="arrow">▾</span></div>
+  <div id="waveStatsContent"></div>
 </div>
 <div id="sensorWarning" style="display:none">
     <p>The ring around your base shows your cannon's visual firing range. The cannon cannot target enemies beyond this radius. Click on the "Cannon" to upgrade the cannon's abilities.</p>
@@ -669,7 +677,8 @@ const CONFIG = {
     TARGET_LOCK_DURATION: 300, // ms brackets stay red this long after targeting
     AUTO_SAVE_INTERVAL: 60000, // ms (1 minute)
     DRAG_THRESHOLD: 5, // pixels to initiate drag vs click (default)
-    CANVAS_CLICK_TOLERANCE: 20 // pixels tolerance for clicking ring UI
+    CANVAS_CLICK_TOLERANCE: 20, // pixels tolerance for clicking ring UI
+    ENEMY_SPAWN_RATE_PER_SECOND: 1.8
 };
 // Increase drag threshold on touch devices to make tapping upgrades easier
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -700,7 +709,8 @@ const {
   TARGET_LOCK_DURATION,
   AUTO_SAVE_INTERVAL,
   DRAG_THRESHOLD,
-  CANVAS_CLICK_TOLERANCE
+  CANVAS_CLICK_TOLERANCE,
+  ENEMY_SPAWN_RATE_PER_SECOND
 } = CONFIG;
 // Upgrade Category Indices
 const UPGRADE_CATEGORY_CANNON = 0;
@@ -817,6 +827,8 @@ let activeWaves = [];
 let waveBossAlive = {};
 // Per-wave timers and state so multiple waves can run concurrently
 let waveStates = {};
+let completedWaves = {};
+let completedWave = 0;
 
 // Cache width of the hotkeys panel for enemy stats alignment
 let hotkeysWidth = null;
@@ -1210,6 +1222,7 @@ function spawnXPEnemy(waveNumber) {
     });
     gameState.xpEnemiesSpawned++;
     updateXPStatsPanel();
+    updateWaveStatsPanel();
 }
 
 function handleEnemyKilled(enemy) {
@@ -1217,16 +1230,21 @@ function handleEnemyKilled(enemy) {
         waveBossAlive[enemy.wave] = false;
         if (waveStates[enemy.wave]) {
             waveStates[enemy.wave].bossAlive = false;
+            waveStates[enemy.wave].remainingBosses = 0;
         }
+        // Boss death alone no longer advances the wave. Progression is handled
+        // centrally when remaining enemies and bosses reach zero.
         enemyPool.getActiveObjects().forEach(e => {
             if (e.xp) enemyPool.release(e);
         });
     }
-    const enemies = enemyPool.getActiveObjects();
-    if (!enemies.some(e => e.wave === enemy.wave)) {
-        const idx = activeWaves.indexOf(enemy.wave);
-        if (idx !== -1) activeWaves.splice(idx, 1);
+    if (!enemy.xp && waveStates[enemy.wave]) {
+        if (enemy.type !== 'Boss' && waveStates[enemy.wave].remainingEnemies > 0) {
+            waveStates[enemy.wave].remainingEnemies--;
+        }
     }
+    // Keep wave in the active list until completion so the HUD counter
+    // properly counts down to 0/0 before the next wave begins
     updateHUD();
 }
 
@@ -1348,12 +1366,12 @@ function updateHUD() {
     const elapsedTime = state.elapsedTime || 0;
     let countdownText;
 
-    if (state.isBossWave) {
-        countdownText = "Boss!";
+    const remaining = (state.duration || 0) - elapsedTime;
+    if (state.isBossWave || remaining <= 0) {
+        countdownText = "Boss!!";
     } else {
-        const remainingTime = Math.max(0, (state.duration || 0) - elapsedTime);
-        const minutes = Math.floor(remainingTime / 60);
-        const seconds = Math.floor(remainingTime % 60);
+        const minutes = Math.floor(remaining / 60);
+        const seconds = Math.floor(remaining % 60);
         countdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
@@ -1361,6 +1379,7 @@ function updateHUD() {
     getElement('waveDisplay').textContent = `Wave: ${waveText} | ${countdownText}`;
 
     updateXPStatsPanel();
+    updateWaveStatsPanel();
 
     // Button state can be adjusted elsewhere if needed
 }
@@ -1590,6 +1609,7 @@ function initializeGame(shouldTryLoad = true) {
 
     activeWaves = [1];
     waveBossAlive = { 1: false };
+    const initialTotalEnemies = Math.round(WAVE_BASE_DURATION * ENEMY_SPAWN_RATE_PER_SECOND);
     waveStates = {
         1: {
             elapsedTime: 0,
@@ -1598,9 +1618,15 @@ function initializeGame(shouldTryLoad = true) {
             xpSpawnTime: Math.random() * (WAVE_BASE_DURATION - 2),
             xpSpawned: false,
             bossAlive: false,
-            spawned: 0
+            spawned: 0,
+            totalEnemies: initialTotalEnemies,
+            remainingEnemies: initialTotalEnemies,
+            totalBosses: 1,
+            remainingBosses: 1
         }
     };
+    completedWaves = {};
+    completedWave = 0;
 
     base = {
         x: canvasWidth / 2,
@@ -1860,16 +1886,15 @@ function gameOver() {
     getElement('deathOverlay').style.display = 'block';
     const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
-    const finalState = waveStates[gameState.wave] || {};
-    const remainingTime = Math.floor(Math.max(0, (finalState.duration || 0) - (finalState.elapsedTime || 0)));
-    const playerRank = gameState.wave * 100000 - remainingTime;
-    window.pendingScore = { wave: gameState.wave, time: remainingTime, ranking: playerRank, saved: false };
+    const remainingTime = completedWaves[completedWave] ?? 0;
+    const playerRank = completedWave * 100000 - remainingTime;
+    window.pendingScore = { wave: completedWave, time: remainingTime, ranking: playerRank, saved: false };
     getTopScores().then(scores => {
         let index = scores.findIndex(s => playerRank > s.ranking);
         if (index === -1 && scores.length < 10) index = scores.length;
         let list = scores.slice();
         if (index !== -1) {
-            list.splice(index, 0, { initials: '???', wave: gameState.wave, time: remainingTime, date: formatDate(new Date()) });
+            list.splice(index, 0, { initials: '???', wave: completedWave, time: remainingTime, date: formatDate(new Date()) });
             list = list.slice(0, 10);
         }
         renderScoreList('gameOverScoreList', list, index);
@@ -2089,8 +2114,8 @@ function updateEnemies(dt) {
             gameState.lastDamageTime = Date.now();
             createExplosion(enemy.x, enemy.y, enemy.color, 20, enemy.radius);
             updateHUD(); // Update health display immediately
-            enemyPool.release(enemy);
             handleEnemyKilled(enemy);
+            enemyPool.release(enemy);
             if (gameState.currentHealth <= 0) {
                  startDeathSequence(); // Begin slow-motion before game over
                  return baseMovedDuringUpdate; // Exit early
@@ -2120,12 +2145,12 @@ function spawnNewEnemies(dt) {
             }
         }
 
-        if (!state.isBossWave && state.elapsedTime >= state.duration) {
+        if (!state.isBossWave && state.elapsedTime >= state.duration && state.spawned >= state.totalEnemies) {
             console.log(`[wave ${waveStr}] boss spawned`);
             spawnEnemy(true, Number(waveStr));
             state.isBossWave = true;
             showToast('Boss Wave!', 3000);
-        } else if (!state.isBossWave && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) {
+        } else if (!state.isBossWave && state.spawned < state.totalEnemies && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) {
             spawnEnemy(false, Number(waveStr));
         }
     }
@@ -2274,8 +2299,8 @@ function handlePlayerFiring(dt) {
                  gameState.score += laserTarget.creditsValue * 20; // More points for laser kills
                  gameState.enemiesKilled++;
                  createExplosion(laserTarget.x, laserTarget.y, laserTarget.color, 40, laserTarget.radius);
-                 enemyPool.release(laserTarget);
                  handleEnemyKilled(laserTarget);
+                 enemyPool.release(laserTarget);
                  updateUpgradeAvailabilityFlags();
              }
         }
@@ -2408,8 +2433,8 @@ function checkCollisions(dt) {
                     gameState.score += enemy.creditsValue * 10;
                     gameState.enemiesKilled++;
                     createExplosion(enemy.x, enemy.y, enemy.color, 30, enemy.radius);
-                    enemyPool.release(enemy); // Remove enemy
                     handleEnemyKilled(enemy);
+                    enemyPool.release(enemy); // Remove enemy
                     updateUpgradeAvailabilityFlags();
                 }
                 break; // Bullet hits one enemy max
@@ -2444,8 +2469,8 @@ function checkCollisions(dt) {
                     gameState.score += enemy.creditsValue * 15; // More points for missile kills
                     gameState.enemiesKilled++;
                     createExplosion(enemy.x, enemy.y, enemy.color, 35, enemy.radius); // Bigger death explosion
-                    enemyPool.release(enemy);
                     handleEnemyKilled(enemy);
+                    enemyPool.release(enemy);
                     updateUpgradeAvailabilityFlags();
                 }
                  // Missile only hits one enemy, but doesn't necessarily get destroyed?
@@ -2485,6 +2510,7 @@ function startNextWave() {
     gameState.waveElapsedTime = 0;
     gameState.xpEnemySpawned = false;
     gameState.xpEnemySpawnTime = Math.random() * (duration - 2);
+    const totalEnemies = Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND);
     waveStates[gameState.wave] = {
         elapsedTime: 0,
         duration,
@@ -2492,7 +2518,11 @@ function startNextWave() {
         xpSpawnTime: gameState.xpEnemySpawnTime,
         xpSpawned: false,
         bossAlive: false,
-        spawned: 0
+        spawned: 0,
+        totalEnemies,
+        remainingEnemies: totalEnemies,
+        totalBosses: 1,
+        remainingBosses: 1
     };
     activeWaves.push(gameState.wave);
     waveBossAlive[gameState.wave] = false;
@@ -2501,18 +2531,27 @@ function startNextWave() {
     saveGame();
 }
 
+// Update active wave states and trigger new waves when the current one is finished
 function checkWaveCompletion(dt) {
-    const enemies = enemyPool.getActiveObjects().filter(e => !e.xp);
+    const allEnemies = enemyPool.getActiveObjects();
+    const enemies = allEnemies.filter(e => !e.xp);
+
     activeWaves = activeWaves.filter(w => {
         const state = waveStates[w];
         const hasEnemies = enemies.some(e => e.wave === w);
-        if (!hasEnemies && state && state.spawned > 0 && !state.bossAlive) {
+        if (state && state.remainingEnemies <= 0 && state.remainingBosses <= 0 && !hasEnemies) {
+            const remaining = Math.floor(Math.max(0, state.duration - state.elapsedTime));
+            completedWaves[w] = remaining;
+            if (w > completedWave) completedWave = w;
             delete waveStates[w];
             return false;
         }
         return true;
     });
-    if (enemies.length === 0 && activeWaves.length === 0) {
+
+    // If the current wave has finished and the player hasn't manually
+    // started the next one, automatically begin it
+    if (!waveStates[gameState.wave]) {
         startNextWave();
     }
 }
@@ -3402,9 +3441,13 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     const upgrade = upgradeTree[categoryIndex].upgrades[upgradeIndex];
 
     if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
-        gameState.credits += 100000;
-        updateHUD();
-        showToast('Cheated 100,000 credits!');
+        if (upgradeIndex === 0) {
+            gameState.credits += 100000;
+            updateHUD();
+            showToast('Cheated 100,000 credits!');
+        } else {
+            toggleWaveStatsPanel();
+        }
         return;
     }
 
@@ -3617,11 +3660,13 @@ function fireLaserAt(target) {
         gameState.score += target.creditsValue * 20;
         gameState.enemiesKilled++;
         createExplosion(target.x, target.y, target.color, 40, target.radius);
+        handleEnemyKilled(target);
         enemyPool.release(target);
         if (target.xp) {
             gameState.doubleFireRateEndTime = Date.now() + 20000;
             gameState.xpEnemiesDestroyed++;
             updateXPStatsPanel();
+            updateWaveStatsPanel();
             showToast('Fire rate doubled!', 3000);
         }
         updateHUD();
@@ -3831,6 +3876,46 @@ function toggleXPStatsPanel(){
     arrow.textContent=p.classList.contains("collapsed")?'▸':'▾';
 }
 
+function updateWaveStatsPanel(){
+    const panel=getElement("waveStatsPanel");
+    if(!panel) return;
+    const content=getElement("waveStatsContent");
+    const showPanel = activeWaves.length > 0;
+    if(!showPanel){
+        panel.style.display="none";
+        return;
+    }
+    panel.style.display="block";
+    const xpPanel=getElement("xpStatsPanel");
+    const enemyPanel=getElement("enemyStatsPanel");
+    panel.style.width="";
+    panel.style.maxWidth=hotkeysWidth===null?"" : hotkeysWidth+"px";
+    const baseTop=(xpPanel.style.display==="none"||xpPanel.offsetHeight===0)
+        ? enemyPanel.offsetTop+enemyPanel.offsetHeight
+        : xpPanel.offsetTop+xpPanel.offsetHeight;
+    panel.style.top=(baseTop+10)+"px";
+    const enemies=enemyPool.getActiveObjects().filter(e=>!e.xp);
+    let html="";
+    activeWaves.forEach(w=>{
+        const state=waveStates[w]||{};
+        const count=state.remainingEnemies!==undefined?state.remainingEnemies:enemies.filter(e=>e.wave===w).length;
+        const boss=state.remainingBosses!==undefined?state.remainingBosses:(waveBossAlive[w]?1:0);
+        const total=count+boss;
+        const rem=Math.max(0,(state.duration||0)-(state.elapsedTime||0));
+        const m=Math.floor(rem/60);
+        const s=Math.floor(rem%60).toString().padStart(2,'0');
+        html+=`<div>Wave ${w}: ${total} enemies - ${m}:${s}</div>`;
+    });
+    content.innerHTML=html;
+}
+
+function toggleWaveStatsPanel(){
+    const p=getElement("waveStatsPanel");
+    const arrow=getElement("waveStatsToggle");
+    p.classList.toggle("collapsed");
+    arrow.textContent=p.classList.contains("collapsed")?'▸':'▾';
+}
+
 function beep(){
     try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();o.type="square";o.frequency.value=800;o.connect(c.destination);o.start();setTimeout(()=>{o.stop();c.close();},100);}catch(e){}
 }
@@ -3918,6 +4003,7 @@ window.addEventListener('keydown', e => {
             case 'i': toggleEnemyStatsPanel(); break;
             case 'q':
                 debugUpgradesVisible = !debugUpgradesVisible;
+                updateWaveStatsPanel();
                 drawGame();
                 break; // Hidden toggle for debug upgrades
             case 'o': toggleRingInfoDisplay(); break; // Toggle info anytime
@@ -4148,6 +4234,7 @@ getElement('sensorWarningButton').onclick = dismissSensorWarning;
 getElement("enemyIntelContinue").onclick=hideEnemyIntelPopup;
 getElement("enemyStatsHeader").onclick=toggleEnemyStatsPanel;
 getElement("xpStatsHeader").onclick=toggleXPStatsPanel;
+getElement("waveStatsHeader").onclick=toggleWaveStatsPanel;
 getElement('playPauseButton').onclick = () => {
     if (infoModeActive) {
         infoModeActive = false;
