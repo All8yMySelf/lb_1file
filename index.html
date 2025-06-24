@@ -1935,7 +1935,12 @@ function gameOver() {
         if (index === -1 && scores.length < 10) index = scores.length;
         let list = scores.slice();
         if (index !== -1) {
-            list.splice(index, 0, { initials: '???', wave: completedWave, time: remainingTime, date: formatDate(new Date()) });
+            list.splice(index, 0, {
+                initials: '???',
+                wave: scoreWave,
+                time: remainingTime,
+                date: formatDate(new Date())
+            });
             list = list.slice(0, 10);
         }
         renderScoreList('gameOverScoreList', list, index);
