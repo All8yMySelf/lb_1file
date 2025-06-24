@@ -1,5 +1,17 @@
 # Orbital Defence Elite - Change Log
 
+## v2.44
+- Show lowest undefeated wave in Game Over statistics.
+- Leaderboard scoring uses the earliest unfinished wave.
+- Remaining enemy count displays during each wave.
+
+## v2.43
+- Leaderboard now uses the earliest active wave on death to prevent inflated
+  scores when multiple waves are queued.
+
+## v2.42
+- Info upgrade uses a standalone layout without connecting lines.
+
 ## v2.41
 - XP enemy despawns instantly when a boss is destroyed.
 

@@ -44,9 +44,10 @@ similar to the example below:
 }
 ```
 
-Before deploying your own version, open `index.html` and replace the example values in the `firebaseConfig` object with your project credentials. Use `database.rules.json` as a template for defining your security rules.
-
-Scores are ranked using the formula `ranking = wave * 100000 - time`. Higher waves and faster completion times result in a higher leaderboard position.
+Scores are ranked using the formula `ranking = wave * 100000 - time` where
+`wave` is the lowest wave that was still active when the player was defeated.
+This ensures sending multiple waves early will not inflate scores. Higher waves
+and faster completion times result in a better leaderboard position.
 
 The database must allow writes at `/scores` so the game can submit new
 entries. A `permission_denied` error in the browser console typically means the
@@ -59,6 +60,17 @@ rules are misconfigured.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+
+### v2.44
+- Show the lowest undefeated wave on the Game Over screen.
+- Leaderboard scoring now uses the earliest unfinished wave.
+- Remaining enemy count is displayed during each wave.
+
+### v2.43
+- Leaderboard uses the earliest active wave when calculating scores.
+
+### v2.42
+- Info upgrade uses a standalone layout without connecting lines.
 ### v2.41
 - XP enemy despawns instantly when a boss is destroyed.
 
