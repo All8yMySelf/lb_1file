@@ -1884,8 +1884,6 @@ function gameOver() {
     getElement('playPauseButton').textContent = '\u25B6';
     getElement('gameOverScreen').style.display = 'flex';
     getElement('deathOverlay').style.display = 'block';
-    const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
-    getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
     const scoreWave = activeWaves.length > 0
         ? Math.min(...activeWaves)
         : completedWave + 1;
@@ -1894,6 +1892,8 @@ function gameOver() {
     if (state) {
         remainingTime = Math.floor(Math.max(0, state.duration - state.elapsedTime));
     }
+    const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
+    getElement('finalStats').textContent = `Wave ${scoreWave}/${remainingTime}s - ${formatDate(new Date())}`;
     const playerRank = scoreWave * 100000 - remainingTime;
     window.pendingScore = { wave: scoreWave, time: remainingTime, ranking: playerRank, saved: false };
     getTopScores().then(scores => {
