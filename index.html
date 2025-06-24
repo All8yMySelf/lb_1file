@@ -4526,5 +4526,11 @@ window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category togglin
 </script>
 <div id="deathOverlay" class="overlay-desaturate" style="display:none"></div>
 <div id="crt-overlay"></div>
+<div id="kofi-container" style="position: fixed; bottom: 0; left: 0; z-index: 1000;"></div>
+<script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+<script type='text/javascript'>
+kofiwidget2.init('Support me?', '#72a4f2', 'J3J61GYAD9');
+document.getElementById('kofi-container').innerHTML = kofiwidget2.getHTML();
+</script>
 </body>
 </html>
