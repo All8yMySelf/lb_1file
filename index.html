@@ -4170,7 +4170,7 @@ function handleDragEnd() {
 
 // Canvas Click (handles base click for menu, ring UI clicks)
 function handleCanvasClick(clientX, clientY) {
-    if (!isGameRunning && !infoModeActive) return;
+    const paused = !isGameRunning && !infoModeActive;
 
     const rect = canvas.getBoundingClientRect();
     const clickX = clientX - rect.left;
@@ -4205,8 +4205,9 @@ function handleCanvasClick(clientX, clientY) {
             }
         }
     }
+    if (paused) return;
 
-    if (base.manualTargeting && base.laserDamage > 0 && Date.now() - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
+    if (isGameRunning && base.manualTargeting && base.laserDamage > 0 && Date.now() - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
         const target = enemyPool.getActiveObjects().find(e =>
             e.xp &&
             clickX >= e.x - e.radius && clickX <= e.x + e.radius &&
