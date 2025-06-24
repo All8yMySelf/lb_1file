@@ -176,10 +176,14 @@
   #xpStatsPanel.collapsed #xpStatsContent { display: none; }
   #xpStatsHeader { cursor: pointer; }
   #xpStatsHeader .arrow { margin-left: 4px; }
-  #waveStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; }
-  #waveStatsPanel.collapsed #waveStatsContent { display: none; }
-  #waveStatsHeader { cursor: pointer; }
+  #waveStatsPanel { position: absolute; right: 10px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; }
+  #waveStatsBody { background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; }
+  #waveStatsPanel.collapsed #waveStatsContent, #waveStatsPanel.collapsed #waveStatsTotal { display: none; }
+  #waveStatsHeader { cursor: pointer; color: #fff; background: transparent; }
   #waveStatsHeader .arrow { margin-left: 4px; }
+  .wave-divider-white { border-bottom:2px solid #fff; }
+  .wave-divider-grey { border-bottom:1px solid #888; }
+  .wave-total { color: var(--button-text); }
   #hotkeys { word-wrap: break-word; }
   #hotkeys.collapsed #hotkeysContent { display: none; }
   #hotkeysHeader { cursor: pointer; }
@@ -268,8 +272,11 @@
   <div id="xpStatsContent"></div>
 </div>
 <div id="waveStatsPanel" style="display:none">
-  <div id="waveStatsHeader">Wave Status <span id="waveStatsToggle" class="arrow">▾</span></div>
-  <div id="waveStatsContent"></div>
+  <div id="waveStatsHeader">Battle Status <span id="waveStatsToggle" class="arrow">▾</span></div>
+  <div id="waveStatsBody">
+    <div id="waveStatsContent"></div>
+    <div id="waveStatsTotal" class="wave-total"></div>
+  </div>
 </div>
 <div id="sensorWarning" style="display:none">
     <p>The ring around your base shows your cannon's visual firing range. The cannon cannot target enemies beyond this radius. Click on the "Cannon" to upgrade the cannon's abilities.</p>
@@ -3966,6 +3973,7 @@ function updateWaveStatsPanel(){
     const panel=getElement("waveStatsPanel");
     if(!panel) return;
     const content=getElement("waveStatsContent");
+    const totalEl=getElement("waveStatsTotal");
     const showPanel = activeWaves.length > 0;
     if(!showPanel){
         panel.style.display="none";
@@ -3982,17 +3990,22 @@ function updateWaveStatsPanel(){
     panel.style.top=(baseTop+10)+"px";
     const enemies=enemyPool.getActiveObjects().filter(e=>!e.xp);
     let html="";
+    let totalEnemies=0;
     activeWaves.forEach(w=>{
         const state=waveStates[w]||{};
         const count=state.remainingEnemies!==undefined?state.remainingEnemies:enemies.filter(e=>e.wave===w).length;
         const boss=state.remainingBosses!==undefined?state.remainingBosses:(waveBossAlive[w]?1:0);
         const total=count+boss;
+        totalEnemies+=total;
         const rem=Math.max(0,(state.duration||0)-(state.elapsedTime||0));
         const m=Math.floor(rem/60);
         const s=Math.floor(rem%60).toString().padStart(2,'0');
         html+=`<div>Wave ${w}: ${total} enemies - ${m}:${s}</div>`;
     });
     content.innerHTML=html;
+    if(totalEl){
+        totalEl.textContent=totalEnemies>0?`Total Enemies: ${totalEnemies}`:"Total Enemies: None detected.";
+    }
 }
 
 function toggleWaveStatsPanel(){
