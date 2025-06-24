@@ -1,5 +1,9 @@
 # Orbital Defence Elite - Change Log
 
+## v2.43
+- Leaderboard now uses the earliest active wave on death to prevent inflated
+  scores when multiple waves are queued.
+
 ## v2.42
 - Info upgrade uses a standalone layout without connecting lines.
 
