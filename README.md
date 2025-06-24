@@ -56,6 +56,17 @@ file is only a reference and is not read by the game directly.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+
+### v2.44
+- Show the lowest undefeated wave on the Game Over screen.
+- Leaderboard scoring now uses the earliest unfinished wave.
+- Remaining enemy count is displayed during each wave.
+
+### v2.43
+- Leaderboard uses the earliest active wave when calculating scores.
+
+### v2.42
+- Info upgrade uses a standalone layout without connecting lines.
 ### v2.41
 - XP enemy despawns instantly when a boss is destroyed.
 
