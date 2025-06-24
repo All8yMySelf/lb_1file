@@ -4453,6 +4453,7 @@ function applyTheme(themeIndex) {
     if (isGameRunning || getElement('startScreen').style.display === 'flex' || getElement('gameOverScreen').style.display === 'flex') {
         drawGame();
     }
+    updateKoFiWidgetColor();
     showToast(`Theme set to: ${currentTheme.name}`, 1500);
 }
 
@@ -4461,6 +4462,16 @@ function cycleTheme() {
     // Save the selected theme index to localStorage
     localStorage.setItem('orbitalDefenseTheme_v2.9', currentThemeIndex);
 }
+
+// Update Ko-Fi widget color to match current theme
+window.updateKoFiWidgetColor = function() {
+    if (typeof kofiwidget2 === 'undefined') return;
+    const color = getComputedStyle(document.documentElement)
+        .getPropertyValue('--button-border') || '#72a4f2';
+    kofiwidget2.init('Support me?', color.trim(), 'J3J61GYAD9');
+    const container = document.getElementById('kofi-container');
+    if (container) container.innerHTML = kofiwidget2.getHTML();
+};
 
 // --- Load and Start Game Function ---
 function loadAndStartGame() {
@@ -4529,8 +4540,7 @@ window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category togglin
 <div id="kofi-container" style="position: fixed; bottom: 0; left: 0; z-index: 1000;"></div>
 <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
 <script type='text/javascript'>
-kofiwidget2.init('Support me?', '#72a4f2', 'J3J61GYAD9');
-document.getElementById('kofi-container').innerHTML = kofiwidget2.getHTML();
+updateKoFiWidgetColor();
 </script>
 </body>
 </html>
