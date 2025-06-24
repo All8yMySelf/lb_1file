@@ -1,4 +1,4 @@
-# Orbital Defence Elite
+# Orbital Defense
 
 This repository contains a small browser game written entirely in a single HTML file. The goal of the challenge is to keep all the game's HTML, CSS and JavaScript code self-contained so that it can be played by simply opening `index.html`.
 
@@ -60,6 +60,10 @@ rules are misconfigured.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+
+### v2.45
+- Start screen now warns the game is still in development.
+- Title increased in size and simplified to "Orbital Defense".
 
 ### v2.44
 - Show the lowest undefeated wave on the Game Over screen.
