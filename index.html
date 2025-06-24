@@ -1886,9 +1886,16 @@ function gameOver() {
     getElement('deathOverlay').style.display = 'block';
     const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
     getElement('finalStats').textContent = `Wave ${gameState.wave}/${survivalTime}s - ${formatDate(new Date())}`;
-    const remainingTime = completedWaves[completedWave] ?? 0;
-    const playerRank = completedWave * 100000 - remainingTime;
-    window.pendingScore = { wave: completedWave, time: remainingTime, ranking: playerRank, saved: false };
+    const scoreWave = activeWaves.length > 0
+        ? Math.min(...activeWaves)
+        : completedWave + 1;
+    let remainingTime = completedWaves[scoreWave] ?? 0;
+    const state = waveStates[scoreWave];
+    if (state) {
+        remainingTime = Math.floor(Math.max(0, state.duration - state.elapsedTime));
+    }
+    const playerRank = scoreWave * 100000 - remainingTime;
+    window.pendingScore = { wave: scoreWave, time: remainingTime, ranking: playerRank, saved: false };
     getTopScores().then(scores => {
         let index = scores.findIndex(s => playerRank > s.ranking);
         if (index === -1 && scores.length < 10) index = scores.length;
