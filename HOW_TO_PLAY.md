@@ -8,6 +8,7 @@
 - **Move Base:** Drag with the mouse or use the **WASD** or **Arrow** keys.
 - **Fire:** The cannon automatically shoots when enemies are in range. Press **F** to toggle auto-fire or use the **Space** key when auto-fire is disabled.
 - **Macross Missiles:** Press **M** to unleash a barrage of missiles once the upgrade is unlocked.
+- **Game Speed:** Use the **«** and **»** buttons to adjust how fast the game runs. You can change the speed even while paused.
 - **Upgrades:** Click the base to open the upgrade ring. You can also click directly on an upgrade icon within the ring for quick access.
 - **Interface Toggles:**
   - **H** – show or hide the hotkeys list.
