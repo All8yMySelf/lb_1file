@@ -4474,7 +4474,7 @@ function cycleTheme() {
 window.updateKoFiWidgetColor = function() {
     if (typeof kofiwidget2 === 'undefined') return;
     const color = getComputedStyle(document.documentElement)
-        .getPropertyValue('--button-border') || '#72a4f2';
+        .getPropertyValue('--button-bg') || '#72a4f2';
     kofiwidget2.init('Support me?', color.trim(), 'J3J61GYAD9');
     const container = document.getElementById('kofi-container');
     if (container) container.innerHTML = kofiwidget2.getHTML();
