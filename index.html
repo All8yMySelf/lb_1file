@@ -168,7 +168,7 @@
   @keyframes slowBlink { 50% { opacity: 0; } }
   .sub-message { margin-bottom: 1rem; color: var(--button-text); }
   .overlay-desaturate { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: grayscale(1); pointer-events: none; z-index: 99; }
-  #enemyStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; width: 100px; }
+  #enemyStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; width: 200px; }
   #enemyStatsPanel.collapsed #enemyStatsContent { display: none; }
   #enemyStatsHeader { cursor: pointer; }
   #enemyStatsHeader .arrow { margin-left: 4px; }
@@ -3933,8 +3933,8 @@ function updateEnemyStatsPanel(){
     if(hotkeysWidth===null){
         hotkeysWidth=hotkeys.offsetWidth;
     }
-    panel.style.width="100px";
-    panel.style.maxWidth="100px";
+    panel.style.width="200px";
+    panel.style.maxWidth="200px";
     let top=hudBar.offsetHeight+10;
     if(hotkeys.classList.contains("show")) top+=hotkeys.offsetHeight+10;
     panel.style.top=top+"px";
