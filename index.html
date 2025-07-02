@@ -168,15 +168,48 @@
   @keyframes slowBlink { 50% { opacity: 0; } }
   .sub-message { margin-bottom: 1rem; color: var(--button-text); }
   .overlay-desaturate { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: grayscale(1); pointer-events: none; z-index: 99; }
-  #enemyStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; width: 200px; }
+  #enemyStatsPanel {
+    position: absolute;
+    right: 10px;
+    background: var(--hotkey-bg);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: var(--hotkey-font-size);
+    color: var(--hotkey-text);
+    z-index: 10;
+    word-wrap: break-word;
+    max-width: 200px;
+    display: inline-block;
+  }
   #enemyStatsPanel.collapsed #enemyStatsContent { display: none; }
   #enemyStatsHeader { cursor: pointer; }
   #enemyStatsHeader .arrow { margin-left: 4px; }
-  #xpStatsPanel { position: absolute; right: 10px; background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; }
+  #xpStatsPanel {
+    position: absolute;
+    right: 10px;
+    background: var(--hotkey-bg);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: var(--hotkey-font-size);
+    color: var(--hotkey-text);
+    z-index: 10;
+    word-wrap: break-word;
+    max-width: 200px;
+    display: inline-block;
+  }
   #xpStatsPanel.collapsed #xpStatsContent { display: none; }
   #xpStatsHeader { cursor: pointer; }
   #xpStatsHeader .arrow { margin-left: 4px; }
-  #waveStatsPanel { position: absolute; right: 10px; font-size: var(--hotkey-font-size); color: var(--hotkey-text); z-index: 10; word-wrap: break-word; }
+  #waveStatsPanel {
+    position: absolute;
+    right: 10px;
+    font-size: var(--hotkey-font-size);
+    color: var(--hotkey-text);
+    z-index: 10;
+    word-wrap: break-word;
+    max-width: 200px;
+    display: inline-block;
+  }
   #waveStatsBody { background: var(--hotkey-bg); padding: 5px 10px; border-radius: 5px; }
   #waveStatsPanel.collapsed #waveStatsContent, #waveStatsPanel.collapsed #waveStatsTotal { display: none; }
   #waveStatsHeader { cursor: pointer; color: #fff; background: transparent; }
@@ -184,7 +217,11 @@
   .wave-divider-white { border-bottom:2px solid #fff; }
   .wave-divider-grey { border-bottom:1px solid #888; }
   .wave-total { color: var(--button-text); }
-  #hotkeys { word-wrap: break-word; }
+  #hotkeys {
+    word-wrap: break-word;
+    max-width: 200px;
+    display: inline-block;
+  }
   #hotkeys.collapsed #hotkeysContent { display: none; }
   #hotkeysHeader { cursor: pointer; }
   #hotkeysHeader .arrow { margin-left: 4px; }
@@ -269,7 +306,7 @@
   </div>
 </div>
 <div id="enemyStatsPanel"><div id="enemyStatsHeader">Enemy Stats <span id="enemyStatsToggle" class="arrow">▾</span></div><div id="enemyStatsContent"></div></div>
-<div id="xpStatsPanel" class="collapsed">
+<div id="xpStatsPanel">
   <div id="xpStatsHeader">XP Status <span id="xpStatsToggle" class="arrow">▾</span></div>
   <div id="xpStatsContent"></div>
 </div>
@@ -3817,6 +3854,9 @@ function toggleHotkeysPanel(){
     const arrow=getElement('hotkeysToggle');
     p.classList.toggle('collapsed');
     arrow.textContent=p.classList.contains('collapsed')?'▸':'▾';
+    updateEnemyStatsPanel();
+    updateXPStatsPanel();
+    updateWaveStatsPanel();
 }
 
 function toggleRingInfoDisplay() {
@@ -3930,10 +3970,7 @@ function updateEnemyStatsPanel(){
     }
     const hudBar=getElement("hud");
     const hotkeys=getElement("hotkeys");
-    if(hotkeysWidth===null){
-        hotkeysWidth=hotkeys.offsetWidth;
-    }
-    panel.style.width="200px";
+    panel.style.width="";
     panel.style.maxWidth="200px";
     let top=hudBar.offsetHeight+10;
     if(hotkeys.classList.contains("show")) top+=hotkeys.offsetHeight+10;
@@ -3945,6 +3982,8 @@ function toggleEnemyStatsPanel(){
     const arrow=getElement("enemyStatsToggle");
     p.classList.toggle("collapsed");
     arrow.textContent=p.classList.contains("collapsed")?'▸':'▾';
+    updateXPStatsPanel();
+    updateWaveStatsPanel();
 }
 
 function updateXPStatsPanel(){
@@ -3958,7 +3997,7 @@ function updateXPStatsPanel(){
     panel.style.display="block";
     const enemyPanel=getElement("enemyStatsPanel");
     panel.style.width="";
-    panel.style.maxWidth=hotkeysWidth===null?"" : hotkeysWidth+"px";
+    panel.style.maxWidth="200px";
     panel.style.top=(enemyPanel.offsetTop+enemyPanel.offsetHeight+10)+"px";
     let html=`<div>XP Enemies: ${gameState.xpEnemiesDestroyed}/${gameState.xpEnemiesSpawned}</div>`;
     html+=`<div>Destroy with Manual Laser to double fire rate for 20 s.</div>`;
@@ -3974,6 +4013,7 @@ function toggleXPStatsPanel(){
     const arrow=getElement("xpStatsToggle");
     p.classList.toggle("collapsed");
     arrow.textContent=p.classList.contains("collapsed")?'▸':'▾';
+    updateWaveStatsPanel();
 }
 
 function updateWaveStatsPanel(){
@@ -3990,7 +4030,7 @@ function updateWaveStatsPanel(){
     const xpPanel=getElement("xpStatsPanel");
     const enemyPanel=getElement("enemyStatsPanel");
     panel.style.width="";
-    panel.style.maxWidth=hotkeysWidth===null?"" : hotkeysWidth+"px";
+    panel.style.maxWidth="200px";
     const baseTop=(xpPanel.style.display==="none"||xpPanel.offsetHeight===0)
         ? enemyPanel.offsetTop+enemyPanel.offsetHeight
         : xpPanel.offsetTop+xpPanel.offsetHeight;
@@ -4020,6 +4060,7 @@ function toggleWaveStatsPanel(){
     const arrow=getElement("waveStatsToggle");
     p.classList.toggle("collapsed");
     arrow.textContent=p.classList.contains("collapsed")?'▸':'▾';
+    updateWaveStatsPanel();
 }
 
 function beep(){
