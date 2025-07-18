@@ -4471,10 +4471,16 @@ window.addEventListener('resize', () => {
     canvasHeight = window.innerHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    // No need to reposition DOM elements anymore
-    // Re-applying certain base stats that depend on screen size might be needed
-    // e.g., if stun radius or laser range were calculated differently based on resize.
-    // For now, assume fixed calculation or recalculation within applyUpgradeEffect.
+    if (fogCanvas) {
+        fogCanvas.width = canvasWidth;
+        fogCanvas.height = canvasHeight;
+    }
+    if (base) {
+        base.x = canvasWidth / 2;
+        base.y = canvasHeight / 2;
+        baseStartX = base.x;
+        baseStartY = base.y;
+    }
     if (isGameRunning) {
         drawGame(); // Redraw immediately after resize
     }
