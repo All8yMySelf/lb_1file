@@ -3893,6 +3893,7 @@ function toggleFullScreen() {
         else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
         else if (doc.msExitFullscreen) doc.msExitFullscreen();
     }
+    handleFullscreenChange();
 }
 
 function handleFullscreenChange() {
@@ -4435,6 +4436,9 @@ getElement("musicVolume").oninput=e=>{musicVolume=parseFloat(e.target.value);loc
 getElement('sendWaveButton').onclick = sendNextWave;
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
 const tooltipTexts = {
   playPauseButton: 'Play or pause the game',
