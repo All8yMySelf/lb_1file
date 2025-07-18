@@ -1542,6 +1542,26 @@ function loadGame() {
         // Restore game state, base stats
         // Be careful not to overwrite functions or non-serializable data
         Object.assign(gameState, savedGame.gameState);
+
+        // Reinitialize wave tracking based on the loaded wave
+        activeWaves = [gameState.wave];
+        waveBossAlive = { [gameState.wave]: false };
+        const duration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
+        const totalEnemies = Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND);
+        waveStates[gameState.wave] = {
+            elapsedTime: 0,
+            duration,
+            isBossWave: false,
+            xpSpawnTime: Math.random() * (duration - 2),
+            xpSpawned: false,
+            bossAlive: false,
+            spawned: 0,
+            totalEnemies,
+            remainingEnemies: totalEnemies,
+            totalBosses: 1,
+            remainingBosses: 1
+        };
+
         // Selectively assign base properties that are saved
         const savedBase = savedGame.base;
         base.x = savedBase.x;
