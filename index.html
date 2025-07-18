@@ -113,8 +113,6 @@
     renderLeaderboard(scores, idx);
     });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/midi-player-js@2.0.5/build/MidiPlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
 
 <title>Orbital Defense v2.45 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -842,14 +840,11 @@ const SPEED_STEPS = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.5,2,3,4,5,6,7,8,9,1
 let speedIndex = SPEED_STEPS.indexOf(1);
 let gameSpeedMultiplier = SPEED_STEPS[speedIndex];
 let isGameRunning = false;
-const musicTracks=["Off","music1.mp3","music2.mp3","music3.mp3","music4.mp3","music5.mp3","music1.mid"];
-const musicTrackNames=["Off","Track 1","Track 2","Track 3","Track 4","Track 5","Track One MIDI"];
+const musicTracks=["Off","music1.mp3","music2.mp3","music3.mp3","music4.mp3","music5.mp3"];
+const musicTrackNames=["Off","Track 1","Track 2","Track 3","Track 4","Track 5"];
 let currentTrackIndex=parseInt(localStorage.getItem("ode_musicTrack")||"0",10);
 let musicAudio=new Audio();
 musicAudio.loop=true;
-let midiPlayer=null;
-let midiInstrument=null;
-let audioContext=null;
 let musicVolume=parseFloat(localStorage.getItem("ode_musicVolume"))||0.25;
 musicAudio.volume=musicVolume;
 let isMuted = localStorage.getItem('ode_isMuted') === 'true';
@@ -1034,25 +1029,6 @@ function resetMissile(missile, config) {
     }
 }
 
-async function playMidiTrack(src){
-    if(!audioContext){
-        audioContext=new (window.AudioContext||window.webkitAudioContext)();
-    }
-    if(!midiInstrument){
-        midiInstrument=await Soundfont.instrument(audioContext,'acoustic_grand_piano');
-    }
-    if(midiPlayer){
-        midiPlayer.stop();
-    }
-    midiPlayer=new MidiPlayer.Player(event=>{
-        if(event.name==='Note on'){
-            midiInstrument.play(event.noteName,audioContext.currentTime,{gain:musicVolume});
-        }
-    });
-    const buf=await fetch(src).then(r=>r.arrayBuffer());
-    midiPlayer.loadArrayBuffer(buf);
-    midiPlayer.play();
-}
 
 
 // Initialize object pools
@@ -3953,13 +3929,9 @@ function playCurrentTrack(){
     if(track==="Off"){
         musicAudio.pause();
     }else{
-        if(track.toLowerCase().endsWith('.mid')){
-            playMidiTrack(track);
-        }else{
-            musicAudio.src=track;
-            musicAudio.volume=musicVolume;
-            musicAudio.play();
-        }
+        musicAudio.src=track;
+        musicAudio.volume=musicVolume;
+        musicAudio.play();
     }
 }
 
