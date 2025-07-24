@@ -977,6 +977,9 @@ let completedWave = 0;
 // Cache width of the hotkeys panel for enemy stats alignment
 let hotkeysWidth = null;
 
+// Space between side panels in pixels
+const PANEL_SPACING = 15;
+
 
 // --- Overlay System ---
 let fogCanvas = null, fogCtx = null;
@@ -4072,8 +4075,8 @@ function updateEnemyStatsPanel(){
     const hotkeys=getElement("hotkeys");
     panel.style.width="";
     panel.style.maxWidth="200px";
-    let top=hudBar.offsetHeight+10;
-    if(hotkeys.classList.contains("show")) top+=hotkeys.offsetHeight+10;
+    let top=hudBar.offsetHeight+PANEL_SPACING;
+    if(hotkeys.classList.contains("show")) top+=hotkeys.offsetHeight+PANEL_SPACING;
     panel.style.top=top+"px";
 }
 
@@ -4098,7 +4101,7 @@ function updateXPStatsPanel(){
     const enemyPanel=getElement("enemyStatsPanel");
     panel.style.width="";
     panel.style.maxWidth="200px";
-    panel.style.top=(enemyPanel.offsetTop+enemyPanel.offsetHeight+10)+"px";
+    panel.style.top=(enemyPanel.offsetTop+enemyPanel.offsetHeight+PANEL_SPACING)+"px";
     let html=`<div>XP Enemies: ${gameState.xpEnemiesDestroyed}/${gameState.xpEnemiesSpawned}</div>`;
     html+=`<div>Destroy with Manual Laser to double fire rate for 20 s.</div>`;
     if(Date.now()<gameState.doubleFireRateEndTime){
@@ -4134,7 +4137,7 @@ function updateWaveStatsPanel(){
     const baseTop=(xpPanel.style.display==="none"||xpPanel.offsetHeight===0)
         ? enemyPanel.offsetTop+enemyPanel.offsetHeight
         : xpPanel.offsetTop+xpPanel.offsetHeight;
-    panel.style.top=(baseTop+10)+"px";
+    panel.style.top=(baseTop+PANEL_SPACING)+"px";
     const enemies=enemyPool.getActiveObjects().filter(e=>!e.xp);
     let html="";
     let totalEnemies=0;
