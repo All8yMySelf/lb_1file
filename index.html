@@ -592,7 +592,7 @@ const THEMES = [
             ringSensor: 'rgba(255, 200, 0, 0.6)',
             ringUpgradeBoxBg: 'rgba(200, 200, 200, 0.7)',
             ringUpgradeBoxAvailable: 'rgba(0, 255, 0, 0.7)',
-            ringUpgradeBoxText: '#000000',
+            ringUpgradeBoxText: '#646464',
             ringUpgradeBoxMax: '#333333',
             gunBarrel: '#000000',
             baseDragIndicator: 'rgba(50, 50, 50, 0.6)',
@@ -1116,6 +1116,13 @@ function getCategoryColor(index){
         case UPGRADE_CATEGORY_INFO: return currentTheme.canvasColors.ringSensor || currentTheme.canvasColors.ringCannon;
         default: return currentTheme.canvasColors.ringCannon;
     }
+}
+
+function getUpgradeTextColor(canAfford){
+    if(currentTheme.name === 'Pixel Black and White'){
+        return currentTheme.canvasColors.ringUpgradeBoxText || '#646464';
+    }
+    return canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
 }
 
 function createExplosion(x, y, color, count = 15, enemyRadius = 10) {
@@ -3358,7 +3365,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 ctx.fillRect(panelX, btnY, buttonWidth, b.height);
             }
 
-            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            ctx.fillStyle = getUpgradeTextColor(canAfford);
             let textY = btnY + padding;
             b.lines.forEach(line => {
                 ctx.fillText(line, panelX + padding, textY);
@@ -3379,7 +3386,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                         ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
                     }
                     ctx.fillRect(boxX, barY, boxSize, boxSize);
-                    ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : (canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)'));
+                    ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : getUpgradeTextColor(canAfford);
                     ctx.lineWidth = (base.focusRadiusSetting * 100 === value) ? 2 : 1;
                     ctx.strokeRect(boxX, barY, boxSize, boxSize);
                     if (categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS) {
@@ -3423,7 +3430,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 ctx.fillStyle = 'rgba(0,255,0,0.2)';
                 ctx.fillRect(subX, btnY, buttonWidth, focusButton.height);
             }
-            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            ctx.fillStyle = getUpgradeTextColor(canAfford);
             let textY = btnY + padding;
             focusButton.lines.forEach(line => {
                 ctx.fillText(line, subX + padding, textY);
@@ -3444,7 +3451,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                     ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
                 }
                 ctx.fillRect(boxX, barY, boxSize, boxSize);
-                ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : (canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)'));
+                ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : getUpgradeTextColor(canAfford);
                 ctx.lineWidth = (base.focusRadiusSetting * 100 === value) ? 2 : 1;
                 ctx.strokeRect(boxX, barY, boxSize, boxSize);
                 ringClickRegions.push({
@@ -3490,7 +3497,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 ctx.fillStyle = 'rgba(0,255,0,0.2)';
                 ctx.fillRect(subX, btnY, buttonWidth, targetButton.height);
             }
-            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            ctx.fillStyle = getUpgradeTextColor(canAfford);
             let textY = btnY + padding;
             targetButton.lines.forEach(line => {
                 ctx.fillText(line, subX + padding, textY);
@@ -3529,7 +3536,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 ctx.fillStyle = 'rgba(0,255,0,0.2)';
                 ctx.fillRect(subX, btnY, buttonWidth, manualButton.height);
             }
-            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            ctx.fillStyle = getUpgradeTextColor(canAfford);
             let textY = btnY + padding;
             manualButton.lines.forEach(line => {
                 ctx.fillText(line, subX + padding, textY);
