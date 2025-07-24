@@ -4526,11 +4526,18 @@ function cycleTheme() {
 // Update Ko-Fi widget color to match current theme
 window.updateKoFiWidgetColor = function() {
     if (typeof kofiwidget2 === 'undefined') return;
-    const color = getComputedStyle(document.documentElement)
-        .getPropertyValue('--button-bg') || '#72a4f2';
+    const styles = getComputedStyle(document.documentElement);
+    const color = styles.getPropertyValue('--button-bg') || '#72a4f2';
+    const textColor = styles.getPropertyValue('--button-text') || '#000';
     kofiwidget2.init('Support me?', color.trim(), 'J3J61GYAD9');
     const container = document.getElementById('kofi-container');
-    if (container) container.innerHTML = kofiwidget2.getHTML();
+    if (container) {
+        container.innerHTML = kofiwidget2.getHTML();
+        const textEl = container.querySelector('.kofitext');
+        if (textEl) textEl.style.setProperty('color', textColor.trim(), 'important');
+        const buttonEl = container.querySelector('.kofi-button');
+        if (buttonEl) buttonEl.style.setProperty('color', textColor.trim(), 'important');
+    }
 };
 
 // --- Load and Start Game Function ---
