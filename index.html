@@ -3318,7 +3318,10 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         ctx.fillRect(x, y, boxWidth, headerHeight);
     }
 
-    ctx.fillStyle = hasAvailable ? '#00ff00' : color;
+    const headerTextColor = currentTheme.name === 'Pixel Black and White'
+        ? (currentTheme.canvasColors.ringUpgradeBoxText || '#000')
+        : (hasAvailable ? '#00ff00' : color);
+    ctx.fillStyle = headerTextColor;
     ctx.fillText(title, x + padding, y + padding);
     ctx.textAlign = 'right';
     ctx.fillText(isExpanded ? '-' : '+', x + boxWidth - padding, y + padding);
