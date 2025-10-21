@@ -117,7 +117,7 @@
 <title>Orbital Defense v2.45 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
-:root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,.8);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#speedDisplay{display:flex;align-items:center;justify-content:center;width:40px;font-size:18px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
+:root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#speedDisplay{display:flex;align-items:center;justify-content:center;width:40px;font-size:18px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
 #musicControls{display:flex;align-items:center;gap:4px;}
 #trackDisplay{min-width:50px;text-align:center;}
 #musicVolume{
@@ -239,6 +239,21 @@
     z-index: 100;
   }
 
+</style>
+<style>
+  #speedDisplay, #sensorToggle .switch-label {
+    background: var(--canvas-bg);
+  }
+  #creditsDisplay, #waveDisplay, #healthDisplay, #speedDisplay, #sensorToggle .switch-label {
+    padding: 0 4px;
+    border-radius: 4px;
+  }
+</style>
+<style>
+  #hud span {
+    -webkit-text-stroke: 1px var(--body-bg);
+    text-shadow: 0 0 2px var(--body-bg);
+  }
 </style>
 <style>.dev-warning{font-size:0.8rem;margin-top:8px;color:var(--button-text);}</style>
 </head>
@@ -549,7 +564,7 @@ const THEMES = [
             '--canvas-bg': 'rgba(255, 255, 255, 0.7)',
             '--crt-overlay-bg': 'linear-gradient(rgba(255, 255, 255, 0.6) 50%, transparent 100%)',
             '--crt-overlay-blend': 'overlay',
-            '--crt-scanline-color': 'rgba(0, 0, 0, 0.1)',
+            '--crt-scanline-color': 'rgba(0, 0, 0, 0.03)',
             '--crt-vignette': 'radial-gradient(circle at center, transparent 60%, rgba(255, 255, 255, 0.6) 100%)',
             '--crt-interlace-color': 'rgba(0, 0, 0, 0.25)',
             '--font-family': "'Share Tech Mono', monospace",
@@ -561,7 +576,7 @@ const THEMES = [
             '--hotkey-font-size': '12px'
         },
         canvasColors: {
-            base: '#333333',
+            base: '#000000',
             baseHit: '#000000',
             bullet: '#000000',
             missile: '#333333',
@@ -593,7 +608,7 @@ const THEMES = [
             ringUpgradeBoxBg: 'rgba(200, 200, 200, 0.7)',
             ringUpgradeBoxAvailable: 'rgba(0, 255, 0, 0.7)',
             ringUpgradeBoxText: '#000000',
-            ringUpgradeBoxMax: '#333333',
+            ringUpgradeBoxMax: '#000000',
             gunBarrel: '#000000',
             baseDragIndicator: 'rgba(50, 50, 50, 0.6)',
             baseReturnIndicator: 'rgba(100, 100, 100, 0.6)'
@@ -694,6 +709,96 @@ const THEMES = [
             yellow: ['#f3c400', '#cfa700', '#a58200', '#7b5e00'],
             white: ['#e2eaf3', '#bfc8d4', '#8a959f', '#5b6066'],
             cyan: ['#00ffe1', '#00ccb4', '#008b7a', '#005540']
+        }
+    },
+    { // Theme 6: Black and White
+        name: "Black and White",
+        cssVariables: {
+            '--bg-gradient': '#000',
+            '--body-bg': '#000',
+            '--text-color': '#fff',
+            '--hud-color': '#e6b54b',
+            '--title-color': '#fff',
+            '--final-stats-color': '#e6b54b',
+            '--button-bg': '#e6b54b',
+            '--button-text': '#000',
+            '--button-border': '#e6b54b',
+            '--button-hover-bg': '#fff',
+            '--button-disabled-bg': '#555',
+            '--button-disabled-text': '#222',
+            '--upgrade-title-color': '#e6b54b',
+            '--toggle-active-bg': '#e6b54b',
+            '--toggle-active-text': '#000',
+            '--toast-bg': 'rgba(255,255,255,0.2)',
+            '--toast-text': '#e6b54b',
+            '--switch-bg': '#444',
+            '--switch-slider-color': '#e6b54b',
+            '--switch-checked-bg': '#666',
+            '--switch-label-color': '#e6b54b',
+            '--stats-border': 'rgba(230,181,75,0.3)',
+            '--stats-bg': 'rgba(255,255,255,0.1)',
+            '--hotkey-bg': 'rgba(255,255,255,0.1)',
+            '--hotkey-text': '#e6b54b',
+            '--canvas-bg': '#000',
+            '--crt-overlay-bg': 'transparent',
+            '--crt-overlay-blend': 'normal',
+            '--crt-scanline-color': 'transparent',
+            '--crt-vignette': 'none',
+            '--crt-interlace-color': 'transparent',
+            '--font-family': "'Share Tech Mono', monospace",
+            '--button-font-size': '20px',
+            '--upgrade-button-font-size': '14px',
+            '--tab-font-size': '16px',
+            '--ring-ui-font-size': '9px',
+            '--hud-font-size': '18px',
+            '--hotkey-font-size': '12px'
+        },
+        canvasColors: {
+            base: '#000000',
+            baseHit: '#ffffff',
+            bullet: '#ffffff',
+            missile: '#ffffff',
+            macrossMissile: '#ffffff',
+            missileTrail: 'rgba(255,255,255,0.5)',
+            laser: '#ffffff',
+            laserGlow: '#e6b54b',
+            particleDefault: '#ffffff',
+            particleHit: '#ffffff',
+            particleExplosion: ['#ffffff', '#e6b54b'],
+            particleStun: '#e6b54b',
+            particleLaunch: '#ffffff',
+            enemyNormal: '#ffffff',
+            enemyFast: '#cccccc',
+            enemyTank: '#999999',
+            enemyBoss: '#ffffff',
+            enemyHealthBarBg: '#333333',
+            enemyHealthBarFg: '#e6b54b',
+            enemyStunEffect: 'rgba(230,181,75,0.8)',
+            ringCannon: 'rgba(230,181,75,0.6)',
+            ringCannonUpgrade: 'rgba(230,181,75,0.8)',
+            ringMissile: 'rgba(230,181,75,0.6)',
+            ringMissileUpgrade: 'rgba(230,181,75,0.8)',
+            ringLaser: 'rgba(230,181,75,0.5)',
+            ringLaserUpgrade: 'rgba(230,181,75,0.8)',
+            ringStun: 'rgba(230,181,75,0.5)',
+            ringStunUpgrade: 'rgba(230,181,75,0.8)',
+            ringSensor: 'rgba(230,181,75,0.6)',
+            ringUpgradeBoxBg: 'rgba(230,181,75,0.8)',
+            ringUpgradeBoxAvailable: 'rgba(0,0,0,0.7)',
+            ringUpgradeBoxText: '#000',
+            ringUpgradeBoxMax: '#000',
+            gunBarrel: '#ffffff',
+            baseDragIndicator: 'rgba(255,255,255,0.5)',
+            baseReturnIndicator: 'rgba(230,181,75,0.6)',
+            upgradeRingLaser: 'rgba(230,181,75,0.6)',
+            upgradeRingMissile: 'rgba(230,181,75,0.6)'
+        },
+        particlePalettes: {
+            red: ['#ff0000', '#cc0000', '#880000', '#550000'],
+            orange: ['#ff7700', '#cc5500', '#883300', '#552200'],
+            yellow: ['#ffff00', '#cccc00', '#888800', '#555500'],
+            white: ['#ffffff', '#cccccc', '#888888', '#555555'],
+            cyan: ['#00ffff', '#00cccc', '#008888', '#005555']
         }
     }
 ];
@@ -841,6 +946,7 @@ let speedIndex = SPEED_STEPS.indexOf(1);
 let gameSpeedMultiplier = SPEED_STEPS[speedIndex];
 let isGameRunning = false;
 const musicTracks=["Off","music1.mp3","music2.mp3","music3.mp3","music4.mp3","music5.mp3"];
+const musicTrackNames=["Off","Track 1","Track 2","Track 3","Track 4","Track 5"];
 let currentTrackIndex=parseInt(localStorage.getItem("ode_musicTrack")||"0",10);
 let musicAudio=new Audio();
 musicAudio.loop=true;
@@ -885,6 +991,9 @@ let completedWave = 0;
 
 // Cache width of the hotkeys panel for enemy stats alignment
 let hotkeysWidth = null;
+
+// Space between side panels in pixels
+const PANEL_SPACING = 15;
 
 
 // --- Overlay System ---
@@ -1029,6 +1138,7 @@ function resetMissile(missile, config) {
 }
 
 
+
 // Initialize object pools
 const enemyPool = ObjectPool(Object, 50, resetEnemy); // Increased pool size
 const bulletPool = ObjectPool(Object, 150, resetBullet); // Increased pool size
@@ -1114,6 +1224,13 @@ function getCategoryColor(index){
         case UPGRADE_CATEGORY_INFO: return currentTheme.canvasColors.ringSensor || currentTheme.canvasColors.ringCannon;
         default: return currentTheme.canvasColors.ringCannon;
     }
+}
+
+function getUpgradeTextColor(canAfford){
+    if(currentTheme.name === 'Pixel Black and White'){
+        return currentTheme.canvasColors.ringUpgradeBoxText || '#646464';
+    }
+    return canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
 }
 
 function createExplosion(x, y, color, count = 15, enemyRadius = 10) {
@@ -3236,7 +3353,10 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         ctx.fillRect(x, y, boxWidth, headerHeight);
     }
 
-    ctx.fillStyle = hasAvailable ? '#00ff00' : color;
+    const headerTextColor = currentTheme.name === 'Pixel Black and White'
+        ? (currentTheme.canvasColors.ringUpgradeBoxText || '#000')
+        : (hasAvailable ? '#00ff00' : color);
+    ctx.fillStyle = headerTextColor;
     ctx.fillText(title, x + padding, y + padding);
     ctx.textAlign = 'right';
     ctx.fillText(isExpanded ? '-' : '+', x + boxWidth - padding, y + padding);
@@ -3376,7 +3496,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 ctx.fillRect(panelX, btnY, buttonWidth, b.height);
             }
 
-            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            ctx.fillStyle = getUpgradeTextColor(canAfford);
             let textY = btnY + padding;
             b.lines.forEach(line => {
                 ctx.fillText(line, panelX + padding, textY);
@@ -3397,7 +3517,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                         ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
                     }
                     ctx.fillRect(boxX, barY, boxSize, boxSize);
-                    ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : (canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)'));
+                    ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : getUpgradeTextColor(canAfford);
                     ctx.lineWidth = (base.focusRadiusSetting * 100 === value) ? 2 : 1;
                     ctx.strokeRect(boxX, barY, boxSize, boxSize);
                     if (categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS) {
@@ -3441,7 +3561,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 ctx.fillStyle = 'rgba(0,255,0,0.2)';
                 ctx.fillRect(subX, btnY, buttonWidth, focusButton.height);
             }
-            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            ctx.fillStyle = getUpgradeTextColor(canAfford);
             let textY = btnY + padding;
             focusButton.lines.forEach(line => {
                 ctx.fillText(line, subX + padding, textY);
@@ -3462,7 +3582,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                     ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
                 }
                 ctx.fillRect(boxX, barY, boxSize, boxSize);
-                ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : (canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)'));
+                ctx.strokeStyle = (base.focusRadiusSetting * 100 === value) ? 'lime' : getUpgradeTextColor(canAfford);
                 ctx.lineWidth = (base.focusRadiusSetting * 100 === value) ? 2 : 1;
                 ctx.strokeRect(boxX, barY, boxSize, boxSize);
                 ringClickRegions.push({
@@ -3508,7 +3628,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 ctx.fillStyle = 'rgba(0,255,0,0.2)';
                 ctx.fillRect(subX, btnY, buttonWidth, targetButton.height);
             }
-            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            ctx.fillStyle = getUpgradeTextColor(canAfford);
             let textY = btnY + padding;
             targetButton.lines.forEach(line => {
                 ctx.fillText(line, subX + padding, textY);
@@ -3547,7 +3667,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 ctx.fillStyle = 'rgba(0,255,0,0.2)';
                 ctx.fillRect(subX, btnY, buttonWidth, manualButton.height);
             }
-            ctx.fillStyle = canAfford ? '#00ff00' : (currentTheme.canvasColors.ringUpgradeBoxText || 'rgba(230,181,75,1)');
+            ctx.fillStyle = getUpgradeTextColor(canAfford);
             let textY = btnY + padding;
             manualButton.lines.forEach(line => {
                 ctx.fillText(line, subX + padding, textY);
@@ -3911,6 +4031,7 @@ function toggleFullScreen() {
         else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
         else if (doc.msExitFullscreen) doc.msExitFullscreen();
     }
+    handleFullscreenChange();
 }
 
 function handleFullscreenChange() {
@@ -3956,7 +4077,7 @@ function playCurrentTrack(){
 function updateTrackDisplay(){
     const d=getElement("trackDisplay");
     if(d){
-        d.textContent=currentTrackIndex===0?"Off":`Track ${currentTrackIndex}`;
+        d.textContent=musicTrackNames[currentTrackIndex]||`Track ${currentTrackIndex}`;
     }
 }
 
@@ -3992,8 +4113,8 @@ function updateEnemyStatsPanel(){
     const hotkeys=getElement("hotkeys");
     panel.style.width="";
     panel.style.maxWidth="200px";
-    let top=hudBar.offsetHeight+10;
-    if(hotkeys.classList.contains("show")) top+=hotkeys.offsetHeight+10;
+    let top=hudBar.offsetHeight+PANEL_SPACING;
+    if(hotkeys.classList.contains("show")) top+=hotkeys.offsetHeight+PANEL_SPACING;
     panel.style.top=top+"px";
 }
 
@@ -4018,7 +4139,7 @@ function updateXPStatsPanel(){
     const enemyPanel=getElement("enemyStatsPanel");
     panel.style.width="";
     panel.style.maxWidth="200px";
-    panel.style.top=(enemyPanel.offsetTop+enemyPanel.offsetHeight+10)+"px";
+    panel.style.top=(enemyPanel.offsetTop+enemyPanel.offsetHeight+PANEL_SPACING)+"px";
     let html=`<div>XP Enemies: ${gameState.xpEnemiesDestroyed}/${gameState.xpEnemiesSpawned}</div>`;
     html+=`<div>Destroy with Manual Laser to double fire rate for 20 s.</div>`;
     if(Date.now()<gameState.doubleFireRateEndTime){
@@ -4054,7 +4175,7 @@ function updateWaveStatsPanel(){
     const baseTop=(xpPanel.style.display==="none"||xpPanel.offsetHeight===0)
         ? enemyPanel.offsetTop+enemyPanel.offsetHeight
         : xpPanel.offsetTop+xpPanel.offsetHeight;
-    panel.style.top=(baseTop+10)+"px";
+    panel.style.top=(baseTop+PANEL_SPACING)+"px";
     const enemies=enemyPool.getActiveObjects().filter(e=>!e.xp);
     let html="";
     let totalEnemies=0;
@@ -4453,6 +4574,9 @@ getElement("musicVolume").oninput=e=>{musicVolume=parseFloat(e.target.value);loc
 getElement('sendWaveButton').onclick = sendNextWave;
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
 const tooltipTexts = {
   playPauseButton: 'Play or pause the game',
@@ -4485,10 +4609,16 @@ window.addEventListener('resize', () => {
     canvasHeight = window.innerHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    // No need to reposition DOM elements anymore
-    // Re-applying certain base stats that depend on screen size might be needed
-    // e.g., if stun radius or laser range were calculated differently based on resize.
-    // For now, assume fixed calculation or recalculation within applyUpgradeEffect.
+    if (fogCanvas) {
+        fogCanvas.width = canvasWidth;
+        fogCanvas.height = canvasHeight;
+    }
+    if (base) {
+        base.x = canvasWidth / 2;
+        base.y = canvasHeight / 2;
+        baseStartX = base.x;
+        baseStartY = base.y;
+    }
     if (isGameRunning) {
         drawGame(); // Redraw immediately after resize
     }
@@ -4534,11 +4664,18 @@ function cycleTheme() {
 // Update Ko-Fi widget color to match current theme
 window.updateKoFiWidgetColor = function() {
     if (typeof kofiwidget2 === 'undefined') return;
-    const color = getComputedStyle(document.documentElement)
-        .getPropertyValue('--button-bg') || '#72a4f2';
+    const styles = getComputedStyle(document.documentElement);
+    const color = styles.getPropertyValue('--button-bg') || '#72a4f2';
+    const textColor = styles.getPropertyValue('--button-text') || '#000';
     kofiwidget2.init('Support me?', color.trim(), 'J3J61GYAD9');
     const container = document.getElementById('kofi-container');
-    if (container) container.innerHTML = kofiwidget2.getHTML();
+    if (container) {
+        container.innerHTML = kofiwidget2.getHTML();
+        const textEl = container.querySelector('.kofitext');
+        if (textEl) textEl.style.setProperty('color', textColor.trim(), 'important');
+        const buttonEl = container.querySelector('.kofi-button');
+        if (buttonEl) buttonEl.style.setProperty('color', textColor.trim(), 'important');
+    }
 };
 
 // --- Load and Start Game Function ---
@@ -4605,7 +4742,7 @@ window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category togglin
 </script>
 <div id="deathOverlay" class="overlay-desaturate" style="display:none"></div>
 <div id="crt-overlay"></div>
-<div id="kofi-container" style="position: fixed; bottom: 0; left: 0; z-index: 1000;"></div>
+<div id="kofi-container" style="position: fixed; bottom: 10px; left: 10px; z-index: 1000;"></div>
 <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
 <script type='text/javascript'>
 updateKoFiWidgetColor();
