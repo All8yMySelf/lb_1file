@@ -1,8 +1,10 @@
-# Security: Implement Firebase security improvements
+# Critical Security & Performance Fixes
 
 ## Summary
 
-This PR implements critical security fixes for the Firebase leaderboard system based on a comprehensive code review. The main issue addressed is the exposed Firebase API key vulnerability through proper database validation rules and client-side protections.
+This PR implements critical security and performance fixes based on a comprehensive code review. Two major issues are addressed:
+1. **Firebase security vulnerability** - Exposed API key with permissive database rules
+2. **Memory leak** - Event listeners never cleaned up, causing performance degradation
 
 ## Changes
 
@@ -48,7 +50,30 @@ This PR implements critical security fixes for the Firebase leaderboard system b
 - Additional security recommendations (App Check, monitoring)
 - Troubleshooting guide for common issues
 
-## Security Impact
+### 🧹 5. Event Listener Cleanup System (`index.html`)
+- Implemented `AbortController` for centralized event listener management
+- Added `cleanupEventListeners()` function
+- Updated all 17 event listeners to use abort signal
+- Added automatic cleanup on page unload
+
+**Event listeners now managed:**
+- Window keyboard events (keydown, keyup)
+- Canvas/window mouse events (mousedown, mousemove, mouseup)
+- Canvas/window touch events (touchstart, touchmove, touchend)
+- Form input events (initials entry)
+- Fullscreen change events (all vendor prefixes)
+- Tooltip hover events (info mode)
+- Window resize event
+
+**Benefits:**
+- Prevents memory leaks from accumulating listeners
+- Improves long-term browser performance
+- Enables proper cleanup on page navigation
+- Follows modern JavaScript best practices
+
+## Impact
+
+### Security Impact
 
 **Before:**
 - ❌ Anyone could submit unlimited scores with any data
@@ -62,14 +87,35 @@ This PR implements critical security fixes for the Firebase leaderboard system b
 - ✅ Clear error messages for users and developers
 - ✅ Comprehensive documentation for deployment
 
+### Performance Impact
+
+**Before:**
+- ❌ Event listeners never removed, accumulating on game restart
+- ❌ Potential memory leaks over extended sessions
+- ❌ Browser performance degradation over time
+
+**After:**
+- ✅ All event listeners properly managed and cleaned up
+- ✅ Automatic cleanup prevents memory leaks
+- ✅ Consistent performance even after multiple game sessions
+- ✅ Better resource management
+
 ## Testing Checklist
 
+### Security Tests
 - [x] Database rules validate correct data
 - [x] Database rules reject invalid initials
 - [x] Database rules reject invalid wave numbers
 - [x] Rate limiting works (max 3/min)
 - [x] Error messages display correctly
 - [x] Documentation is complete
+
+### Performance Tests
+- [x] Event listeners properly attached with abort signals
+- [x] cleanupEventListeners() removes all listeners
+- [x] No console errors or warnings
+- [x] Game functions normally after multiple restarts
+- [x] Memory usage stable over extended sessions
 
 ## Deployment Steps
 
@@ -95,14 +141,19 @@ None. All changes are backward compatible with existing valid score submissions.
 
 ## Additional Notes
 
-This addresses the **#1 Critical Issue** from the code review: "Exposed Firebase API Key". While Firebase API keys are meant to be public for client-side apps, the real vulnerability was the permissive `.write: true` rule. This is now fixed with comprehensive validation.
+This PR addresses two critical issues from the code review:
+
+1. **Issue #1 (Critical): Exposed Firebase API Key** - While Firebase API keys are meant to be public for client-side apps, the real vulnerability was the permissive `.write: true` rule. This is now fixed with comprehensive validation.
+
+2. **Issue #2 (Critical): Memory Leak from Event Listeners** - Event listeners were never removed, accumulating on each game restart. This is now fixed using modern AbortController pattern.
 
 ## Files Changed
 
 - `database.rules.json` - Added strict validation rules
-- `index.html` - Added rate limiting and error handling
+- `index.html` - Added rate limiting, error handling, and event listener cleanup
 - `FIREBASE_SECURITY.md` - New security documentation
+- `PR_DESCRIPTION.md` - Pull request documentation
 
-**Total:** 3 files changed, 304 insertions(+), 3 deletions(-)
+**Total:** 4 files changed, 346 insertions(+), 20 deletions(-)
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
