@@ -27,12 +27,42 @@
   const db = getDatabase(app);
   let leaderboardUnsub = null;
 
-  // 2) submitScore writes to /scores
+  // Rate limiting for score submissions
+  const RATE_LIMIT = {
+    submissions: 0,
+    resetTime: Date.now() + 60000 // 1 minute
+  };
+
+  // 2) submitScore writes to /scores with rate limiting and validation
   window.submitScore = async function({ initials, wave, time, ranking }) {
+    // Rate limit check (max 3 submissions per minute)
+    if (Date.now() > RATE_LIMIT.resetTime) {
+      RATE_LIMIT.submissions = 0;
+      RATE_LIMIT.resetTime = Date.now() + 60000;
+    }
+
+    if (RATE_LIMIT.submissions >= 3) {
+      showToast('Too many submissions. Please wait.', 3000);
+      return;
+    }
+
+    RATE_LIMIT.submissions++;
+
     const date = new Date().toLocaleDateString("en-GB", {
       day: "numeric", month: "long", year: "numeric"
     });
-    await push(ref(db, "scores"), { initials, wave, time, date, ranking });
+
+    try {
+      await push(ref(db, "scores"), { initials, wave, time, date, ranking });
+    } catch (err) {
+      console.error('Failed to submit score', err);
+      if (err.code === 'PERMISSION_DENIED') {
+        showToast('Invalid score data. Please check your submission.', 3000);
+      } else {
+        showToast('Failed to submit score. Please try again.', 3000);
+      }
+      throw err; // Re-throw so calling code knows it failed
+    }
   };
 
   // 3) getTopScores reads top 10 by ranking, sorts desc, returns array
