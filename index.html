@@ -844,6 +844,17 @@ const THEMES = [
 <script defer>
 (function(){ // IIFE to encapsulate code
 "use strict";
+
+// Event listener cleanup management
+// AbortController allows us to remove all event listeners at once to prevent memory leaks
+// Call cleanupEventListeners() to remove all listeners (e.g., on page unload or game reset)
+let eventListenerController = new AbortController();
+
+function cleanupEventListeners() {
+    eventListenerController.abort(); // Remove all event listeners
+    eventListenerController = new AbortController(); // Create new controller for future listeners
+}
+
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
 
@@ -4315,11 +4326,11 @@ window.addEventListener('keydown', e => {
             case 'o': toggleRingInfoDisplay(); break; // Toggle info anytime
         }
     }
-});
+}, { signal: eventListenerController.signal });
 
 window.addEventListener('keyup', e => {
     keysPressed[e.key.toLowerCase()] = false;
-});
+}, { signal: eventListenerController.signal });
 
 // Mouse/Touch Dragging - Shared Logic
 function handleDragStart(clientX, clientY) {
@@ -4477,20 +4488,20 @@ canvas.addEventListener('mousedown', e => {
     if(e.button === 0) { // Only left click
          handleDragStart(e.clientX, e.clientY);
     }
-});
+}, { signal: eventListenerController.signal });
 window.addEventListener('mousemove', e => {
     handleDragMove(e.clientX, e.clientY);
     if (infoModeActive) {
         showTooltipForCanvas(e);
     }
-});
+}, { signal: eventListenerController.signal });
 window.addEventListener('mouseup', e => {
      if(e.button === 0) {
          handleDragEnd();
          // Process click action only if not dragging
          handleCanvasClick(e.clientX, e.clientY);
      }
-});
+}, { signal: eventListenerController.signal });
 
 // Touch Events
 canvas.addEventListener('touchstart', e => {
@@ -4503,7 +4514,7 @@ canvas.addEventListener('touchstart', e => {
             handleCanvasClick(touch.clientX, touch.clientY);
         }
     }
-}, { passive: false });
+}, { passive: false, signal: eventListenerController.signal });
 
 window.addEventListener('touchmove', e => {
     if (e.touches.length === 1) {
@@ -4512,7 +4523,7 @@ window.addEventListener('touchmove', e => {
              e.preventDefault(); // Prevent scrolling while dragging base
         }
     }
-}, { passive: false });
+}, { passive: false, signal: eventListenerController.signal });
 
 window.addEventListener('touchend', e => {
     if (e.changedTouches.length === 1) {
@@ -4521,7 +4532,7 @@ window.addEventListener('touchend', e => {
         // Process click action only if not dragging
         handleCanvasClick(touch.clientX, touch.clientY);
     }
-});
+}, { signal: eventListenerController.signal });
 
 
 // UI Button Listeners
@@ -4577,11 +4588,11 @@ getElement('clearSaveButton').onclick = clearSavedGame;
 getElement('startFromHighScore').onclick = startGame;
 getElement('initialsInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitInitials();
-});
+}, { signal: eventListenerController.signal });
 getElement('initialsInput').addEventListener('input', e => {
     e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (e.target.value.length >= 3) submitInitials();
-});
+}, { signal: eventListenerController.signal });
 getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
 getElement('fullscreenButton').onclick = toggleFullScreen;
 
@@ -4591,10 +4602,10 @@ getElement("musicVolume").oninput=e=>{musicVolume=parseFloat(e.target.value);loc
 
 getElement('sendWaveButton').onclick = sendNextWave;
 
-document.addEventListener('fullscreenchange', handleFullscreenChange);
-document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+document.addEventListener('fullscreenchange', handleFullscreenChange, { signal: eventListenerController.signal });
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange, { signal: eventListenerController.signal });
+document.addEventListener('mozfullscreenchange', handleFullscreenChange, { signal: eventListenerController.signal });
+document.addEventListener('MSFullscreenChange', handleFullscreenChange, { signal: eventListenerController.signal });
 
 const tooltipTexts = {
   playPauseButton: 'Play or pause the game',
@@ -4616,9 +4627,9 @@ Object.entries(tooltipTexts).forEach(([id,text])=>{
   const el=getElement(id);
   if(!el) return;
   ['mouseenter','mousemove'].forEach(evt=>{
-    el.addEventListener(evt,e=>{ if(infoModeActive) showTooltip(text,e.pageX,e.pageY); });
+    el.addEventListener(evt,e=>{ if(infoModeActive) showTooltip(text,e.pageX,e.pageY); }, { signal: eventListenerController.signal });
   });
-  el.addEventListener('mouseleave', hideTooltip);
+  el.addEventListener('mouseleave', hideTooltip, { signal: eventListenerController.signal });
 });
 
 // Window Resize
@@ -4640,7 +4651,7 @@ window.addEventListener('resize', () => {
     if (isGameRunning) {
         drawGame(); // Redraw immediately after resize
     }
-});
+}, { signal: eventListenerController.signal });
 
 
 // --- Theme Switching Logic ---
@@ -4756,6 +4767,12 @@ function loadAndStartGame() {
 // --- Global Access (for HTML onclick) ---
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
+
+// Cleanup event listeners on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+    cleanupEventListeners();
+});
+
 })(); // End IIFE
 </script>
 <div id="deathOverlay" class="overlay-desaturate" style="display:none"></div>
