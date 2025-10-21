@@ -55,6 +55,10 @@
 
   window.listenToLeaderboard = callback => {
     const q = query(ref(db, "scores"), orderByChild("ranking"), limitToLast(10));
+    if (leaderboardUnsub) {
+      leaderboardUnsub();
+      leaderboardUnsub = null;
+    }
     try {
       leaderboardUnsub = onValue(q, snap => {
         const list = [];
@@ -66,10 +70,14 @@
       }, err => {
         console.error('Failed to fetch scores', err);
         showToast('Failed to fetch scores', 3000);
+        const loader = document.getElementById("leaderboardLoading");
+        if (loader) loader.style.display = "none";
       });
     } catch (err) {
       console.error('Failed to fetch scores', err);
       showToast('Failed to fetch scores', 3000);
+      const loader = document.getElementById("leaderboardLoading");
+      if (loader) loader.style.display = "none";
     }
   };
 
