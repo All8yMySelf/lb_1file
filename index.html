@@ -988,6 +988,10 @@ let lastTime = 0;
 let deltaTime = 0;
 let gameState; // Contains credits, health, wave, score etc.
 let gameStartTime = 0;
+
+// HUD update optimization - dirty flag to prevent unnecessary DOM updates
+let hudDirty = false;
+let lastDisplayedSecond = -1; // Track last displayed timer second
 let base; // Contains position, stats, upgrades effects
 let upgradeTree; // Defines upgrade structure, costs, effects
 const SPEED_STEPS = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.5,2,3,4,5,6,7,8,9,10];
@@ -1600,6 +1604,11 @@ async function submitInitials() {
     }
 }
 
+// Helper function to mark HUD as needing update
+function markHUDDirty() {
+    hudDirty = true;
+}
+
 function updateHUD() {
     getElement('creditsDisplay').textContent = `Credits: ${gameState.credits}`;
     getElement('healthDisplay').textContent = `Health: ${Math.max(0, gameState.currentHealth)}/${gameState.maxHealth}`; // Ensure health doesn't show < 0
@@ -1622,6 +1631,9 @@ function updateHUD() {
 
     updateXPStatsPanel();
     updateWaveStatsPanel();
+
+    // Clear dirty flag after update
+    hudDirty = false;
 
     // Button state can be adjusted elsewhere if needed
 }
@@ -2188,7 +2200,11 @@ function gameLoop(timestamp) {
 
         updateGame(deltaTime); // Update game state
         drawGame(); // Draw game elements
-        updateHUD(); // Update UI text
+
+        // Only update HUD when values have changed (dirty flag optimization)
+        if (hudDirty) {
+            updateHUD();
+        }
 
         if (isDeathSequence) {
             if (Date.now() - deathSequenceStartTime >= 1500) {
@@ -2364,7 +2380,7 @@ function updateEnemies(dt) {
             gameState.currentHealth -= enemy.type === 'Fast' ? Math.ceil(gameState.maxHealth * 0.25) : enemy.radius; // Fast enemies do % damage
             gameState.lastDamageTime = Date.now();
             createExplosion(enemy.x, enemy.y, enemy.color, 20, enemy.radius);
-            updateHUD(); // Update health display immediately
+            markHUDDirty(); // Mark for health display update
             handleEnemyKilled(enemy);
             enemyPool.release(enemy);
             if (gameState.currentHealth <= 0) {
@@ -2401,6 +2417,7 @@ function spawnNewEnemies(dt) {
             spawnEnemy(true, Number(waveStr));
             state.isBossWave = true;
             showToast('Boss Wave!', 3000);
+            markHUDDirty(); // Boss wave changes timer display
         } else if (!state.isBossWave && state.spawned < state.totalEnemies && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) {
             spawnEnemy(false, Number(waveStr));
         }
@@ -2413,6 +2430,13 @@ function spawnNewEnemies(dt) {
         gameState.isBossWave = currentState.isBossWave;
         gameState.xpEnemySpawned = currentState.xpSpawned;
         gameState.xpEnemySpawnTime = currentState.xpSpawnTime;
+
+        // Mark HUD dirty only when displayed second changes (not every frame)
+        const currentSecond = Math.floor(currentState.duration - currentState.elapsedTime);
+        if (currentSecond !== lastDisplayedSecond) {
+            lastDisplayedSecond = currentSecond;
+            markHUDDirty();
+        }
     }
 }
 
@@ -2549,6 +2573,7 @@ function handlePlayerFiring(dt) {
                  gameState.credits += laserTarget.creditsValue;
                  gameState.score += laserTarget.creditsValue * 20; // More points for laser kills
                  gameState.enemiesKilled++;
+                 markHUDDirty(); // Credits changed
                  createExplosion(laserTarget.x, laserTarget.y, laserTarget.color, 40, laserTarget.radius);
                  handleEnemyKilled(laserTarget);
                  enemyPool.release(laserTarget);
@@ -2682,6 +2707,7 @@ function checkCollisions(dt) {
                     gameState.credits += enemy.creditsValue;
                     gameState.score += enemy.creditsValue * 10;
                     gameState.enemiesKilled++;
+                    markHUDDirty(); // Credits changed
                     createExplosion(enemy.x, enemy.y, enemy.color, 30, enemy.radius);
                     handleEnemyKilled(enemy);
                     enemyPool.release(enemy); // Remove enemy
@@ -2719,6 +2745,7 @@ function checkCollisions(dt) {
                     gameState.credits += enemy.creditsValue;
                     gameState.score += enemy.creditsValue * 15; // More points for missile kills
                     gameState.enemiesKilled++;
+                    markHUDDirty(); // Credits changed
                     createExplosion(enemy.x, enemy.y, enemy.color, 35, enemy.radius); // Bigger death explosion
                     handleEnemyKilled(enemy);
                     enemyPool.release(enemy);
@@ -2755,6 +2782,8 @@ function startNextWave() {
     gameState.enemiesSpawnedThisWave = 0;
     gameState.isBossWave = false;
     gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
+    markHUDDirty(); // Wave and health changed
+    lastDisplayedSecond = -1; // Reset timer tracking for new wave
     const duration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
     gameState.waveDuration = duration;
     gameState.waveStartTime = Date.now();
@@ -3742,7 +3771,7 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
         if (upgradeIndex === 0) {
             gameState.credits += 100000;
-            updateHUD();
+            markHUDDirty(); // Credits changed
             showToast('Cheated 100,000 credits!');
         } else {
             toggleWaveStatsPanel();
@@ -3783,7 +3812,7 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
 
         applyUpgradeEffect(categoryIndex, upgradeIndex, true); // Apply effect of new level
 
-        updateHUD();
+        markHUDDirty(); // Credits changed
         drawGame();
         showToast(`Upgraded ${upgrade.name}!`);
         saveGame(); // Auto-save on upgrade
@@ -3828,7 +3857,7 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     // Heal amount equal to the increase
                     gameState.currentHealth += (gameState.maxHealth - oldMaxHealth);
                     gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth); // Cap at new max
-                    updateHUD();
+                    markHUDDirty(); // Health changed
                     break;
                 case UPGRADE_DEFENSE_MOVEMENT: base.currentMoveSpeed = upgrade.f(level); break;
             }
@@ -3958,6 +3987,7 @@ function fireLaserAt(target) {
         gameState.credits += target.creditsValue;
         gameState.score += target.creditsValue * 20;
         gameState.enemiesKilled++;
+        markHUDDirty(); // Credits changed
         createExplosion(target.x, target.y, target.color, 40, target.radius);
         handleEnemyKilled(target);
         if (target.xp) {
@@ -3968,7 +3998,6 @@ function fireLaserAt(target) {
             showToast('Fire rate doubled!', 3000);
         }
         enemyPool.release(target);
-        updateHUD();
         updateUpgradeAvailabilityFlags();
     }
 }
