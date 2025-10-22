@@ -139,16 +139,23 @@
     document.getElementById("leaderboardLoading").style.display = "none";
   };
 
-  // 5) Hook up “Leaderboard” button
- 
+  // 5) Hook up "Leaderboard" button
+
     document.getElementById("show-leaderboard").addEventListener("click", async () => {
-    window.showHighScores();
-    const scores = await getTopScores();
-    let idx = -1;
-    if (pendingScore && pendingScore.saved) {
-      idx = scores.findIndex(s => s.ranking === pendingScore.ranking);
+    try {
+        window.showHighScores();
+        const scores = await getTopScores();
+        let idx = -1;
+        if (pendingScore && pendingScore.saved) {
+            idx = scores.findIndex(s => s.ranking === pendingScore.ranking);
+        }
+        renderLeaderboard(scores, idx);
+    } catch (err) {
+        console.error('Failed to load leaderboard', err);
+        window.showHighScores();
+        renderLeaderboard([], -1);
+        showToast('Unable to load leaderboard', 3000);
     }
-    renderLeaderboard(scores, idx);
     });
 </script>
 
@@ -1469,14 +1476,11 @@ function drawParticles() {
     for (const color in particlesByColor) {
         ctx.fillStyle = color;
         particlesByColor[color].forEach(p => {
-            // Apply alpha individually if needed, though batching might be less effective then
-            // ctx.globalAlpha = p.alpha; // Uncomment if alpha varies significantly per particle
             const pixelX = Math.floor(p.x);
             const pixelY = Math.floor(p.y);
             ctx.fillRect(pixelX, pixelY, p.size, p.size);
         });
     }
-    // ctx.globalAlpha = 1; // Reset alpha if applied individually
 }
 
 function drawBracket(x, y, size, color = '#ffcc00', pulsing = true) {
@@ -1893,15 +1897,6 @@ function loadGame() {
             });
         });
 
-        // Crucially, re-apply all upgrade effects based on the loaded levels
-        // (Some might already be applied above, but this ensures consistency)
-        // for (let i = 0; i < upgradeTree.length; i++) {
-        //     for (let j = 0; j in upgradeTree[i].upgrades.length; j++) {
-        //         if (upgradeTree[i].upgrades[j].level > 0) {
-        //              applyUpgradeEffect(i, j, false); // false indicates not a new purchase
-        //         }
-        //     }
-        // }
 
 
         updateHUD();
@@ -2297,19 +2292,23 @@ function gameOver() {
             const phrases = [
                 'So close, yet orbital debris…',
                 'Your score called. It wants another chance.',
-                'Your gran could’ve done better… but we believe in you.',
+                'Your gran could've done better… but we believe in you.',
                 'Launch again, recruit.',
-                'Good news: you’re in the Top 1000!',
+                'Good news: you're in the Top 1000!',
                 'Now serving humble pie.',
                 'Failure builds character. Try again?',
                 'Almost made it. Like, just almost.',
                 'Mission: failed. Style: impeccable.',
-                'It’s not about the score. It’s about the… no wait, it is about the score.'
+                'It's not about the score. It's about the… no wait, it is about the score.'
             ];
             getElement('initialsInput').style.display = 'none';
             getElement('cheekyMessage').textContent = phrases[Math.floor(Math.random()*phrases.length)];
             window.pendingScore.saved = true; // No need to save if not top 10
         }
+    }).catch(err => {
+        console.error('Failed to fetch scores for game over screen', err);
+        renderScoreList('gameOverScoreList', [], -1);
+        getElement('cheekyMessage').textContent = 'Unable to load leaderboard. Try again later!';
     });
     saveGame(); // Save final state on game over
 }
@@ -3066,9 +3065,6 @@ function drawGame() {
     ctx.beginPath();
     ctx.arc(base.x, base.y, base.radius, 0, Math.PI * 2);
     ctx.fill();
-    // Optional: Add a subtle border (maybe theme dependent?)
-    // ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    // ctx.stroke();
 
 
     // --- Draw Base State Indicators ---
@@ -3420,10 +3416,6 @@ function drawRingUIElement(type, radius, labelText, categoryIndex, upgradeIndex,
 
     // Center the element horizontally
     const startX = elementBaseX - totalWidth / 2;
-
-    // Background (optional, subtle)
-    // ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-    // ctx.fillRect(startX - padding, elementBaseY - totalHeight / 2 - padding, totalWidth + padding*2, totalHeight + padding*2);
 
     let currentX = startX;
 
@@ -4529,14 +4521,6 @@ function handleDragMove(clientX, clientY) {
         // Clamp position within bounds
         base.x = Math.max(base.radius, Math.min(canvasWidth - base.radius, targetX));
         base.y = Math.max(base.radius, Math.min(canvasHeight - base.radius, targetY));
-
-        // Update drag start points relative to the *new* base position for smoother continuation
-        // This prevents large jumps if the base hits the edge
-        // dragStartX = mouseX - (base.x - baseStartX);
-        // dragStartY = mouseY - (base.y - baseStartY);
-        // baseStartX = base.x; // Update base start for next delta calculation
-        // baseStartY = base.y;
-
     }
 }
 
@@ -4898,12 +4882,6 @@ function loadAndStartGame() {
 
 // Initial setup on load
   window.onload = () => {
-    // Preload pixel font if needed (optional, adds dependency)
-    // const fontLink = document.createElement('link');
-    // fontLink.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
-    // fontLink.rel = 'stylesheet';
-    // document.head.appendChild(fontLink);
-
       initializeGame(false); // Initialize without loading saved game yet
 
     // Load saved theme preference, default to "Orbital Elite" (index 0)
