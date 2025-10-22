@@ -870,6 +870,7 @@ const CONFIG = {
     PARTICLE_BASE_SPEED: 1,
     PARTICLE_BASE_LIFE: 1,
     PARTICLE_BASE_SIZE: 2,
+    MAX_PARTICLES: 500, // Maximum number of particles to prevent performance issues
     WAVE_BASE_DURATION: 60, // seconds
     WAVE_DURATION_INCREMENT: 10, // seconds per wave
     BOSS_HEALTH_BASE: 20,
@@ -902,6 +903,7 @@ const {
   PARTICLE_BASE_SPEED,
   PARTICLE_BASE_LIFE,
   PARTICLE_BASE_SIZE,
+  MAX_PARTICLES,
   WAVE_BASE_DURATION,
   WAVE_DURATION_INCREMENT,
   BOSS_HEALTH_BASE,
@@ -1207,6 +1209,11 @@ function resetPools() {
 
 // --- Particle System ---
 function createParticle(x, y, color, speed = PARTICLE_BASE_SPEED, life = PARTICLE_BASE_LIFE, size = PARTICLE_BASE_SIZE) {
+    // Enforce particle limit to prevent performance issues
+    if (particles.length >= MAX_PARTICLES) {
+        particles.shift(); // Remove oldest particle to make room
+    }
+
     // Use theme's particle palettes
     const themePalettes = currentTheme.particlePalettes;
     let palette;
