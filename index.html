@@ -886,7 +886,71 @@ const CONFIG = {
     AUTO_SAVE_INTERVAL: 60000, // ms (1 minute)
     DRAG_THRESHOLD: 5, // pixels to initiate drag vs click (default)
     CANVAS_CLICK_TOLERANCE: 20, // pixels tolerance for clicking ring UI
-    ENEMY_SPAWN_RATE_PER_SECOND: 1.8
+    ENEMY_SPAWN_RATE_PER_SECOND: 1.8,
+
+    // Animation & Frame Rate
+    FRAMES_PER_SECOND: 60, // Used for dt scaling
+    PULSE_ANIMATION_PERIOD: 200, // ms - bracket pulsing animation
+    UPGRADE_PULSE_PERIOD: 300, // ms - upgrade box pulsing
+    DELTA_TIME_CAP: 0.1, // seconds - prevents large frame time jumps
+
+    // Durations & Timing
+    TOAST_DURATION: 3000, // ms - notification display time
+    FEEDBACK_DELAY: 1500, // ms - death sequence & upgrade feedback
+    CENTER_RETURN_DURATION: 3, // seconds - base return to center animation
+
+    // Pool Sizes & Buffers
+    BULLET_POOL_SIZE: 150, // Pre-allocated bullet objects
+    MISSILE_TRAIL_LENGTH: 40, // Trail buffer capacity
+
+    // Scaling Factors (commonly used decimals)
+    PULSE_AMPLITUDE: 0.1, // Amplitude for pulsing animations
+    TANK_SPEED_MULTIPLIER: 0.5, // Tank enemy moves at 50% speed
+    CENTER_RETURN_SPEED: 0.5, // Base return speed scaling
+    PARTICLE_WHITE_THRESHOLD: 0.2, // 20% of particles are white
+    PARTICLE_YELLOW_THRESHOLD: 0.5, // 50% threshold for white+yellow (20% white, 30% yellow, 50% color)
+    PARTICLE_LIFE_VARIANCE_MIN: 0.3, // Minimum life variance for particles
+    EXPLOSION_PARTICLE_DISTANCE_THRESHOLD: 0.8, // Distance factor for explosion particles
+    BARREL_OFFSET_RATIO: 0.6, // Barrel positioning relative to size
+    TRAIL_ALPHA_FADE_FACTOR: 0.6, // Trail transparency fade
+    TRAIL_MAX_FADE_OPACITY: 0.7, // Maximum trail opacity after fade
+    BIG_THREAT_RANGE_MULTIPLIER: 0.5, // Range multiplier for big threat detection
+    FAST_ENEMY_DAMAGE_PERCENT: 0.25, // Fast enemies do 25% of max health damage
+    HEALTH_REGEN_PERCENT_PER_WAVE: 0.1, // 10% health regenerated per wave
+    STUN_SLOW_FACTOR_INCREMENT: 0.1, // Slow factor increment per stun level
+    STUN_MAX_SLOW_FACTOR: 0.9, // Maximum slow factor (90% slow)
+    SENSOR_FOV_INCREMENT: 0.1, // FOV scaling per level
+    UPGRADE_PULSE_BLEND_FACTOR: 0.5, // Opacity for upgrade pulsing effect
+
+    // Growth & Multiplier Constants
+    CANNON_RANGE_GROWTH_FACTOR: 1.05, // 5% range growth per level
+    MISSILE_RANGE_LIMIT_BUFFER_FACTOR: 1.1, // 10% buffer for missile range limit
+    UPGRADE_COST_INCREASE_MULTIPLIER: 1.5, // Cost increase per level
+
+    // Distance & Size Thresholds
+    BIG_THREAT_RADIUS_THRESHOLD: 20, // Radius to consider enemy a big threat
+    OFF_SCREEN_SPAWN_BOUNDARY_OFFSET: 60, // Pixels beyond screen edge for spawning
+    SPAWN_RADIUS_OFFSET: 50, // Additional spawn radius offset
+    BARREL_SHADE_DIVISOR: 20, // Divisor for barrel shading calculation
+
+    // Missile & Weapon Mechanics
+    MISSILE_HOMING_MULTIPLIER_PER_LEVEL: 0.05, // 5% speed increase per homing level
+    MISSILE_TURN_SPEED_INCREMENT: 0.01, // Turn speed increment per level
+    MISSILE_LAUNCH_SPREAD_DIVISOR: 0.5, // Angle spread divisor for missile launch
+    LASER_RANGE_BASE_MULTIPLIER: 0.3, // Base laser range as % of screen
+    LASER_RANGE_INCREMENT_PER_LEVEL: 0.02, // Laser range increment per level
+    STUN_RADIUS_INCREMENT_PER_LEVEL: 0.03, // Stun radius increment per level
+
+    // Visual & Rendering Parameters
+    HIGHLIGHT_GLOW_OPACITY: 0.35, // Opacity for highlight glow effects
+    DEFAULT_PARTICLE_SPEED: 2, // Default particle speed value
+    DEFAULT_PARTICLE_SIZE: 3, // Default particle size
+    PARTICLE_EXPLOSION_SPEED: 3, // Speed for explosion particles
+    SMALL_PARTICLE_SIZE: 3, // Size for small particles
+    BARREL_ARC_SIZE: 3, // Radius for barrel arc rendering
+    RING_SENSOR_ALPHA: 0.15, // Alpha value for sensor ring
+    CLICK_REGION_DIVISOR: 0.5, // Divisor for click region width
+    CLICK_AREA_DIVISOR: 1.5 // Divisor for click area radius
 };
 // Increase drag threshold on touch devices to make tapping upgrades easier
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -919,7 +983,63 @@ const {
   AUTO_SAVE_INTERVAL,
   DRAG_THRESHOLD,
   CANVAS_CLICK_TOLERANCE,
-  ENEMY_SPAWN_RATE_PER_SECOND
+  ENEMY_SPAWN_RATE_PER_SECOND,
+  // Animation & Frame Rate
+  FRAMES_PER_SECOND,
+  PULSE_ANIMATION_PERIOD,
+  UPGRADE_PULSE_PERIOD,
+  DELTA_TIME_CAP,
+  // Durations & Timing
+  TOAST_DURATION,
+  FEEDBACK_DELAY,
+  CENTER_RETURN_DURATION,
+  // Pool Sizes & Buffers
+  BULLET_POOL_SIZE,
+  MISSILE_TRAIL_LENGTH,
+  // Scaling Factors
+  PULSE_AMPLITUDE,
+  TANK_SPEED_MULTIPLIER,
+  CENTER_RETURN_SPEED,
+  PARTICLE_WHITE_THRESHOLD,
+  PARTICLE_YELLOW_THRESHOLD,
+  PARTICLE_LIFE_VARIANCE_MIN,
+  EXPLOSION_PARTICLE_DISTANCE_THRESHOLD,
+  BARREL_OFFSET_RATIO,
+  TRAIL_ALPHA_FADE_FACTOR,
+  TRAIL_MAX_FADE_OPACITY,
+  BIG_THREAT_RANGE_MULTIPLIER,
+  FAST_ENEMY_DAMAGE_PERCENT,
+  HEALTH_REGEN_PERCENT_PER_WAVE,
+  STUN_SLOW_FACTOR_INCREMENT,
+  STUN_MAX_SLOW_FACTOR,
+  SENSOR_FOV_INCREMENT,
+  UPGRADE_PULSE_BLEND_FACTOR,
+  // Growth & Multiplier Constants
+  CANNON_RANGE_GROWTH_FACTOR,
+  MISSILE_RANGE_LIMIT_BUFFER_FACTOR,
+  UPGRADE_COST_INCREASE_MULTIPLIER,
+  // Distance & Size Thresholds
+  BIG_THREAT_RADIUS_THRESHOLD,
+  OFF_SCREEN_SPAWN_BOUNDARY_OFFSET,
+  SPAWN_RADIUS_OFFSET,
+  BARREL_SHADE_DIVISOR,
+  // Missile & Weapon Mechanics
+  MISSILE_HOMING_MULTIPLIER_PER_LEVEL,
+  MISSILE_TURN_SPEED_INCREMENT,
+  MISSILE_LAUNCH_SPREAD_DIVISOR,
+  LASER_RANGE_BASE_MULTIPLIER,
+  LASER_RANGE_INCREMENT_PER_LEVEL,
+  STUN_RADIUS_INCREMENT_PER_LEVEL,
+  // Visual & Rendering Parameters
+  HIGHLIGHT_GLOW_OPACITY,
+  DEFAULT_PARTICLE_SPEED,
+  DEFAULT_PARTICLE_SIZE,
+  PARTICLE_EXPLOSION_SPEED,
+  SMALL_PARTICLE_SIZE,
+  BARREL_ARC_SIZE,
+  RING_SENSOR_ALPHA,
+  CLICK_REGION_DIVISOR,
+  CLICK_AREA_DIVISOR
 } = CONFIG;
 // Upgrade Category Indices
 const UPGRADE_CATEGORY_CANNON = 0;
@@ -956,9 +1076,9 @@ const UPGRADE_INFO_HELP = 0;
 
 // Enemy types: [color, speed, health, radius, credits]
 const ENEMY_TYPES = [
-  ['#f46d43', 1,   3, 10,  10], // Normal
+  ['#f46d43', 1,   3, 10,  10], // Normal: [color, speed, health, radius, credits]
   ['#fee08b', 2,   2,  8,  20], // Fast
-  ['#d53e4f', 0.5, 6, 15,  30], // Tank
+  ['#d53e4f', TANK_SPEED_MULTIPLIER, 6, 15,  30], // Tank (slower but tankier)
   ['#9e0142', 0.3, 0, 25, 100]  // Boss (health calculated dynamically)
 ];
 const ENEMY_TYPE_NORMAL = 0;
@@ -1027,7 +1147,7 @@ let baseStartX = 0;
 let baseStartY = 0;
 let isReturningToCenter = false;
 let wasDragging = false; // Used to differentiate click from drag-release
-let centerReturnSpeed = 0.5;
+let centerReturnSpeed = CENTER_RETURN_SPEED;
 let centerReturnStartTime = 0;
 
 // Ring UI Clickable Regions (calculated during draw)
@@ -1172,7 +1292,7 @@ function resetMissile(missile, config) {
     missile.turnSpeed = config.turnSpeed || 0.05;
     missile.homingRadius =
         typeof config.homingRadius !== 'undefined' ? config.homingRadius : base.missileHomingRadius;
-    missile.trail = config.trail || Array(40).fill({ x: missile.x, y: missile.y });
+    missile.trail = config.trail || Array(MISSILE_TRAIL_LENGTH).fill({ x: missile.x, y: missile.y });
     missile.isMacross = config.macross || false;
     missile.homingActive = config.homingActive || false;
     missile.startX = config.startX || missile.x;
@@ -1196,7 +1316,7 @@ function resetMissile(missile, config) {
 
 // Initialize object pools
 const enemyPool = ObjectPool(Object, 50, resetEnemy); // Increased pool size
-const bulletPool = ObjectPool(Object, 150, resetBullet); // Increased pool size
+const bulletPool = ObjectPool(Object, BULLET_POOL_SIZE, resetBullet); // Pre-allocated bullet objects
 const missilePool = ObjectPool(Object, 75, resetMissile); // Increased pool size
 
 // Reset pools function
@@ -1301,26 +1421,26 @@ function createExplosion(x, y, color, count = 15, enemyRadius = 10) {
     // Outer ring
     for (let i = 0; i < ringCount; i++) {
         const angle = (i / ringCount) * Math.PI * 2;
-        const distance = enemyRadius * 0.8;
-        createParticle(x + Math.cos(angle) * distance, y + Math.sin(angle) * distance, color, 2 + enemyRadius / 10, 0.6, baseSize);
+        const distance = enemyRadius * EXPLOSION_PARTICLE_DISTANCE_THRESHOLD;
+        createParticle(x + Math.cos(angle) * distance, y + Math.sin(angle) * distance, color, DEFAULT_PARTICLE_SPEED + enemyRadius / 10, TRAIL_ALPHA_FADE_FACTOR, baseSize);
     }
 
     // Core explosion
     for (let i = 0; i < particleCount; i++) {
-        let particleColor = (i < particleCount * 0.2) ? '#ffffff' : (i < particleCount * 0.5) ? '#ffff00' : color;
-        const distanceFactor = Math.random() * 0.8;
-        const speed = 3 + (enemyRadius / 10) * (1 - distanceFactor);
+        let particleColor = (i < particleCount * PARTICLE_WHITE_THRESHOLD) ? '#ffffff' : (i < particleCount * PARTICLE_YELLOW_THRESHOLD) ? '#ffff00' : color;
+        const distanceFactor = Math.random() * EXPLOSION_PARTICLE_DISTANCE_THRESHOLD;
+        const speed = PARTICLE_EXPLOSION_SPEED + (enemyRadius / 10) * (1 - distanceFactor);
         const particleSize = baseSize * (1 + (1 - i / particleCount));
         createParticle(
-            x + (Math.random() - 0.5) * enemyRadius * distanceFactor,
-            y + (Math.random() - 0.5) * enemyRadius * distanceFactor,
-            particleColor, speed, 0.3 + Math.random() * 0.4, particleSize
+            x + (Math.random() - CENTER_RETURN_SPEED) * enemyRadius * distanceFactor,
+            y + (Math.random() - CENTER_RETURN_SPEED) * enemyRadius * distanceFactor,
+            particleColor, speed, PARTICLE_LIFE_VARIANCE_MIN + Math.random() * 0.4, particleSize
         );
     }
 }
 
 function updateParticles(dt) {
-    const dtScaled = dt * 60;
+    const dtScaled = dt * FRAMES_PER_SECOND;
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx * dtScaled;
@@ -1360,15 +1480,15 @@ function drawParticles() {
 }
 
 function drawBracket(x, y, size, color = '#ffcc00', pulsing = true) {
-    const pulse = pulsing ? 1 + 0.1 * Math.sin(Date.now() / 200) : 1;
+    const pulse = pulsing ? 1 + PULSE_AMPLITUDE * Math.sin(Date.now() / PULSE_ANIMATION_PERIOD) : 1;
     const s = size * pulse;
     ctx.strokeStyle = color;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(x - s, y - s * 0.6); ctx.lineTo(x - s, y - s); ctx.lineTo(x - s * 0.6, y - s);
-    ctx.moveTo(x + s, y - s * 0.6); ctx.lineTo(x + s, y - s); ctx.lineTo(x + s * 0.6, y - s);
-    ctx.moveTo(x - s, y + s * 0.6); ctx.lineTo(x - s, y + s); ctx.lineTo(x - s * 0.6, y + s);
-    ctx.moveTo(x + s, y + s * 0.6); ctx.lineTo(x + s, y + s); ctx.lineTo(x + s * 0.6, y + s);
+    ctx.moveTo(x - s, y - s * BARREL_OFFSET_RATIO); ctx.lineTo(x - s, y - s); ctx.lineTo(x - s * BARREL_OFFSET_RATIO, y - s);
+    ctx.moveTo(x + s, y - s * BARREL_OFFSET_RATIO); ctx.lineTo(x + s, y - s); ctx.lineTo(x + s * BARREL_OFFSET_RATIO, y - s);
+    ctx.moveTo(x - s, y + s * BARREL_OFFSET_RATIO); ctx.lineTo(x - s, y + s); ctx.lineTo(x - s * BARREL_OFFSET_RATIO, y + s);
+    ctx.moveTo(x + s, y + s * BARREL_OFFSET_RATIO); ctx.lineTo(x + s, y + s); ctx.lineTo(x + s * BARREL_OFFSET_RATIO, y + s);
     ctx.stroke();
 }
 
@@ -2254,7 +2374,7 @@ function updateGame(dt) {
 function handleBaseMovement(dt) {
     if (!baseCanMove) return;
 
-    const dtScaled = dt * 60;
+    const dtScaled = dt * FRAMES_PER_SECOND;
     const prevBaseX = base.x;
     const prevBaseY = base.y;
 
@@ -2303,7 +2423,7 @@ function updateEnemies(dt) {
     const enemies = enemyPool.getActiveObjects();
     let baseMovedDuringUpdate = false;
 
-    const dtScaled = dt * 60;
+    const dtScaled = dt * FRAMES_PER_SECOND;
     // Check if base moved since last frame
     const deltaX = base.x - lastBaseX;
     const deltaY = base.y - lastBaseY;
@@ -2405,7 +2525,7 @@ function updateEnemies(dt) {
 
 function spawnNewEnemies(dt) {
     const enemies = enemyPool.getActiveObjects();
-    const dtScaled = dt * 60;
+    const dtScaled = dt * FRAMES_PER_SECOND;
 
     for (const [waveStr, state] of Object.entries(waveStates)) {
         state.elapsedTime += dt;
@@ -2475,7 +2595,7 @@ function handlePlayerFiring(dt) {
                 .filter(e => !e.xp)
                 .filter(e => !sensorUpgrades.targetAI || (e.health - (e.allocatedDamage||0) > 0))
                 .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
-            const bigThreat = targets.find(e => e.radius >= 20 && Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * 0.5);
+            const bigThreat = targets.find(e => e.radius >= BIG_THREAT_RADIUS_THRESHOLD && Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * BIG_THREAT_RANGE_MULTIPLIER);
             const focusTarget = targets.find(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * base.focusRadiusSetting);
             if (bigThreat) {
                 targets = Array(base.gunBarrelCount).fill(bigThreat);
@@ -2594,7 +2714,7 @@ function updateProjectiles(dt, baseMoved) {
     const bullets = bulletPool.getActiveObjects();
     const missiles = missilePool.getActiveObjects();
     const enemies = enemyPool.getActiveObjects(); // Need enemy list for missile targeting
-    const dtScaled = dt * 60;
+    const dtScaled = dt * FRAMES_PER_SECOND;
 
     // --- Update Bullets ---
     const bulletMoveDist = BULLET_BASE_SPEED * dtScaled;
@@ -2674,7 +2794,7 @@ function updateProjectiles(dt, baseMoved) {
 
         // 4. Update Trail
         missile.trail.unshift({ x: missile.x, y: missile.y });
-        if (missile.trail.length > 40) missile.trail.pop();
+        if (missile.trail.length > MISSILE_TRAIL_LENGTH) missile.trail.pop();
 
         // 5. Check bounds / Range (collision checked separately)
         const distFromStart = Math.hypot(missile.x - missile.startX, missile.y - missile.startY);
@@ -3321,7 +3441,7 @@ function drawRingUIElement(type, radius, labelText, categoryIndex, upgradeIndex,
             ctx.fillRect(boxX, boxStartY, boxSize, boxSize);
         } else if (i === currentLevel && canUpgrade) {
             // Pulsing effect for next available upgrade
-            const pulse = Math.abs(Math.sin(Date.now() / 300));
+            const pulse = Math.abs(Math.sin(Date.now() / UPGRADE_PULSE_PERIOD));
             // Calculate inverted color based on the ring's base color
             const baseColorMatch = color.match(/(\d+(\.\d+)?)/g);
             let invertedColor = 'rgba(255, 255, 255, 0.7)'; // Default to white if parsing fails
