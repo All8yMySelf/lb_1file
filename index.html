@@ -4591,25 +4591,32 @@ Object.entries(tooltipTexts).forEach(([id,text])=>{
   el.addEventListener('mouseleave', hideTooltip);
 });
 
-// Window Resize
+// Window Resize with debouncing to prevent performance issues
+let resizeTimeout;
 window.addEventListener('resize', () => {
-    canvasWidth = window.innerWidth;
-    canvasHeight = window.innerHeight;
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    if (fogCanvas) {
-        fogCanvas.width = canvasWidth;
-        fogCanvas.height = canvasHeight;
-    }
-    if (base) {
-        base.x = canvasWidth / 2;
-        base.y = canvasHeight / 2;
-        baseStartX = base.x;
-        baseStartY = base.y;
-    }
-    if (isGameRunning) {
-        drawGame(); // Redraw immediately after resize
-    }
+    // Clear existing timeout to debounce resize events
+    clearTimeout(resizeTimeout);
+
+    // Execute resize logic after 250ms of no resize events
+    resizeTimeout = setTimeout(() => {
+        canvasWidth = window.innerWidth;
+        canvasHeight = window.innerHeight;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        if (fogCanvas) {
+            fogCanvas.width = canvasWidth;
+            fogCanvas.height = canvasHeight;
+        }
+        if (base) {
+            base.x = canvasWidth / 2;
+            base.y = canvasHeight / 2;
+            baseStartX = base.x;
+            baseStartY = base.y;
+        }
+        if (isGameRunning) {
+            drawGame(); // Redraw after resize
+        }
+    }, 250);
 });
 
 
