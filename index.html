@@ -27,12 +27,42 @@
   const db = getDatabase(app);
   let leaderboardUnsub = null;
 
-  // 2) submitScore writes to /scores
+  // Rate limiting for score submissions
+  const RATE_LIMIT = {
+    submissions: 0,
+    resetTime: Date.now() + 60000 // 1 minute
+  };
+
+  // 2) submitScore writes to /scores with rate limiting and validation
   window.submitScore = async function({ initials, wave, time, ranking }) {
+    // Rate limit check (max 3 submissions per minute)
+    if (Date.now() > RATE_LIMIT.resetTime) {
+      RATE_LIMIT.submissions = 0;
+      RATE_LIMIT.resetTime = Date.now() + 60000;
+    }
+
+    if (RATE_LIMIT.submissions >= 3) {
+      showToast('Too many submissions. Please wait.', 3000);
+      return;
+    }
+
+    RATE_LIMIT.submissions++;
+
     const date = new Date().toLocaleDateString("en-GB", {
       day: "numeric", month: "long", year: "numeric"
     });
-    await push(ref(db, "scores"), { initials, wave, time, date, ranking });
+
+    try {
+      await push(ref(db, "scores"), { initials, wave, time, date, ranking });
+    } catch (err) {
+      console.error('Failed to submit score', err);
+      if (err.code === 'PERMISSION_DENIED') {
+        showToast('Invalid score data. Please check your submission.', 3000);
+      } else {
+        showToast('Failed to submit score. Please try again.', 3000);
+      }
+      throw err; // Re-throw so calling code knows it failed
+    }
   };
 
   // 3) getTopScores reads top 10 by ranking, sorts desc, returns array
@@ -55,6 +85,10 @@
 
   window.listenToLeaderboard = callback => {
     const q = query(ref(db, "scores"), orderByChild("ranking"), limitToLast(10));
+    if (leaderboardUnsub) {
+      leaderboardUnsub();
+      leaderboardUnsub = null;
+    }
     try {
       leaderboardUnsub = onValue(q, snap => {
         const list = [];
@@ -66,10 +100,14 @@
       }, err => {
         console.error('Failed to fetch scores', err);
         showToast('Failed to fetch scores', 3000);
+        const loader = document.getElementById("leaderboardLoading");
+        if (loader) loader.style.display = "none";
       });
     } catch (err) {
       console.error('Failed to fetch scores', err);
       showToast('Failed to fetch scores', 3000);
+      const loader = document.getElementById("leaderboardLoading");
+      if (loader) loader.style.display = "none";
     }
   };
 
@@ -806,6 +844,17 @@ const THEMES = [
 <script defer>
 (function(){ // IIFE to encapsulate code
 "use strict";
+
+// Event listener cleanup management
+// AbortController allows us to remove all event listeners at once to prevent memory leaks
+// Call cleanupEventListeners() to remove all listeners (e.g., on page unload or game reset)
+let eventListenerController = new AbortController();
+
+function cleanupEventListeners() {
+    eventListenerController.abort(); // Remove all event listeners
+    eventListenerController = new AbortController(); // Create new controller for future listeners
+}
+
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
 
@@ -821,6 +870,7 @@ const CONFIG = {
     PARTICLE_BASE_SPEED: 1,
     PARTICLE_BASE_LIFE: 1,
     PARTICLE_BASE_SIZE: 2,
+    MAX_PARTICLES: 500, // Maximum number of particles to prevent performance issues
     WAVE_BASE_DURATION: 60, // seconds
     WAVE_DURATION_INCREMENT: 10, // seconds per wave
     BOSS_HEALTH_BASE: 20,
@@ -853,6 +903,7 @@ const {
   PARTICLE_BASE_SPEED,
   PARTICLE_BASE_LIFE,
   PARTICLE_BASE_SIZE,
+  MAX_PARTICLES,
   WAVE_BASE_DURATION,
   WAVE_DURATION_INCREMENT,
   BOSS_HEALTH_BASE,
@@ -939,6 +990,10 @@ let lastTime = 0;
 let deltaTime = 0;
 let gameState; // Contains credits, health, wave, score etc.
 let gameStartTime = 0;
+
+// HUD update optimization - dirty flag to prevent unnecessary DOM updates
+let hudDirty = false;
+let lastDisplayedSecond = -1; // Track last displayed timer second
 let base; // Contains position, stats, upgrades effects
 let upgradeTree; // Defines upgrade structure, costs, effects
 const SPEED_STEPS = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.5,2,3,4,5,6,7,8,9,10];
@@ -1154,6 +1209,11 @@ function resetPools() {
 
 // --- Particle System ---
 function createParticle(x, y, color, speed = PARTICLE_BASE_SPEED, life = PARTICLE_BASE_LIFE, size = PARTICLE_BASE_SIZE) {
+    // Enforce particle limit to prevent performance issues
+    if (particles.length >= MAX_PARTICLES) {
+        particles.shift(); // Remove oldest particle to make room
+    }
+
     // Use theme's particle palettes
     const themePalettes = currentTheme.particlePalettes;
     let palette;
@@ -1551,6 +1611,11 @@ async function submitInitials() {
     }
 }
 
+// Helper function to mark HUD as needing update
+function markHUDDirty() {
+    hudDirty = true;
+}
+
 function updateHUD() {
     getElement('creditsDisplay').textContent = `Credits: ${gameState.credits}`;
     getElement('healthDisplay').textContent = `Health: ${Math.max(0, gameState.currentHealth)}/${gameState.maxHealth}`; // Ensure health doesn't show < 0
@@ -1573,6 +1638,9 @@ function updateHUD() {
 
     updateXPStatsPanel();
     updateWaveStatsPanel();
+
+    // Clear dirty flag after update
+    hudDirty = false;
 
     // Button state can be adjusted elsewhere if needed
 }
@@ -2159,7 +2227,11 @@ function gameLoop(timestamp) {
 
         updateGame(deltaTime); // Update game state
         drawGame(); // Draw game elements
-        updateHUD(); // Update UI text
+
+        // Only update HUD when values have changed (dirty flag optimization)
+        if (hudDirty) {
+            updateHUD();
+        }
 
         if (isDeathSequence) {
             if (Date.now() - deathSequenceStartTime >= 1500) {
@@ -2335,7 +2407,7 @@ function updateEnemies(dt) {
             gameState.currentHealth -= enemy.type === 'Fast' ? Math.ceil(gameState.maxHealth * 0.25) : enemy.radius; // Fast enemies do % damage
             gameState.lastDamageTime = Date.now();
             createExplosion(enemy.x, enemy.y, enemy.color, 20, enemy.radius);
-            updateHUD(); // Update health display immediately
+            markHUDDirty(); // Mark for health display update
             handleEnemyKilled(enemy);
             enemyPool.release(enemy);
             if (gameState.currentHealth <= 0) {
@@ -2372,6 +2444,7 @@ function spawnNewEnemies(dt) {
             spawnEnemy(true, Number(waveStr));
             state.isBossWave = true;
             showToast('Boss Wave!', 3000);
+            markHUDDirty(); // Boss wave changes timer display
         } else if (!state.isBossWave && state.spawned < state.totalEnemies && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) {
             spawnEnemy(false, Number(waveStr));
         }
@@ -2384,6 +2457,13 @@ function spawnNewEnemies(dt) {
         gameState.isBossWave = currentState.isBossWave;
         gameState.xpEnemySpawned = currentState.xpSpawned;
         gameState.xpEnemySpawnTime = currentState.xpSpawnTime;
+
+        // Mark HUD dirty only when displayed second changes (not every frame)
+        const currentSecond = Math.floor(currentState.duration - currentState.elapsedTime);
+        if (currentSecond !== lastDisplayedSecond) {
+            lastDisplayedSecond = currentSecond;
+            markHUDDirty();
+        }
     }
 }
 
@@ -2520,6 +2600,7 @@ function handlePlayerFiring(dt) {
                  gameState.credits += laserTarget.creditsValue;
                  gameState.score += laserTarget.creditsValue * 20; // More points for laser kills
                  gameState.enemiesKilled++;
+                 markHUDDirty(); // Credits changed
                  createExplosion(laserTarget.x, laserTarget.y, laserTarget.color, 40, laserTarget.radius);
                  handleEnemyKilled(laserTarget);
                  enemyPool.release(laserTarget);
@@ -2653,6 +2734,7 @@ function checkCollisions(dt) {
                     gameState.credits += enemy.creditsValue;
                     gameState.score += enemy.creditsValue * 10;
                     gameState.enemiesKilled++;
+                    markHUDDirty(); // Credits changed
                     createExplosion(enemy.x, enemy.y, enemy.color, 30, enemy.radius);
                     handleEnemyKilled(enemy);
                     enemyPool.release(enemy); // Remove enemy
@@ -2690,6 +2772,7 @@ function checkCollisions(dt) {
                     gameState.credits += enemy.creditsValue;
                     gameState.score += enemy.creditsValue * 15; // More points for missile kills
                     gameState.enemiesKilled++;
+                    markHUDDirty(); // Credits changed
                     createExplosion(enemy.x, enemy.y, enemy.color, 35, enemy.radius); // Bigger death explosion
                     handleEnemyKilled(enemy);
                     enemyPool.release(enemy);
@@ -2726,6 +2809,8 @@ function startNextWave() {
     gameState.enemiesSpawnedThisWave = 0;
     gameState.isBossWave = false;
     gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
+    markHUDDirty(); // Wave and health changed
+    lastDisplayedSecond = -1; // Reset timer tracking for new wave
     const duration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
     gameState.waveDuration = duration;
     gameState.waveStartTime = Date.now();
@@ -3713,7 +3798,7 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
         if (upgradeIndex === 0) {
             gameState.credits += 100000;
-            updateHUD();
+            markHUDDirty(); // Credits changed
             showToast('Cheated 100,000 credits!');
         } else {
             toggleWaveStatsPanel();
@@ -3754,7 +3839,7 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
 
         applyUpgradeEffect(categoryIndex, upgradeIndex, true); // Apply effect of new level
 
-        updateHUD();
+        markHUDDirty(); // Credits changed
         drawGame();
         showToast(`Upgraded ${upgrade.name}!`);
         saveGame(); // Auto-save on upgrade
@@ -3799,7 +3884,7 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     // Heal amount equal to the increase
                     gameState.currentHealth += (gameState.maxHealth - oldMaxHealth);
                     gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth); // Cap at new max
-                    updateHUD();
+                    markHUDDirty(); // Health changed
                     break;
                 case UPGRADE_DEFENSE_MOVEMENT: base.currentMoveSpeed = upgrade.f(level); break;
             }
@@ -3929,6 +4014,7 @@ function fireLaserAt(target) {
         gameState.credits += target.creditsValue;
         gameState.score += target.creditsValue * 20;
         gameState.enemiesKilled++;
+        markHUDDirty(); // Credits changed
         createExplosion(target.x, target.y, target.color, 40, target.radius);
         handleEnemyKilled(target);
         if (target.xp) {
@@ -3939,7 +4025,6 @@ function fireLaserAt(target) {
             showToast('Fire rate doubled!', 3000);
         }
         enemyPool.release(target);
-        updateHUD();
         updateUpgradeAvailabilityFlags();
     }
 }
@@ -4297,11 +4382,11 @@ window.addEventListener('keydown', e => {
             case 'o': toggleRingInfoDisplay(); break; // Toggle info anytime
         }
     }
-});
+}, { signal: eventListenerController.signal });
 
 window.addEventListener('keyup', e => {
     keysPressed[e.key.toLowerCase()] = false;
-});
+}, { signal: eventListenerController.signal });
 
 // Mouse/Touch Dragging - Shared Logic
 function handleDragStart(clientX, clientY) {
@@ -4459,20 +4544,20 @@ canvas.addEventListener('mousedown', e => {
     if(e.button === 0) { // Only left click
          handleDragStart(e.clientX, e.clientY);
     }
-});
+}, { signal: eventListenerController.signal });
 window.addEventListener('mousemove', e => {
     handleDragMove(e.clientX, e.clientY);
     if (infoModeActive) {
         showTooltipForCanvas(e);
     }
-});
+}, { signal: eventListenerController.signal });
 window.addEventListener('mouseup', e => {
      if(e.button === 0) {
          handleDragEnd();
          // Process click action only if not dragging
          handleCanvasClick(e.clientX, e.clientY);
      }
-});
+}, { signal: eventListenerController.signal });
 
 // Touch Events
 canvas.addEventListener('touchstart', e => {
@@ -4485,7 +4570,7 @@ canvas.addEventListener('touchstart', e => {
             handleCanvasClick(touch.clientX, touch.clientY);
         }
     }
-}, { passive: false });
+}, { passive: false, signal: eventListenerController.signal });
 
 window.addEventListener('touchmove', e => {
     if (e.touches.length === 1) {
@@ -4494,7 +4579,7 @@ window.addEventListener('touchmove', e => {
              e.preventDefault(); // Prevent scrolling while dragging base
         }
     }
-}, { passive: false });
+}, { passive: false, signal: eventListenerController.signal });
 
 window.addEventListener('touchend', e => {
     if (e.changedTouches.length === 1) {
@@ -4503,7 +4588,7 @@ window.addEventListener('touchend', e => {
         // Process click action only if not dragging
         handleCanvasClick(touch.clientX, touch.clientY);
     }
-});
+}, { signal: eventListenerController.signal });
 
 
 // UI Button Listeners
@@ -4559,11 +4644,11 @@ getElement('clearSaveButton').onclick = clearSavedGame;
 getElement('startFromHighScore').onclick = startGame;
 getElement('initialsInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitInitials();
-});
+}, { signal: eventListenerController.signal });
 getElement('initialsInput').addEventListener('input', e => {
     e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (e.target.value.length >= 3) submitInitials();
-});
+}, { signal: eventListenerController.signal });
 getElement('sensorDisplayToggle').onclick = cycleSensorDisplayMode;
 getElement('fullscreenButton').onclick = toggleFullScreen;
 
@@ -4573,10 +4658,10 @@ getElement("musicVolume").oninput=e=>{musicVolume=parseFloat(e.target.value);loc
 
 getElement('sendWaveButton').onclick = sendNextWave;
 
-document.addEventListener('fullscreenchange', handleFullscreenChange);
-document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+document.addEventListener('fullscreenchange', handleFullscreenChange, { signal: eventListenerController.signal });
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange, { signal: eventListenerController.signal });
+document.addEventListener('mozfullscreenchange', handleFullscreenChange, { signal: eventListenerController.signal });
+document.addEventListener('MSFullscreenChange', handleFullscreenChange, { signal: eventListenerController.signal });
 
 const tooltipTexts = {
   playPauseButton: 'Play or pause the game',
@@ -4598,31 +4683,38 @@ Object.entries(tooltipTexts).forEach(([id,text])=>{
   const el=getElement(id);
   if(!el) return;
   ['mouseenter','mousemove'].forEach(evt=>{
-    el.addEventListener(evt,e=>{ if(infoModeActive) showTooltip(text,e.pageX,e.pageY); });
+    el.addEventListener(evt,e=>{ if(infoModeActive) showTooltip(text,e.pageX,e.pageY); }, { signal: eventListenerController.signal });
   });
-  el.addEventListener('mouseleave', hideTooltip);
+  el.addEventListener('mouseleave', hideTooltip, { signal: eventListenerController.signal });
 });
 
-// Window Resize
+// Window Resize with debouncing to prevent performance issues
+let resizeTimeout;
 window.addEventListener('resize', () => {
-    canvasWidth = window.innerWidth;
-    canvasHeight = window.innerHeight;
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    if (fogCanvas) {
-        fogCanvas.width = canvasWidth;
-        fogCanvas.height = canvasHeight;
-    }
-    if (base) {
-        base.x = canvasWidth / 2;
-        base.y = canvasHeight / 2;
-        baseStartX = base.x;
-        baseStartY = base.y;
-    }
-    if (isGameRunning) {
-        drawGame(); // Redraw immediately after resize
-    }
-});
+    // Clear existing timeout to debounce resize events
+    clearTimeout(resizeTimeout);
+
+    // Execute resize logic after 250ms of no resize events
+    resizeTimeout = setTimeout(() => {
+        canvasWidth = window.innerWidth;
+        canvasHeight = window.innerHeight;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        if (fogCanvas) {
+            fogCanvas.width = canvasWidth;
+            fogCanvas.height = canvasHeight;
+        }
+        if (base) {
+            base.x = canvasWidth / 2;
+            base.y = canvasHeight / 2;
+            baseStartX = base.x;
+            baseStartY = base.y;
+        }
+        if (isGameRunning) {
+            drawGame(); // Redraw after resize
+        }
+    }, 250);
+}, { signal: eventListenerController.signal });
 
 
 // --- Theme Switching Logic ---
@@ -4738,6 +4830,12 @@ function loadAndStartGame() {
 // --- Global Access (for HTML onclick) ---
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
+
+// Cleanup event listeners on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+    cleanupEventListeners();
+});
+
 })(); // End IIFE
 </script>
 <div id="deathOverlay" class="overlay-desaturate" style="display:none"></div>
