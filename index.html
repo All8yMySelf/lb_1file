@@ -139,7 +139,7 @@
     document.getElementById("leaderboardLoading").style.display = "none";
   };
 
-  // 5) Hook up “Leaderboard” button
+  // 5) Hook up "Leaderboard" button
  
     document.getElementById("show-leaderboard").addEventListener("click", async () => {
     try {
@@ -2304,14 +2304,14 @@ function gameOver() {
             const phrases = [
                 'So close, yet orbital debris…',
                 'Your score called. It wants another chance.',
-                'Your gran could’ve done better… but we believe in you.',
+                'Your gran could've done better… but we believe in you.',
                 'Launch again, recruit.',
-                'Good news: you’re in the Top 1000!',
+                'Good news: you're in the Top 1000!',
                 'Now serving humble pie.',
                 'Failure builds character. Try again?',
                 'Almost made it. Like, just almost.',
                 'Mission: failed. Style: impeccable.',
-                'It’s not about the score. It’s about the… no wait, it is about the score.'
+                'It's not about the score. It's about the… no wait, it is about the score.'
             ];
             getElement('initialsInput').style.display = 'none';
             getElement('cheekyMessage').textContent = phrases[Math.floor(Math.random()*phrases.length)];
