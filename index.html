@@ -3236,6 +3236,9 @@ function drawGame() {
         const barY = enemy.y - (sensorUpgrades.enemyVisuals ? enemy.radius : 4) - barYOffset;
 
         if (sensorDisplayMode === 'inline') {
+            const inlineAccent = getCategoryColor(UPGRADE_CATEGORY_INFO);
+            const inlineText = currentTheme.canvasColors.ringUpgradeBoxText || '#e6b54b';
+            const inlineBg = currentTheme.canvasColors.ringUpgradeBoxBg || currentTheme.canvasColors.hotkeyBg || 'rgba(0,0,0,0.6)';
             const infoLines = [];
             if (!sensorUpgrades.enemyVisuals) {
                 infoLines.push('Hannah Undefined');
