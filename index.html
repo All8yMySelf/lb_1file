@@ -3235,6 +3235,9 @@ function drawGame() {
         const barY = enemy.y - (sensorUpgrades.enemyVisuals ? enemy.radius : 4) - barYOffset;
 
         if (sensorDisplayMode === 'inline') {
+            const inlineAccent = getCategoryColor(UPGRADE_CATEGORY_INFO);
+            const inlineText = currentTheme.canvasColors.ringUpgradeBoxText || '#e6b54b';
+            const inlineBg = currentTheme.canvasColors.ringUpgradeBoxBg || currentTheme.canvasColors.hotkeyBg || 'rgba(0,0,0,0.6)';
             const infoLines = [];
             if (!sensorUpgrades.enemyVisuals) {
                 infoLines.push('Hannah Undefined');
@@ -3260,27 +3263,49 @@ function drawGame() {
             if (sensorUpgrades.showHealthBars) boxHeight += barHeight + fontSize + 8;
             const boxX = enemy.x + bracketSize + 10;
             const boxY = enemy.y - boxHeight / 2;
-            ctx.fillStyle = 'rgba(255,204,0,0.35)';
+            // Match inline enemy cards to the ring info display style
+            ctx.fillStyle = colorWithAlpha(inlineBg, 0.75);
             ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-            ctx.strokeStyle = '#ffcc00';
+            ctx.strokeStyle = colorWithAlpha(inlineAccent, 0.6);
+            ctx.lineWidth = 1;
+            ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+            // Connector line (same color family as ring info display)
+            ctx.strokeStyle = colorWithAlpha(inlineAccent, 0.75);
             ctx.beginPath();
             ctx.moveTo(enemy.x + bracketSize, enemy.y);
             ctx.lineTo(boxX, boxY + 10);
             ctx.stroke();
+
+            // Corner brackets (retro HUD accent)
+            const bracketLength = 6;
+            const inset = 1;
+            const left = boxX + inset;
+            const right = boxX + boxWidth - inset;
+            const top = boxY + inset;
+            const bottom = boxY + boxHeight - inset;
+            ctx.strokeStyle = inlineAccent;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(left, top + bracketLength); ctx.lineTo(left, top); ctx.lineTo(left + bracketLength, top);
+            ctx.moveTo(right - bracketLength, top); ctx.lineTo(right, top); ctx.lineTo(right, top + bracketLength);
+            ctx.moveTo(left, bottom - bracketLength); ctx.lineTo(left, bottom); ctx.lineTo(left + bracketLength, bottom);
+            ctx.moveTo(right - bracketLength, bottom); ctx.lineTo(right, bottom); ctx.lineTo(right, bottom - bracketLength);
+            ctx.stroke();
             let textY;
             if (sensorUpgrades.showHealthBars) {
-                ctx.fillStyle = '#664400';
+                ctx.fillStyle = colorWithAlpha(inlineAccent, 0.2);
                 ctx.fillRect(boxX + padding, boxY + padding, boxWidth - padding * 2, barHeight);
-                ctx.fillStyle = '#ffcc00';
+                ctx.fillStyle = colorWithAlpha(inlineAccent, 0.9);
                 ctx.fillRect(boxX + padding, boxY + padding, (boxWidth - padding * 2) * healthPercent, barHeight);
-                ctx.fillStyle = '#000';
+                ctx.fillStyle = inlineText;
                 ctx.font = '8px monospace';
                 ctx.fillText('HP', boxX + padding, boxY + padding + barHeight + fontSize - 1);
                 textY = boxY + padding + barHeight + fontSize + 4;
             } else {
                 textY = boxY + padding + fontSize;
             }
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = inlineText;
             infoLines.forEach(t => { ctx.fillText(t, boxX + padding, textY); textY += fontSize + 2; });
         } else {
             if (sensorUpgrades.showHealthBars) {
