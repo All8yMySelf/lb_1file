@@ -3236,6 +3236,9 @@ function drawGame() {
         const barY = enemy.y - (sensorUpgrades.enemyVisuals ? enemy.radius : 4) - barYOffset;
 
         if (sensorDisplayMode === 'inline') {
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
             const inlineAccent = getCategoryColor(UPGRADE_CATEGORY_INFO);
             const inlineText = currentTheme.canvasColors.ringUpgradeBoxText || '#e6b54b';
             const inlineBg = currentTheme.canvasColors.ringUpgradeBoxBg || currentTheme.canvasColors.hotkeyBg || 'rgba(0,0,0,0.6)';
@@ -3308,6 +3311,7 @@ function drawGame() {
             }
             ctx.fillStyle = 'rgba(210, 255, 250, 0.95)';
             infoLines.forEach(t => { ctx.fillText(t, boxX + padding, textY); textY += fontSize + 2; });
+            ctx.restore();
         } else {
             if (sensorUpgrades.showHealthBars) {
                 ctx.fillStyle = '#664400';
