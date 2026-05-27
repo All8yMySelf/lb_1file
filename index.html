@@ -3017,6 +3017,9 @@ function drawGame() {
         base.stunRadius
     );
 
+    // Draw the dark sensor shadow first so tactical overlays stay readable above it.
+    applyOverlay(visibleRadius);
+
     // --- Draw Range Rings ---
     ctx.lineWidth = 2;
     // Cannon Range
@@ -3401,7 +3404,6 @@ function drawGame() {
     // --- Draw Particles ---
     drawParticles();
 
-    applyOverlay(visibleRadius);
     // --- Draw Ring UI (Directly on Canvas) ---
     ringClickRegions = []; // Clear regions each frame
 
