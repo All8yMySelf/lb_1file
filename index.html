@@ -4323,11 +4323,24 @@ function updateEnemyHUD(info) {
     if (sensorDisplayMode !== 'hud') return;
     // HUD mode no longer displays a popup since enemy stats panel replaces it
 }
+function getEnemyIntelDisplayOrder(){
+    const fallbackOrder={Fast:0,Normal:1,Tank:2,Boss:3,XP:4};
+    return Object.keys(enemyIntel.known).sort((a,b)=>{
+        const ah=Number(enemyIntel.known[a]?.health);
+        const bh=Number(enemyIntel.known[b]?.health);
+        const aFinite=Number.isFinite(ah);
+        const bFinite=Number.isFinite(bh);
+        if(aFinite&&bFinite&&ah!==bh) return ah-bh;
+        if(aFinite!==bFinite) return aFinite?-1:1;
+        return (fallbackOrder[a]??99)-(fallbackOrder[b]??99);
+    });
+}
+
 function updateEnemyStatsPanel(){
     const panel=getElement("enemyStatsPanel");
     const list=getElement("enemyStatsContent");
     let html="";
-    enemyIntel.order.forEach(t=>{
+    getEnemyIntelDisplayOrder().forEach(t=>{
         const d=enemyIntel.known[t];
         const hp=sensorUpgrades.showHealthBars?d.health:'?';
         html+=`<div>${t}: Spd ${d.speed} HP ${hp}</div>`;
@@ -4469,7 +4482,6 @@ function identifyEnemy(enemy){
     const baseStats={speed:enemy.speed.toFixed(1),health:Math.round(enemy.maxHealth),attack:"Unknown"};
     if(enemy.type==="XP"){baseStats.attack="Flees";}
     enemyIntel.known[enemy.type]=baseStats;
-    enemyIntel.order.push(enemy.type);
     pauseGame();
     showEnemyIntelPopup(enemy.type,enemyIntel.known[enemy.type]);
 }
