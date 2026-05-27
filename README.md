@@ -15,6 +15,9 @@ The slider beside the selector adjusts the music volume and defaults to 25%.
 
 - **Theme** — cycles through different visual styles.
 - **Mute** — turns game sounds on or off.
+- **SFX** — toggles beep sound effects.
+- **Time controls** — unlock higher and lower battle speeds through the new
+  time-control upgrades, then adjust speed from the compact control cluster.
 
 ## About
 
@@ -60,6 +63,26 @@ rules are misconfigured.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+
+### v2.63
+- Improved the opening sensor warning layout so the text is centered and constrained.
+- Enemy Info now defaults to Inline mode when starting a new game.
+- Inline enemy cards use shorter wrapped locked-health messaging.
+- Loaded save games now resume immediately instead of starting paused.
+- Time-speed controls now dock under the Time Control upgrade category.
+- Fog of war now uses a grey hidden-area overlay with repeated dark hash marks and recurring FOG labels.
+
+### v2.62
+- Bumped the game version after 17 merged updates on May 27, 2026.
+- Added purchasable time-control upgrades that unlock wider speed limits.
+- Moved compact time-speed controls beside the sensor controls.
+- Added an SFX toggle for beep sound effects.
+- Restyled ring info and inline enemy HUD cards with theme-aware translucent panels and clearer text.
+- Improved enemy stat panels with health-based sorting, corrected wave speed scaling, cleaner alignment, and less duplicate HP text.
+- Moved the Send Next Wave button into the Battle Status panel.
+- Improved theme readability, including the renamed Neon theme and Pixel Black and White HUD contrast.
+- Fixed ring, targeting-range, and canvas layering so HUD and range information render above shadow and overlay effects.
+- Clarified labels for unidentified non-enemy objects.
 
 ### v2.45
 - Start screen now warns the game is still in development.

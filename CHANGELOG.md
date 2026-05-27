@@ -1,5 +1,33 @@
 # Orbital Defense - Change Log
 
+## v2.63
+- Improved the opening sensor warning layout so the text is centered and
+  constrained instead of running across the full screen.
+- Changed Enemy Info to default to Inline mode when starting a new game.
+- Shortened and wrapped inline enemy info cards so locked health messages do
+  not stretch across the playfield.
+- Fixed loaded saves so they resume playing immediately instead of starting
+  paused.
+- Docked unlocked time-speed controls under the Time Control upgrade category.
+- Redesigned the fog-of-war overlay with a grey hidden-area treatment, repeated
+  dark hash marks, and recurring FOG labels.
+
+## v2.62
+- Bumped the game version after 17 merged updates on May 27, 2026.
+- Added purchasable time-control upgrades that unlock wider speed limits.
+- Moved compact time-speed controls beside the sensor controls.
+- Added an SFX toggle for beep sound effects.
+- Restyled ring info and inline enemy HUD cards with theme-aware translucent
+  panels and improved text readability.
+- Improved enemy stat panels with health-based sorting, corrected wave speed
+  scaling, cleaner alignment, and less duplicate HP text.
+- Moved the Send Next Wave button into the Battle Status panel.
+- Improved theme readability, including the renamed Neon theme and Pixel Black
+  and White HUD contrast.
+- Fixed ring, targeting-range, and canvas layering so HUD and range information
+  render above shadow and overlay effects.
+- Clarified labels for unidentified non-enemy objects.
+
 ## v2.45
 - Added a development warning on the start screen.
 - Game title increased in size and renamed to "Orbital Defense".
