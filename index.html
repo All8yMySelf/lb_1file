@@ -1591,6 +1591,8 @@ function spawnEnemy(isBoss = false, waveNumber = gameState.wave) {
 
     if (enemyIntel.active && enemyIntel.known[enemy.type]) {
         enemyIntel.known[enemy.type].health = Math.round(health);
+        const knownSpeed = Number(enemyIntel.known[enemy.type].speed) || 0;
+        enemyIntel.known[enemy.type].speed = Math.max(knownSpeed, speed).toFixed(1);
         updateEnemyStatsPanel();
     }
     if (waveStates[waveNumber]) {
