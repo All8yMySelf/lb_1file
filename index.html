@@ -1494,25 +1494,55 @@ function drawBracket(x, y, size, color = '#ffcc00', pulsing = true) {
 
 // Display a small info box connected to a ring, styled like enemy inline info
 function drawRingInfoPanel(radius, label, offset) {
-    const fontSize = 9;
-    const padding = 3;
+    const fontSize = 10;
+    const paddingX = 10;
+    const paddingY = 5;
     ctx.font = `${fontSize}px monospace`;
     const textWidth = ctx.measureText(label).width;
-    const boxWidth = Math.max(textWidth + padding * 2, 40);
-    const boxHeight = fontSize + padding * 2;
+    const boxWidth = Math.max(textWidth + paddingX * 2, 90);
+    const boxHeight = fontSize + paddingY * 2;
     const baseX = base.x + radius;
     const baseY = base.y;
-    const boxX = baseX + 10;
-    const boxY = base.y - offset * (boxHeight + 4) - boxHeight / 2;
-    ctx.fillStyle = 'rgba(255,204,0,0.35)';
+    const boxX = baseX + 12;
+    const boxY = base.y - offset * (boxHeight + 6) - boxHeight / 2;
+
+    // Light scan-style translucent panel to keep motion visible while improving legibility
+    ctx.fillStyle = 'rgba(2, 14, 20, 0.55)';
     ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-    ctx.strokeStyle = '#ffcc00';
+    ctx.strokeStyle = 'rgba(0, 255, 230, 0.45)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+    // Connector line from ring edge to panel
+    ctx.strokeStyle = 'rgba(0, 255, 230, 0.6)';
     ctx.beginPath();
     ctx.moveTo(baseX, baseY);
     ctx.lineTo(boxX, boxY + boxHeight / 2);
     ctx.stroke();
-    ctx.fillStyle = '#000';
-    ctx.fillText(label, boxX + padding, boxY + padding + fontSize - 1);
+
+    // Corner bracket details (retro HUD style)
+    const bracketLength = 6;
+    const inset = 1;
+    const left = boxX + inset;
+    const right = boxX + boxWidth - inset;
+    const top = boxY + inset;
+    const bottom = boxY + boxHeight - inset;
+    ctx.strokeStyle = 'rgba(0, 255, 230, 0.95)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(left, top + bracketLength); ctx.lineTo(left, top); ctx.lineTo(left + bracketLength, top);
+    ctx.moveTo(right - bracketLength, top); ctx.lineTo(right, top); ctx.lineTo(right, top + bracketLength);
+    ctx.moveTo(left, bottom - bracketLength); ctx.lineTo(left, bottom); ctx.lineTo(left + bracketLength, bottom);
+    ctx.moveTo(right - bracketLength, bottom); ctx.lineTo(right, bottom); ctx.lineTo(right, bottom - bracketLength);
+    ctx.stroke();
+
+    // Centered bright text for readability
+    ctx.fillStyle = 'rgba(210, 255, 250, 0.95)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, boxX + boxWidth / 2, boxY + boxHeight / 2 + 0.5);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
 }
 
 // --- Enemy Spawning ---
