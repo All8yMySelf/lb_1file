@@ -371,7 +371,7 @@
   </div>
 </div>
 <div id="sensorWarning" style="display:none">
-    <p>The ring around your base shows your cannon's visual firing range. The cannon cannot target enemies beyond this radius. Click on the "Cannon" to upgrade the cannon's abilities.</p>
+    <p>The ring around your base shows your cannon's targeting range. The cannon cannot target enemies beyond this radius. Click on the "Cannon" to upgrade the cannon's abilities.</p>
     <p>Upgrade "Sensors" Electronic FOV to see enemies outside this ring. The wave timer has started – enemies approach from beyond your sight.</p>
     <button id="sensorWarningButton">Continue</button>
 </div>
@@ -3066,7 +3066,7 @@ function drawGame() {
     // Display simple pop-up panels describing each ring when ring info is enabled
     if (showRingInfo) {
         let offset = 0;
-        drawRingInfoPanel(base.cannonRange, 'Cannon Range', offset++);
+        drawRingInfoPanel(base.cannonRange, 'Cannon Targeting Range', offset++);
         if (base.missileCount > 0 && base.missileTargetingRadius > 0) {
             drawRingInfoPanel(base.missileTargetingRadius, 'Missile Range', offset++);
         }
@@ -3402,28 +3402,6 @@ function drawGame() {
     drawParticles();
 
     applyOverlay(visibleRadius);
-
-    // Display simple pop-up panels describing each ring when ring info is enabled
-    if (showRingInfo) {
-        let offset = 0;
-        drawRingInfoPanel(base.cannonRange, 'Cannon Range', offset++);
-        if (base.missileCount > 0 && base.missileTargetingRadius > 0) {
-            drawRingInfoPanel(base.missileTargetingRadius, 'Missile Range', offset++);
-        }
-        if (base.laserDamage > 0 && base.laserRange > 0) {
-            drawRingInfoPanel(base.laserRange, 'Laser Range', offset++);
-        }
-        if (base.stunLevel > 0 && base.stunRadius > 0) {
-            drawRingInfoPanel(base.stunRadius, 'Stun Radius', offset++);
-        }
-        if (base.sensorRange > base.cannonRange) {
-            drawRingInfoPanel(base.sensorRange, 'Sensor Range', offset++);
-        }
-        if (base.focusRadiusSetting > 0) {
-            drawRingInfoPanel(base.cannonRange * base.focusRadiusSetting, 'Focus Radius', offset++);
-        }
-    }
-
     // --- Draw Ring UI (Directly on Canvas) ---
     ringClickRegions = []; // Clear regions each frame
 
