@@ -3254,7 +3254,7 @@ function drawGame() {
                 }
             }
 
-            const fontSize = 9;
+            const fontSize = 12;
             ctx.font = `${fontSize}px monospace`;
             const padding = 3;
             let maxW = 0;
@@ -3300,7 +3300,7 @@ function drawGame() {
                 ctx.fillStyle = 'rgba(0, 255, 230, 0.9)';
                 ctx.fillRect(boxX + padding, boxY + padding, (boxWidth - padding * 2) * healthPercent, barHeight);
                 ctx.fillStyle = 'rgba(210, 255, 250, 0.95)';
-                ctx.font = '8px monospace';
+                ctx.font = '10px monospace';
                 ctx.fillText('HP', boxX + padding, boxY + padding + barHeight + fontSize - 1);
                 textY = boxY + padding + barHeight + fontSize + 4;
             } else {
@@ -3456,7 +3456,7 @@ function drawRingUIElement(type, radius, labelText, categoryIndex, upgradeIndex,
 
     const elementBaseX = radius; // Position along the rotated x-axis
     const elementBaseY = 0;
-    const fontSize = parseInt(currentTheme.cssVariables['--ring-ui-font-size']) || 11;
+    const fontSize = Math.max(13, parseInt(currentTheme.cssVariables['--ring-ui-font-size']) || 11);
     const padding = 3;
     const boxSize = 8;
     const boxSpacing = 2;
