@@ -1054,9 +1054,10 @@ const UPGRADE_CATEGORY_DEFENSE = 1;
 const UPGRADE_CATEGORY_LASER = 2;
 const UPGRADE_CATEGORY_MISSILE = 3;
 const UPGRADE_CATEGORY_SPECIAL = 4;
-const UPGRADE_CATEGORY_SENSORS = 5;
-const UPGRADE_CATEGORY_INFO = 6;
-const UPGRADE_CATEGORY_DEBUG = 7;
+const UPGRADE_CATEGORY_TIME = 5;
+const UPGRADE_CATEGORY_SENSORS = 6;
+const UPGRADE_CATEGORY_INFO = 7;
+const UPGRADE_CATEGORY_DEBUG = 8;
 
 // Specific Upgrade Indices (within category)
 const UPGRADE_CANNON_FIRERATE = 0;
@@ -1074,6 +1075,8 @@ const UPGRADE_MISSILE_DAMAGE = 2;
 const UPGRADE_MISSILE_HOMING = 3;
 const UPGRADE_MISSILE_MACROSS = 4;
 const UPGRADE_SPECIAL_STUN = 0;
+const UPGRADE_TIME_SLOW = 0;
+const UPGRADE_TIME_FAST = 1;
 const UPGRADE_SENSOR_RANGE = 0;
 const UPGRADE_SENSOR_OUTLINES = 1;
 const UPGRADE_SENSOR_HEALTHBARS = 2;
@@ -1126,6 +1129,20 @@ let upgradeTree; // Defines upgrade structure, costs, effects
 const SPEED_STEPS = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.5,2,3,4,5,6,7,8,9,10];
 let speedIndex = SPEED_STEPS.indexOf(1);
 let gameSpeedMultiplier = SPEED_STEPS[speedIndex];
+function getUnlockedSlowSteps() {
+    return upgradeTree?.[UPGRADE_CATEGORY_TIME]?.upgrades?.[UPGRADE_TIME_SLOW]?.level || 0;
+}
+function getUnlockedFastSteps() {
+    return upgradeTree?.[UPGRADE_CATEGORY_TIME]?.upgrades?.[UPGRADE_TIME_FAST]?.level || 0;
+}
+function getMinUnlockedSpeedIndex() {
+    const baseIndex = SPEED_STEPS.indexOf(1);
+    return Math.max(0, baseIndex - getUnlockedSlowSteps());
+}
+function getMaxUnlockedSpeedIndex() {
+    const baseIndex = SPEED_STEPS.indexOf(1);
+    return Math.min(SPEED_STEPS.length - 1, baseIndex + getUnlockedFastSteps());
+}
 let isGameRunning = false;
 const musicTracks=["Off","music1.mp3","music2.mp3","music3.mp3","music4.mp3","music5.mp3"];
 const musicTrackNames=["Off","Track 1","Track 2","Track 3","Track 4","Track 5"];
@@ -2207,7 +2224,31 @@ function initializeGame(shouldTryLoad = true) {
                   g: (level, cost, maxLvl) => `${level * 10}%${level < maxLvl ? `>${(level + 1) * 10}%` : ''}` }
             ]
         },
-        { // Category 5: Sensors
+        { // Category 5: Time
+            category: "Time Control",
+            expanded: false,
+            upgrades: [
+                { name: 'Slow Time', cost: 500, level: 0, maxLevel: 9,
+                  f: level => level,
+                  g: (level, cost, maxLvl) => {
+                      const minIdx = Math.max(0, SPEED_STEPS.indexOf(1) - level);
+                      const current = SPEED_STEPS[minIdx];
+                      const nextIdx = Math.max(0, SPEED_STEPS.indexOf(1) - Math.min(level + 1, maxLvl));
+                      const next = SPEED_STEPS[nextIdx];
+                      return `${current}x${level < maxLvl ? ` > ${next}x` : ''}`;
+                  } },
+                { name: 'Fast Time', cost: 500, level: 0, maxLevel: 10,
+                  f: level => level,
+                  g: (level, cost, maxLvl) => {
+                      const maxIdx = Math.min(SPEED_STEPS.length - 1, SPEED_STEPS.indexOf(1) + level);
+                      const current = SPEED_STEPS[maxIdx];
+                      const nextIdx = Math.min(SPEED_STEPS.length - 1, SPEED_STEPS.indexOf(1) + Math.min(level + 1, maxLvl));
+                      const next = SPEED_STEPS[nextIdx];
+                      return `${current}x${level < maxLvl ? ` > ${next}x` : ''}`;
+                  } }
+            ]
+        },
+        { // Category 6: Sensors
             category: "Sensors",
             expanded: false,
             upgrades: [
@@ -2229,7 +2270,7 @@ function initializeGame(shouldTryLoad = true) {
                   g: (level) => level > 0 ? 'Active' : '(Install)' }
             ]
         },
-        { // Category 6: Info
+        { // Category 7: Info
             category: "Info / How To Play",
             expanded: false,
             upgrades: [
@@ -2238,7 +2279,7 @@ function initializeGame(shouldTryLoad = true) {
                   g: level => level ? 'Active' : '(Start)' }
             ]
         },
-        { // Category 7: Debug
+        { // Category 8: Debug
             category: "Debug",
             expanded: false,
             upgrades: [
@@ -4103,6 +4144,14 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                  }
             }
             break;
+        case UPGRADE_CATEGORY_TIME: {
+            const minIdx = getMinUnlockedSpeedIndex();
+            const maxIdx = getMaxUnlockedSpeedIndex();
+            speedIndex = Math.max(minIdx, Math.min(maxIdx, speedIndex));
+            gameSpeedMultiplier = SPEED_STEPS[speedIndex];
+            updateSpeedDisplay();
+            break;
+        }
         case UPGRADE_CATEGORY_SENSORS:
             switch(upgradeIndex) {
                 case UPGRADE_SENSOR_RANGE:
@@ -4789,17 +4838,21 @@ getElement('playPauseButton').onclick = () => {
     }
 };
 getElement('slowDownButton').onclick = () => {
-    if (speedIndex > 0) {
+    if (speedIndex > getMinUnlockedSpeedIndex()) {
         speedIndex--;
         gameSpeedMultiplier = SPEED_STEPS[speedIndex];
         updateSpeedDisplay();
+    } else {
+        showToast('Upgrade Time Control to slow further.', 1200);
     }
 };
 getElement('speedUpButton').onclick = () => {
-    if (speedIndex < SPEED_STEPS.length - 1) {
+    if (speedIndex < getMaxUnlockedSpeedIndex()) {
         speedIndex++;
         gameSpeedMultiplier = SPEED_STEPS[speedIndex];
         updateSpeedDisplay();
+    } else {
+        showToast('Upgrade Time Control to speed up further.', 1200);
     }
 };
 getElement('macrossButton').onclick = fireMacrossMissiles;
