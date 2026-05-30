@@ -2,7 +2,7 @@
   "rules": {
     "scores": {
       ".read": true,
-      ".write": "newData.exists() && newData.hasChildren(['initials', 'wave', 'time', 'date', 'ranking']) && newData.child('initials').isString() && newData.child('initials').val().length >= 1 && newData.child('initials').val().length <= 3 && newData.child('initials').val().matches(/^[A-Z0-9]+$/) && newData.child('wave').isNumber() && newData.child('wave').val() >= 1 && newData.child('wave').val() <= 1000 && newData.child('time').isNumber() && newData.child('time').val() >= 0 && newData.child('ranking').isNumber()",
+      ".write": "newData.exists() && newData.hasChildren(['initials', 'wave', 'time', 'date', 'ranking']) && newData.child('initials').isString() && newData.child('initials').val().length >= 2 && newData.child('initials').val().length <= 3 && newData.child('initials').val().matches(/^[A-Z0-9]+$/) && newData.child('wave').isNumber() && newData.child('wave').val() >= 1 && newData.child('wave').val() <= 1000 && newData.child('time').isNumber() && newData.child('time').val() >= 0 && newData.child('ranking').isNumber() && newData.child('ranking').val() == newData.child('wave').val() * 100000 - newData.child('time').val()",
       ".indexOn": "ranking"
     }
   }

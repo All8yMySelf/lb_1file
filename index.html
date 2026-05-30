@@ -48,12 +48,32 @@
 
     RATE_LIMIT.submissions++;
 
+    const cleanInitials = String(initials || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3);
+    const cleanWave = Math.floor(Number(wave));
+    const cleanTime = Math.max(0, Math.floor(Number(time)));
+    const computedRanking = cleanWave * 100000 - cleanTime;
+
+    if (cleanInitials.length < 2 || !Number.isFinite(cleanWave) || cleanWave < 1 || !Number.isFinite(cleanTime)) {
+      showToast('Invalid score data. Please check your submission.', 3000);
+      return;
+    }
+
+    if (Number(ranking) !== computedRanking) {
+      console.warn('Score ranking corrected before submission', { ranking, computedRanking });
+    }
+
     const date = new Date().toLocaleDateString("en-GB", {
       day: "numeric", month: "long", year: "numeric"
     });
 
     try {
-      await push(ref(db, "scores"), { initials, wave, time, date, ranking });
+      await push(ref(db, "scores"), {
+        initials: cleanInitials,
+        wave: cleanWave,
+        time: cleanTime,
+        date,
+        ranking: computedRanking
+      });
     } catch (err) {
       console.error('Failed to submit score', err);
       if (err.code === 'PERMISSION_DENIED') {
@@ -152,7 +172,7 @@
     });
 </script>
 
-<title>Orbital Defense v2.63 - Optimised</title>
+<title>Orbital Defense v2.64 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -195,8 +215,76 @@
 </style>
 <style>
   @media (max-width: 600px) {
-    #hud { font-size: 18px; }
-    #controls button { width: 24px; height: 24px; font-size: 16px; margin: 0 2px; }
+    #hud {
+      left: 4px;
+      right: 4px;
+      gap: 2px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    #hud span {
+      min-width: 0;
+      padding: 0 2px;
+    }
+    #controls {
+      left: 6px;
+      right: 6px;
+      bottom: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+    #controls button { width: 26px; height: 26px; font-size: 15px; margin: 0; }
+    #themeButton {
+      width: auto;
+      max-width: 132px;
+      padding: 5px 7px;
+      font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #sensorToggle {
+      gap: 3px;
+      font-size: 10px;
+    }
+    #sensorDisplayToggle {
+      width: auto;
+      padding: 4px 6px;
+      font-size: 10px;
+    }
+    #musicControls {
+      order: 2;
+      width: 100%;
+      justify-content: flex-end;
+      gap: 3px;
+    }
+    #musicControls button {
+      width: auto;
+      min-width: 26px;
+      padding: 4px 6px;
+      font-size: 10px;
+    }
+    #trackDisplay {
+      min-width: 42px;
+      font-size: 10px;
+    }
+    #musicVolume {
+      width: 72px;
+      height: 8px;
+      writing-mode: horizontal-tb;
+      direction: ltr;
+    }
+    #macrossButton {
+      width: auto;
+      max-width: 180px;
+      padding: 5px 7px;
+      font-size: 10px;
+    }
+    #hotkeys, #enemyStatsPanel, #xpStatsPanel, #waveStatsPanel {
+      max-width: 46vw;
+      font-size: 10px;
+    }
     #speedDisplay { width: 32px; font-size: 14px; }
   }
 </style>
@@ -325,16 +413,16 @@
 </head>
 <body>
 <div class="bg"></div>
-<canvas id="gameCanvas"></canvas> <!-- Renamed from #g -->
-<div id="hud"> <!-- Renamed from #u -->
-    <span id="creditsDisplay"></span> <!-- Renamed from #c -->
-    <span id="waveDisplay"></span> <!-- Renamed from #w -->
-    <span id="healthDisplay"></span> <!-- Renamed from #h -->
+<canvas id="gameCanvas"></canvas>
+<div id="hud">
+    <span id="creditsDisplay"></span>
+    <span id="waveDisplay"></span>
+    <span id="healthDisplay"></span>
 </div>
-<div id="startScreen"> <!-- Renamed from #s -->
-    <h1>Orbital Defense v2.63</h1>
-    <button id="startButton">Start Game</button> <!-- Renamed from #b -->
-    <button id="loadButton" style="display:none;">Load Game</button> <!-- Added Load Button -->
+<div id="startScreen">
+    <h1 id="gameTitle">Orbital Defense v2.64</h1>
+    <button id="startButton">Start Game</button>
+    <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
     <button id="show-leaderboard">Leaderboard</button>
     <p class="dev-warning">This game is a work in progress and may change often.</p>
@@ -345,14 +433,14 @@
   <div id="leaderboardLoading"></div>
   <button id="startFromHighScore">Start Game</button>
 </div>
-<div id="gameOverScreen" style="display:none"> <!-- Renamed from #o -->
+<div id="gameOverScreen" style="display:none">
     <h1 class="slow-blink">GAME OVER</h1>
     <p class="sub-message">You were defeated...</p>
-    <div id="finalStats"></div> <!-- Renamed from #f -->
+    <div id="finalStats"></div>
     <ol id="gameOverScoreList"></ol>
     <div id="cheekyMessage"></div>
     <input id="initialsInput" maxlength="3">
-    <button id="restartButton">Play Again</button> <!-- Renamed from #r -->
+    <button id="restartButton">Play Again</button>
 </div>
 <div id="controls">
     <div id="timeSpeedControls" aria-label="Time Speed Controls">
@@ -361,9 +449,9 @@
         <span id="speedDisplay">1x</span>
         <button id="speedUpButton">&#187;</button>
     </div>
-    <button id="macrossButton" style="display:none">Macross Missile Massacre</button> <!-- Renamed from #M -->
-    <button id="toggleInfoButton" class="active">o</button> <!-- Renamed from #I -->
-    <button id="themeButton">Theme: Orbital Elite</button> <!-- Added Theme Button -->
+    <button id="macrossButton" style="display:none">Macross Missile Massacre</button>
+    <button id="toggleInfoButton" class="active">o</button>
+    <button id="themeButton">Theme: Orbital Elite</button>
     <div id="sensorToggle">
         <span class="switch-label">Enemy Info:</span>
         <button id="sensorDisplayToggle">Inline</button>
@@ -888,6 +976,27 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
+const GAME_VERSION = '2.64';
+const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
+const SAVE_SCHEMA_VERSION = 2;
+const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
+const THEME_STORAGE_KEY = 'orbitalDefenseTheme_v2.9';
+const MUSIC_TRACK_STORAGE_KEY = 'ode_musicTrack';
+const MUSIC_VOLUME_STORAGE_KEY = 'ode_musicVolume';
+const SFX_STORAGE_KEY = 'ode_sfxEnabled';
+const MUTE_STORAGE_KEY = 'ode_isMuted';
+
+function getStoredNumber(key, fallback, options = {}) {
+    const rawValue = localStorage.getItem(key);
+    if (rawValue === null) return fallback;
+
+    const parsedValue = options.integer ? parseInt(rawValue, 10) : parseFloat(rawValue);
+    if (!Number.isFinite(parsedValue)) return fallback;
+
+    const min = Number.isFinite(options.min) ? options.min : -Infinity;
+    const max = Number.isFinite(options.max) ? options.max : Infinity;
+    return Math.max(min, Math.min(max, parsedValue));
+}
 
 // --- Configuration Constants ---
 
@@ -1170,13 +1279,13 @@ function getMaxUnlockedSpeedIndex() {
 let isGameRunning = false;
 const musicTracks=["Off","music1.mp3","music2.mp3","music3.mp3","music4.mp3","music5.mp3"];
 const musicTrackNames=["Off","Track 1","Track 2","Track 3","Track 4","Track 5"];
-let currentTrackIndex=parseInt(localStorage.getItem("ode_musicTrack")||"0",10);
+let currentTrackIndex=getStoredNumber(MUSIC_TRACK_STORAGE_KEY, 0, { min: 0, max: musicTracks.length - 1, integer: true });
 let musicAudio=new Audio();
 musicAudio.loop=true;
-let musicVolume=parseFloat(localStorage.getItem("ode_musicVolume"))||0.25;
+let musicVolume=getStoredNumber(MUSIC_VOLUME_STORAGE_KEY, 0.25, { min: 0, max: 1 });
 musicAudio.volume=musicVolume;
-let sfxEnabled = localStorage.getItem("ode_sfxEnabled") !== "false";
-let isMuted = localStorage.getItem('ode_isMuted') === 'true';
+let sfxEnabled = localStorage.getItem(SFX_STORAGE_KEY) !== "false";
+let isMuted = localStorage.getItem(MUTE_STORAGE_KEY) === 'true';
 let animationFrameId = null;
 let savedGame = null; // Stores loaded game state
 let autoSaveTimer = null;
@@ -1421,6 +1530,55 @@ function resetPools() {
     bulletPool.clear();
     missilePool.clear();
     particles = [];
+}
+
+function scaleObjectPosition(obj, scaleX, scaleY) {
+    if (!obj) return;
+    if (typeof obj.x === 'number') obj.x *= scaleX;
+    if (typeof obj.y === 'number') obj.y *= scaleY;
+    if (typeof obj.startX === 'number') obj.startX *= scaleX;
+    if (typeof obj.startY === 'number') obj.startY *= scaleY;
+}
+
+function resizeGameCanvasToWindow() {
+    const previousWidth = canvasWidth || window.innerWidth;
+    const previousHeight = canvasHeight || window.innerHeight;
+    const nextWidth = window.innerWidth;
+    const nextHeight = window.innerHeight;
+    if (previousWidth === nextWidth && previousHeight === nextHeight) return;
+
+    const scaleX = previousWidth ? nextWidth / previousWidth : 1;
+    const scaleY = previousHeight ? nextHeight / previousHeight : 1;
+
+    canvasWidth = nextWidth;
+    canvasHeight = nextHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    if (fogCanvas) {
+        fogCanvas.width = canvasWidth;
+        fogCanvas.height = canvasHeight;
+    }
+
+    if (base) {
+        scaleObjectPosition(base, scaleX, scaleY);
+        base.x = Math.max(base.radius, Math.min(canvasWidth - base.radius, base.x));
+        base.y = Math.max(base.radius, Math.min(canvasHeight - base.radius, base.y));
+        if (typeof base.laserTargetX === 'number') base.laserTargetX *= scaleX;
+        if (typeof base.laserTargetY === 'number') base.laserTargetY *= scaleY;
+        baseStartX = base.x;
+        baseStartY = base.y;
+    }
+
+    enemyPool.getActiveObjects().forEach(obj => scaleObjectPosition(obj, scaleX, scaleY));
+    bulletPool.getActiveObjects().forEach(obj => scaleObjectPosition(obj, scaleX, scaleY));
+    missilePool.getActiveObjects().forEach(obj => scaleObjectPosition(obj, scaleX, scaleY));
+    particles.forEach(obj => scaleObjectPosition(obj, scaleX, scaleY));
+
+    if (base && gameState && upgradeTree) {
+        drawGame();
+        updateHUD();
+    }
 }
 
 // --- Particle System ---
@@ -1837,7 +1995,6 @@ function dismissSensorWarning() {
 
 async function submitInitials() {
     let initials = getElement('initialsInput').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (initials.length === 2) initials += '_';
     if (initials.length < 2) return;
     if (!window.pendingScore) return;
     const { wave, time, ranking } = window.pendingScore;
@@ -1971,8 +2128,28 @@ function resumeGame() {
 }
 
 // --- Game State Management ---
+function migrateSavedGameData(savedData) {
+    if (!savedData || typeof savedData !== 'object') return null;
+
+    const schemaVersion = Number(savedData.schemaVersion || 1);
+    if (schemaVersion > SAVE_SCHEMA_VERSION) {
+        throw new Error(`Save schema ${schemaVersion} is newer than supported schema ${SAVE_SCHEMA_VERSION}`);
+    }
+    if (!savedData.gameState || !savedData.base || !Array.isArray(savedData.upgrades)) {
+        throw new Error('Save data is missing required game state, base, or upgrade data.');
+    }
+
+    return {
+        ...savedData,
+        schemaVersion: SAVE_SCHEMA_VERSION
+    };
+}
+
 function saveGame() {
     const gameStateData = {
+        schemaVersion: SAVE_SCHEMA_VERSION,
+        gameVersion: GAME_VERSION,
+        savedAt: new Date().toISOString(),
         gameState: { ...gameState },
         base: { ...base },
         upgrades: upgradeTree.map(category => ({
@@ -1984,18 +2161,29 @@ function saveGame() {
                 maxLevel: u.maxLevel
             }))
         })),
-        // Add isGameOver flag if the game is over
+        waveState: {
+            activeWaves: [...activeWaves],
+            waveBossAlive: { ...waveBossAlive },
+            waveStates: JSON.parse(JSON.stringify(waveStates)),
+            completedWaves: { ...completedWaves },
+            completedWave
+        },
+        sensorState: {
+            sensorUpgrades: { ...sensorUpgrades },
+            sensorDisplayMode,
+            enemyIntel: JSON.parse(JSON.stringify(enemyIntel))
+        },
         isGameOver: gameState.currentHealth <= 0
     };
-    localStorage.setItem('orbitalDefenseGame_v2.9', JSON.stringify(gameStateData));
+    localStorage.setItem(SAVE_STORAGE_KEY, JSON.stringify(gameStateData));
     showToast('Game saved!');
 }
 
 function tryLoadGame() {
     try {
-        const savedData = localStorage.getItem('orbitalDefenseGame_v2.9');
+        const savedData = localStorage.getItem(SAVE_STORAGE_KEY);
         if (savedData) {
-            const parsedData = JSON.parse(savedData);
+            const parsedData = migrateSavedGameData(JSON.parse(savedData));
             // Check if the saved game is a game over state
             if (parsedData.isGameOver) {
                 if (DEBUG_MODE) console.log("Saved game data is from a finished game, ignoring.");
@@ -2041,7 +2229,6 @@ function loadGame() {
         base.missileCount = savedBase.missileCount;
         base.missileDamage = savedBase.missileDamage;
         base.missileTargetingRadius = savedBase.missileTargetingRadius;
-        base.missileExplosionRadius = savedBase.missileExplosionRadius; // Assuming this was saved; if not, recalculate
         base.macrossMissileCount = savedBase.macrossMissileCount;
         base.macrossMissileDamage = savedBase.macrossMissileDamage;
         base.stunLevel = savedBase.stunLevel;
@@ -2051,7 +2238,6 @@ function loadGame() {
       base.missileHomingRadius = savedBase.missileHomingRadius;
         base.focusRadiusSetting = savedBase.focusRadiusSetting || 0;
         base.sensorRange = savedBase.sensorRange || base.cannonRange;
-        base.missileOrbit = false; // Not implemented?
         base.color = savedBase.color;
         base.currentMoveSpeed = savedBase.currentMoveSpeed; // Restore move speed
 
@@ -2071,17 +2257,14 @@ function loadGame() {
             });
         });
 
-        // Crucially, re-apply all upgrade effects based on the loaded levels
-        // (Some might already be applied above, but this ensures consistency)
-        // for (let i = 0; i < upgradeTree.length; i++) {
-        //     for (let j = 0; j in upgradeTree[i].upgrades.length; j++) {
-        //         if (upgradeTree[i].upgrades[j].level > 0) {
-        //              applyUpgradeEffect(i, j, false); // false indicates not a new purchase
-        //         }
-        //     }
-        // }
-
-
+        if (savedGame.sensorState) {
+            sensorUpgrades = { ...sensorUpgrades, ...(savedGame.sensorState.sensorUpgrades || {}) };
+            sensorDisplayMode = savedGame.sensorState.sensorDisplayMode || sensorDisplayMode;
+            enemyIntel = savedGame.sensorState.enemyIntel || enemyIntel;
+            getElement('sensorDisplayToggle').textContent =
+                sensorDisplayMode.charAt(0).toUpperCase() + sensorDisplayMode.slice(1);
+            updateEnemyStatsPanel();
+        }
         updateHUD();
         drawGame();
         showToast('Game loaded!');
@@ -2097,8 +2280,8 @@ function loadGame() {
 }
 
 function clearSavedGame() {
-    localStorage.removeItem('orbitalDefenseGame_v2.9');
-    localStorage.removeItem('orbitalDefenseTheme_v2.9');
+    localStorage.removeItem(SAVE_STORAGE_KEY);
+    localStorage.removeItem(THEME_STORAGE_KEY);
     savedGame = null;
     getElement('loadButton').style.display = 'none';
     getElement('clearSaveButton').style.display = 'none';
@@ -2199,7 +2382,6 @@ function initializeGame(shouldTryLoad = true) {
         missileCount: 0, // Needs upgrade
         missileDamage: 0,
         missileTargetingRadius: 0,
-        missileExplosionRadius: 0, // Not currently implemented?
         macrossMissileCount: 0, // Needs upgrade
         macrossMissileDamage: 20,
         stunLevel: 0, // Needs upgrade
@@ -2209,7 +2391,6 @@ function initializeGame(shouldTryLoad = true) {
         missileHomingRadius: 0,
         focusRadiusSetting: 0,
         sensorRange: initialRange,
-        missileOrbit: false, // Not implemented?
         color: 'rgb(94,79,162)',
         currentMoveSpeed: BASE_INITIAL_MOVE_SPEED // Base speed without upgrades
     };
@@ -2934,7 +3115,6 @@ function updateProjectiles(dt, baseMoved) {
     }
 
     // --- Update Missiles ---
-    const missileBaseSpeed = 2; // Base speed units per update cycle (before multipliers)
     const missileTurnSpeed = base.missileTurnSpeed;
 
     for (let i = missiles.length - 1; i >= 0; i--) {
@@ -3683,10 +3863,6 @@ function drawRingUIElement(type, radius, labelText, categoryIndex, upgradeIndex,
 
     // Center the element horizontally
     const startX = elementBaseX - totalWidth / 2;
-
-    // Background (optional, subtle)
-    // ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-    // ctx.fillRect(startX - padding, elementBaseY - totalHeight / 2 - padding, totalWidth + padding*2, totalHeight + padding*2);
 
     let currentX = startX;
 
@@ -4495,27 +4671,13 @@ function handleFullscreenChange() {
     const btn = getElement('fullscreenButton');
     const inFull = !!document.fullscreenElement;
     btn.textContent = inFull ? '\u2715' : '\u26F6';
-    canvasWidth = window.innerWidth;
-    canvasHeight = window.innerHeight;
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    if (fogCanvas) {
-        fogCanvas.width = canvasWidth;
-        fogCanvas.height = canvasHeight;
-    }
-    if (base) {
-        base.x = canvasWidth / 2;
-        base.y = canvasHeight / 2;
-        baseStartX = base.x;
-        baseStartY = base.y;
-    }
-    drawGame();
+    resizeGameCanvasToWindow();
 }
 
 
 function setTrack(index){
     currentTrackIndex=(index+musicTracks.length)%musicTracks.length;
-    localStorage.setItem("ode_musicTrack",currentTrackIndex);
+    localStorage.setItem(MUSIC_TRACK_STORAGE_KEY,currentTrackIndex);
     playCurrentTrack();
     updateTrackDisplay();
 }
@@ -4893,9 +5055,6 @@ function handleCanvasClick(clientX, clientY) {
         }
     }
 
-
-    // 2. Check click on Base (opens upgrade menu) - Check this last
-    // Removed base click to open full-screen upgrade menu
 }
 
 function showTooltipForCanvas(e) {
@@ -4986,7 +5145,7 @@ getElement('startButton').onclick = startGame;
 getElement('restartButton').onclick = async () => {
     if (window.pendingScore && !window.pendingScore.saved) {
         try {
-            await submitScore({ initials: '???', wave: window.pendingScore.wave, time: window.pendingScore.time, ranking: window.pendingScore.ranking });
+            await submitScore({ initials: 'CPU', wave: window.pendingScore.wave, time: window.pendingScore.time, ranking: window.pendingScore.ranking });
         } catch (err) {
             console.error('Auto-save failed', err);
         }
@@ -5032,8 +5191,8 @@ getElement('speedUpButton').onclick = () => {
 };
 getElement('macrossButton').onclick = fireMacrossMissiles;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
-getElement('themeButton').onclick = cycleTheme; // Added Theme Button Listener
-getElement('loadButton').onclick = loadAndStartGame; // Added Load Button Listener
+getElement('themeButton').onclick = cycleTheme;
+getElement('loadButton').onclick = loadAndStartGame;
 getElement('clearSaveButton').onclick = clearSavedGame;
 getElement('startFromHighScore').onclick = startGame;
 getElement('initialsInput').addEventListener('keydown', e => {
@@ -5048,10 +5207,10 @@ getElement('fullscreenButton').onclick = toggleFullScreen;
 
 getElement("prevTrack").onclick=()=>setTrack(currentTrackIndex-1);
 getElement("nextTrack").onclick=()=>setTrack(currentTrackIndex+1);
-getElement("musicVolume").oninput=e=>{musicVolume=parseFloat(e.target.value);localStorage.setItem("ode_musicVolume",musicVolume);musicAudio.volume=musicVolume;};
+getElement("musicVolume").oninput=e=>{musicVolume=Math.max(0,Math.min(1,parseFloat(e.target.value)));localStorage.setItem(MUSIC_VOLUME_STORAGE_KEY,musicVolume);musicAudio.volume=musicVolume;};
 getElement("sfxToggleButton").onclick=()=>{
     sfxEnabled=!sfxEnabled;
-    localStorage.setItem("ode_sfxEnabled",String(sfxEnabled));
+    localStorage.setItem(SFX_STORAGE_KEY,String(sfxEnabled));
     updateSfxButton();
 };
 
@@ -5096,23 +5255,7 @@ window.addEventListener('resize', () => {
 
     // Execute resize logic after 250ms of no resize events
     resizeTimeout = setTimeout(() => {
-        canvasWidth = window.innerWidth;
-        canvasHeight = window.innerHeight;
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-        if (fogCanvas) {
-            fogCanvas.width = canvasWidth;
-            fogCanvas.height = canvasHeight;
-        }
-        if (base) {
-            base.x = canvasWidth / 2;
-            base.y = canvasHeight / 2;
-            baseStartX = base.x;
-            baseStartY = base.y;
-        }
-        if (isGameRunning) {
-            drawGame(); // Redraw after resize
-        }
+        resizeGameCanvasToWindow();
     }, 250);
 }, { signal: eventListenerController.signal });
 
@@ -5128,7 +5271,6 @@ function applyTheme(themeIndex) {
         root.style.setProperty(key, value);
     }
 
-    // Update button text (optional, if theme name changes)
     const themeButton = getElement('themeButton');
     if (themeButton) {
         themeButton.textContent = `Theme: ${currentTheme.name}`;
@@ -5150,7 +5292,7 @@ function applyTheme(themeIndex) {
 function cycleTheme() {
     applyTheme(currentThemeIndex + 1);
     // Save the selected theme index to localStorage
-    localStorage.setItem('orbitalDefenseTheme_v2.9', currentThemeIndex);
+    localStorage.setItem(THEME_STORAGE_KEY, currentThemeIndex);
 }
 
 // Update Ko-Fi widget color to match current theme
@@ -5199,16 +5341,13 @@ function loadAndStartGame() {
 
 // Initial setup on load
   window.onload = () => {
-    // Preload pixel font if needed (optional, adds dependency)
-    // const fontLink = document.createElement('link');
-    // fontLink.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
-    // fontLink.rel = 'stylesheet';
-    // document.head.appendChild(fontLink);
-
       initializeGame(false); // Initialize without loading saved game yet
+    document.title = `${GAME_TITLE} - Optimised`;
+    const gameTitle = getElement('gameTitle');
+    if (gameTitle) gameTitle.textContent = GAME_TITLE;
 
     // Load saved theme preference, default to "Orbital Elite" (index 0)
-    const savedTheme = localStorage.getItem('orbitalDefenseTheme_v2.9');
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
     const savedThemeIndex = savedTheme !== null ? parseInt(savedTheme, 10) : 0;
     applyTheme(savedThemeIndex); // Apply saved or default theme
 
@@ -5223,10 +5362,8 @@ function loadAndStartGame() {
 
     getElement('startScreen').style.display = 'flex';
     getElement('gameOverScreen').style.display = 'none';
-    // Draw initial empty state? Or just wait for game start.
     ctx.fillStyle = 'rgb(0, 0, 0)';
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-      // Try loading save data now, before Start Game is pressed
     tryLoadGame(); // Button visibility handled within
 };
 
@@ -5234,7 +5371,6 @@ function loadAndStartGame() {
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
 
-// Cleanup event listeners on page unload to prevent memory leaks
 window.addEventListener('beforeunload', () => {
     cleanupEventListeners();
 });

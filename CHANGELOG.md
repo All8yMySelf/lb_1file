@@ -1,5 +1,21 @@
 # Orbital Defense - Change Log
 
+## v2.64
+- Centralized the displayed game version so the browser title and start screen
+  use the same source value.
+- Tightened leaderboard validation rules and documentation, including enforcing
+  the ranking formula before leaderboard writes are accepted.
+- Improved small-screen HUD and control wrapping so the game controls fit more
+  reliably on mobile viewports.
+- Added save metadata and migration validation so old local saves remain
+  loadable while future save changes have an explicit compatibility check.
+- Fixed stored preference parsing so setting music volume to zero remains muted
+  after reload.
+- Added a local smoke-check script for version consistency, Firebase rule
+  validation, single-file assumptions, and inline JavaScript syntax.
+- Removed stale implementation comments and unused missile placeholder state from
+  the single-file game.
+
 ## v2.63
 - Improved the opening sensor warning layout so the text is centered and
   constrained instead of running across the full screen.
