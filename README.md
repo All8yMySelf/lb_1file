@@ -19,6 +19,14 @@ The slider beside the selector adjusts the music volume and defaults to 25%.
 - **Time controls** — unlock higher and lower battle speeds through the new
   time-control upgrades, then adjust speed from the compact control cluster.
 
+## Checks
+
+Run the local smoke check before publishing changes:
+
+```sh
+node scripts/smoke_check.mjs
+```
+
 ## About
 
 `index.html` now embeds the original `styles.css` and `themes.js` directly inside `<style>` and `<script>` tags. There are no external dependencies beyond the Firebase scripts loaded from a CDN.
@@ -40,7 +48,7 @@ similar to the example below:
   "rules": {
     "scores": {
       ".read": true,
-      ".write": true,
+      ".write": "newData.exists() && newData.hasChildren(['initials', 'wave', 'time', 'date', 'ranking']) && newData.child('initials').isString() && newData.child('initials').val().length >= 2 && newData.child('initials').val().length <= 3 && newData.child('initials').val().matches(/^[A-Z0-9]+$/) && newData.child('wave').isNumber() && newData.child('wave').val() >= 1 && newData.child('wave').val() <= 1000 && newData.child('time').isNumber() && newData.child('time').val() >= 0 && newData.child('ranking').isNumber() && newData.child('ranking').val() == newData.child('wave').val() * 100000 - newData.child('time').val()",
       ".indexOn": "ranking"
     }
   }
@@ -54,7 +62,8 @@ and faster completion times result in a better leaderboard position.
 
 The database must allow writes at `/scores` so the game can submit new
 entries. A `permission_denied` error in the browser console typically means the
-rules are misconfigured.
+rules are misconfigured or a submitted score does not match the required
+initials, wave, time, and ranking validation.
 
 `database.rules.json` contains the same example configuration shown above and can be used as a template for your security rules. This file is only a reference and is not read by the game directly.
 
@@ -63,6 +72,21 @@ rules are misconfigured.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+
+### v2.64
+- Centralized the displayed game version so the browser title and start screen
+  use the same source value.
+- Tightened leaderboard validation documentation to match the Firebase rules.
+- Improved small-screen HUD and control wrapping so the game controls fit more
+  reliably on mobile viewports.
+- Added save metadata and migration validation so old local saves remain
+  loadable while future save changes have an explicit compatibility check.
+- Fixed stored preference parsing so setting music volume to zero remains muted
+  after reload.
+- Added a local smoke-check script for version consistency, Firebase rule
+  validation, single-file assumptions, and inline JavaScript syntax.
+- Removed stale implementation comments and unused missile placeholder state from
+  the single-file game.
 
 ### v2.63
 - Improved the opening sensor warning layout so the text is centered and constrained.
