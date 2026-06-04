@@ -27,6 +27,8 @@ Run the local smoke check before publishing changes:
 node scripts/smoke_check.mjs
 ```
 
+For local multi-agent workflow and publishing notes, see [AGENTS.md](AGENTS.md).
+
 ## About
 
 `index.html` now embeds the original `styles.css` and `themes.js` directly inside `<style>` and `<script>` tags. There are no external dependencies beyond the Firebase scripts loaded from a CDN.
