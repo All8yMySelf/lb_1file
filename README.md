@@ -73,6 +73,12 @@ The game is under active development. Below is a brief summary of recent updates
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 
+### v2.65
+- Greyed out fully maxed upgrade categories and maxed upgrade rows while keeping
+  them clickable for review.
+- Improved ring info label placement so large range labels stay out of the
+  right-side status panels and remain anchored to the visible ring edge.
+
 ### v2.64
 - Centralized the displayed game version so the browser title and start screen
   use the same source value.
