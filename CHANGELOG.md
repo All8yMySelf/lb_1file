@@ -1,5 +1,12 @@
 # Orbital Defense - Change Log
 
+## v2.65
+- Greyed out fully maxed upgrade categories and maxed upgrade rows while keeping
+  them clickable so purchased upgrades can still be inspected.
+- Reworked ring info label placement so large cannon, stun, focus, and sensor
+  range labels avoid the right-side HUD and stay attached to visible ring
+  positions.
+
 ## v2.64
 - Centralized the displayed game version so the browser title and start screen
   use the same source value.
