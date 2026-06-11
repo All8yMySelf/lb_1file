@@ -172,7 +172,7 @@
     });
 </script>
 
-<title>Orbital Defense v2.65 - Optimised</title>
+<title>Orbital Defense v2.66 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -614,7 +614,7 @@
     <span id="healthDisplay"></span>
 </div>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v2.65</h1>
+    <h1 id="gameTitle">Orbital Defense v2.66</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -1188,9 +1188,9 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.65';
+const GAME_VERSION = '2.66';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
-const SAVE_SCHEMA_VERSION = 2;
+const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
 const THEME_STORAGE_KEY = 'orbitalDefenseTheme_v2.9';
 const MUSIC_TRACK_STORAGE_KEY = 'ode_musicTrack';
@@ -1630,35 +1630,42 @@ const ObjectPool = function(objectType, initialSize = 20, resetFunction) {
 
 // --- Object Pool Reset Functions ---
 function resetEnemy(enemy, config) {
+    const isRelease = !config || Object.keys(config).length === 0;
+
     // Reset common properties
-    enemy.x = config.x || 0;
-    enemy.y = config.y || 0;
+    enemy.x = config.x ?? 0;
+    enemy.y = config.y ?? 0;
     enemy.color = config.c || '#ffffff';
-    enemy.speed = config.s || 0;
-    enemy.normalSpeed = config.s || 0;
-    enemy.health = config.h || 1;
-    enemy.maxHealth = config.m || 1;
-    enemy.radius = config.r || 10;
-    enemy.creditsValue = config.C || 0;
-    enemy.trail = config.T || []; // Ensure trail is reset or set
-    enemy.isStunned = config.st || false;
+    enemy.speed = config.s ?? 0;
+    enemy.normalSpeed = config.normalSpeed ?? config.s ?? 0;
+    enemy.health = config.h ?? 1;
+    enemy.maxHealth = config.m ?? 1;
+    enemy.radius = config.r ?? 10;
+    enemy.creditsValue = config.C ?? 0;
+    enemy.trail = Array.isArray(config.T) ? config.T : []; // Ensure trail is reset or set
+    enemy.isStunned = !!config.st;
     enemy.stunTime = config.stunTime || 0;
     enemy.type = config.type || 'Normal';
-    enemy.xp = config.xp || false;
-    enemy.dir = config.dir || 1;
-    enemy.wave = config.wave || 0;
-    enemy.dx = config.dx || 0;
-    enemy.dy = config.dy || 0;
+    enemy.xp = !!config.xp;
+    enemy.dir = config.dir ?? 1;
+    enemy.wave = config.wave ?? 0;
+    enemy.dx = config.dx ?? 0;
+    enemy.dy = config.dy ?? 0;
 
-    enemy.isTargeted = false;
-    enemy.targetLockTime = 0;
+    enemy.isTargeted = !!config.isTargeted;
+    enemy.targetLockTime = Math.max(0, Number(config.targetLockTime) || 0);
 
-    enemy.allocatedDamage = 0;
+    enemy.allocatedDamage = Math.max(0, Number(config.allocatedDamage) || 0);
 
-    // Clear dynamic properties
-    enemy.trail = [];
-    enemy.isStunned = false;
-    enemy.stunTime = 0;
+    if (isRelease) {
+        // Clear dynamic properties
+        enemy.trail = [];
+        enemy.isStunned = false;
+        enemy.stunTime = 0;
+        enemy.isTargeted = false;
+        enemy.targetLockTime = 0;
+        enemy.allocatedDamage = 0;
+    }
 }
 
 function resetBullet(bullet, config) {
@@ -2367,11 +2374,232 @@ function migrateSavedGameData(savedData) {
     };
 }
 
-function saveGame() {
+function getSavePauseOffset(savedAt) {
+    const savedAtMs = Date.parse(savedAt);
+    if (!Number.isFinite(savedAtMs)) return 0;
+    return Math.max(0, Date.now() - savedAtMs);
+}
+
+function shiftedSavedTimestamp(value, offset) {
+    const timestamp = Number(value);
+    return Number.isFinite(timestamp) && timestamp > 0 ? timestamp + offset : timestamp || 0;
+}
+
+function scaledPoint(point, scaleX, scaleY) {
+    return {
+        x: (Number(point?.x) || 0) * scaleX,
+        y: (Number(point?.y) || 0) * scaleY
+    };
+}
+
+function serializePointTrail(trail) {
+    return Array.isArray(trail)
+        ? trail.map(point => ({ x: Number(point.x) || 0, y: Number(point.y) || 0 }))
+        : [];
+}
+
+function serializeEnemy(enemy) {
+    return {
+        x: enemy.x,
+        y: enemy.y,
+        color: enemy.color,
+        speed: enemy.speed,
+        normalSpeed: enemy.normalSpeed,
+        health: enemy.health,
+        maxHealth: enemy.maxHealth,
+        radius: enemy.radius,
+        creditsValue: enemy.creditsValue,
+        trail: serializePointTrail(enemy.trail),
+        isStunned: !!enemy.isStunned,
+        stunTime: enemy.stunTime || 0,
+        type: enemy.type,
+        xp: !!enemy.xp,
+        dir: enemy.dir,
+        wave: enemy.wave,
+        dx: enemy.dx,
+        dy: enemy.dy,
+        isTargeted: !!enemy.isTargeted,
+        targetLockTime: enemy.targetLockTime || 0,
+        allocatedDamage: enemy.allocatedDamage || 0
+    };
+}
+
+function serializeBullet(bullet) {
+    return {
+        x: bullet.x,
+        y: bullet.y,
+        dx: bullet.dx,
+        dy: bullet.dy,
+        color: bullet.color
+    };
+}
+
+function serializeMissile(missile, enemyIndexByObject) {
+    return {
+        x: missile.x,
+        y: missile.y,
+        dx: missile.dx,
+        dy: missile.dy,
+        targetIndex: enemyIndexByObject.has(missile.target) ? enemyIndexByObject.get(missile.target) : -1,
+        speed: missile.speed,
+        turnSpeed: missile.turnSpeed,
+        homingRadius: missile.homingRadius,
+        trail: serializePointTrail(missile.trail),
+        isMacross: !!missile.isMacross,
+        homingActive: !!missile.homingActive,
+        startX: missile.startX,
+        startY: missile.startY,
+        rangeLimit: missile.rangeLimit
+    };
+}
+
+function serializeParticle(particle) {
+    return {
+        x: particle.x,
+        y: particle.y,
+        vx: particle.vx,
+        vy: particle.vy,
+        size: particle.size,
+        color: particle.color,
+        alpha: particle.alpha,
+        life: particle.life,
+        maxLife: particle.maxLife
+    };
+}
+
+function serializeRuntimeState() {
+    const enemies = enemyPool.getActiveObjects();
+    const enemyIndexByObject = new Map(enemies.map((enemy, index) => [enemy, index]));
+
+    return {
+        canvasWidth,
+        canvasHeight,
+        gameStartElapsed: gameStartTime ? Date.now() - gameStartTime : 0,
+        enemies: enemies.map(serializeEnemy),
+        bullets: bulletPool.getActiveObjects().map(serializeBullet),
+        missiles: missilePool.getActiveObjects().map(missile => serializeMissile(missile, enemyIndexByObject)),
+        particles: particles.map(serializeParticle)
+    };
+}
+
+function restoreSavedRuntimeState(runtimeState, savedAt) {
+    if (!runtimeState || typeof runtimeState !== 'object') return false;
+    const hasEnemySnapshot = Array.isArray(runtimeState.enemies);
+
+    const savedCanvasWidth = Number(runtimeState.canvasWidth) || canvasWidth;
+    const savedCanvasHeight = Number(runtimeState.canvasHeight) || canvasHeight;
+    const scaleX = savedCanvasWidth ? canvasWidth / savedCanvasWidth : 1;
+    const scaleY = savedCanvasHeight ? canvasHeight / savedCanvasHeight : 1;
+    const pauseOffset = getSavePauseOffset(savedAt);
+
+    resetPools();
+
+    const restoredEnemies = [];
+    if (hasEnemySnapshot) {
+        runtimeState.enemies.forEach(savedEnemy => {
+            const enemy = enemyPool.get({
+                x: (Number(savedEnemy.x) || 0) * scaleX,
+                y: (Number(savedEnemy.y) || 0) * scaleY,
+                c: savedEnemy.color,
+                s: Number(savedEnemy.speed) || 0,
+                normalSpeed: Number(savedEnemy.normalSpeed) || Number(savedEnemy.speed) || 0,
+                h: Number(savedEnemy.health) || 1,
+                m: Number(savedEnemy.maxHealth) || 1,
+                r: Number(savedEnemy.radius) || 10,
+                C: Number(savedEnemy.creditsValue) || 0,
+                T: serializePointTrail(savedEnemy.trail).map(point => scaledPoint(point, scaleX, scaleY)),
+                st: !!savedEnemy.isStunned,
+                stunTime: shiftedSavedTimestamp(savedEnemy.stunTime, pauseOffset),
+                type: savedEnemy.type || 'Normal',
+                xp: !!savedEnemy.xp,
+                dir: savedEnemy.dir ?? 1,
+                wave: Number(savedEnemy.wave) || 0,
+                dx: Number(savedEnemy.dx) || 0,
+                dy: Number(savedEnemy.dy) || 0,
+                isTargeted: !!savedEnemy.isTargeted,
+                targetLockTime: Math.max(0, Number(savedEnemy.targetLockTime) || 0),
+                allocatedDamage: Math.max(0, Number(savedEnemy.allocatedDamage) || 0)
+            });
+            restoredEnemies.push(enemy);
+        });
+    }
+
+    if (Array.isArray(runtimeState.bullets)) {
+        runtimeState.bullets.forEach(savedBullet => {
+            bulletPool.get({
+                x: (Number(savedBullet.x) || 0) * scaleX,
+                y: (Number(savedBullet.y) || 0) * scaleY,
+                dx: Number(savedBullet.dx) || 0,
+                dy: Number(savedBullet.dy) || 0,
+                color: savedBullet.color
+            });
+        });
+    }
+
+    if (Array.isArray(runtimeState.missiles)) {
+        runtimeState.missiles.forEach(savedMissile => {
+            const targetIndex = Math.floor(Number(savedMissile.targetIndex));
+            const target = Number.isFinite(targetIndex) && targetIndex >= 0 ? restoredEnemies[targetIndex] : null;
+            missilePool.get({
+                x: (Number(savedMissile.x) || 0) * scaleX,
+                y: (Number(savedMissile.y) || 0) * scaleY,
+                dx: Number(savedMissile.dx) || 0,
+                dy: Number(savedMissile.dy) || 0,
+                t: target || null,
+                speed: Number(savedMissile.speed) || 1,
+                turnSpeed: Number(savedMissile.turnSpeed) || base.missileTurnSpeed,
+                homingRadius: Number(savedMissile.homingRadius) || base.missileHomingRadius,
+                trail: serializePointTrail(savedMissile.trail).map(point => scaledPoint(point, scaleX, scaleY)),
+                macross: !!savedMissile.isMacross,
+                homingActive: !!savedMissile.homingActive || !target,
+                startX: (Number(savedMissile.startX) || 0) * scaleX,
+                startY: (Number(savedMissile.startY) || 0) * scaleY,
+                rangeLimit: Number(savedMissile.rangeLimit) || base.missileTargetingRadius * 1.1
+            });
+        });
+    }
+
+    particles = Array.isArray(runtimeState.particles)
+        ? runtimeState.particles.slice(-MAX_PARTICLES).map(savedParticle => ({
+            x: (Number(savedParticle.x) || 0) * scaleX,
+            y: (Number(savedParticle.y) || 0) * scaleY,
+            vx: Number(savedParticle.vx) || 0,
+            vy: Number(savedParticle.vy) || 0,
+            size: Math.max(1, Math.floor(Number(savedParticle.size) || 1)),
+            color: savedParticle.color || '#ffffff',
+            alpha: Math.max(0, Math.min(1, Number(savedParticle.alpha) || 0)),
+            life: Math.max(0, Number(savedParticle.life) || 0),
+            maxLife: Math.max(0, Number(savedParticle.maxLife) || Number(savedParticle.life) || 0)
+        }))
+        : [];
+
+    const gameStartElapsed = Math.max(0, Number(runtimeState.gameStartElapsed) || 0);
+    gameStartTime = gameStartElapsed ? Date.now() - gameStartElapsed : 0;
+    return hasEnemySnapshot;
+}
+
+function shiftLoadedGameStateTimestamps(savedAt) {
+    const pauseOffset = getSavePauseOffset(savedAt);
+    if (!pauseOffset) return;
+    [
+        'lastBulletFireTime',
+        'lastDamageTime',
+        'lastLaserFireTime',
+        'laserEffectEndTime',
+        'lastMissileFireTime',
+        'stunEffectEndTime',
+        'doubleFireRateEndTime'
+    ].forEach(key => {
+        gameState[key] = shiftedSavedTimestamp(gameState[key], pauseOffset);
+    });
+}
+
+function saveGame(options = {}) {
+    const savedAt = new Date().toISOString();
     const gameStateData = {
         schemaVersion: SAVE_SCHEMA_VERSION,
         gameVersion: GAME_VERSION,
-        savedAt: new Date().toISOString(),
+        savedAt,
         gameState: { ...gameState },
         base: { ...base },
         upgrades: upgradeTree.map(category => ({
@@ -2395,10 +2623,11 @@ function saveGame() {
             sensorDisplayMode,
             enemyIntel: JSON.parse(JSON.stringify(enemyIntel))
         },
+        runtimeState: serializeRuntimeState(),
         isGameOver: gameState.currentHealth <= 0
     };
     localStorage.setItem(SAVE_STORAGE_KEY, JSON.stringify(gameStateData));
-    showToast('Game saved!');
+    if (!options.silent) showToast('Game saved!');
 }
 
 function tryLoadGame() {
@@ -2435,6 +2664,7 @@ function loadGame() {
         // Restore game state, base stats
         // Be careful not to overwrite functions or non-serializable data
         Object.assign(gameState, savedGame.gameState);
+        shiftLoadedGameStateTimestamps(savedGame.savedAt);
         // Selectively assign base properties that are saved
         const savedBase = savedGame.base;
         base.x = savedBase.x;
@@ -2487,6 +2717,12 @@ function loadGame() {
                 sensorDisplayMode.charAt(0).toUpperCase() + sensorDisplayMode.slice(1);
             updateEnemyStatsPanel();
         }
+
+        const restoredRuntimeState = restoreSavedRuntimeState(savedGame.runtimeState, savedGame.savedAt);
+        if (!restoreSavedWaveState(savedGame.waveState, restoredRuntimeState)) {
+            resetActiveWaveForLoadedGame();
+        }
+
         updateHUD();
         drawGame();
         showToast('Game loaded!');
@@ -3570,6 +3806,97 @@ function resetActiveWaveForLoadedGame() {
     };
     gameState.waveDuration = duration;
     gameState.waveStartTime = Date.now() - elapsedTime * 1000;
+}
+
+function normalizeLoadedWaveState(wave, savedState, hasSavedRuntimeState) {
+    const defaultDuration = WAVE_BASE_DURATION + (wave - 1) * WAVE_DURATION_INCREMENT;
+    const duration = Math.max(1, Number(savedState?.duration) || defaultDuration);
+    const elapsedTime = Math.max(0, Math.min(Number(savedState?.elapsedTime) || 0, duration));
+    const totalEnemies = Math.max(0, Math.floor(Number(savedState?.totalEnemies) || Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND)));
+    const spawned = Math.max(0, Math.min(totalEnemies, Math.floor(Number(savedState?.spawned) || 0)));
+    const unspawnedEnemies = Math.max(0, totalEnemies - spawned);
+    const savedRemainingEnemies = Number.isFinite(Number(savedState?.remainingEnemies))
+        ? Math.max(0, Math.floor(Number(savedState.remainingEnemies)))
+        : unspawnedEnemies;
+    const savedRemainingBosses = Number.isFinite(Number(savedState?.remainingBosses))
+        ? Math.max(0, Math.floor(Number(savedState.remainingBosses)))
+        : (savedState?.bossAlive === false && savedState?.isBossWave ? 0 : 1);
+    const remainingEnemies = hasSavedRuntimeState
+        ? savedRemainingEnemies
+        : Math.max(0, Math.min(savedRemainingEnemies, unspawnedEnemies));
+
+    return {
+        elapsedTime,
+        duration,
+        // Older saves did not serialize active enemies. If a boss was alive in
+        // that format, mark the wave as pre-boss so it respawns instead of stalling.
+        isBossWave: hasSavedRuntimeState ? !!savedState?.isBossWave : savedRemainingBosses <= 0,
+        xpSpawnTime: Number.isFinite(Number(savedState?.xpSpawnTime))
+            ? Math.max(0, Math.min(Number(savedState.xpSpawnTime), Math.max(0, duration - 2)))
+            : Math.random() * Math.max(0, duration - 2),
+        xpSpawned: !!savedState?.xpSpawned,
+        bossAlive: hasSavedRuntimeState ? !!savedState?.bossAlive : false,
+        spawned,
+        totalEnemies,
+        remainingEnemies,
+        totalBosses: Math.max(1, Math.floor(Number(savedState?.totalBosses) || 1)),
+        remainingBosses: savedRemainingBosses
+    };
+}
+
+function restoreSavedWaveState(savedWaveState, hasSavedRuntimeState = false) {
+    const savedStates = savedWaveState?.waveStates;
+    if (!savedStates || typeof savedStates !== 'object') return false;
+
+    const restoredStates = {};
+    Object.entries(savedStates).forEach(([waveKey, savedState]) => {
+        const wave = Math.floor(Number(waveKey));
+        if (!Number.isFinite(wave) || wave < 1 || !savedState || typeof savedState !== 'object') return;
+        restoredStates[wave] = normalizeLoadedWaveState(wave, savedState, hasSavedRuntimeState);
+    });
+
+    const restoredWaves = Object.keys(restoredStates)
+        .map(wave => Number(wave))
+        .filter(wave => Number.isFinite(wave) && wave > 0)
+        .sort((a, b) => a - b);
+    if (restoredWaves.length === 0) return false;
+
+    const savedActiveWaves = Array.isArray(savedWaveState.activeWaves)
+        ? savedWaveState.activeWaves
+            .map(wave => Math.floor(Number(wave)))
+            .filter(wave => restoredStates[wave])
+        : [];
+    activeWaves = [...new Set(savedActiveWaves.length > 0 ? savedActiveWaves : restoredWaves)];
+    waveStates = restoredStates;
+    waveBossAlive = {};
+    activeWaves.forEach(wave => {
+        waveBossAlive[wave] = !!waveStates[wave]?.bossAlive;
+    });
+
+    completedWaves = {};
+    if (savedWaveState.completedWaves && typeof savedWaveState.completedWaves === 'object') {
+        Object.entries(savedWaveState.completedWaves).forEach(([waveKey, remaining]) => {
+            const wave = Math.floor(Number(waveKey));
+            const remainingTime = Math.max(0, Math.floor(Number(remaining)));
+            if (Number.isFinite(wave) && wave > 0 && Number.isFinite(remainingTime)) {
+                completedWaves[wave] = remainingTime;
+            }
+        });
+    }
+    completedWave = Math.max(0, Math.floor(Number(savedWaveState.completedWave) || 0));
+
+    if (!waveStates[gameState.wave]) {
+        gameState.wave = activeWaves[activeWaves.length - 1];
+    }
+    const currentState = waveStates[gameState.wave] || waveStates[activeWaves[activeWaves.length - 1]];
+    gameState.waveDuration = currentState.duration;
+    gameState.waveElapsedTime = currentState.elapsedTime;
+    gameState.waveStartTime = Date.now() - currentState.elapsedTime * 1000;
+    gameState.isBossWave = currentState.isBossWave;
+    gameState.xpEnemySpawned = currentState.xpSpawned;
+    gameState.xpEnemySpawnTime = currentState.xpSpawnTime;
+    lastDisplayedSecond = -1;
+    return true;
 }
 
 // Update active wave states and trigger new waves when the current one is finished
@@ -5574,7 +5901,6 @@ function loadAndStartGame() {
     getElement('deathOverlay').style.display = 'none';
     getElement('howToPlayOverlay').style.display = 'none';
     getElement('sensorWarning').style.display = 'none';
-    resetActiveWaveForLoadedGame();
     gameSpeedMultiplier = 1;
     speedIndex = SPEED_STEPS.indexOf(1);
     updateSpeedDisplay();
@@ -5617,7 +5943,21 @@ function loadAndStartGame() {
 window.purchaseUpgrade = purchaseUpgrade; // Make purchase function global for button clicks
 window.toggleUpgradeCategory = toggleUpgradeCategory; // Expose category toggling
 
+function shouldSaveBeforeUnload() {
+    if (!gameState || !base || !upgradeTree) return false;
+    if (getElement('startScreen').style.display !== 'none') return false;
+    if (getElement('leaderboard-screen').style.display !== 'none') return false;
+    return true;
+}
+
 window.addEventListener('beforeunload', () => {
+    if (shouldSaveBeforeUnload()) {
+        try {
+            saveGame({ silent: true });
+        } catch (err) {
+            console.error('Before-unload save failed', err);
+        }
+    }
     cleanupEventListeners();
 });
 

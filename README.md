@@ -75,6 +75,12 @@ The game is under active development. Below is a brief summary of recent updates
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 
+### v2.66
+- Saved active battle objects so hard-refreshing the page can restore enemies,
+  projectiles, particles, and wave state instead of resuming with an empty field.
+- Preserved stacked-wave progress on load and added smoke-check coverage for the
+  runtime save format.
+
 ### v2.65
 - Greyed out fully maxed upgrade categories and maxed upgrade rows while keeping
   them clickable for review.

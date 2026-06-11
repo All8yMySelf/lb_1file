@@ -31,8 +31,17 @@ assert(typeof scoresRules['.write'] === 'string', 'Scores write rule must be a v
 assert(scoresRules['.write'].includes("newData.child('ranking').val() == newData.child('wave').val() * 100000 - newData.child('time').val()"), 'Scores write rule must enforce the ranking formula.');
 assert(!readme.includes('".write": true'), 'README must not document permissive leaderboard writes.');
 
-assert(html.includes('const SAVE_SCHEMA_VERSION = 2;'), 'Save schema version is missing.');
+assert(html.includes('const SAVE_SCHEMA_VERSION = 3;'), 'Save schema version is missing.');
 assert(html.includes('function migrateSavedGameData'), 'Save migration function is missing.');
+assert(html.includes('runtimeState: serializeRuntimeState()'), 'Active runtime state must be saved.');
+assert(html.includes('function restoreSavedRuntimeState(runtimeState, savedAt)'), 'Active runtime state restore function is missing.');
+assert(html.includes('function restoreSavedWaveState(savedWaveState, hasSavedRuntimeState = false)'), 'Saved wave-state restore function is missing.');
+assert(html.includes('const restoredRuntimeState = restoreSavedRuntimeState(savedGame.runtimeState, savedGame.savedAt);'), 'loadGame must restore active runtime state.');
+assert(html.includes('if (!restoreSavedWaveState(savedGame.waveState, restoredRuntimeState))'), 'loadGame must restore saved wave state before falling back.');
+const loadAndStartBody = html.match(/function loadAndStartGame\(\) \{([\s\S]*?)\n\}\s*\/\/ Initial setup on load/);
+assert(loadAndStartBody && !loadAndStartBody[1].includes('resetActiveWaveForLoadedGame();'), 'loadAndStartGame must not overwrite restored wave state.');
+assert(html.includes('saveGame({ silent: true });'), 'Hard refresh must silently save the active game state before unload.');
+assert(html.includes('const remainingEnemies = hasSavedRuntimeState'), 'Loaded waves must distinguish old saves from runtime-state saves.');
 assert(html.includes('getStoredNumber(MUSIC_VOLUME_STORAGE_KEY, 0.25'), 'Music volume should use parsed stored number fallback.');
 assert(!html.includes('parseFloat(localStorage.getItem("ode_musicVolume"))||0.25'), 'Old music volume fallback still exists.');
 assert(html.includes('flex-wrap: wrap'), 'Mobile control wrapping CSS is missing.');
