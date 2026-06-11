@@ -1,5 +1,13 @@
 # Orbital Defense - Change Log
 
+## v2.66
+- Saved active enemies, bullets, missiles, particles, and canvas state so hard
+  refreshes can restore the in-progress battle instead of clearing the screen.
+- Restored saved multi-wave state without overwriting it during load, while
+  preserving compatibility with older local saves.
+- Added smoke-check coverage for runtime-state saves and hard-refresh restore
+  behavior.
+
 ## v2.65
 - Greyed out fully maxed upgrade categories and maxed upgrade rows while keeping
   them clickable so purchased upgrades can still be inspected.
