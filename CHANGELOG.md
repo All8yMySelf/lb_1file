@@ -1,5 +1,15 @@
 # Orbital Defense - Change Log
 
+## v2.67
+- Refactored the one-file game internals while keeping `index.html` as the
+  playable artifact.
+- Moved upgrade definitions into a dedicated factory so future upgrades are
+  easier to add and inspect.
+- Split game, wave, base, sensor, and input initialization into focused helper
+  functions without intentionally changing gameplay behavior.
+- Updated agent workflow notes so every testable local change bumps the visible
+  game version and changelog before handoff.
+
 ## v2.66
 - Saved active enemies, bullets, missiles, particles, and canvas state so hard
   refreshes can restore the in-progress battle instead of clearing the screen.

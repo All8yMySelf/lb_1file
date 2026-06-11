@@ -35,6 +35,11 @@ For a publishable game update:
 - Keep `index.html` self-contained apart from the existing Firebase CDN scripts
   and checked-in media assets.
 
+For any local change that the user will test before publishing, also bump the
+visible game version and update the change notes before handing it back. The
+tester should be able to confirm from the browser title or start screen that
+they are running the changed build, even for small fixes.
+
 ## Checks
 
 Run the smoke check before committing or pushing:

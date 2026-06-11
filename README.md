@@ -75,6 +75,12 @@ The game is under active development. Below is a brief summary of recent updates
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 
+### v2.67
+- Refactored the single-file internals so upgrade definitions and initial game
+  state are easier to maintain while keeping `index.html` directly playable.
+- Added workflow guidance that every testable local change should bump the
+  visible version and changelog before handoff.
+
 ### v2.66
 - Saved active battle objects so hard-refreshing the page can restore enemies,
   projectiles, particles, and wave state instead of resuming with an empty field.

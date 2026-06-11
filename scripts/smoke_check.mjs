@@ -42,6 +42,15 @@ const loadAndStartBody = html.match(/function loadAndStartGame\(\) \{([\s\S]*?)\
 assert(loadAndStartBody && !loadAndStartBody[1].includes('resetActiveWaveForLoadedGame();'), 'loadAndStartGame must not overwrite restored wave state.');
 assert(html.includes('saveGame({ silent: true });'), 'Hard refresh must silently save the active game state before unload.');
 assert(html.includes('const remainingEnemies = hasSavedRuntimeState'), 'Loaded waves must distinguish old saves from runtime-state saves.');
+assert(html.includes('function createUpgradeTree(initialRange)'), 'Upgrade definitions must stay isolated from game initialization.');
+assert(html.includes('function createInitialGameState()'), 'Initial game state factory is missing.');
+assert(html.includes('function createInitialWaveRuntime()'), 'Initial wave runtime factory is missing.');
+assert(html.includes('function createInitialBaseState(initialRange)'), 'Initial base state factory is missing.');
+const initializeGameBody = html.match(/function initializeGame\(shouldTryLoad = true\) \{([\s\S]*?)\n\}\s*function startGame/);
+assert(initializeGameBody && initializeGameBody[1].includes('upgradeTree = createUpgradeTree(initialRange);'), 'initializeGame must build upgrades through createUpgradeTree.');
+assert(initializeGameBody && !initializeGameBody[1].includes('category: "Cannon"'), 'initializeGame must not contain inline upgrade definitions.');
+assert(initializeGameBody && initializeGameBody[1].includes('gameState = createInitialGameState();'), 'initializeGame must use the game-state factory.');
+assert(initializeGameBody && initializeGameBody[1].includes('base = createInitialBaseState(initialRange);'), 'initializeGame must use the base-state factory.');
 assert(html.includes('getStoredNumber(MUSIC_VOLUME_STORAGE_KEY, 0.25'), 'Music volume should use parsed stored number fallback.');
 assert(!html.includes('parseFloat(localStorage.getItem("ode_musicVolume"))||0.25'), 'Old music volume fallback still exists.');
 assert(html.includes('flex-wrap: wrap'), 'Mobile control wrapping CSS is missing.');
