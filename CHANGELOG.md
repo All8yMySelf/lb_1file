@@ -1,5 +1,11 @@
 # Orbital Defense - Change Log
 
+## v2.87
+- New "Homing Radius" toggle button shows a faint circle around every missile
+  marking its homing acquisition radius, so you can verify how far missiles
+  see and that they lock the correct enemies.
+- The toggle is remembered between sessions and defaults to On.
+
 ## v2.86
 - Reworked XP Boost stacking into timed active layers instead of one replaced
   timer. Each active layer doubles fire rate, up to seven active layers.
