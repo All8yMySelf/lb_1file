@@ -75,6 +75,14 @@ The game is under active development. Below is a brief summary of recent updates
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 
+### v2.86
+- XP Boost now stacks as up to seven timed layers: each charge doubles fire
+  rate and appends a shorter duration to the active boost tail.
+
+### v2.85
+- Missile styles are now Itano, Helix, and Braided; Braided combines the burst
+  and corkscrew feel into twisting convergent strikes.
+
 ### v2.84
 - Enemies are now visible inside any active targeting or sensor radius, fixing
   invisible missile targets outside sensor range.
