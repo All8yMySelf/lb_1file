@@ -1208,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.96';
+const GAME_VERSION = '2.97';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -3221,6 +3221,8 @@ function createInitialGameState() {
         laserEffectEndTime: 0,
         lastMissileFireTime: 0,
         macrossCooldownTimer: 0,
+        macrossUseCount: 0, // Each use adds 5s to the next recharge
+        macrossCooldownTotal: 0,
         stunEffectEndTime: 0, // Not currently used, stun applied directly
         waveStartTime: 0,
         waveElapsedTime: 0,
@@ -5173,7 +5175,8 @@ function drawMacrossMenuButton(x, y, categorySpacing) {
     const padding = 8;
     const boxWidth = 170;
     const level = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
-    const totalCooldown = Math.max(1, MACROSS_BASE_COOLDOWN - level * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL);
+    const totalCooldown = Math.max(1, gameState.macrossCooldownTotal ||
+        (MACROSS_BASE_COOLDOWN - level * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL));
     const remaining = Math.max(0, gameState.macrossCooldownTimer || 0);
     const ready = remaining <= 0;
     const progress = ready ? 1 : Math.min(1, 1 - remaining / totalCooldown);
@@ -5902,7 +5905,12 @@ function fireMacrossMissiles() {
         showToast('Macross Missile Massacre!');
 
         const cooldownLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
-        gameState.macrossCooldownTimer = MACROSS_BASE_COOLDOWN - cooldownLevel * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL;
+        // Every use makes the next recharge 5s longer
+        const usePenalty = (gameState.macrossUseCount || 0) * 5;
+        gameState.macrossUseCount = (gameState.macrossUseCount || 0) + 1;
+        gameState.macrossCooldownTotal =
+            MACROSS_BASE_COOLDOWN - cooldownLevel * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL + usePenalty;
+        gameState.macrossCooldownTimer = gameState.macrossCooldownTotal;
     }
 }
 
