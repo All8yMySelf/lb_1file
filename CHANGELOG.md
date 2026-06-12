@@ -1,5 +1,12 @@
 # Orbital Defense - Change Log
 
+## v2.91
+- The homing radius visibility toggle now lives on the Homing upgrade card
+  itself as a small on/off switch (top-right corner); the bottom-bar button
+  has been removed. The setting still persists between sessions.
+- Homing can now be upgraded to grade 8 (80%), up from grade 5 (50%).
+- The homing radius circle around missiles is fainter.
+
 ## v2.90
 - Macross Missile Massacre volley size is now capped at 200 missiles
   (50 -> 100 -> 200); higher Macros grades keep improving damage and
