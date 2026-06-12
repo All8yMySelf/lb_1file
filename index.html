@@ -282,12 +282,6 @@
       writing-mode: horizontal-tb;
       direction: ltr;
     }
-    #macrossButton {
-      width: auto;
-      max-width: 180px;
-      padding: 5px 7px;
-      font-size: 10px;
-    }
     #hotkeys, #enemyStatsPanel, #xpStatsPanel, #waveStatsPanel {
       max-width: 46vw;
       font-size: 10px;
@@ -664,7 +658,6 @@
         <span id="speedDisplay">1x</span>
         <button id="speedUpButton">&#187;</button>
     </div>
-    <button id="macrossButton" style="display:none">Macross Missile Massacre</button>
     <button id="xpBoostButton" style="display:none">XP Boost (0)</button>
     <button id="toggleInfoButton" class="active">o</button>
     <button id="themeButton">Theme: Retro</button>
@@ -1215,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.91';
+const GAME_VERSION = '2.92';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -3332,7 +3325,6 @@ function initializeGame(shouldTryLoad = true) {
     base = createInitialBaseState(initialRange);
     resetSensorRuntime();
     resetPools();
-    getElement('macrossButton').classList.remove('active');
     resetInputRuntime();
     upgradeTree = createUpgradeTree(initialRange);
 
@@ -4092,10 +4084,6 @@ function updateCooldowns(dt) {
         gameState.macrossCooldownTimer -= dt;
         if (gameState.macrossCooldownTimer <= 0) {
             gameState.macrossCooldownTimer = 0;
-             if(base.macrossMissileCount > 0) { // Only enable if upgrade purchased
-                 getElement('macrossButton').disabled = false;
-                 getElement('macrossButton').classList.add('active');
-             }
         }
     }
 }
@@ -5011,6 +4999,7 @@ function drawUpgradeMenu() {
         }
     });
     currentY += drawXpBoostMenuButton(menuX, currentY, categorySpacing);
+    currentY += drawMacrossMenuButton(menuX, currentY, categorySpacing);
     updateTimeSpeedControlsVisibility();
 
 }
@@ -5116,6 +5105,60 @@ function drawXpBoostMenuButton(x, y, categorySpacing) {
 
     ringClickRegions.push({
         type: 'xp_boost_button',
+        x,
+        y,
+        width: boxWidth,
+        height
+    });
+
+    return height + categorySpacing;
+}
+
+// Macross Missile Massacre card, drawn under the XP Boost card once the
+// Macros upgrade is bought. While reloading the card is grey and its
+// background fills left-to-right with the recharge progress; at 100% the
+// whole card turns green and clicking it fires the volley.
+function drawMacrossMenuButton(x, y, categorySpacing) {
+    if (!gameState || !base || base.macrossMissileCount <= 0) return 0;
+
+    const fontSize = parseInt(currentTheme.cssVariables['--upgrade-button-font-size']) || 12;
+    const padding = 8;
+    const boxWidth = 170;
+    const level = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
+    const totalCooldown = Math.max(1, MACROSS_BASE_COOLDOWN - level * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL);
+    const remaining = Math.max(0, gameState.macrossCooldownTimer || 0);
+    const ready = remaining <= 0;
+    const progress = ready ? 1 : Math.min(1, 1 - remaining / totalCooldown);
+    const line1 = 'Macross Massacre';
+    const line2 = ready ? `${base.macrossMissileCount} missiles ready` : `Reloading ${remaining.toFixed(1)}s`;
+    const height = fontSize * 2 + padding * 2 + 8;
+    const readyColor = '#00ff00';
+    const greyColor = 'rgba(150,150,150,0.9)';
+
+    ctx.font = `${fontSize}px ${currentTheme.cssVariables['--font-family'] || "'Press Start 2P', monospace"}`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+    ctx.fillRect(x, y, boxWidth, height);
+
+    if (ready) {
+        ctx.fillStyle = 'rgba(0,255,0,0.25)';
+        ctx.fillRect(x, y, boxWidth, height);
+    } else {
+        ctx.fillStyle = 'rgba(120,120,120,0.35)';
+        ctx.fillRect(x, y, boxWidth * progress, height);
+    }
+
+    ctx.strokeStyle = ready ? readyColor : greyColor;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, boxWidth, height);
+
+    ctx.fillStyle = ready ? readyColor : greyColor;
+    ctx.fillText(line1, x + padding, y + padding);
+    ctx.fillText(line2, x + padding, y + padding + fontSize + 4);
+
+    ringClickRegions.push({
+        type: 'macross_button',
         x,
         y,
         width: boxWidth,
@@ -5569,12 +5612,6 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                 case UPGRADE_MISSILE_MACROSS:
                     base.macrossMissileCount = upgrade.f(level);
                     base.macrossMissileDamage = 20 + level * 5;
-                    getElement('macrossButton').style.display = level > 0 ? 'block' : 'none';
-                    // Enable button immediately if cooldown is 0
-                    if (level > 0 && gameState.macrossCooldownTimer <= 0) {
-                        getElement('macrossButton').disabled = false;
-                        getElement('macrossButton').classList.add('active');
-                    }
                     break;
                 case UPGRADE_MISSILE_SMART:
                     base.macrossSmartAccuracy = upgrade.f(level);
@@ -5780,8 +5817,6 @@ function fireMacrossMissiles() {
 
         const cooldownLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
         gameState.macrossCooldownTimer = MACROSS_BASE_COOLDOWN - cooldownLevel * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL;
-        getElement('macrossButton').disabled = true;
-        getElement('macrossButton').classList.remove('active');
     }
 }
 
@@ -6229,6 +6264,10 @@ function handleCanvasClick(clientX, clientY) {
                 toggleHomingRadius();
                 drawGame();
                 return;
+            } else if (region.type === 'macross_button') {
+                fireMacrossMissiles();
+                drawGame();
+                return;
             } else if (region.type === 'upgrade_button' || region.type === 'collapsible_upgrade_button') {
                 purchaseUpgrade(region.categoryIndex, region.upgradeIndex);
                 return; // Handle click and exit
@@ -6383,7 +6422,6 @@ getElement('speedUpButton').onclick = () => {
         showToast('Upgrade Time Control to speed up further.', 1200);
     }
 };
-getElement('macrossButton').onclick = fireMacrossMissiles;
 getElement('xpBoostButton').onclick = activateXpBoost;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme;
@@ -6420,7 +6458,6 @@ const tooltipTexts = {
   playPauseButton: 'Play or pause the game',
   slowDownButton: 'Slow down game speed',
   speedUpButton: 'Speed up game speed',
-  macrossButton: 'Fire all missiles',
   toggleInfoButton: 'Toggle ring info text',
   themeButton: 'Change visual theme',
   sensorDisplayToggle: 'Switch enemy info mode',

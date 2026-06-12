@@ -1,5 +1,13 @@
 # Orbital Defense - Change Log
 
+## v2.92
+- The Macross Missile Massacre button moved from the bottom bar to a card
+  directly under the XP Boost card in the upgrade menu, appearing once the
+  Macros upgrade is bought.
+- While reloading the card is grey and its background fills left-to-right as
+  the cooldown recharges, so you can judge when it will be ready; at 100% the
+  card turns green and clicking it fires the volley.
+
 ## v2.91
 - The homing radius visibility toggle now lives on the Homing upgrade card
   itself as a small on/off switch (top-right corner); the bottom-bar button
