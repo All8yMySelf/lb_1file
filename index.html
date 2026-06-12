@@ -669,6 +669,7 @@
     <button id="toggleInfoButton" class="active">o</button>
     <button id="themeButton">Theme: Retro</button>
     <button id="missileStyleButton">Missiles: Itano</button>
+    <button id="homingRadiusToggle">Homing Radius: On</button>
     <div id="sensorToggle">
         <span class="switch-label">Enemy Info:</span>
         <button id="sensorDisplayToggle">Inline</button>
@@ -1216,7 +1217,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.86';
+const GAME_VERSION = '2.87';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1496,7 +1497,18 @@ canvas.height = canvasHeight;
 
 // --- Game State Variables ---
 let showRingInfo = true;
-let showMissileRadius = false;
+const HOMING_RADIUS_STORAGE_KEY = 'ode_showMissileRadius';
+let showMissileRadius = localStorage.getItem(HOMING_RADIUS_STORAGE_KEY) !== 'off';
+function updateHomingRadiusToggle() {
+    const btn = getElement('homingRadiusToggle');
+    if (btn) btn.textContent = `Homing Radius: ${showMissileRadius ? 'On' : 'Off'}`;
+}
+function toggleHomingRadius() {
+    showMissileRadius = !showMissileRadius;
+    localStorage.setItem(HOMING_RADIUS_STORAGE_KEY, showMissileRadius ? 'on' : 'off');
+    updateHomingRadiusToggle();
+    showToast(`Homing radius ${showMissileRadius ? 'visible' : 'hidden'}`);
+}
 let sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
 let sensorDisplayMode = 'inline';
 let baseCanMove = true;
@@ -4990,7 +5002,8 @@ function drawProjectilesLayer() {
         ctx.restore();
 
         if (showMissileRadius) {
-            ctx.strokeStyle = 'rgba(0,255,0,0.3)';
+            ctx.strokeStyle = 'rgba(0,255,0,0.18)';
+            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.arc(missile.x, missile.y, missile.homingRadius || base.missileHomingRadius, 0, Math.PI * 2);
             ctx.stroke();
@@ -6350,6 +6363,8 @@ getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme;
 getElement('missileStyleButton').onclick = cycleMissileStyle;
 updateMissileStyleButton();
+getElement('homingRadiusToggle').onclick = toggleHomingRadius;
+updateHomingRadiusToggle();
 getElement('loadButton').onclick = loadAndStartGame;
 getElement('clearSaveButton').onclick = clearSavedGame;
 getElement('startFromHighScore').onclick = startGame;
