@@ -75,6 +75,22 @@ The game is under active development. Below is a brief summary of recent updates
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 
+### v2.84
+- Enemies are now visible inside any active targeting or sensor radius, fixing
+  invisible missile targets outside sensor range.
+
+### v2.83
+- XP Status no longer duplicates Boost charge details, and its Manual Laser
+  hint hides after Manual Targeting is purchased.
+
+### v2.82
+- XP Boost moved into the upgrade menu as a clickable progress-card with the
+  active multiplier and countdown shown directly on the button.
+
+### v2.81
+- Wave reward choosers now offer 3 deterministic options based on wave number,
+  removing random reward luck from high-score runs.
+
 ### v2.80
 - XP kills bank charges on a new XP Boost button; each press doubles fire
   rate, stacking with halved durations (20s, 10s, 5s...).
