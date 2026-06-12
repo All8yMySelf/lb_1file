@@ -1,5 +1,12 @@
 # Orbital Defense - Change Log
 
+## v2.94
+- The homing radius circle now draws around the missile's locked target
+  rather than the missile itself (one circle per enemy, however many
+  missiles are inbound). When the target dies and a missile survives, the
+  circle shifts to that missile while it hunts for a new target, then jumps
+  to whatever it locks next.
+
 ## v2.93
 - The Smart AI card is now drawn as an offshoot of the Macros card (one step
   down the ladder, connected to it), matching how Focus Radius hangs off

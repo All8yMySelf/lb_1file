@@ -1208,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.93';
+const GAME_VERSION = '2.94';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -4924,6 +4924,7 @@ function drawProjectilesLayer() {
     });
 
     // --- Draw Missiles ---
+    const drawnLockTargets = new Set(); // One radius circle per locked enemy
     missilePool.getActiveObjects().forEach(missile => {
         // Trail
         ctx.strokeStyle = currentTheme.canvasColors.missileTrail;
@@ -4952,11 +4953,20 @@ function drawProjectilesLayer() {
         ctx.restore();
 
         if (showMissileRadius) {
-            ctx.strokeStyle = 'rgba(0,255,0,0.1)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.arc(missile.x, missile.y, missile.homingRadius || base.missileHomingRadius, 0, Math.PI * 2);
-            ctx.stroke();
+            // While locked on, the circle sits around the chosen target;
+            // once that enemy dies and the missile survives, the circle
+            // moves to the missile itself as it searches for a new target
+            const lockTarget = missile.target || null;
+            if (!lockTarget || !drawnLockTargets.has(lockTarget)) {
+                if (lockTarget) drawnLockTargets.add(lockTarget);
+                ctx.strokeStyle = 'rgba(0,255,0,0.1)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(lockTarget ? lockTarget.x : missile.x,
+                        lockTarget ? lockTarget.y : missile.y,
+                        missile.homingRadius || base.missileHomingRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
         }
     });
 
