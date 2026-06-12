@@ -1,5 +1,63 @@
 # Orbital Defense - Change Log
 
+## v3.09
+- Missile tail failure now starts at 75% of travel life and the tail is fully
+  gone at 90%.
+- The final 10% of travel is unguided tumbling drift with no homing radius,
+  while collisions still deal damage.
+
+## v3.08
+- Missile tails now start shrinking and failing with 20% of travel life left,
+  disappear completely for the final 5%, and no longer draw a homing radius
+  during that final drift.
+- In the final 5% of range, missiles lose guidance and tumble ballistically
+  while keeping momentum; they can still collide and deal damage until they
+  expire.
+
+## v3.07
+- Tactical Zoom now expands the starfield to cover the full revealed sensor
+  area, so stars fill the visible playfield out to the largest active range
+  while the fog pattern remains outside it.
+
+## v3.06
+- Range ring label panels now resolve overlaps in screen space so zoomed or
+  moving labels do not stack on top of each other.
+
+## v3.05
+- Tactical Zoom now keeps range ring label panels and text at normal screen
+  size while the rings themselves continue to scale with the playfield.
+
+## v3.04
+- Tactical Zoom now appears as a normal Sensor upgrade directly under
+  Calculate Enemies' Health instead of being drawn as a side branch.
+
+## v3.03
+- Added a Tactical Zoom Sensor upgrade under Calculate Enemies' Health.
+- Once unlocked, pinch zoom on touch devices and mouse-wheel zoom on desktop
+  scale the tactical playfield around the base while the upgrade UI and HUD
+  stay fixed-size.
+
+## v3.02
+- Macross Missile Massacre now combines both strategic cooldown rules:
+  the base reload starts at 15 seconds on the wave Macros is activated and
+  rises by 1 second per later wave, while each previous use in the current
+  wave adds another 5 seconds to the next recharge.
+- Starting a new wave resets the per-use penalty back to that wave's base
+  reload.
+
+## v3.01
+- Macross Missile Massacre reload timing now keys off the wave where the
+  Macros upgrade is first activated: 15 seconds on that wave, then +1 second
+  per later wave.
+- Superseded in v3.02 by restoring the per-use +5 second penalty within each
+  wave.
+
+## v3.00
+- Missiles now enter a burnout phase after 75% of their lifespan distance:
+  their smoke trail fades, their body fades, and their steering starts to
+  wobble and drift before they disappear at full range.
+- Burnout missiles still collide and deal damage until they fully expire.
+
 ## v2.99
 - Added two Sensor upgrades under Target Analysis AI:
   - Ordnance Sync separates cannon and missile reservations so bullets avoid
