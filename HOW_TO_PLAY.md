@@ -7,7 +7,8 @@
 ## Basic Controls
 - **Move Base:** Drag with the mouse or use the **WASD** or **Arrow** keys.
 - **Fire:** The cannon automatically shoots when enemies are in range. Press **F** to toggle auto-fire or use the **Space** key when auto-fire is disabled.
-- **Macross Missiles:** Press **M** to unleash a barrage of missiles once the upgrade is unlocked.
+- **Macross Missiles:** Press **M** or click the Macross card (under the XP Boost card in the upgrade menu) to unleash a barrage of up to 200 homing missiles once the Macros upgrade is unlocked. The card fills as it recharges and turns green when ready; every launch adds 5 seconds to the next recharge. The Smart AI sub-upgrade splits the volley across enemies based on their health.
+- **Homing Radius:** The small switch on the Homing upgrade card toggles a faint circle showing each missile's homing acquisition radius (drawn around its locked target, or around the missile while it searches).
 - **Game Speed:** Use the **«** and **»** buttons to adjust how fast the game runs. You can change the speed even while paused.
 - **Upgrades:** Click the base to open the upgrade ring. You can also click directly on an upgrade icon within the ring for quick access.
 - **Interface Toggles:**

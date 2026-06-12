@@ -75,6 +75,49 @@ The game is under active development. Below is a brief summary of recent updates
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 
+### v2.97
+- Every Macross Missile Massacre launch adds 5 seconds to the next recharge,
+  making repeated use progressively slower to come back.
+
+### v2.96
+- New Lifespan missile upgrade: travel allowance starts at base-to-radius
+  +10% and each of 8 grades adds another 10% (maxed matches the old limit).
+
+### v2.95
+- New Retarget upgrade (offshoot of the Radius card): the base reassigns a
+  surviving missile to the closest enemy inside its missile targeting ring.
+
+### v2.94
+- The homing radius circle draws around the missile's locked target, and only
+  around the missile itself while it hunts for a new one.
+
+### v2.93
+- The Smart AI card now branches off the Macros card in the upgrade menu.
+
+### v2.92
+- The Macross button moved from the bottom bar to a card under XP Boost with
+  a recharge progress bar that turns green when ready.
+
+### v2.91
+- The homing radius toggle moved onto the Homing upgrade card; Homing now
+  upgrades to 80% (8 grades); the radius circle is fainter.
+
+### v2.90
+- The Macross volley is capped at 200 missiles.
+
+### v2.89
+- Braided is the only missile flight style; the style-cycling button was
+  removed.
+
+### v2.88
+- New Smart AI upgrade for the Macross volley: health-based missile
+  allocation across enemies closest-first (70%–100% accuracy over 4 grades),
+  with spare missiles fanning out in all directions.
+
+### v2.87
+- New homing radius visibility toggle showing each missile's acquisition
+  circle.
+
 ### v2.86
 - XP Boost now stacks as up to seven timed layers: each charge doubles fire
   rate and appends a shorter duration to the active boost tail.
