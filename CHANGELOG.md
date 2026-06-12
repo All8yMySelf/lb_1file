@@ -1,5 +1,11 @@
 # Orbital Defense - Change Log
 
+## v2.97
+- Every Macross Missile Massacre launch now adds 5 seconds to the next
+  recharge, so the more you lean on it the longer it takes to come back.
+  The card's progress bar reflects the lengthened recharge, and the use
+  count carries through saves.
+
 ## v2.96
 - New "Lifespan" upgrade on the missile ladder controlling how far a missile
   can travel after launch. The base allowance is the distance from the base
