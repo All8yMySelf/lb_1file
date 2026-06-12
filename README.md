@@ -74,6 +74,46 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.09
+- Missile tails now shrink from 75% to 90% of travel life, then missiles
+  tumble unguided for the final 10%.
+
+### v3.08
+- Missile tails shrink and vanish near end-of-life; the final 5% is unguided
+  tumbling drift that can still hit enemies before expiry.
+
+### v3.07
+- Tactical Zoom now fills the full revealed sensor area with stars out to the
+  largest active range, with fog remaining outside.
+
+### v3.06
+- Range ring labels now shift apart in screen space to avoid overlapping
+  during Tactical Zoom.
+
+### v3.05
+- Range ring label text now stays readable at normal screen size while using
+  Tactical Zoom.
+
+### v3.04
+- Tactical Zoom now appears in the main Sensor list directly below
+  Calculate Enemies' Health.
+
+### v3.03
+- Added Tactical Zoom under Sensors, unlocked from Calculate Enemies' Health,
+  for pinch or mouse-wheel zooming of the playfield without scaling the UI.
+
+### v3.02
+- Macross reload now combines the activation-wave base timer with the
+  within-wave +5s penalty for each previous use.
+
+### v3.01
+- Macross Missile Massacre reload starts at 15 seconds on the wave where
+  Macros is first activated, then rises by 1 second each later wave.
+
+### v3.00
+- Missiles now fade their smoke and body, wobble, and drift after 75% of their
+  lifespan distance while still dealing collision damage until they expire.
+
 ### v2.99
 - Added Ordnance Sync and Fire Control AI Sensor upgrades to reduce wasted
   overlap between cannon, missile, and laser targeting.

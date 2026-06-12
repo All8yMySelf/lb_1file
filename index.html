@@ -179,7 +179,7 @@
     });
 </script>
 
-<title>Orbital Defense v2.99 - Optimised</title>
+<title>Orbital Defense v3.09 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -629,7 +629,7 @@
 #perkStatus{position:absolute;top:36px;left:10px;z-index:10;font-size:11px;color:#ffd700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v2.99</h1>
+    <h1 id="gameTitle">Orbital Defense v3.09</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -1208,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.99';
+const GAME_VERSION = '3.09';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1237,8 +1237,8 @@ const CONFIG = {
     BULLET_BASE_SPEED: 5,
     BASE_RADIUS: 30,
     INITIAL_FIRE_RATE: 200,
-    MACROSS_BASE_COOLDOWN: 30,
-    MACROSS_COOLDOWN_REDUCTION_PER_LEVEL: 3,
+    MACROSS_BASE_COOLDOWN: 15,
+    MACROSS_COOLDOWN_WAVE_INCREMENT: 1,
     PARTICLE_BASE_SPEED: 1,
     PARTICLE_BASE_LIFE: 1,
     PARTICLE_BASE_SIZE: 2,
@@ -1274,6 +1274,11 @@ const CONFIG = {
     // Pool Sizes & Buffers
     BULLET_POOL_SIZE: 150, // Pre-allocated bullet objects
     MISSILE_TRAIL_LENGTH: 40, // Trail buffer capacity
+    MISSILE_TRAIL_DECAY_START_RATIO: 0.75, // Tail starts failing with 25% range left
+    MISSILE_DRIFT_START_RATIO: 0.9, // Last 10% is unguided tumble
+    MISSILE_DECAY_MAX_DRIFT: 6, // Max erratic turn rate as missiles burn out
+    TACTICAL_ZOOM_MIN: 0.45,
+    TACTICAL_ZOOM_MAX: 1.4,
 
     // Scaling Factors (commonly used decimals)
     PULSE_AMPLITUDE: 0.1, // Amplitude for pulsing animations
@@ -1335,7 +1340,7 @@ const {
   BASE_RADIUS,
   INITIAL_FIRE_RATE,
   MACROSS_BASE_COOLDOWN,
-  MACROSS_COOLDOWN_REDUCTION_PER_LEVEL,
+  MACROSS_COOLDOWN_WAVE_INCREMENT,
   PARTICLE_BASE_SPEED,
   PARTICLE_BASE_LIFE,
   PARTICLE_BASE_SIZE,
@@ -1368,6 +1373,11 @@ const {
   // Pool Sizes & Buffers
   BULLET_POOL_SIZE,
   MISSILE_TRAIL_LENGTH,
+  MISSILE_TRAIL_DECAY_START_RATIO,
+  MISSILE_DRIFT_START_RATIO,
+  MISSILE_DECAY_MAX_DRIFT,
+  TACTICAL_ZOOM_MIN,
+  TACTICAL_ZOOM_MAX,
   // Scaling Factors
   PULSE_AMPLITUDE,
   TANK_SPEED_MULTIPLIER,
@@ -1451,6 +1461,7 @@ const UPGRADE_SENSOR_HEALTHBARS = 2;
 const UPGRADE_SENSOR_TARGET_AI = 3;
 const UPGRADE_SENSOR_ORDNANCE_SYNC = 4;
 const UPGRADE_SENSOR_FIRE_CONTROL_AI = 5;
+const UPGRADE_SENSOR_TACTICAL_ZOOM = 6;
 // Info mode upgrade moved to its own category
 const UPGRADE_INFO_HELP = 0;
 
@@ -1503,16 +1514,60 @@ function toggleHomingRadius() {
 
 function getMacrossBaseCooldown() {
     if (!upgradeTree?.[UPGRADE_CATEGORY_MISSILE]) return MACROSS_BASE_COOLDOWN;
-    const cooldownLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
-    return Math.max(1, MACROSS_BASE_COOLDOWN - cooldownLevel * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL);
+    const activationWave = Math.max(1, Math.floor(Number(base?.macrossActivationWave) || gameState?.wave || 1));
+    const currentWave = Math.max(activationWave, Math.floor(Number(gameState?.wave) || activationWave));
+    return MACROSS_BASE_COOLDOWN + (currentWave - activationWave) * MACROSS_COOLDOWN_WAVE_INCREMENT;
 }
 let sensorUpgrades = {
     enemyVisuals: false,
     showHealthBars: false,
     targetAI: false,
     ordnanceSync: false,
-    fireControlAI: false
+    fireControlAI: false,
+    tacticalZoom: false
 };
+let tacticalZoomLevel = 1;
+let pinchZoomActive = false;
+let pinchStartDistance = 0;
+let pinchStartZoom = 1;
+
+function clampTacticalZoom(value) {
+    return Math.max(TACTICAL_ZOOM_MIN, Math.min(TACTICAL_ZOOM_MAX, Number(value) || 1));
+}
+
+function isTacticalZoomActive() {
+    return !!sensorUpgrades.tacticalZoom && !!base;
+}
+
+function worldToScreen(x, y) {
+    if (!isTacticalZoomActive()) return { x, y };
+    return {
+        x: canvasWidth / 2 + (x - base.x) * tacticalZoomLevel,
+        y: canvasHeight / 2 + (y - base.y) * tacticalZoomLevel
+    };
+}
+
+function screenToWorld(x, y) {
+    if (!isTacticalZoomActive()) return { x, y };
+    return {
+        x: base.x + (x - canvasWidth / 2) / tacticalZoomLevel,
+        y: base.y + (y - canvasHeight / 2) / tacticalZoomLevel
+    };
+}
+
+function applyTacticalWorldTransform() {
+    if (!isTacticalZoomActive()) return false;
+    ctx.translate(canvasWidth / 2, canvasHeight / 2);
+    ctx.scale(tacticalZoomLevel, tacticalZoomLevel);
+    ctx.translate(-base.x, -base.y);
+    return true;
+}
+
+function setTacticalZoom(value, shouldSave = false) {
+    tacticalZoomLevel = clampTacticalZoom(value);
+    if (shouldSave && isTacticalZoomActive()) saveGame({ silent: true });
+    drawGame();
+}
 
 function createWeaponReservations(source = {}) {
     return {
@@ -1843,10 +1898,24 @@ function resetMissile(missile, config) {
     missile.startX = config.startX || missile.x;
     missile.startY = config.startY || missile.y;
     missile.rangeLimit = config.rangeLimit || base.missileTargetingRadius * (base.missileRangeMultiplier || 1.1);
+    missile.lifeProgress = Number(config.lifeProgress) || 0;
+    missile.fadeAlpha = typeof config.fadeAlpha === 'number' ? config.fadeAlpha : 1;
+    missile.trailAlpha = typeof config.trailAlpha === 'number' ? config.trailAlpha : 1;
+    missile.trailLengthFactor = typeof config.trailLengthFactor === 'number' ? config.trailLengthFactor : 1;
+    missile.unguidedDrift = !!config.unguidedDrift;
+    if (missile.unguidedDrift) {
+        missile.target = null;
+        missile.homingActive = false;
+    }
+    missile.tumbleAngle = typeof config.tumbleAngle === 'number' ? config.tumbleAngle : Math.atan2(missile.dy, missile.dx);
+    missile.tumbleSpin = typeof config.tumbleSpin === 'number'
+        ? config.tumbleSpin
+        : (Math.random() < 0.5 ? -1 : 1) * (7 + Math.random() * 8);
 
     // Flight choreography (missile style switcher)
     missile.style = config.style || 'Itano';
     missile.age = 0;
+    missile.decayPhase = typeof config.decayPhase === 'number' ? config.decayPhase : Math.random() * Math.PI * 2;
     missile.scatterTime = config.scatterTime || 0;
     missile.curl = config.curl || 0;
     missile.wobbleFreq = config.wobbleFreq || 0;
@@ -1867,8 +1936,16 @@ function resetMissile(missile, config) {
         missile.startX = 0;
         missile.startY = 0;
         missile.rangeLimit = base.missileTargetingRadius * (base.missileRangeMultiplier || 1.1);
+        missile.lifeProgress = 0;
+        missile.fadeAlpha = 1;
+        missile.trailAlpha = 1;
+        missile.trailLengthFactor = 1;
+        missile.unguidedDrift = false;
+        missile.tumbleAngle = 0;
+        missile.tumbleSpin = 0;
         missile.style = 'Itano';
         missile.age = 0;
+        missile.decayPhase = 0;
         missile.scatterTime = 0;
         missile.curl = 0;
         missile.wobbleFreq = 0;
@@ -2119,7 +2196,7 @@ function drawBracket(x, y, size, color = '#ffcc00', pulsing = true) {
 }
 
 // Display a small info box connected to a ring, styled like enemy inline info
-function drawRingInfoPanel(radius, label, offset) {
+function makeRingInfoLayout(radius, label, offset) {
     const fontSize = 10;
     const paddingX = 10;
     const paddingY = 5;
@@ -2138,16 +2215,18 @@ function drawRingInfoPanel(radius, label, offset) {
     if (label === 'Sensor Range') preferredAngle = 0.18;
     if (label === 'Focus Radius') preferredAngle = 0.42;
 
-    let ringX = base.x + Math.cos(preferredAngle) * radius;
-    let ringY = base.y + Math.sin(preferredAngle) * radius;
+    const baseScreen = worldToScreen(base.x, base.y);
+    const screenRadius = isTacticalZoomActive() ? radius * tacticalZoomLevel : radius;
+    let ringX = baseScreen.x + Math.cos(preferredAngle) * screenRadius;
+    let ringY = baseScreen.y + Math.sin(preferredAngle) * screenRadius;
     if (ringX + margin + boxWidth > safeRight) {
-        const targetRingX = Math.max(base.x - radius, maxBoxX - margin);
-        const ratio = Math.max(-1, Math.min(1, (targetRingX - base.x) / radius));
+        const targetRingX = Math.max(baseScreen.x - screenRadius, maxBoxX - margin);
+        const ratio = Math.max(-1, Math.min(1, (targetRingX - baseScreen.x) / Math.max(1, screenRadius)));
         const edgeAngle = Math.acos(ratio);
         const verticalSign = label === 'Sensor Range' || label === 'Focus Radius' ? 1 : -1;
         const adjustedAngle = edgeAngle * verticalSign;
-        ringX = base.x + Math.cos(adjustedAngle) * radius;
-        ringY = base.y + Math.sin(adjustedAngle) * radius;
+        ringX = baseScreen.x + Math.cos(adjustedAngle) * screenRadius;
+        ringY = baseScreen.y + Math.sin(adjustedAngle) * screenRadius;
     }
 
     let boxX = Math.max(margin, Math.min(ringX + margin, maxBoxX));
@@ -2159,6 +2238,47 @@ function drawRingInfoPanel(radius, label, offset) {
 
     const connectorX = Math.max(margin, Math.min(ringX, canvasWidth - margin));
     const connectorY = Math.max(margin, Math.min(ringY, canvasHeight - margin));
+
+    return { label, fontSize, boxX, boxY, boxWidth, boxHeight, connectorX, connectorY, margin };
+}
+
+function boxesOverlap(a, b, gap = 6) {
+    return a.boxX < b.boxX + b.boxWidth + gap &&
+        a.boxX + a.boxWidth + gap > b.boxX &&
+        a.boxY < b.boxY + b.boxHeight + gap &&
+        a.boxY + a.boxHeight + gap > b.boxY;
+}
+
+function resolveRingInfoLayouts(layouts) {
+    const sorted = layouts.slice().sort((a, b) => a.boxY - b.boxY);
+    sorted.forEach((layout, index) => {
+        for (let i = 0; i < index; i++) {
+            const other = sorted[i];
+            if (boxesOverlap(layout, other)) {
+                layout.boxY = other.boxY + other.boxHeight + 8;
+            }
+        }
+        layout.boxY = Math.max(layout.margin, Math.min(layout.boxY, canvasHeight - layout.boxHeight - layout.margin));
+    });
+    for (let i = sorted.length - 2; i >= 0; i--) {
+        const layout = sorted[i];
+        const next = sorted[i + 1];
+        if (boxesOverlap(layout, next)) {
+            layout.boxY = next.boxY - layout.boxHeight - 8;
+            layout.boxY = Math.max(layout.margin, Math.min(layout.boxY, canvasHeight - layout.boxHeight - layout.margin));
+        }
+    }
+    return sorted;
+}
+
+function drawRingInfoPanel(layout) {
+    const wasZoomed = isTacticalZoomActive();
+    if (wasZoomed) {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    const { label, fontSize, boxX, boxY, boxWidth, boxHeight, connectorX, connectorY } = layout;
+    ctx.font = `${fontSize}px monospace`;
 
     // Light scan-style translucent panel to keep motion visible while improving legibility
     ctx.fillStyle = 'rgba(2, 14, 20, 0.55)';
@@ -2197,6 +2317,13 @@ function drawRingInfoPanel(radius, label, offset) {
     ctx.fillText(label, boxX + boxWidth / 2, boxY + boxHeight / 2 + 0.5);
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
+    if (wasZoomed) ctx.restore();
+}
+
+function drawRingInfoPanels(items) {
+    const layouts = resolveRingInfoLayouts(items.map((item, index) =>
+        makeRingInfoLayout(item.radius, item.label, index)));
+    layouts.forEach(drawRingInfoPanel);
 }
 
 // --- Enemy Spawning ---
@@ -2767,6 +2894,14 @@ function serializeMissile(missile, enemyIndexByObject) {
         startX: missile.startX,
         startY: missile.startY,
         rangeLimit: missile.rangeLimit,
+        lifeProgress: missile.lifeProgress || 0,
+        fadeAlpha: typeof missile.fadeAlpha === 'number' ? missile.fadeAlpha : 1,
+        trailAlpha: typeof missile.trailAlpha === 'number' ? missile.trailAlpha : 1,
+        trailLengthFactor: typeof missile.trailLengthFactor === 'number' ? missile.trailLengthFactor : 1,
+        unguidedDrift: !!missile.unguidedDrift,
+        tumbleAngle: missile.tumbleAngle || 0,
+        tumbleSpin: missile.tumbleSpin || 0,
+        decayPhase: missile.decayPhase || 0,
         reservedTargetIndex: enemyIndexByObject.has(missile.reservedTarget) ? enemyIndexByObject.get(missile.reservedTarget) : -1,
         reservedDamage: missile.reservedDamage || 0
     };
@@ -2886,6 +3021,14 @@ function restoreSavedRuntimeState(runtimeState, savedAt) {
                 startX: (Number(savedMissile.startX) || 0) * scaleX,
                 startY: (Number(savedMissile.startY) || 0) * scaleY,
                 rangeLimit: Number(savedMissile.rangeLimit) || base.missileTargetingRadius * 1.1,
+                lifeProgress: Math.max(0, Math.min(1, Number(savedMissile.lifeProgress) || 0)),
+                fadeAlpha: typeof savedMissile.fadeAlpha === 'number' ? Math.max(0, Math.min(1, savedMissile.fadeAlpha)) : 1,
+                trailAlpha: typeof savedMissile.trailAlpha === 'number' ? Math.max(0, Math.min(1, savedMissile.trailAlpha)) : 1,
+                trailLengthFactor: typeof savedMissile.trailLengthFactor === 'number' ? Math.max(0, Math.min(1, savedMissile.trailLengthFactor)) : 1,
+                unguidedDrift: !!savedMissile.unguidedDrift,
+                tumbleAngle: Number(savedMissile.tumbleAngle) || 0,
+                tumbleSpin: Number(savedMissile.tumbleSpin) || 0,
+                decayPhase: Number(savedMissile.decayPhase) || 0,
                 reservedTarget,
                 reservedDamage: Math.max(0, Number(savedMissile.reservedDamage) || 0)
             });
@@ -2958,6 +3101,7 @@ function saveGame(options = {}) {
         },
         sensorState: {
             sensorUpgrades: { ...sensorUpgrades },
+            tacticalZoomLevel,
             sensorDisplayMode,
             enemyIntel: JSON.parse(JSON.stringify(enemyIntel))
         },
@@ -3021,6 +3165,7 @@ function loadGame() {
         base.missileTargetingRadius = savedBase.missileTargetingRadius;
         base.macrossMissileCount = savedBase.macrossMissileCount;
         base.macrossMissileDamage = savedBase.macrossMissileDamage;
+        base.macrossActivationWave = Math.max(0, Math.floor(Number(savedBase.macrossActivationWave) || 0));
         base.stunLevel = savedBase.stunLevel;
         base.stunRadius = savedBase.stunRadius;
        base.missileSpeedMultiplier = savedBase.missileSpeedMultiplier;
@@ -3049,6 +3194,7 @@ function loadGame() {
 
         if (savedGame.sensorState) {
             sensorUpgrades = { ...sensorUpgrades, ...(savedGame.sensorState.sensorUpgrades || {}) };
+            tacticalZoomLevel = clampTacticalZoom(savedGame.sensorState.tacticalZoomLevel || tacticalZoomLevel);
             sensorDisplayMode = savedGame.sensorState.sensorDisplayMode || sensorDisplayMode;
             enemyIntel = savedGame.sensorState.enemyIntel || enemyIntel;
             getElement('sensorDisplayToggle').textContent =
@@ -3212,9 +3358,9 @@ function createUpgradeTree(initialRange) {
                       const nextCount = level < maxLvl ? Math.min(200, 50 * Math.pow(2, level)) : currentCount;
                       const currentDmg = 20 + level * 5;
                       const nextDmg = level < maxLvl ? 20 + (level + 1) * 5 : currentDmg;
-                      const currentCD = MACROSS_BASE_COOLDOWN - level * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL;
-                      const nextCD = level < maxLvl ? MACROSS_BASE_COOLDOWN - (level + 1) * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL : currentCD;
-                      return `${currentCount}m ${currentDmg}d ${currentCD}s${level < maxLvl ? ` > ${nextCount}m ${nextDmg}d ${nextCD}s` : ''}`;
+                      const currentCD = getMacrossBaseCooldown();
+                      const nextStats = level < maxLvl ? ` > ${nextCount}m ${nextDmg}d` : '';
+                      return `${currentCount}m ${currentDmg}d${nextStats}\nReload ${currentCD}s (+${MACROSS_COOLDOWN_WAVE_INCREMENT}/wave)`;
                    }},
                 { name: 'Smart AI', cost: 8000, level: 0, maxLevel: 4, // Requires Macross active
                   f: level => level === 0 ? 0 : 0.6 + 0.1 * level, // Targeting accuracy 70% -> 100%
@@ -3294,6 +3440,9 @@ function createUpgradeTree(initialRange) {
                   g: (level) => level > 0 ? 'Active' : '(Install)' },
                 { name: 'Fire Control AI', cost: 8000, level: 0, maxLevel: 1,
                   f: level => level > 0,
+                  g: (level) => level > 0 ? 'Active' : '(Install)' },
+                { name: 'Tactical Zoom', cost: 1200, level: 0, maxLevel: 1,
+                  f: level => level > 0,
                   g: (level) => level > 0 ? 'Active' : '(Install)' }
             ]
         },
@@ -3338,7 +3487,7 @@ function createInitialGameState() {
         laserEffectEndTime: 0,
         lastMissileFireTime: 0,
         macrossCooldownTimer: 0,
-        macrossUseCount: 0, // Each use adds 5s to the next recharge
+        macrossUseCount: 0, // Each use in the current wave adds 5s to the next recharge
         macrossCooldownTotal: 0,
         stunEffectEndTime: 0, // Not currently used, stun applied directly
         waveStartTime: 0,
@@ -3411,6 +3560,7 @@ function createInitialBaseState(initialRange) {
         missileTargetingRadius: 0,
         macrossMissileCount: 0, // Needs upgrade
         macrossMissileDamage: 20,
+        macrossActivationWave: 0,
         macrossSmartAccuracy: 0, // Needs Smart AI upgrade
         missileRetarget: false, // Needs Retarget upgrade
         missileRangeMultiplier: 1.1, // Lifespan: travel budget over missile radius
@@ -3433,8 +3583,11 @@ function resetSensorRuntime() {
         showHealthBars: false,
         targetAI: false,
         ordnanceSync: false,
-        fireControlAI: false
+        fireControlAI: false,
+        tacticalZoom: false
     };
+    tacticalZoomLevel = 1;
+    pinchZoomActive = false;
     sensorDisplayMode = 'inline';
     enemyIntel = { active:false, known:{}, order:[] };
     getElement('sensorDisplayToggle').textContent = 'Inline';
@@ -3444,6 +3597,7 @@ function resetSensorRuntime() {
 function resetInputRuntime() {
     isDragging = false;
     wasDragging = false;
+    pinchZoomActive = false;
     isReturningToCenter = false;
     lastBaseX = base.x;
     lastBaseY = base.y;
@@ -4038,6 +4192,31 @@ function updateProjectiles(dt, baseMoved) {
     for (let i = missiles.length - 1; i >= 0; i--) {
         const missile = missiles[i];
         missile.age += dt;
+        const rangeLimit = Math.max(1, missile.rangeLimit || 1);
+        const distFromStartBeforeMove = Math.hypot(missile.x - missile.startX, missile.y - missile.startY);
+        missile.lifeProgress = Math.min(1, distFromStartBeforeMove / rangeLimit);
+        const trailDecayAmount = missile.lifeProgress <= MISSILE_TRAIL_DECAY_START_RATIO
+            ? 0
+            : Math.min(1, (missile.lifeProgress - MISSILE_TRAIL_DECAY_START_RATIO) /
+                (MISSILE_DRIFT_START_RATIO - MISSILE_TRAIL_DECAY_START_RATIO));
+        const driftAmount = missile.lifeProgress < MISSILE_DRIFT_START_RATIO
+            ? 0
+            : Math.min(1, (missile.lifeProgress - MISSILE_DRIFT_START_RATIO) /
+                (1 - MISSILE_DRIFT_START_RATIO));
+        missile.trailAlpha = Math.max(0, 1 - trailDecayAmount);
+        missile.trailLengthFactor = Math.max(0, 1 - trailDecayAmount);
+        missile.fadeAlpha = Math.max(0, 1 - driftAmount);
+        const unguidedDrift = missile.lifeProgress >= MISSILE_DRIFT_START_RATIO;
+        if (unguidedDrift && !missile.unguidedDrift) {
+            missile.unguidedDrift = true;
+            missile.target = null;
+            missile.homingActive = false;
+            missile.tumbleAngle = Math.atan2(missile.dy, missile.dx);
+        }
+        if (missile.unguidedDrift) {
+            missile.tumbleAngle += missile.tumbleSpin * dt;
+        }
+
         // During the scatter phase missiles fly ballistically (with curl) and
         // ignore homing, then whip around and converge on the target
         const inScatter = missile.age < missile.scatterTime;
@@ -4050,7 +4229,7 @@ function updateProjectiles(dt, baseMoved) {
             missile.homingActive = true; // Activate general homing
         }
 
-        if (!targetEnemy && missile.homingActive && !inScatter) {
+        if (!missile.unguidedDrift && !targetEnemy && missile.homingActive && !inScatter) {
             // Find the closest enemy within homing range
             let closestDistSq = (missile.homingRadius || base.missileHomingRadius) ** 2;
             let potentialTarget = null;
@@ -4095,7 +4274,7 @@ function updateProjectiles(dt, baseMoved) {
         }
 
         // 2. Steering Logic
-        if (targetEnemy && !inScatter) {
+        if (!missile.unguidedDrift && targetEnemy && !inScatter) {
             targetEnemy.isTargeted = true;
             targetEnemy.targetLockTime = TARGET_LOCK_DURATION;
             let targetX = targetEnemy.x;
@@ -4135,8 +4314,13 @@ function updateProjectiles(dt, baseMoved) {
 
         // 2b. Path bending: scatter curl (Itano/Braided) and helix wobble
         let bend = 0;
-        if (inScatter && missile.curl) bend += missile.curl * dt;
-        if (!inScatter && missile.wobbleAmp) bend += Math.sin(missile.age * missile.wobbleFreq) * missile.wobbleAmp * dt;
+        if (!missile.unguidedDrift && inScatter && missile.curl) bend += missile.curl * dt;
+        if (!missile.unguidedDrift && !inScatter && missile.wobbleAmp) bend += Math.sin(missile.age * missile.wobbleFreq) * missile.wobbleAmp * dt;
+        if (!missile.unguidedDrift && trailDecayAmount > 0) {
+            const drift = Math.sin(missile.age * 18 + missile.decayPhase) +
+                Math.sin(missile.age * 31 + missile.decayPhase * 0.7) * 0.45;
+            bend += drift * MISSILE_DECAY_MAX_DRIFT * trailDecayAmount * trailDecayAmount * dt;
+        }
         if (bend !== 0) {
             const bentAngle = Math.atan2(missile.dy, missile.dx) + bend;
             missile.dx = Math.cos(bentAngle);
@@ -4154,7 +4338,8 @@ function updateProjectiles(dt, baseMoved) {
 
         // 5. Check bounds / Range (collision checked separately)
         const distFromStart = Math.hypot(missile.x - missile.startX, missile.y - missile.startY);
-        if (distFromStart > missile.rangeLimit ||
+        missile.lifeProgress = Math.min(1, distFromStart / rangeLimit);
+        if (distFromStart > rangeLimit ||
             missile.x < -50 || missile.x > canvasWidth + 50 ||
             missile.y < -50 || missile.y > canvasHeight + 50) {
             releaseWeaponDamage(missile.reservedTarget, 'missile', missile.reservedDamage);
@@ -4430,17 +4615,21 @@ const STAR_LAYERS = [
 let starfield = [];
 let starfieldW = 0;
 let starfieldH = 0;
+let starfieldSpan = 0;
 let starDriftOffset = 0;
 
-function initStarfield() {
+function initStarfield(requiredSpan = Math.max(canvasWidth, canvasHeight)) {
     starfield = [];
     starfieldW = canvasWidth;
     starfieldH = canvasHeight;
+    starfieldSpan = Math.max(canvasWidth, canvasHeight, requiredSpan);
+    const densityScale = Math.min(8, Math.max(1, (starfieldSpan * starfieldSpan) / Math.max(1, canvasWidth * canvasHeight)));
     STAR_LAYERS.forEach((layer, layerIndex) => {
-        for (let i = 0; i < layer.count; i++) {
+        const count = Math.ceil(layer.count * densityScale);
+        for (let i = 0; i < count; i++) {
             starfield.push({
-                x: Math.random() * canvasWidth,
-                y: Math.random() * canvasHeight,
+                x: (Math.random() - 0.5) * starfieldSpan,
+                y: (Math.random() - 0.5) * starfieldSpan,
                 layer: layerIndex,
                 tw: Math.random() * Math.PI * 2 // twinkle phase
             });
@@ -4453,8 +4642,10 @@ function updateStarfield(effectiveDt) {
 }
 
 function drawStarfield(visibleRadius) {
-    if (starfield.length === 0 || starfieldW !== canvasWidth || starfieldH !== canvasHeight) {
-        initStarfield();
+    const requiredSpan = Math.max(canvasWidth, canvasHeight, visibleRadius * 2 + 240);
+    if (starfield.length === 0 || starfieldW !== canvasWidth || starfieldH !== canvasHeight ||
+        starfieldSpan < requiredSpan * 0.92 || starfieldSpan > requiredSpan * 1.35) {
+        initStarfield(requiredSpan);
     }
     const t = Date.now() / 1000;
     ctx.save();
@@ -4466,13 +4657,15 @@ function drawStarfield(visibleRadius) {
         const layer = STAR_LAYERS[s.layer];
         // Parallax against base movement plus a slow ambient drift that
         // follows game speed
-        let sx = (s.x - (base.x - canvasWidth / 2) * layer.factor) % canvasWidth;
-        let sy = (s.y + starDriftOffset * layer.drift - (base.y - canvasHeight / 2) * layer.factor) % canvasHeight;
-        if (sx < 0) sx += canvasWidth;
-        if (sy < 0) sy += canvasHeight;
+        let sx = (s.x - (base.x - canvasWidth / 2) * layer.factor) % starfieldSpan;
+        let sy = (s.y + starDriftOffset * layer.drift - (base.y - canvasHeight / 2) * layer.factor) % starfieldSpan;
+        if (sx < -starfieldSpan / 2) sx += starfieldSpan;
+        if (sx > starfieldSpan / 2) sx -= starfieldSpan;
+        if (sy < -starfieldSpan / 2) sy += starfieldSpan;
+        if (sy > starfieldSpan / 2) sy -= starfieldSpan;
         const twinkle = 0.7 + 0.3 * Math.sin(t * 1.5 + s.tw);
         ctx.globalAlpha = layer.alpha * twinkle;
-        ctx.fillRect(sx - layer.size / 2, sy - layer.size / 2, layer.size, layer.size);
+        ctx.fillRect(base.x + sx - layer.size / 2, base.y + sy - layer.size / 2, layer.size, layer.size);
     });
     ctx.restore();
 }
@@ -4687,6 +4880,11 @@ function drawGame() {
         ctx.translate((Math.random() - 0.5) * 2 * screenShakeMagnitude,
                       (Math.random() - 0.5) * 2 * screenShakeMagnitude);
     }
+    const worldTransformActive = isTacticalZoomActive();
+    if (worldTransformActive) {
+        ctx.save();
+        applyTacticalWorldTransform();
+    }
 
     // Starfield first: clipped to the visible circle so the lit zone reads
     // as sensor coverage against the fogged outside
@@ -4703,8 +4901,9 @@ function drawGame() {
     drawProjectilesLayer();
     drawParticles();
     drawFloatingTexts();
-    drawUpgradeMenu();
+    if (worldTransformActive) ctx.restore();
     if (shakeActive) ctx.restore();
+    drawUpgradeMenu();
 }
 
 function drawRangeRings() {
@@ -4755,23 +4954,25 @@ function drawRangeRings() {
 
     // Display simple pop-up panels describing each ring when ring info is enabled
     if (showRingInfo) {
-        let offset = 0;
-        drawRingInfoPanel(base.cannonRange, 'Cannon Targeting Range', offset++);
+        const ringInfoItems = [
+            { radius: base.cannonRange, label: 'Cannon Targeting Range' }
+        ];
         if (base.missileCount > 0 && base.missileTargetingRadius > 0) {
-            drawRingInfoPanel(base.missileTargetingRadius, 'Missile Range', offset++);
+            ringInfoItems.push({ radius: base.missileTargetingRadius, label: 'Missile Range' });
         }
         if (base.laserDamage > 0 && base.laserRange > 0) {
-            drawRingInfoPanel(base.laserRange, 'Laser Range', offset++);
+            ringInfoItems.push({ radius: base.laserRange, label: 'Laser Range' });
         }
         if (base.stunLevel > 0 && base.stunRadius > 0) {
-            drawRingInfoPanel(base.stunRadius, 'Stun Radius', offset++);
+            ringInfoItems.push({ radius: base.stunRadius, label: 'Stun Radius' });
         }
         if (base.sensorRange > base.cannonRange) {
-            drawRingInfoPanel(base.sensorRange, 'Sensor Range', offset++);
+            ringInfoItems.push({ radius: base.sensorRange, label: 'Sensor Range' });
         }
         if (base.focusRadiusSetting > 0) {
-            drawRingInfoPanel(base.cannonRange * base.focusRadiusSetting, 'Focus Radius', offset++);
+            ringInfoItems.push({ radius: base.cannonRange * base.focusRadiusSetting, label: 'Focus Radius' });
         }
+        drawRingInfoPanels(ringInfoItems);
     }
 
 
@@ -4984,11 +5185,16 @@ function drawEnemiesLayer(enemies) {
 
         if (sensorUpgrades.targetAI) {
             const shots = Math.max(0, Math.ceil((enemy.health - (enemy.allocatedDamage||0)) / base.bulletDamage));
+            ctx.save();
+            const shotLabel = isTacticalZoomActive() ? worldToScreen(enemy.x, enemy.y) : { x: enemy.x, y: enemy.y };
+            if (isTacticalZoomActive()) ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.fillStyle = '#ffffff';
             ctx.font = '10px monospace';
             ctx.textAlign = 'center';
-            const barY = enemy.y - (sensorUpgrades.enemyVisuals ? enemy.radius : 4) - 10;
-            ctx.fillText(shots, enemy.x, barY - 6);
+            const radiusOffset = sensorUpgrades.enemyVisuals ? enemy.radius * (isTacticalZoomActive() ? tacticalZoomLevel : 1) : 4;
+            const barY = shotLabel.y - radiusOffset - 10;
+            ctx.fillText(shots, shotLabel.x, barY - 6);
+            ctx.restore();
         }
     });
     updateEnemyHUD(hudInfo);
@@ -4997,6 +5203,10 @@ function drawEnemiesLayer(enemies) {
 // Inline sensor card drawn beside an enemy when sensor display mode is 'inline'
 function drawEnemyInlineCard(enemy, bracketSize, healthPercent, barHeight) {
     ctx.save();
+    const screenFixed = isTacticalZoomActive();
+    const labelAnchor = screenFixed ? worldToScreen(enemy.x, enemy.y) : { x: enemy.x, y: enemy.y };
+    const displayBracketSize = screenFixed ? Math.max(8, bracketSize * tacticalZoomLevel) : bracketSize;
+    if (screenFixed) ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     const infoLines = [];
@@ -5040,8 +5250,8 @@ function drawEnemyInlineCard(enemy, bracketSize, healthPercent, barHeight) {
     const boxWidth = Math.max(maxW + padding * 2, 40);
     let boxHeight = wrappedInfoLines.length * (fontSize + 2) + padding * 2;
     if (sensorUpgrades.showHealthBars) boxHeight += barHeight + fontSize + 8;
-    const boxX = enemy.x + bracketSize + 10;
-    const boxY = enemy.y - boxHeight / 2;
+    const boxX = labelAnchor.x + displayBracketSize + 10;
+    const boxY = labelAnchor.y - boxHeight / 2;
     // Match inline enemy cards to the ring info display style
     ctx.fillStyle = 'rgba(2, 14, 20, 0.55)';
     ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
@@ -5052,7 +5262,7 @@ function drawEnemyInlineCard(enemy, bracketSize, healthPercent, barHeight) {
     // Connector line (same color family as ring info display)
     ctx.strokeStyle = 'rgba(0, 255, 230, 0.6)';
     ctx.beginPath();
-    ctx.moveTo(enemy.x + bracketSize, enemy.y);
+    ctx.moveTo(labelAnchor.x + displayBracketSize, labelAnchor.y);
     ctx.lineTo(boxX, boxY + 10);
     ctx.stroke();
 
@@ -5100,16 +5310,25 @@ function drawProjectilesLayer() {
     // --- Draw Missiles ---
     const drawnLockTargets = new Set(); // One radius circle per locked enemy
     missilePool.getActiveObjects().forEach(missile => {
+        const missileAlpha = typeof missile.fadeAlpha === 'number' ? Math.max(0, Math.min(1, missile.fadeAlpha)) : 1;
+        const trailAlpha = typeof missile.trailAlpha === 'number' ? Math.max(0, Math.min(1, missile.trailAlpha)) : missileAlpha;
+        const trailLengthFactor = typeof missile.trailLengthFactor === 'number'
+            ? Math.max(0, Math.min(1, missile.trailLengthFactor))
+            : 1;
+
         // Trail
-        ctx.strokeStyle = currentTheme.canvasColors.missileTrail;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(missile.trail[0].x, missile.trail[0].y);
-        for(let i = 1; i < missile.trail.length; i++) {
-             ctx.globalAlpha = 1 - (i / missile.trail.length) * 0.7;
-             ctx.lineTo(missile.trail[i].x, missile.trail[i].y);
+        const visibleTrailLength = Math.min(missile.trail.length, Math.ceil(MISSILE_TRAIL_LENGTH * trailLengthFactor));
+        if (visibleTrailLength > 1 && trailAlpha > 0.02) {
+            ctx.strokeStyle = currentTheme.canvasColors.missileTrail;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(missile.trail[0].x, missile.trail[0].y);
+            for(let i = 1; i < visibleTrailLength; i++) {
+                 ctx.globalAlpha = (1 - (i / visibleTrailLength) * 0.7) * trailAlpha;
+                 ctx.lineTo(missile.trail[i].x, missile.trail[i].y);
+            }
+            ctx.stroke();
         }
-        ctx.stroke();
         ctx.globalAlpha = 1;
 
         // Missile body
@@ -5117,8 +5336,9 @@ function drawProjectilesLayer() {
         ctx.beginPath();
         // Draw a small triangle for directionality
         ctx.save();
+        ctx.globalAlpha = missileAlpha;
         ctx.translate(missile.x, missile.y);
-        ctx.rotate(Math.atan2(missile.dy, missile.dx));
+        ctx.rotate(missile.unguidedDrift ? missile.tumbleAngle : Math.atan2(missile.dy, missile.dx));
         ctx.moveTo(3, 0);
         ctx.lineTo(-2, -2);
         ctx.lineTo(-2, 2);
@@ -5126,7 +5346,7 @@ function drawProjectilesLayer() {
         ctx.fill();
         ctx.restore();
 
-        if (showMissileRadius) {
+        if (showMissileRadius && !missile.unguidedDrift && missile.lifeProgress < MISSILE_DRIFT_START_RATIO) {
             // While locked on, the circle sits around the chosen target;
             // once that enemy dies and the missile survives, the circle
             // moves to the missile itself as it searches for a new target
@@ -5134,12 +5354,14 @@ function drawProjectilesLayer() {
             if (!lockTarget || !drawnLockTargets.has(lockTarget)) {
                 if (lockTarget) drawnLockTargets.add(lockTarget);
                 ctx.strokeStyle = 'rgba(0,255,0,0.1)';
+                ctx.globalAlpha = missileAlpha;
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.arc(lockTarget ? lockTarget.x : missile.x,
                         lockTarget ? lockTarget.y : missile.y,
                         missile.homingRadius || base.missileHomingRadius, 0, Math.PI * 2);
                 ctx.stroke();
+                ctx.globalAlpha = 1;
             }
         }
     });
@@ -5404,6 +5626,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let retargetButton = null;
         let ordnanceSyncButton = null;
         let fireControlButton = null;
+        let tacticalZoomButton = null;
         let maxTextWidth = 0;
         category.upgrades.forEach((u, idx) => {
             const isFocus = categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS;
@@ -5413,6 +5636,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             const isRetarget = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_RETARGET;
             const isOrdnanceSync = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_ORDNANCE_SYNC;
             const isFireControl = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_FIRE_CONTROL_AI;
+            const isTacticalZoom = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_TACTICAL_ZOOM;
             const hasBar = isFocus || u.progressBar;
             const b = measureUpgradeButton(u, idx, hasBar, fontSize, padding);
             maxTextWidth = Math.max(maxTextWidth, b.minWidth);
@@ -5423,8 +5647,17 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             else if (isRetarget) retargetButton = b;
             else if (isOrdnanceSync) ordnanceSyncButton = b;
             else if (isFireControl) fireControlButton = b;
+            else if (isTacticalZoom) tacticalZoomButton = b;
             else buttons.push(b);
         });
+        if (tacticalZoomButton) {
+            const healthButtonIndex = buttons.findIndex(b => b.idx === UPGRADE_SENSOR_HEALTHBARS);
+            if (categoryIndex === UPGRADE_CATEGORY_SENSORS && healthButtonIndex !== -1) {
+                buttons.splice(healthButtonIndex + 1, 0, tacticalZoomButton);
+            } else {
+                buttons.push(tacticalZoomButton);
+            }
+        }
 
         const buttonWidth = Math.max(150, maxTextWidth + padding * 2);
         let currentY = y;
@@ -5492,6 +5725,10 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             }
             if (categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS &&
                 upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_MULTIBARREL].level === 0) {
+                canAfford = false;
+            }
+            if (categoryIndex === UPGRADE_CATEGORY_SENSORS && b.idx === UPGRADE_SENSOR_TACTICAL_ZOOM &&
+                upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_HEALTHBARS].level === 0) {
                 canAfford = false;
             }
 
@@ -5742,6 +5979,12 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
             return;
         }
     }
+    if (categoryIndex === UPGRADE_CATEGORY_SENSORS && upgradeIndex === UPGRADE_SENSOR_TACTICAL_ZOOM) {
+        if (upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_HEALTHBARS].level === 0) {
+            showToast("Requires Calculate Enemies' Health first!", 2500);
+            return;
+        }
+    }
     if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS) {
         if (upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_MULTIBARREL].level === 0) {
             showToast("Requires Guns upgrade first!", 2500);
@@ -5862,6 +6105,9 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                 case UPGRADE_MISSILE_MACROSS:
                     base.macrossMissileCount = upgrade.f(level);
                     base.macrossMissileDamage = 20 + level * 5;
+                    if (level > 0 && (!base.macrossActivationWave || base.macrossActivationWave < 1)) {
+                        base.macrossActivationWave = Math.max(1, Math.floor(Number(gameState?.wave) || 1));
+                    }
                     break;
                 case UPGRADE_MISSILE_SMART:
                     base.macrossSmartAccuracy = upgrade.f(level);
@@ -5918,6 +6164,10 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     break;
                 case UPGRADE_SENSOR_FIRE_CONTROL_AI:
                     sensorUpgrades.fireControlAI = level > 0;
+                    break;
+                case UPGRADE_SENSOR_TACTICAL_ZOOM:
+                    sensorUpgrades.tacticalZoom = level > 0;
+                    if (!sensorUpgrades.tacticalZoom) tacticalZoomLevel = 1;
                     break;
             }
             break;
@@ -6080,7 +6330,6 @@ function fireMacrossMissiles() {
         createExplosion(base.x, base.y, 'red', 50, 40); // Big launch effect
         showToast('Macross Missile Massacre!');
 
-        // Every use in the current wave makes the next recharge 5s longer.
         const usePenalty = (gameState.macrossUseCount || 0) * 5;
         gameState.macrossUseCount = (gameState.macrossUseCount || 0) + 1;
         gameState.macrossCooldownTotal = getMacrossBaseCooldown() + usePenalty;
@@ -6436,8 +6685,9 @@ function handleDragStart(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = clientX - rect.left;
     const mouseY = clientY - rect.top;
+    const baseScreen = worldToScreen(base.x, base.y);
 
-    if (Math.hypot(mouseX - base.x, mouseY - base.y) <= base.radius) {
+    if (Math.hypot(mouseX - baseScreen.x, mouseY - baseScreen.y) <= base.radius * (isTacticalZoomActive() ? tacticalZoomLevel : 1)) {
         isDragging = true;
         dragStartX = mouseX;
         dragStartY = mouseY;
@@ -6458,14 +6708,16 @@ function handleDragMove(clientX, clientY) {
 
         const deltaX = mouseX - dragStartX;
         const deltaY = mouseY - dragStartY;
+        const worldDeltaX = isTacticalZoomActive() ? deltaX / tacticalZoomLevel : deltaX;
+        const worldDeltaY = isTacticalZoomActive() ? deltaY / tacticalZoomLevel : deltaY;
 
         if (!wasDragging && Math.hypot(deltaX, deltaY) > DRAG_THRESHOLD) {
             wasDragging = true; // It's officially a drag
         }
 
         // Calculate new base position
-        const targetX = baseStartX + deltaX;
-        const targetY = baseStartY + deltaY;
+        const targetX = baseStartX + worldDeltaX;
+        const targetY = baseStartY + worldDeltaY;
 
         // Clamp position within bounds
         base.x = Math.max(base.radius, Math.min(canvasWidth - base.radius, targetX));
@@ -6500,6 +6752,7 @@ function handleCanvasClick(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
     const clickX = clientX - rect.left;
     const clickY = clientY - rect.top;
+    const worldClick = screenToWorld(clickX, clickY);
 
     // Check if click was part of a drag ending - if so, ignore click action
     if (wasDragging) {
@@ -6547,8 +6800,8 @@ function handleCanvasClick(clientX, clientY) {
     if (isGameRunning && base.manualTargeting && base.laserDamage > 0 && Date.now() - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
         const target = enemyPool.getActiveObjects().find(e =>
             e.xp &&
-            clickX >= e.x - e.radius && clickX <= e.x + e.radius &&
-            clickY >= e.y - e.radius && clickY <= e.y + e.radius
+            worldClick.x >= e.x - e.radius && worldClick.x <= e.x + e.radius &&
+            worldClick.y >= e.y - e.radius && worldClick.y <= e.y + e.radius
         );
         if (target) {
             fireLaserAt(target);
@@ -6582,10 +6835,18 @@ function showTooltipForCanvas(e) {
             break;
         }
     }
-    if (!text && Math.hypot(x - base.x, y - base.y) <= base.radius) {
+    const baseScreen = worldToScreen(base.x, base.y);
+    if (!text && Math.hypot(x - baseScreen.x, y - baseScreen.y) <= base.radius * (isTacticalZoomActive() ? tacticalZoomLevel : 1)) {
         text = 'Your base. Drag to move. Click upgrades.';
     }
     if (text) showTooltip(text, e.pageX, e.pageY); else hideTooltip();
+}
+
+function touchDistance(touches) {
+    if (!touches || touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
 }
 
 
@@ -6611,7 +6872,14 @@ window.addEventListener('mouseup', e => {
 
 // Touch Events
 canvas.addEventListener('touchstart', e => {
-    if (e.touches.length === 1) {
+    if (isTacticalZoomActive() && e.touches.length === 2) {
+        pinchZoomActive = true;
+        pinchStartDistance = touchDistance(e.touches);
+        pinchStartZoom = tacticalZoomLevel;
+        wasDragging = true;
+        if (isDragging) handleDragEnd();
+        e.preventDefault();
+    } else if (e.touches.length === 1) {
         const touch = e.touches[0];
         if (handleDragStart(touch.clientX, touch.clientY)) {
             e.preventDefault(); // Prevent scrolling if drag started on base
@@ -6623,7 +6891,13 @@ canvas.addEventListener('touchstart', e => {
 }, { passive: false, signal: eventListenerController.signal });
 
 window.addEventListener('touchmove', e => {
-    if (e.touches.length === 1) {
+    if (pinchZoomActive && isTacticalZoomActive() && e.touches.length === 2) {
+        const distance = touchDistance(e.touches);
+        if (pinchStartDistance > 0) {
+            setTacticalZoom(pinchStartZoom * (distance / pinchStartDistance));
+        }
+        e.preventDefault();
+    } else if (e.touches.length === 1) {
         handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
         if (isDragging) {
              e.preventDefault(); // Prevent scrolling while dragging base
@@ -6632,6 +6906,14 @@ window.addEventListener('touchmove', e => {
 }, { passive: false, signal: eventListenerController.signal });
 
 window.addEventListener('touchend', e => {
+    if (pinchZoomActive) {
+        if (e.touches.length < 2) {
+            pinchZoomActive = false;
+            wasDragging = false;
+            setTacticalZoom(tacticalZoomLevel, true);
+        }
+        return;
+    }
     if (e.changedTouches.length === 1) {
         const touch = e.changedTouches[0];
         handleDragEnd();
@@ -6639,6 +6921,13 @@ window.addEventListener('touchend', e => {
         handleCanvasClick(touch.clientX, touch.clientY);
     }
 }, { signal: eventListenerController.signal });
+
+canvas.addEventListener('wheel', e => {
+    if (!isTacticalZoomActive()) return;
+    e.preventDefault();
+    const factor = Math.exp(-e.deltaY * 0.0015);
+    setTacticalZoom(tacticalZoomLevel * factor, true);
+}, { passive: false, signal: eventListenerController.signal });
 
 
 // UI Button Listeners
