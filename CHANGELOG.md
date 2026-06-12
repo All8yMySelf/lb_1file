@@ -1,5 +1,12 @@
 # Orbital Defense - Change Log
 
+## v2.95
+- New "Retarget" upgrade, drawn as an offshoot of the missile Radius card
+  (requires Radius). When a missile's enemy is destroyed and the missile is
+  still inside the base's missile targeting range, the base assigns it the
+  closest enemy within that range — even one outside the missile's own
+  homing radius. Macross volley missiles keep their own homing instead.
+
 ## v2.94
 - The homing radius circle now draws around the missile's locked target
   rather than the missile itself (one circle per enemy, however many
