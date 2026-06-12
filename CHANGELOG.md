@@ -1,5 +1,91 @@
 # Orbital Defense - Change Log
 
+## v2.75
+- Added a three-layer parallax starfield rendered only inside the visible
+  sensor circle, so the lit zone reads as "what your sensors can see" against
+  the greyed-out fog outside.
+- Stars shift against base movement (parallax), drift slowly with game speed,
+  and twinkle.
+- The starfield regenerates automatically when the window is resized.
+- Added a soft glow to the base.
+
+## v2.74
+- Added a "game feel" pass behind the debug "Juice FX" toggle, purely
+  presentational:
+  - Floating credit text (`+$X`) rises from each kill; the base shows the
+    damage it takes (`-X`).
+  - Brief hit-stop on kills (stronger on boss kills) makes impacts land.
+  - Screen shake when the base is hit and when a boss dies; the canvas clear
+    stays put so edges don't smear.
+  - Kill-combo counter: chained kills within 2 seconds pop a `COMBO xN!`
+    callout at every 5th kill.
+- All effects reset on new game and have zero effect when the toggle is off.
+
+## v2.73
+- Added choice-based wave rewards behind the debug "Wave Rewards" toggle:
+  clearing a wave pauses the game and offers a pick-1-of-3 perk choice.
+- Perk pool: Repair Crew (heal 30% now), Reinforced Hull (+20 max health),
+  Overcharged Rounds (+15% bullet damage), Rapid Loader (+10% fire rate),
+  Bounty Contract (+25% kill credits), Credit Cache (instant wave-scaled
+  credits).
+- Perks last the whole run, stack, survive save/load, and are folded into
+  upgrade recomputation so buying upgrades later doesn't erase them.
+- Multiple waves clearing together queue their reward choices back to back.
+
+## v2.72
+- Added four experimental enemy archetypes, active only while the debug
+  "Enemy Archetypes" toggle is ON, appearing from wave 2 in ~25% of spawns:
+  - **Splitter** (orange): splits into two smaller, faster children when
+    destroyed (not when it reaches the base).
+  - **Shielded** (blue): a shield ring absorbs damage before health; the ring
+    fades as the shield weakens.
+  - **Healer** (green): slowly regenerates nearby allies inside its pulsing
+    aura ring.
+  - **Kamikaze** (pink): arrives in swarms of four; fast, fragile, and hits
+    the base three times harder than its size suggests.
+- Archetype stats scale with wave difficulty like classic enemies, integrate
+  with enemy identification/intel, and survive save/load.
+- Wave completion counting stays consistent with swarms and splits.
+
+## v2.71
+- Added three experimental feature toggles to the hidden debug menu (Q),
+  below +100,000 credits: Enemy Archetypes, Wave Rewards, and Juice FX.
+- Toggles show their ON/OFF state, persist across reloads, and can be
+  flipped individually so upcoming features can be tested before going live.
+  They have no gameplay effect yet.
+- Removed an unreachable wave-stats fallback in the debug purchase handler.
+
+## v2.70
+- Split the monolithic `drawGame` into focused layer functions (range rings,
+  base, gun barrels, enemies, projectiles, upgrade menu) with no intended
+  visual change.
+- Deduplicated the upgrade-menu drawing code: one shared measurement helper,
+  one focus-notch bar renderer, and one sub-upgrade button renderer replace
+  three near-identical blocks.
+- Removed the dead `drawRingUIElement` function (unused since the v2.9 ring UI
+  was replaced; it referenced an undefined variable and would have crashed if
+  called).
+- Folded the per-frame target-lock countdown into the existing enemy update
+  loop, removing a duplicate pass over the enemy pool.
+- Completed waves now also release their boss-tracking entries so long runs
+  don't accumulate stale state.
+- Routed the remaining unconditional debug logs through `DEBUG_MODE`.
+
+## v2.69
+- On the leaderboard screen, Q is now a pure show/hide toggle for cheat
+  scores — even for players whose own run used the cheat.
+- Q no longer flips the in-game debug menu state while the leaderboard is
+  open.
+
+## v2.68
+- Scores from runs that used the debug +100,000 credits cheat are now flagged
+  in the leaderboard database.
+- Normal players only see clean scores on the leaderboard; cheat-flagged
+  entries are hidden.
+- Players who used the cheat this run, or who have the debug menu open
+  (Q key), see the full leaderboard with a `[Q]` marker next to cheat scores.
+- Pressing Q while the leaderboard is open refreshes it immediately.
+
 ## v2.67
 - Refactored the one-file game internals while keeping `index.html` as the
   playable artifact.
