@@ -1,5 +1,11 @@
 # Orbital Defense - Change Log
 
+## v2.93
+- The Smart AI card is now drawn as an offshoot of the Macros card (one step
+  down the ladder, connected to it), matching how Focus Radius hangs off
+  Guns and Manual Targeting hangs off Laser. It greys out until Macros is
+  bought.
+
 ## v2.92
 - The Macross Missile Massacre button moved from the bottom bar to a card
   directly under the XP Boost card in the upgrade menu, appearing once the

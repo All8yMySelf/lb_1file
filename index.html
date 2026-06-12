@@ -1208,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.92';
+const GAME_VERSION = '2.93';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -5217,17 +5217,20 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let focusButton = null;
         let targetButton = null;
         let manualButton = null;
+        let smartButton = null;
         let maxTextWidth = 0;
         category.upgrades.forEach((u, idx) => {
             const isFocus = categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS;
             const isTargetAI = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_TARGET_AI;
             const isManualLaser = categoryIndex === UPGRADE_CATEGORY_LASER && idx === UPGRADE_LASER_MANUAL;
+            const isSmartAI = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SMART;
             const hasBar = isFocus || u.progressBar;
             const b = measureUpgradeButton(u, idx, hasBar, fontSize, padding);
             maxTextWidth = Math.max(maxTextWidth, b.minWidth);
             if (isFocus) focusButton = b;
             else if (isTargetAI) targetButton = b;
             else if (isManualLaser) manualButton = b;
+            else if (isSmartAI) smartButton = b;
             else buttons.push(b);
         });
 
@@ -5237,6 +5240,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let gunButtonY = null;
         let calcHealthButtonY = null;
         let laserButtonY = null;
+        let macrosButtonY = null;
 
         // Compute center positions
         let tempY = y;
@@ -5251,6 +5255,9 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             }
             if (categoryIndex === UPGRADE_CATEGORY_LASER && b.idx === UPGRADE_LASER_DAMAGE) {
                 laserButtonY = tempY;
+            }
+            if (categoryIndex === UPGRADE_CATEGORY_MISSILE && b.idx === UPGRADE_MISSILE_MACROSS) {
+                macrosButtonY = tempY;
             }
             tempY += b.height + 10;
         });
@@ -5363,6 +5370,12 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         if (manualButton) {
             drawSubUpgradeButton(manualButton, panelX, buttonWidth, laserButtonY !== null ? laserButtonY : currentY,
                 upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level > 0,
+                categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+        }
+
+        if (smartButton) {
+            drawSubUpgradeButton(smartButton, panelX, buttonWidth, macrosButtonY !== null ? macrosButtonY : currentY,
+                upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level > 0,
                 categoryIndex, displayColor, maxedColor, fontSize, padding, false);
         }
     }
