@@ -1217,7 +1217,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.87';
+const GAME_VERSION = '2.88';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1448,6 +1448,7 @@ const UPGRADE_MISSILE_RANGE = 1;
 const UPGRADE_MISSILE_DAMAGE = 2;
 const UPGRADE_MISSILE_HOMING = 3;
 const UPGRADE_MISSILE_MACROSS = 4;
+const UPGRADE_MISSILE_SMART = 5;
 const UPGRADE_SPECIAL_STUN = 0;
 const UPGRADE_TIME_SLOW = 0;
 const UPGRADE_TIME_FAST = 1;
@@ -3157,7 +3158,15 @@ function createUpgradeTree(initialRange) {
                       const currentCD = MACROSS_BASE_COOLDOWN - level * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL;
                       const nextCD = level < maxLvl ? MACROSS_BASE_COOLDOWN - (level + 1) * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL : currentCD;
                       return `${currentCount}m ${currentDmg}d ${currentCD}s${level < maxLvl ? ` > ${nextCount}m ${nextDmg}d ${nextCD}s` : ''}`;
-                   }}
+                   }},
+                { name: 'Smart AI', cost: 8000, level: 0, maxLevel: 4, // Requires Macross active
+                  f: level => level === 0 ? 0 : 0.6 + 0.1 * level, // Targeting accuracy 70% -> 100%
+                  g: (level, cost, maxLvl) => {
+                      if (level === 0) return '(Activate)';
+                      const currentPct = 60 + level * 10;
+                      const nextPct = level < maxLvl ? 60 + (level + 1) * 10 : currentPct;
+                      return `${currentPct}%${level < maxLvl ? ` > ${nextPct}%` : ''}`;
+                  }}
             ]
         },
         { // Category 4: Special
@@ -3327,6 +3336,8 @@ function createInitialBaseState(initialRange) {
         missileTargetingRadius: 0,
         macrossMissileCount: 0, // Needs upgrade
         macrossMissileDamage: 20,
+        macrossSmartAccuracy: 0, // Needs Smart AI upgrade
+
         stunLevel: 0, // Needs upgrade
         stunRadius: 0,
         missileSpeedMultiplier: 1,
@@ -5455,6 +5466,12 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
             return; // Cannot buy sub-upgrades if missiles not acquired
         }
     }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_SMART) {
+        if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level === 0) {
+            showToast("Requires Macross Missile Massacre first!", 2500);
+            return;
+        }
+    }
     if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS) {
         if (upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_MULTIBARREL].level === 0) {
             showToast("Requires Guns upgrade first!", 2500);
@@ -5581,6 +5598,9 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                         getElement('macrossButton').disabled = false;
                         getElement('macrossButton').classList.add('active');
                     }
+                    break;
+                case UPGRADE_MISSILE_SMART:
+                    base.macrossSmartAccuracy = upgrade.f(level);
                     break;
             }
             break;
@@ -5716,15 +5736,40 @@ function updateXpBoostButton() {
 function fireMacrossMissiles() {
     if (gameState.macrossCooldownTimer <= 0 && base.macrossMissileCount > 0) {
         const count = base.macrossMissileCount;
-
-        // Styled volleys share one focus target (boss first, else nearest)
-        // so the whole swarm visibly coalesces on a single point
-        let focusTarget = null;
         const candidates = enemyPool.getActiveObjects().filter(e => !e.xp);
-        focusTarget = candidates.find(e => e.type === 'Boss') || null;
-        if (!focusTarget && candidates.length > 0) {
-            focusTarget = candidates.reduce((a, b) =>
-                Math.hypot(a.x - base.x, a.y - base.y) < Math.hypot(b.x - base.x, b.y - base.y) ? a : b);
+        const assignments = new Array(count).fill(null);
+
+        if (base.macrossSmartAccuracy > 0 && candidates.length > 0) {
+            // Smart AI: walk enemies closest-first, estimating how many
+            // missiles each needs from its health. Estimation error shrinks
+            // as accuracy rises; at 100% the count is exact. Missiles left
+            // over once every enemy is covered launch untargeted and rely on
+            // their own homing to acquire whatever appears.
+            const sorted = candidates.slice().sort((a, b) =>
+                Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
+            const error = 1 - base.macrossSmartAccuracy;
+            let assigned = 0;
+            for (const enemy of sorted) {
+                if (assigned >= count) break;
+                const needed = Math.max(1, Math.ceil(enemy.health / base.macrossMissileDamage));
+                const estimated = Math.max(1, Math.round(needed * (1 + (Math.random() * 2 - 1) * error)));
+                for (let k = 0; k < estimated && assigned < count; k++) assignments[assigned++] = enemy;
+            }
+            // Shuffle so untargeted spares launch across the full circle
+            // instead of bunching into one arc
+            for (let i = assignments.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [assignments[i], assignments[j]] = [assignments[j], assignments[i]];
+            }
+        } else {
+            // No Smart AI: the whole volley converges on one focus target
+            // (boss first, else nearest) so the swarm coalesces on a point
+            let focusTarget = candidates.find(e => e.type === 'Boss') || null;
+            if (!focusTarget && candidates.length > 0) {
+                focusTarget = candidates.reduce((a, b) =>
+                    Math.hypot(a.x - base.x, a.y - base.y) < Math.hypot(b.x - base.x, b.y - base.y) ? a : b);
+            }
+            assignments.fill(focusTarget);
         }
 
         for (let i = 0; i < count; i++) {
@@ -5740,7 +5785,7 @@ function fireMacrossMissiles() {
                 y: base.y,
                 dx: Math.cos(angle),
                 dy: Math.sin(angle),
-                t: focusTarget,
+                t: assignments[i],
                 speed: launchSpeed,
                 turnSpeed: base.missileTurnSpeed,
                 homingRadius: base.missileHomingRadius,

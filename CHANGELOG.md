@@ -1,5 +1,16 @@
 # Orbital Defense - Change Log
 
+## v2.88
+- New "Smart AI" upgrade (4 grades, requires Macross) for the Macross Missile
+  Massacre. The volley reads each enemy's health and splits itself across
+  enemies closest-first instead of dumping every missile on one target.
+- Grade 1 estimates missiles-per-enemy at 70% accuracy; each grade adds 10%
+  up to a spot-on 100% at grade 4.
+- Missiles left over after every enemy is covered launch out in all
+  directions and use their own homing to acquire new arrivals.
+- Without Smart AI the massacre behaves as before: every missile converges
+  on the boss, or the nearest enemy.
+
 ## v2.87
 - New "Homing Radius" toggle button shows a faint circle around every missile
   marking its homing acquisition radius, so you can verify how far missiles
