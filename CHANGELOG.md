@@ -1,5 +1,13 @@
 # Orbital Defense - Change Log
 
+## v2.96
+- New "Lifespan" upgrade on the missile ladder controlling how far a missile
+  can travel after launch. The base allowance is the distance from the base
+  to the missile radius edge plus 10%; each of 8 grades adds another 10%,
+  with the final grade matching the old hardcoded 190% travel limit.
+- Note this means un-upgraded missiles now expire sooner than before (110%
+  of the radius instead of 190%) until Lifespan is bought.
+
 ## v2.95
 - New "Retarget" upgrade, drawn as an offshoot of the missile Radius card
   (requires Radius). When a missile's enemy is destroyed and the missile is
