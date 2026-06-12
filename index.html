@@ -1208,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.95';
+const GAME_VERSION = '2.96';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1441,6 +1441,7 @@ const UPGRADE_MISSILE_HOMING = 3;
 const UPGRADE_MISSILE_MACROSS = 4;
 const UPGRADE_MISSILE_SMART = 5;
 const UPGRADE_MISSILE_RETARGET = 6;
+const UPGRADE_MISSILE_LIFESPAN = 7;
 const UPGRADE_SPECIAL_STUN = 0;
 const UPGRADE_TIME_SLOW = 0;
 const UPGRADE_TIME_FAST = 1;
@@ -1767,7 +1768,7 @@ function resetMissile(missile, config) {
     missile.homingActive = config.homingActive || false;
     missile.startX = config.startX || missile.x;
     missile.startY = config.startY || missile.y;
-    missile.rangeLimit = config.rangeLimit || base.missileTargetingRadius * 1.1;
+    missile.rangeLimit = config.rangeLimit || base.missileTargetingRadius * (base.missileRangeMultiplier || 1.1);
 
     // Flight choreography (missile style switcher)
     missile.style = config.style || 'Itano';
@@ -1789,7 +1790,7 @@ function resetMissile(missile, config) {
         missile.homingRadius = base.missileHomingRadius;
         missile.startX = 0;
         missile.startY = 0;
-        missile.rangeLimit = base.missileTargetingRadius * 1.1;
+        missile.rangeLimit = base.missileTargetingRadius * (base.missileRangeMultiplier || 1.1);
         missile.style = 'Itano';
         missile.age = 0;
         missile.scatterTime = 0;
@@ -3114,7 +3115,14 @@ function createUpgradeTree(initialRange) {
                   }},
                 { name: 'Retarget', cost: 4000, level: 0, maxLevel: 1, // Offshoot of Radius
                   f: level => level,
-                  g: (level, cost, maxLvl) => level === 0 ? '(Activate)' : 'Active' }
+                  g: (level, cost, maxLvl) => level === 0 ? '(Activate)' : 'Active' },
+                { name: 'Lifespan', cost: 2000, level: 0, maxLevel: 8,
+                  f: level => 1.1 + 0.1 * level, // Travel budget as a multiple of missile radius
+                  g: (level, cost, maxLvl) => {
+                      const currentPct = 110 + level * 10;
+                      const nextPct = level < maxLvl ? currentPct + 10 : currentPct;
+                      return `${currentPct}%${level < maxLvl ? ` > ${nextPct}%` : ''}`;
+                  }}
             ]
         },
         { // Category 4: Special
@@ -3286,6 +3294,7 @@ function createInitialBaseState(initialRange) {
         macrossMissileDamage: 20,
         macrossSmartAccuracy: 0, // Needs Smart AI upgrade
         missileRetarget: false, // Needs Retarget upgrade
+        missileRangeMultiplier: 1.1, // Lifespan: travel budget over missile radius
 
         stunLevel: 0, // Needs upgrade
         stunRadius: 0,
@@ -3817,7 +3826,7 @@ function handlePlayerFiring(dt) {
                     homingActive: true,
                     startX: base.x,
                     startY: base.y,
-                    rangeLimit: base.missileTargetingRadius * 1.9,
+                    rangeLimit: base.missileTargetingRadius * base.missileRangeMultiplier,
                     ...styleConfig
                 });
                 if (sensorUpgrades.targetAI) target.allocatedDamage = (target.allocatedDamage||0) + base.missileDamage;
@@ -5690,6 +5699,9 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                 case UPGRADE_MISSILE_RETARGET:
                     base.missileRetarget = level > 0;
                     break;
+                case UPGRADE_MISSILE_LIFESPAN:
+                    base.missileRangeMultiplier = upgrade.f(level);
+                    break;
             }
             break;
         case UPGRADE_CATEGORY_SPECIAL:
@@ -5881,7 +5893,7 @@ function fireMacrossMissiles() {
                 homingActive: true,
                 startX: base.x,
                 startY: base.y,
-                rangeLimit: base.missileTargetingRadius * 1.9,
+                rangeLimit: base.missileTargetingRadius * base.missileRangeMultiplier,
                 ...styleConfig
             });
         }
