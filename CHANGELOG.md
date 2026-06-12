@@ -1,5 +1,21 @@
 # Orbital Defense - Change Log
 
+## v2.86
+- Reworked XP Boost stacking into timed active layers instead of one replaced
+  timer. Each active layer doubles fire rate, up to seven active layers.
+- New XP Boost charge durations are 20s, 10s, 5s, 4s, 3s, 2s, and 2s. Each
+  new charge appends its duration to the remaining boost tail while raising
+  the multiplier.
+- The XP Boost card now drains as a progress bar across the active boost tail
+  and shows active layers out of seven.
+
+## v2.85
+- Missile style cycling now keeps only Itano, Helix, and a new Braided mode;
+  Classic and Starburst are no longer selectable.
+- Braided missiles burst outward, curl back, twist around each other with
+  phase-spaced paths, then tighten together onto the target before impact.
+- Old saved missile-style preferences migrate to the closest remaining mode.
+
 ## v2.84
 - Fixed enemy visibility so enemies are drawn when they enter any active reveal
   radius: sensors, cannon targeting, missile targeting, laser range, or stun

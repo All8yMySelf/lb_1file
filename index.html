@@ -179,7 +179,7 @@
     });
 </script>
 
-<title>Orbital Defense v2.84 - Optimised</title>
+<title>Orbital Defense v2.86 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -635,7 +635,7 @@
 #perkStatus{position:absolute;top:36px;left:10px;z-index:10;font-size:11px;color:#ffd700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v2.84</h1>
+    <h1 id="gameTitle">Orbital Defense v2.86</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -1216,7 +1216,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.84';
+const GAME_VERSION = '2.86';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1552,35 +1552,51 @@ let cheatScoresVisible = false; // Leaderboard cheat-score visibility, toggled w
 const featureToggles = { enemyArchetypes: true, waveRewards: true, juiceEffects: true };
 localStorage.removeItem('ode_featureToggles'); // Clean up the old toggle storage
 
+const XP_BOOST_LAYER_DURATIONS = [20, 10, 5, 4, 3, 2, 2];
+const XP_BOOST_MAX_ACTIVE_LAYERS = XP_BOOST_LAYER_DURATIONS.length;
+
 // Missile flight choreography styles, cycled with the bottom "Missiles"
 // button so the best-looking one can be picked during play
-const MISSILE_STYLES = ['Classic', 'Itano', 'Helix', 'Starburst'];
+const MISSILE_STYLES = ['Itano', 'Helix', 'Braided'];
 const MISSILE_STYLE_STORAGE_KEY = 'ode_missileStyle';
 let missileStyleIndex = (() => {
-    const stored = parseInt(localStorage.getItem(MISSILE_STYLE_STORAGE_KEY), 10);
-    return Number.isFinite(stored) && stored >= 0 && stored < MISSILE_STYLES.length ? stored : 1; // Default: Itano
+    const stored = localStorage.getItem(MISSILE_STYLE_STORAGE_KEY);
+    const storedByName = MISSILE_STYLES.indexOf(stored);
+    if (storedByName >= 0) return storedByName;
+
+    // Migrate the old numeric cycle: Classic, Itano, Helix, Starburst.
+    const legacyIndex = parseInt(stored, 10);
+    const legacyMap = ['Itano', 'Itano', 'Helix', 'Braided'];
+    const migratedStyle = Number.isFinite(legacyIndex) ? legacyMap[legacyIndex] : 'Itano';
+    const migratedIndex = MISSILE_STYLES.indexOf(migratedStyle);
+    return migratedIndex >= 0 ? migratedIndex : 0; // Default: Itano
 })();
 function currentMissileStyle() { return MISSILE_STYLES[missileStyleIndex]; }
 
 // Per-missile launch parameters for the current style. scatterTime is the
 // ballistic spread phase before homing kicks in; curl spins the scatter
-// path; wobble adds the helix corkscrew.
+// path; wobble adds the helix corkscrew; weave bends multiple missiles around
+// each other as they converge.
 function missileStyleConfig(isMacross) {
     const style = currentMissileStyle();
     switch (style) {
         case 'Itano':
             return { style, scatterTime: isMacross ? 0.55 : 0.35,
                      curl: (Math.random() < 0.5 ? -1 : 1) * (1.5 + Math.random() * 2.5),
-                     wobbleFreq: 0, wobbleAmp: 0 };
+                     wobbleFreq: 0, wobbleAmp: 0, weaveAmp: 0, weaveFreq: 0 };
         case 'Helix':
             return { style, scatterTime: 0.15, curl: 0,
-                     wobbleFreq: 6 + Math.random() * 4, wobbleAmp: 2.2 };
-        case 'Starburst':
-            return { style, scatterTime: isMacross ? 0.6 : 0.4,
-                     curl: (Math.random() - 0.5) * 0.6,
-                     wobbleFreq: 0, wobbleAmp: 0 };
+                     wobbleFreq: 6 + Math.random() * 4, wobbleAmp: 2.2,
+                     weaveAmp: 0, weaveFreq: 0 };
+        case 'Braided':
+            return { style, scatterTime: isMacross ? 0.5 : 0.38,
+                     curl: (Math.random() < 0.5 ? -1 : 1) * (2.4 + Math.random() * 2.2),
+                     wobbleFreq: 7 + Math.random() * 3, wobbleAmp: 1.4,
+                     weaveAmp: isMacross ? 55 : 34, weaveFreq: 7.5 + Math.random() * 2.5,
+                     weavePhase: Math.random() * Math.PI * 2 };
         default:
-            return { style: 'Classic', scatterTime: 0, curl: 0, wobbleFreq: 0, wobbleAmp: 0 };
+            return { style: 'Itano', scatterTime: 0.35, curl: 2.4, wobbleFreq: 0, wobbleAmp: 0,
+                     weaveAmp: 0, weaveFreq: 0 };
     }
 }
 
@@ -1591,7 +1607,7 @@ function updateMissileStyleButton() {
 
 function cycleMissileStyle() {
     missileStyleIndex = (missileStyleIndex + 1) % MISSILE_STYLES.length;
-    localStorage.setItem(MISSILE_STYLE_STORAGE_KEY, String(missileStyleIndex));
+    localStorage.setItem(MISSILE_STYLE_STORAGE_KEY, currentMissileStyle());
     updateMissileStyleButton();
     showToast(`Missile style: ${currentMissileStyle()}`);
 }
@@ -1796,12 +1812,15 @@ function resetMissile(missile, config) {
     missile.rangeLimit = config.rangeLimit || base.missileTargetingRadius * 1.1;
 
     // Flight choreography (missile style switcher)
-    missile.style = config.style || 'Classic';
+    missile.style = config.style || 'Itano';
     missile.age = 0;
     missile.scatterTime = config.scatterTime || 0;
     missile.curl = config.curl || 0;
     missile.wobbleFreq = config.wobbleFreq || 0;
     missile.wobbleAmp = config.wobbleAmp || 0;
+    missile.weaveAmp = config.weaveAmp || 0;
+    missile.weaveFreq = config.weaveFreq || 0;
+    missile.weavePhase = config.weavePhase || 0;
 
     if (isRelease) {
         // When releasing back to the pool, clear dynamic state
@@ -1813,12 +1832,15 @@ function resetMissile(missile, config) {
         missile.startX = 0;
         missile.startY = 0;
         missile.rangeLimit = base.missileTargetingRadius * 1.1;
-        missile.style = 'Classic';
+        missile.style = 'Itano';
         missile.age = 0;
         missile.scatterTime = 0;
         missile.curl = 0;
         missile.wobbleFreq = 0;
         missile.wobbleAmp = 0;
+        missile.weaveAmp = 0;
+        missile.weaveFreq = 0;
+        missile.weavePhase = 0;
     }
 }
 
@@ -2833,6 +2855,11 @@ function shiftLoadedGameStateTimestamps(savedAt) {
     ].forEach(key => {
         gameState[key] = shiftedSavedTimestamp(gameState[key], pauseOffset);
     });
+    if (Array.isArray(gameState.xpBoostLayers)) {
+        gameState.xpBoostLayers = gameState.xpBoostLayers
+            .map(endTime => shiftedSavedTimestamp(endTime, pauseOffset))
+            .filter(endTime => Number.isFinite(Number(endTime)) && Number(endTime) > Date.now());
+    }
 }
 
 function saveGame(options = {}) {
@@ -3225,11 +3252,12 @@ function createInitialGameState() {
         enemiesKilled: 0,
         autoFire: true,
         // XP Boost charge bank: kills of XP enemies bank charges; each press
-        // doubles fire rate, with each stacked press lasting half as long
+        // adds one active timed layer up to XP_BOOST_MAX_ACTIVE_LAYERS.
         xpCharges: 0,
         xpBoostMultiplier: 1,
         xpBoostEndTime: 0,
         xpBoostLastDuration: 20,
+        xpBoostLayers: [],
         xpEnemiesSpawned: 0,
         xpEnemiesDestroyed: 0,
         xpEnemySpawnTime: 0,
@@ -3711,13 +3739,15 @@ function handlePlayerFiring(dt) {
     const enemies = enemyPool.getActiveObjects();
 
     // --- Bullet Firing ---
-    const xpBoostActive = currentTime < (gameState.xpBoostEndTime || 0);
-    if (!xpBoostActive && (gameState.xpBoostMultiplier || 1) > 1) {
-        gameState.xpBoostMultiplier = 1; // Boost expired
+    const hadXpBoost = (gameState.xpBoostMultiplier || 1) > 1 ||
+        (Array.isArray(gameState.xpBoostLayers) && gameState.xpBoostLayers.length > 0);
+    const xpBoostStatus = getXpBoostStatus(currentTime);
+    const xpBoostActive = xpBoostStatus.activeLayers > 0;
+    if (!xpBoostActive && hadXpBoost) {
         updateXpBoostButton();
         showToast('XP Boost expired');
     }
-    const rate = base.fireRate / (xpBoostActive ? (gameState.xpBoostMultiplier || 1) : 1);
+    const rate = base.fireRate / xpBoostStatus.multiplier;
     if (currentTime - gameState.lastBulletFireTime >= rate / gameSpeedMultiplier) {
         // Find nearest enemy within cannon range
         let nearestEnemy = null;
@@ -3777,21 +3807,32 @@ function handlePlayerFiring(dt) {
 
     // --- Missile Firing ---
     if (base.missileCount > 0 && currentTime - gameState.lastMissileFireTime >= MISSILE_FIRE_INTERVAL / gameSpeedMultiplier) {
-        let targets = enemies
+        const targetCandidates = enemies
             .filter(enemy => Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.missileTargetingRadius)
             .filter(enemy => !enemy.xp)
             .filter(e => !sensorUpgrades.targetAI || (e.health - (e.allocatedDamage||0) > 0))
-            .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y))
-            .slice(0, base.missileCount); // Fire up to missileCount missiles
+            .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
+        const targets = [];
+        for (let i = 0; i < base.missileCount && targetCandidates.length > 0; i++) {
+            targets.push(targetCandidates[i % targetCandidates.length]);
+        }
 
         if (targets.length > 0) {
-             targets.forEach(target => {
+             targets.forEach((target, index) => {
                 target.isTargeted = true;
                 target.targetLockTime = TARGET_LOCK_DURATION;
                 const angle = Math.atan2(target.y - base.y, target.x - base.x);
                 // Styled launches scatter wide before converging on the target
-                const spread = currentMissileStyle() === 'Classic' ? Math.PI / 8 : Math.PI;
-                const launchAngle = angle + (Math.random() - 0.5) * spread;
+                const style = currentMissileStyle();
+                const spread = style === 'Braided' ? Math.PI * 1.25 : Math.PI;
+                const formationOffset = targets.length > 1
+                    ? (index - (targets.length - 1) / 2) / Math.max(1, targets.length - 1)
+                    : (Math.random() - 0.5);
+                const launchAngle = angle + formationOffset * spread + (Math.random() - 0.5) * 0.25;
+                const styleConfig = missileStyleConfig(false);
+                if (style === 'Braided') {
+                    styleConfig.weavePhase = (index / Math.max(1, targets.length)) * Math.PI * 2;
+                }
 
                 missilePool.get({
                     x: base.x,
@@ -3805,8 +3846,8 @@ function handlePlayerFiring(dt) {
                     homingActive: true,
                     startX: base.x,
                     startY: base.y,
-                    rangeLimit: base.missileTargetingRadius * (currentMissileStyle() === 'Classic' ? 1.1 : 1.9),
-                    ...missileStyleConfig(false)
+                    rangeLimit: base.missileTargetingRadius * 1.9,
+                    ...styleConfig
                 });
                 if (sensorUpgrades.targetAI) target.allocatedDamage = (target.allocatedDamage||0) + base.missileDamage;
              });
@@ -3921,8 +3962,23 @@ function updateProjectiles(dt, baseMoved) {
         if (targetEnemy && !inScatter) {
             targetEnemy.isTargeted = true;
             targetEnemy.targetLockTime = TARGET_LOCK_DURATION;
-            const dx = targetEnemy.x - missile.x;
-            const dy = targetEnemy.y - missile.y;
+            let targetX = targetEnemy.x;
+            let targetY = targetEnemy.y;
+            const directDx = targetEnemy.x - missile.x;
+            const directDy = targetEnemy.y - missile.y;
+            const directDist = Math.hypot(directDx, directDy) || 1;
+            if (missile.style === 'Braided' && missile.weaveAmp) {
+                const travelTime = Math.max(0, missile.age - missile.scatterTime);
+                const tighten = Math.min(1, directDist / 180);
+                const sideX = -directDy / directDist;
+                const sideY = directDx / directDist;
+                const orbit = Math.sin(travelTime * missile.weaveFreq + missile.weavePhase);
+                const offset = orbit * missile.weaveAmp * tighten;
+                targetX += sideX * offset;
+                targetY += sideY * offset;
+            }
+            const dx = targetX - missile.x;
+            const dy = targetY - missile.y;
             const targetAngle = Math.atan2(dy, dx);
             const currentAngle = Math.atan2(missile.dy, missile.dx);
 
@@ -3932,7 +3988,7 @@ function updateProjectiles(dt, baseMoved) {
 
             // Limit turning rate; styled missiles whip around harder so the
             // scattered volley visibly coalesces on the target
-            const turnLimit = missileTurnSpeed * (missile.style !== 'Classic' ? 2.5 : 1);
+            const turnLimit = missileTurnSpeed * (missile.style === 'Braided' ? 3.2 : 2.5);
             const turnAmount = Math.max(-turnLimit, Math.min(turnLimit, angleDiff));
             const newAngle = currentAngle + turnAmount;
 
@@ -3941,7 +3997,7 @@ function updateProjectiles(dt, baseMoved) {
         }
         // else: continue straight
 
-        // 2b. Path bending: scatter curl (Itano/Starburst) and helix wobble
+        // 2b. Path bending: scatter curl (Itano/Braided) and helix wobble
         let bend = 0;
         if (inScatter && missile.curl) bend += missile.curl * dt;
         if (!inScatter && missile.wobbleAmp) bend += Math.sin(missile.age * missile.wobbleFreq) * missile.wobbleAmp * dt;
@@ -4984,11 +5040,57 @@ function drawUpgradeMenu() {
 
 }
 
+function normalizeXpBoostLayers(now = Date.now()) {
+    if (!gameState) return [];
+    let layers = Array.isArray(gameState.xpBoostLayers)
+        ? gameState.xpBoostLayers.map(Number).filter(endTime => Number.isFinite(endTime) && endTime > now)
+        : [];
+
+    if (layers.length === 0 && Number(gameState.xpBoostEndTime) > now) {
+        layers = [Number(gameState.xpBoostEndTime)];
+    }
+
+    layers.sort((a, b) => a - b);
+    if (layers.length > XP_BOOST_MAX_ACTIVE_LAYERS) {
+        layers = layers.slice(-XP_BOOST_MAX_ACTIVE_LAYERS);
+    }
+    gameState.xpBoostLayers = layers;
+    gameState.xpBoostMultiplier = getXpBoostMultiplier(layers.length);
+    gameState.xpBoostEndTime = layers.length > 0 ? layers[layers.length - 1] : 0;
+    return layers;
+}
+
+function getXpBoostMultiplier(activeLayers) {
+    return activeLayers > 0 ? Math.pow(2, activeLayers) : 1;
+}
+
+function getXpBoostTailDuration(activeLayers) {
+    return XP_BOOST_LAYER_DURATIONS
+        .slice(0, Math.max(0, activeLayers))
+        .reduce((total, duration) => total + duration, 0);
+}
+
+function getXpBoostStatus(now = Date.now()) {
+    const layers = normalizeXpBoostLayers(now);
+    const activeLayers = layers.length;
+    const endTime = activeLayers > 0 ? layers[activeLayers - 1] : 0;
+    return {
+        layers,
+        activeLayers,
+        multiplier: getXpBoostMultiplier(activeLayers),
+        endTime,
+        remainingMs: Math.max(0, endTime - now),
+        tailDurationMs: getXpBoostTailDuration(activeLayers) * 1000,
+        canActivate: (gameState.xpCharges || 0) > 0 && activeLayers < XP_BOOST_MAX_ACTIVE_LAYERS
+    };
+}
+
 function shouldShowXpBoostMenuButton() {
     if (!gameState) return false;
+    const status = getXpBoostStatus();
     return (gameState.xpEnemiesSpawned || 0) > 0 ||
         (gameState.xpCharges || 0) > 0 ||
-        Date.now() < (gameState.xpBoostEndTime || 0);
+        status.activeLayers > 0;
 }
 
 function drawXpBoostMenuButton(x, y, categorySpacing) {
@@ -4999,15 +5101,15 @@ function drawXpBoostMenuButton(x, y, categorySpacing) {
     const boxWidth = 170;
     const charges = gameState.xpCharges || 0;
     const now = Date.now();
-    const active = now < (gameState.xpBoostEndTime || 0);
-    const durationMs = Math.max(1, (gameState.xpBoostLastDuration || 20) * 1000);
-    const remainingMs = active ? Math.max(0, gameState.xpBoostEndTime - now) : 0;
-    const progress = active ? remainingMs / durationMs : 0;
+    const status = getXpBoostStatus(now);
+    const active = status.activeLayers > 0;
+    const remainingMs = status.remainingMs;
+    const progress = active ? Math.min(1, remainingMs / Math.max(1, status.tailDurationMs)) : 0;
     const line1 = active
-        ? `XP Boost x${gameState.xpBoostMultiplier || 2}`
+        ? `XP Boost x${status.multiplier}`
         : `XP Boost (${charges})`;
     const line2 = active
-        ? `${(remainingMs / 1000).toFixed(1)}s left (${charges})`
+        ? `${(remainingMs / 1000).toFixed(1)}s ${status.activeLayers}/7 (${charges})`
         : (charges > 0 ? 'Spend charge' : 'No charges');
     const height = fontSize * 2 + padding * 2 + 8;
     const boostColor = '#ffd700';
@@ -5568,22 +5670,25 @@ function fireLaserAt(target) {
 }
 
 // --- XP Boost charge bank ---
-// Banked XP charges double fire rate on demand. Pressing again while a
-// boost runs doubles the rate again, but the fresh window is half as long:
-// 20s, then 10s, then 5s...
+// Banked XP charges add timed boost layers on demand. Each active layer
+// doubles fire rate, up to seven simultaneous layers. New layers extend the
+// tail timer by a shorter fixed duration: 20s, 10s, 5s, 4s, 3s, 2s, 2s.
 function activateXpBoost() {
     if ((gameState.xpCharges || 0) <= 0) return;
     const now = Date.now();
-    gameState.xpCharges--;
-    if (now < (gameState.xpBoostEndTime || 0)) {
-        gameState.xpBoostMultiplier = (gameState.xpBoostMultiplier || 1) * 2;
-        gameState.xpBoostLastDuration = Math.max(2.5, (gameState.xpBoostLastDuration || 20) / 2);
-    } else {
-        gameState.xpBoostMultiplier = 2;
-        gameState.xpBoostLastDuration = 20;
+    const status = getXpBoostStatus(now);
+    if (status.activeLayers >= XP_BOOST_MAX_ACTIVE_LAYERS) {
+        showToast('XP Boost max stack active!', 1500);
+        return;
     }
-    gameState.xpBoostEndTime = now + gameState.xpBoostLastDuration * 1000;
-    showToast(`Fire rate x${gameState.xpBoostMultiplier} for ${gameState.xpBoostLastDuration}s!`, 2500);
+    gameState.xpCharges--;
+    const duration = XP_BOOST_LAYER_DURATIONS[status.activeLayers] || 2;
+    const startTime = Math.max(now, status.endTime);
+    gameState.xpBoostLayers = [...status.layers, startTime + duration * 1000]
+        .sort((a, b) => a - b);
+    const updatedStatus = getXpBoostStatus(now);
+    gameState.xpBoostLastDuration = duration;
+    showToast(`Fire rate x${updatedStatus.multiplier}: +${duration}s`, 2500);
     updateXpBoostButton();
     updateXPStatsPanel();
 }
@@ -5602,18 +5707,20 @@ function fireMacrossMissiles() {
         // Styled volleys share one focus target (boss first, else nearest)
         // so the whole swarm visibly coalesces on a single point
         let focusTarget = null;
-        if (currentMissileStyle() !== 'Classic') {
-            const candidates = enemyPool.getActiveObjects().filter(e => !e.xp);
-            focusTarget = candidates.find(e => e.type === 'Boss') || null;
-            if (!focusTarget && candidates.length > 0) {
-                focusTarget = candidates.reduce((a, b) =>
-                    Math.hypot(a.x - base.x, a.y - base.y) < Math.hypot(b.x - base.x, b.y - base.y) ? a : b);
-            }
+        const candidates = enemyPool.getActiveObjects().filter(e => !e.xp);
+        focusTarget = candidates.find(e => e.type === 'Boss') || null;
+        if (!focusTarget && candidates.length > 0) {
+            focusTarget = candidates.reduce((a, b) =>
+                Math.hypot(a.x - base.x, a.y - base.y) < Math.hypot(b.x - base.x, b.y - base.y) ? a : b);
         }
 
         for (let i = 0; i < count; i++) {
             const angle = (i / count) * Math.PI * 2 + Math.random() * 0.1 - 0.05; // Add slight random angle variation
             const launchSpeed = 3 + Math.random() * 3; // Vary launch speeds
+            const styleConfig = missileStyleConfig(true);
+            if (currentMissileStyle() === 'Braided') {
+                styleConfig.weavePhase = (i / Math.max(1, count)) * Math.PI * 2;
+            }
 
             missilePool.get({
                 x: base.x,
@@ -5628,8 +5735,8 @@ function fireMacrossMissiles() {
                 homingActive: true,
                 startX: base.x,
                 startY: base.y,
-                rangeLimit: base.missileTargetingRadius * (currentMissileStyle() === 'Classic' ? 1.1 : 1.9),
-                ...missileStyleConfig(true)
+                rangeLimit: base.missileTargetingRadius * 1.9,
+                ...styleConfig
             });
         }
 
