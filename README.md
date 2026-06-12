@@ -74,6 +74,13 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v2.99
+- Added Ordnance Sync and Fire Control AI Sensor upgrades to reduce wasted
+  overlap between cannon, missile, and laser targeting.
+
+### v2.98
+- Macross Missile Massacre's +5s recharge penalty resets on each new wave,
+  while repeated uses within the same wave still get progressively slower.
 
 ### v2.97
 - Every Macross Missile Massacre launch adds 5 seconds to the next recharge,

@@ -179,7 +179,7 @@
     });
 </script>
 
-<title>Orbital Defense v2.97 - Optimised</title>
+<title>Orbital Defense v2.99 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -629,7 +629,7 @@
 #perkStatus{position:absolute;top:36px;left:10px;z-index:10;font-size:11px;color:#ffd700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v2.86</h1>
+    <h1 id="gameTitle">Orbital Defense v2.99</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -1208,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.97';
+const GAME_VERSION = '2.99';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1449,6 +1449,8 @@ const UPGRADE_SENSOR_RANGE = 0;
 const UPGRADE_SENSOR_OUTLINES = 1;
 const UPGRADE_SENSOR_HEALTHBARS = 2;
 const UPGRADE_SENSOR_TARGET_AI = 3;
+const UPGRADE_SENSOR_ORDNANCE_SYNC = 4;
+const UPGRADE_SENSOR_FIRE_CONTROL_AI = 5;
 // Info mode upgrade moved to its own category
 const UPGRADE_INFO_HELP = 0;
 
@@ -1498,7 +1500,69 @@ function toggleHomingRadius() {
     localStorage.setItem(HOMING_RADIUS_STORAGE_KEY, showMissileRadius ? 'on' : 'off');
     showToast(`Homing radius ${showMissileRadius ? 'visible' : 'hidden'}`);
 }
-let sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
+
+function getMacrossBaseCooldown() {
+    if (!upgradeTree?.[UPGRADE_CATEGORY_MISSILE]) return MACROSS_BASE_COOLDOWN;
+    const cooldownLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
+    return Math.max(1, MACROSS_BASE_COOLDOWN - cooldownLevel * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL);
+}
+let sensorUpgrades = {
+    enemyVisuals: false,
+    showHealthBars: false,
+    targetAI: false,
+    ordnanceSync: false,
+    fireControlAI: false
+};
+
+function createWeaponReservations(source = {}) {
+    return {
+        cannon: Math.max(0, Number(source.cannon) || 0),
+        missile: Math.max(0, Number(source.missile) || 0),
+        laser: Math.max(0, Number(source.laser) || 0)
+    };
+}
+
+function totalWeaponReservations(enemy) {
+    const reservations = enemy?.weaponReservations || {};
+    return (Number(reservations.cannon) || 0) +
+        (Number(reservations.missile) || 0) +
+        (Number(reservations.laser) || 0);
+}
+
+function syncAllocatedDamage(enemy) {
+    if (!enemy) return;
+    enemy.allocatedDamage = totalWeaponReservations(enemy);
+}
+
+function reserveWeaponDamage(enemy, weapon, damage) {
+    if (!sensorUpgrades.targetAI || !enemy || damage <= 0) return;
+    enemy.weaponReservations = createWeaponReservations(enemy.weaponReservations);
+    enemy.weaponReservations[weapon] = Math.max(0, (enemy.weaponReservations[weapon] || 0) + damage);
+    syncAllocatedDamage(enemy);
+}
+
+function releaseWeaponDamage(enemy, weapon, damage) {
+    if (!enemy || damage <= 0) return;
+    enemy.weaponReservations = createWeaponReservations(enemy.weaponReservations);
+    enemy.weaponReservations[weapon] = Math.max(0, (enemy.weaponReservations[weapon] || 0) - damage);
+    syncAllocatedDamage(enemy);
+}
+
+function reservedDamageForWeapon(enemy, weapon) {
+    if (!sensorUpgrades.targetAI || !enemy) return 0;
+    const reservations = createWeaponReservations(enemy.weaponReservations);
+    if (sensorUpgrades.fireControlAI) {
+        return reservations.cannon + reservations.missile + reservations.laser;
+    }
+    if (sensorUpgrades.ordnanceSync && (weapon === 'cannon' || weapon === 'missile')) {
+        return reservations.cannon + reservations.missile;
+    }
+    return reservations[weapon] || 0;
+}
+
+function hasTargetCapacity(enemy, weapon) {
+    return !sensorUpgrades.targetAI || (enemy.health - reservedDamageForWeapon(enemy, weapon) > 0);
+}
 let sensorDisplayMode = 'inline';
 let baseCanMove = true;
 let enemyIntel = { active:false, known:{}, order:[] };
@@ -1722,7 +1786,12 @@ function resetEnemy(enemy, config) {
     enemy.isTargeted = !!config.isTargeted;
     enemy.targetLockTime = Math.max(0, Number(config.targetLockTime) || 0);
 
-    enemy.allocatedDamage = Math.max(0, Number(config.allocatedDamage) || 0);
+    enemy.weaponReservations = createWeaponReservations(config.weaponReservations);
+    const legacyAllocatedDamage = Math.max(0, Number(config.allocatedDamage) || 0);
+    if (legacyAllocatedDamage > 0 && totalWeaponReservations(enemy) === 0) {
+        enemy.weaponReservations.missile = legacyAllocatedDamage;
+    }
+    syncAllocatedDamage(enemy);
 
     // Archetype fields (shield must not leak between pool reuses)
     enemy.shield = Math.max(0, Number(config.shield) || 0);
@@ -1736,6 +1805,7 @@ function resetEnemy(enemy, config) {
         enemy.stunTime = 0;
         enemy.isTargeted = false;
         enemy.targetLockTime = 0;
+        enemy.weaponReservations = createWeaponReservations();
         enemy.allocatedDamage = 0;
         enemy.shield = 0;
         enemy.maxShield = 0;
@@ -1749,6 +1819,8 @@ function resetBullet(bullet, config) {
     bullet.dx = config.dx || 0;
     bullet.dy = config.dy || 0;
     bullet.color = config.color || currentTheme.canvasColors.bullet;
+    bullet.target = config.target || null;
+    bullet.reservedDamage = Math.max(0, Number(config.reservedDamage) || 0);
 }
 
 function resetMissile(missile, config) {
@@ -1759,6 +1831,8 @@ function resetMissile(missile, config) {
     missile.dx = config.dx || 0;
     missile.dy = config.dy || 0;
     missile.target = config.t || null; // Set target or null
+    missile.reservedTarget = config.reservedTarget || missile.target || null;
+    missile.reservedDamage = Math.max(0, Number(config.reservedDamage) || 0);
     missile.speed = config.speed || 1;
     missile.turnSpeed = config.turnSpeed || 0.05;
     missile.homingRadius =
@@ -1784,6 +1858,8 @@ function resetMissile(missile, config) {
     if (isRelease) {
         // When releasing back to the pool, clear dynamic state
         missile.target = null;
+        missile.reservedTarget = null;
+        missile.reservedDamage = 0;
         missile.trail = [];
         missile.isMacross = false;
         missile.homingActive = false;
@@ -2294,7 +2370,26 @@ function applyHealerAuras(dt) {
     });
 }
 
+function clearProjectileReservationsForEnemy(enemy) {
+    if (!enemy) return;
+    bulletPool.getActiveObjects().forEach(bullet => {
+        if (bullet.target === enemy) {
+            bullet.target = null;
+            bullet.reservedDamage = 0;
+        }
+    });
+    missilePool.getActiveObjects().forEach(missile => {
+        if (missile.reservedTarget === enemy) {
+            missile.reservedTarget = null;
+            missile.reservedDamage = 0;
+        }
+    });
+    enemy.weaponReservations = createWeaponReservations();
+    syncAllocatedDamage(enemy);
+}
+
 function handleEnemyKilled(enemy, options = {}) {
+    clearProjectileReservationsForEnemy(enemy);
     if (enemy.type === 'Splitter' && !enemy.isChild && !options.suppressSplit) {
         // Children burst out perpendicular to the base-to-splitter axis so
         // they sidestep the incoming bullet stream instead of dying to it
@@ -2637,19 +2732,22 @@ function serializeEnemy(enemy) {
         isTargeted: !!enemy.isTargeted,
         targetLockTime: enemy.targetLockTime || 0,
         allocatedDamage: enemy.allocatedDamage || 0,
+        weaponReservations: createWeaponReservations(enemy.weaponReservations),
         shield: enemy.shield || 0,
         maxShield: enemy.maxShield || 0,
         isChild: !!enemy.isChild
     };
 }
 
-function serializeBullet(bullet) {
+function serializeBullet(bullet, enemyIndexByObject) {
     return {
         x: bullet.x,
         y: bullet.y,
         dx: bullet.dx,
         dy: bullet.dy,
-        color: bullet.color
+        color: bullet.color,
+        targetIndex: enemyIndexByObject.has(bullet.target) ? enemyIndexByObject.get(bullet.target) : -1,
+        reservedDamage: bullet.reservedDamage || 0
     };
 }
 
@@ -2668,7 +2766,9 @@ function serializeMissile(missile, enemyIndexByObject) {
         homingActive: !!missile.homingActive,
         startX: missile.startX,
         startY: missile.startY,
-        rangeLimit: missile.rangeLimit
+        rangeLimit: missile.rangeLimit,
+        reservedTargetIndex: enemyIndexByObject.has(missile.reservedTarget) ? enemyIndexByObject.get(missile.reservedTarget) : -1,
+        reservedDamage: missile.reservedDamage || 0
     };
 }
 
@@ -2695,7 +2795,7 @@ function serializeRuntimeState() {
         canvasHeight,
         gameStartElapsed: gameStartTime ? Date.now() - gameStartTime : 0,
         enemies: enemies.map(serializeEnemy),
-        bullets: bulletPool.getActiveObjects().map(serializeBullet),
+        bullets: bulletPool.getActiveObjects().map(bullet => serializeBullet(bullet, enemyIndexByObject)),
         missiles: missilePool.getActiveObjects().map(missile => serializeMissile(missile, enemyIndexByObject)),
         particles: particles.map(serializeParticle)
     };
@@ -2738,6 +2838,7 @@ function restoreSavedRuntimeState(runtimeState, savedAt) {
                 isTargeted: !!savedEnemy.isTargeted,
                 targetLockTime: Math.max(0, Number(savedEnemy.targetLockTime) || 0),
                 allocatedDamage: Math.max(0, Number(savedEnemy.allocatedDamage) || 0),
+                weaponReservations: createWeaponReservations(savedEnemy.weaponReservations),
                 shield: Math.max(0, Number(savedEnemy.shield) || 0),
                 maxShield: Math.max(0, Number(savedEnemy.maxShield) || 0),
                 isChild: !!savedEnemy.isChild
@@ -2748,12 +2849,16 @@ function restoreSavedRuntimeState(runtimeState, savedAt) {
 
     if (Array.isArray(runtimeState.bullets)) {
         runtimeState.bullets.forEach(savedBullet => {
+            const targetIndex = Math.floor(Number(savedBullet.targetIndex));
+            const target = Number.isFinite(targetIndex) && targetIndex >= 0 ? restoredEnemies[targetIndex] : null;
             bulletPool.get({
                 x: (Number(savedBullet.x) || 0) * scaleX,
                 y: (Number(savedBullet.y) || 0) * scaleY,
                 dx: Number(savedBullet.dx) || 0,
                 dy: Number(savedBullet.dy) || 0,
-                color: savedBullet.color
+                color: savedBullet.color,
+                target,
+                reservedDamage: Math.max(0, Number(savedBullet.reservedDamage) || 0)
             });
         });
     }
@@ -2762,6 +2867,10 @@ function restoreSavedRuntimeState(runtimeState, savedAt) {
         runtimeState.missiles.forEach(savedMissile => {
             const targetIndex = Math.floor(Number(savedMissile.targetIndex));
             const target = Number.isFinite(targetIndex) && targetIndex >= 0 ? restoredEnemies[targetIndex] : null;
+            const reservedTargetIndex = Math.floor(Number(savedMissile.reservedTargetIndex));
+            const reservedTarget = Number.isFinite(reservedTargetIndex) && reservedTargetIndex >= 0
+                ? restoredEnemies[reservedTargetIndex]
+                : target;
             missilePool.get({
                 x: (Number(savedMissile.x) || 0) * scaleX,
                 y: (Number(savedMissile.y) || 0) * scaleY,
@@ -2776,7 +2885,9 @@ function restoreSavedRuntimeState(runtimeState, savedAt) {
                 homingActive: !!savedMissile.homingActive || !target,
                 startX: (Number(savedMissile.startX) || 0) * scaleX,
                 startY: (Number(savedMissile.startY) || 0) * scaleY,
-                rangeLimit: Number(savedMissile.rangeLimit) || base.missileTargetingRadius * 1.1
+                rangeLimit: Number(savedMissile.rangeLimit) || base.missileTargetingRadius * 1.1,
+                reservedTarget,
+                reservedDamage: Math.max(0, Number(savedMissile.reservedDamage) || 0)
             });
         });
     }
@@ -3177,6 +3288,12 @@ function createUpgradeTree(initialRange) {
                   g: (level) => level > 0 ? 'On' : '(Enable)' },
                 { name: 'Target Analysis AI', cost: 3000, level: 0, maxLevel: 1,
                   f: level => level > 0,
+                  g: (level) => level > 0 ? 'Active' : '(Install)' },
+                { name: 'Ordnance Sync', cost: 5000, level: 0, maxLevel: 1,
+                  f: level => level > 0,
+                  g: (level) => level > 0 ? 'Active' : '(Install)' },
+                { name: 'Fire Control AI', cost: 8000, level: 0, maxLevel: 1,
+                  f: level => level > 0,
                   g: (level) => level > 0 ? 'Active' : '(Install)' }
             ]
         },
@@ -3311,7 +3428,13 @@ function createInitialBaseState(initialRange) {
 }
 
 function resetSensorRuntime() {
-    sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
+    sensorUpgrades = {
+        enemyVisuals: false,
+        showHealthBars: false,
+        targetAI: false,
+        ordnanceSync: false,
+        fireControlAI: false
+    };
     sensorDisplayMode = 'inline';
     enemyIntel = { active:false, known:{}, order:[] };
     getElement('sensorDisplayToggle').textContent = 'Inline';
@@ -3750,7 +3873,7 @@ function handlePlayerFiring(dt) {
             let targets = enemies
                 .filter(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange)
                 .filter(e => !e.xp)
-                .filter(e => !sensorUpgrades.targetAI || (e.health - (e.allocatedDamage||0) > 0))
+                .filter(e => hasTargetCapacity(e, 'cannon'))
                 .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
             const bigThreat = targets.find(e => e.radius >= BIG_THREAT_RADIUS_THRESHOLD && Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * BIG_THREAT_RANGE_MULTIPLIER);
             const focusTarget = targets.find(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange * base.focusRadiusSetting);
@@ -3779,9 +3902,11 @@ function handlePlayerFiring(dt) {
                     y: base.y,
                     dx: Math.cos(angle),
                     dy: Math.sin(angle),
-                    color: shadeColor(currentTheme.canvasColors.bullet, shade)
+                    color: shadeColor(currentTheme.canvasColors.bullet, shade),
+                    target: t,
+                    reservedDamage: sensorUpgrades.targetAI ? base.bulletDamage : 0
                 });
-                if (sensorUpgrades.targetAI) t.allocatedDamage = (t.allocatedDamage||0) + base.bulletDamage;
+                reserveWeaponDamage(t, 'cannon', base.bulletDamage);
             }
             gameState.lastBulletFireTime = currentTime;
         }
@@ -3792,7 +3917,7 @@ function handlePlayerFiring(dt) {
         const targetCandidates = enemies
             .filter(enemy => Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.missileTargetingRadius)
             .filter(enemy => !enemy.xp)
-            .filter(e => !sensorUpgrades.targetAI || (e.health - (e.allocatedDamage||0) > 0))
+            .filter(e => hasTargetCapacity(e, 'missile'))
             .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
         const targets = [];
         for (let i = 0; i < base.missileCount && targetCandidates.length > 0; i++) {
@@ -3829,9 +3954,11 @@ function handlePlayerFiring(dt) {
                     startX: base.x,
                     startY: base.y,
                     rangeLimit: base.missileTargetingRadius * base.missileRangeMultiplier,
+                    reservedTarget: target,
+                    reservedDamage: sensorUpgrades.targetAI ? base.missileDamage : 0,
                     ...styleConfig
                 });
-                if (sensorUpgrades.targetAI) target.allocatedDamage = (target.allocatedDamage||0) + base.missileDamage;
+                reserveWeaponDamage(target, 'missile', base.missileDamage);
              });
             createExplosion(base.x, base.y, 'orange', 5 * targets.length, 8); // Bigger launch effect for more missiles
             gameState.lastMissileFireTime = currentTime;
@@ -3844,13 +3971,15 @@ function handlePlayerFiring(dt) {
         const laserTarget = enemies.find(enemy =>
             !enemy.xp && (enemy.type === 'Fast' || enemy.type === 'Boss') &&
             Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.laserRange &&
-            (!sensorUpgrades.targetAI || (enemy.health - (enemy.allocatedDamage||0) > 0))
+            hasTargetCapacity(enemy, 'laser')
         );
 
         if (laserTarget) {
             laserTarget.isTargeted = true;
             laserTarget.targetLockTime = TARGET_LOCK_DURATION;
+            reserveWeaponDamage(laserTarget, 'laser', base.laserDamage);
             laserTarget.health -= applyShieldAbsorption(laserTarget, base.laserDamage);
+            releaseWeaponDamage(laserTarget, 'laser', base.laserDamage);
             gameState.lastLaserFireTime = currentTime;
             gameState.laserEffectEndTime = currentTime + 200; // Duration of visual effect
             base.laserTargetX = laserTarget.x;
@@ -3897,6 +4026,7 @@ function updateProjectiles(dt, baseMoved) {
 
         // Remove bullets out of bounds
         if (bullet.x < -10 || bullet.x > canvasWidth + 10 || bullet.y < -10 || bullet.y > canvasHeight + 10) {
+            releaseWeaponDamage(bullet.target, 'cannon', bullet.reservedDamage);
             bulletPool.release(bullet);
         }
         // Collision checked in checkCollisions
@@ -4027,6 +4157,7 @@ function updateProjectiles(dt, baseMoved) {
         if (distFromStart > missile.rangeLimit ||
             missile.x < -50 || missile.x > canvasWidth + 50 ||
             missile.y < -50 || missile.y > canvasHeight + 50) {
+            releaseWeaponDamage(missile.reservedTarget, 'missile', missile.reservedDamage);
             missilePool.release(missile);
         }
     }
@@ -4052,8 +4183,8 @@ function checkCollisions(dt) {
 
             if (distSq < radiiSumSq) {
                 bulletHit = true;
+                releaseWeaponDamage(bullet.target, 'cannon', bullet.reservedDamage);
                 enemy.health -= applyShieldAbsorption(enemy, base.bulletDamage);
-                if (sensorUpgrades.targetAI) enemy.allocatedDamage = Math.max(0, (enemy.allocatedDamage||0) - base.bulletDamage);
                 createParticle(bullet.x, bullet.y, currentTheme.canvasColors.particleHit, 2, 0.3, 2); // Hit spark
 
                 if (enemy.health <= 0) {
@@ -4090,8 +4221,8 @@ function checkCollisions(dt) {
             if (distSq < radiiSumSq) {
                 missileHit = true;
                 const damage = missile.isMacross ? base.macrossMissileDamage : base.missileDamage;
+                releaseWeaponDamage(missile.reservedTarget, 'missile', missile.reservedDamage);
                 enemy.health -= applyShieldAbsorption(enemy, damage);
-                if (sensorUpgrades.targetAI) enemy.allocatedDamage = Math.max(0, (enemy.allocatedDamage||0) - damage);
                  // Small impact explosion
                  createExplosion(missile.x, missile.y, currentTheme.canvasColors.missile, 10, enemy.radius / 2); // Use missile color
 
@@ -4130,6 +4261,9 @@ function updateCooldowns(dt) {
 
 function startNextWave() {
     gameState.wave++;
+    gameState.macrossUseCount = 0;
+    gameState.macrossCooldownTotal = getMacrossBaseCooldown();
+    gameState.macrossCooldownTimer = Math.min(gameState.macrossCooldownTimer || 0, gameState.macrossCooldownTotal);
     gameState.enemiesSpawnedThisWave = 0;
     gameState.isBossWave = false;
     // Wave heal tops up to max but never strips Repair Crew overheal
@@ -5174,9 +5308,7 @@ function drawMacrossMenuButton(x, y, categorySpacing) {
     const fontSize = parseInt(currentTheme.cssVariables['--upgrade-button-font-size']) || 12;
     const padding = 8;
     const boxWidth = 170;
-    const level = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
-    const totalCooldown = Math.max(1, gameState.macrossCooldownTotal ||
-        (MACROSS_BASE_COOLDOWN - level * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL));
+    const totalCooldown = Math.max(1, gameState.macrossCooldownTotal || getMacrossBaseCooldown());
     const remaining = Math.max(0, gameState.macrossCooldownTimer || 0);
     const ready = remaining <= 0;
     const progress = ready ? 1 : Math.min(1, 1 - remaining / totalCooldown);
@@ -5270,6 +5402,8 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let manualButton = null;
         let smartButton = null;
         let retargetButton = null;
+        let ordnanceSyncButton = null;
+        let fireControlButton = null;
         let maxTextWidth = 0;
         category.upgrades.forEach((u, idx) => {
             const isFocus = categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS;
@@ -5277,6 +5411,8 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             const isManualLaser = categoryIndex === UPGRADE_CATEGORY_LASER && idx === UPGRADE_LASER_MANUAL;
             const isSmartAI = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SMART;
             const isRetarget = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_RETARGET;
+            const isOrdnanceSync = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_ORDNANCE_SYNC;
+            const isFireControl = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_FIRE_CONTROL_AI;
             const hasBar = isFocus || u.progressBar;
             const b = measureUpgradeButton(u, idx, hasBar, fontSize, padding);
             maxTextWidth = Math.max(maxTextWidth, b.minWidth);
@@ -5285,6 +5421,8 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             else if (isManualLaser) manualButton = b;
             else if (isSmartAI) smartButton = b;
             else if (isRetarget) retargetButton = b;
+            else if (isOrdnanceSync) ordnanceSyncButton = b;
+            else if (isFireControl) fireControlButton = b;
             else buttons.push(b);
         });
 
@@ -5294,6 +5432,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let gunButtonY = null;
         let calcHealthButtonY = null;
         let laserButtonY = null;
+        let targetAIButtonY = null;
         let macrosButtonY = null;
         let radiusButtonY = null;
 
@@ -5310,6 +5449,9 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             }
             if (categoryIndex === UPGRADE_CATEGORY_LASER && b.idx === UPGRADE_LASER_DAMAGE) {
                 laserButtonY = tempY;
+            }
+            if (categoryIndex === UPGRADE_CATEGORY_SENSORS && b.idx === UPGRADE_SENSOR_TARGET_AI) {
+                targetAIButtonY = tempY;
             }
             if (categoryIndex === UPGRADE_CATEGORY_MISSILE && b.idx === UPGRADE_MISSILE_MACROSS) {
                 macrosButtonY = tempY;
@@ -5442,6 +5584,19 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE].level > 0,
                 categoryIndex, displayColor, maxedColor, fontSize, padding, false);
         }
+
+        if (ordnanceSyncButton) {
+            drawSubUpgradeButton(ordnanceSyncButton, panelX, buttonWidth, targetAIButtonY !== null ? targetAIButtonY : currentY,
+                upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_TARGET_AI].level > 0,
+                categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+        }
+
+        if (fireControlButton) {
+            const offsetY = ordnanceSyncButton ? ordnanceSyncButton.height + 10 : 0;
+            drawSubUpgradeButton(fireControlButton, panelX, buttonWidth, (targetAIButtonY !== null ? targetAIButtonY : currentY) + offsetY,
+                upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_ORDNANCE_SYNC].level > 0,
+                categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+        }
     }
 
     ringClickRegions.push({
@@ -5572,6 +5727,18 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_RETARGET) {
         if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE].level === 0) {
             showToast("Requires missile Radius upgrade first!", 2500);
+            return;
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_SENSORS && upgradeIndex === UPGRADE_SENSOR_ORDNANCE_SYNC) {
+        if (upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_TARGET_AI].level === 0) {
+            showToast("Requires Target Analysis AI first!", 2500);
+            return;
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_SENSORS && upgradeIndex === UPGRADE_SENSOR_FIRE_CONTROL_AI) {
+        if (upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_ORDNANCE_SYNC].level === 0) {
+            showToast("Requires Ordnance Sync first!", 2500);
             return;
         }
     }
@@ -5746,6 +5913,12 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                 case UPGRADE_SENSOR_TARGET_AI:
                     sensorUpgrades.targetAI = level > 0;
                     break;
+                case UPGRADE_SENSOR_ORDNANCE_SYNC:
+                    sensorUpgrades.ordnanceSync = level > 0;
+                    break;
+                case UPGRADE_SENSOR_FIRE_CONTROL_AI:
+                    sensorUpgrades.fireControlAI = level > 0;
+                    break;
             }
             break;
         case UPGRADE_CATEGORY_INFO:
@@ -5897,19 +6070,20 @@ function fireMacrossMissiles() {
                 startX: base.x,
                 startY: base.y,
                 rangeLimit: base.missileTargetingRadius * base.missileRangeMultiplier,
+                reservedTarget: assignments[i],
+                reservedDamage: sensorUpgrades.targetAI && assignments[i] ? base.macrossMissileDamage : 0,
                 ...styleConfig
             });
+            reserveWeaponDamage(assignments[i], 'missile', base.macrossMissileDamage);
         }
 
         createExplosion(base.x, base.y, 'red', 50, 40); // Big launch effect
         showToast('Macross Missile Massacre!');
 
-        const cooldownLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level;
-        // Every use makes the next recharge 5s longer
+        // Every use in the current wave makes the next recharge 5s longer.
         const usePenalty = (gameState.macrossUseCount || 0) * 5;
         gameState.macrossUseCount = (gameState.macrossUseCount || 0) + 1;
-        gameState.macrossCooldownTotal =
-            MACROSS_BASE_COOLDOWN - cooldownLevel * MACROSS_COOLDOWN_REDUCTION_PER_LEVEL + usePenalty;
+        gameState.macrossCooldownTotal = getMacrossBaseCooldown() + usePenalty;
         gameState.macrossCooldownTimer = gameState.macrossCooldownTotal;
     }
 }

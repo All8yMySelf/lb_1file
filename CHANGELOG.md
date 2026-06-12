@@ -1,5 +1,18 @@
 # Orbital Defense - Change Log
 
+## v2.99
+- Added two Sensor upgrades under Target Analysis AI:
+  - Ordnance Sync separates cannon and missile reservations so bullets avoid
+    enemies already covered by incoming missiles, and missiles avoid cannon
+    reservations.
+  - Fire Control AI extends that separation to the laser, so the laser prefers
+    targets not already covered by cannon or missile damage.
+
+## v2.98
+- Macross Missile Massacre cooldown penalties now reset at the start of each
+  new wave. Within a wave, each use still adds 5 seconds to the next recharge,
+  but the next wave starts that penalty cycle fresh.
+
 ## v2.97
 - Every Macross Missile Massacre launch now adds 5 seconds to the next
   recharge, so the more you lean on it the longer it takes to come back.
