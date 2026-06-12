@@ -1208,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.94';
+const GAME_VERSION = '2.95';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1440,6 +1440,7 @@ const UPGRADE_MISSILE_DAMAGE = 2;
 const UPGRADE_MISSILE_HOMING = 3;
 const UPGRADE_MISSILE_MACROSS = 4;
 const UPGRADE_MISSILE_SMART = 5;
+const UPGRADE_MISSILE_RETARGET = 6;
 const UPGRADE_SPECIAL_STUN = 0;
 const UPGRADE_TIME_SLOW = 0;
 const UPGRADE_TIME_FAST = 1;
@@ -3110,7 +3111,10 @@ function createUpgradeTree(initialRange) {
                       const currentPct = 60 + level * 10;
                       const nextPct = level < maxLvl ? 60 + (level + 1) * 10 : currentPct;
                       return `${currentPct}%${level < maxLvl ? ` > ${nextPct}%` : ''}`;
-                  }}
+                  }},
+                { name: 'Retarget', cost: 4000, level: 0, maxLevel: 1, // Offshoot of Radius
+                  f: level => level,
+                  g: (level, cost, maxLvl) => level === 0 ? '(Activate)' : 'Active' }
             ]
         },
         { // Category 4: Special
@@ -3281,6 +3285,7 @@ function createInitialBaseState(initialRange) {
         macrossMissileCount: 0, // Needs upgrade
         macrossMissileDamage: 20,
         macrossSmartAccuracy: 0, // Needs Smart AI upgrade
+        missileRetarget: false, // Needs Retarget upgrade
 
         stunLevel: 0, // Needs upgrade
         stunRadius: 0,
@@ -3921,6 +3926,30 @@ function updateProjectiles(dt, baseMoved) {
             missile.target = targetEnemy; // Update target for next frame
             if (targetEnemy) {
                 missile.speed *= 1 + upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_HOMING].level * 0.05;
+            }
+
+            // Retarget upgrade: if the missile found nothing in its own
+            // homing radius but is still inside the base's missile range,
+            // the base assigns it the closest enemy within that range
+            if (!targetEnemy && base.missileRetarget && !missile.isMacross &&
+                Math.hypot(missile.x - base.x, missile.y - base.y) <= base.missileTargetingRadius) {
+                let bestDistSq = Infinity;
+                let reassigned = null;
+                enemies.forEach(enemy => {
+                    if (enemy.xp) return;
+                    if (Math.hypot(enemy.x - base.x, enemy.y - base.y) > base.missileTargetingRadius) return;
+                    const dx = enemy.x - missile.x;
+                    const dy = enemy.y - missile.y;
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < bestDistSq) {
+                        bestDistSq = distSq;
+                        reassigned = enemy;
+                    }
+                });
+                if (reassigned) {
+                    targetEnemy = reassigned;
+                    missile.target = reassigned;
+                }
             }
         }
 
@@ -5228,12 +5257,14 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let targetButton = null;
         let manualButton = null;
         let smartButton = null;
+        let retargetButton = null;
         let maxTextWidth = 0;
         category.upgrades.forEach((u, idx) => {
             const isFocus = categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS;
             const isTargetAI = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_TARGET_AI;
             const isManualLaser = categoryIndex === UPGRADE_CATEGORY_LASER && idx === UPGRADE_LASER_MANUAL;
             const isSmartAI = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SMART;
+            const isRetarget = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_RETARGET;
             const hasBar = isFocus || u.progressBar;
             const b = measureUpgradeButton(u, idx, hasBar, fontSize, padding);
             maxTextWidth = Math.max(maxTextWidth, b.minWidth);
@@ -5241,6 +5272,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             else if (isTargetAI) targetButton = b;
             else if (isManualLaser) manualButton = b;
             else if (isSmartAI) smartButton = b;
+            else if (isRetarget) retargetButton = b;
             else buttons.push(b);
         });
 
@@ -5251,6 +5283,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let calcHealthButtonY = null;
         let laserButtonY = null;
         let macrosButtonY = null;
+        let radiusButtonY = null;
 
         // Compute center positions
         let tempY = y;
@@ -5268,6 +5301,9 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             }
             if (categoryIndex === UPGRADE_CATEGORY_MISSILE && b.idx === UPGRADE_MISSILE_MACROSS) {
                 macrosButtonY = tempY;
+            }
+            if (categoryIndex === UPGRADE_CATEGORY_MISSILE && b.idx === UPGRADE_MISSILE_RANGE) {
+                radiusButtonY = tempY;
             }
             tempY += b.height + 10;
         });
@@ -5386,6 +5422,12 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         if (smartButton) {
             drawSubUpgradeButton(smartButton, panelX, buttonWidth, macrosButtonY !== null ? macrosButtonY : currentY,
                 upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level > 0,
+                categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+        }
+
+        if (retargetButton) {
+            drawSubUpgradeButton(retargetButton, panelX, buttonWidth, radiusButtonY !== null ? radiusButtonY : currentY,
+                upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE].level > 0,
                 categoryIndex, displayColor, maxedColor, fontSize, padding, false);
         }
     }
@@ -5515,6 +5557,12 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
             return;
         }
     }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_RETARGET) {
+        if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_RANGE].level === 0) {
+            showToast("Requires missile Radius upgrade first!", 2500);
+            return;
+        }
+    }
     if (categoryIndex === UPGRADE_CATEGORY_CANNON && upgradeIndex === UPGRADE_CANNON_FOCUS_RADIUS) {
         if (upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_MULTIBARREL].level === 0) {
             showToast("Requires Guns upgrade first!", 2500);
@@ -5638,6 +5686,9 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     break;
                 case UPGRADE_MISSILE_SMART:
                     base.macrossSmartAccuracy = upgrade.f(level);
+                    break;
+                case UPGRADE_MISSILE_RETARGET:
+                    base.missileRetarget = level > 0;
                     break;
             }
             break;
