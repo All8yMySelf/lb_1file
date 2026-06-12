@@ -1,5 +1,32 @@
 # Orbital Defense - Change Log
 
+## v2.84
+- Fixed enemy visibility so enemies are drawn when they enter any active reveal
+  radius: sensors, cannon targeting, missile targeting, laser range, or stun
+  field.
+- Missile targets no longer appear invisible just because they are outside the
+  sensor radius.
+
+## v2.83
+- Cleaned up XP Status after the XP Boost card move: the panel no longer
+  repeats banked charge information that already lives on the Boost card.
+- The "Destroy with Manual Laser..." hint now disappears once Manual Targeting
+  has been purchased.
+
+## v2.82
+- Moved XP Boost out of the bottom controls and into the canvas upgrade menu
+  below the upgrade categories, so it sits with the rest of the tactical cards.
+- The XP Boost card now acts as its own countdown display: while active, the
+  card shows the multiplier, remaining seconds, charges, and a shrinking
+  progress fill.
+- Removed the active boost timer from XP Status so the timer lives on the
+  clickable Boost card.
+
+## v2.81
+- Wave reward choices are now deterministic for fair high-score runs: each
+  cleared wave still offers 3 rewards, but the options rotate by wave number
+  through the six-reward list instead of being randomly sampled.
+
 ## v2.80
 - XP enemies now bank charges instead of instantly doubling fire rate: a new
   "XP Boost (N)" button pops up at the bottom showing how many charges you
