@@ -668,7 +668,6 @@
     <button id="xpBoostButton" style="display:none">XP Boost (0)</button>
     <button id="toggleInfoButton" class="active">o</button>
     <button id="themeButton">Theme: Retro</button>
-    <button id="homingRadiusToggle">Homing Radius: On</button>
     <div id="sensorToggle">
         <span class="switch-label">Enemy Info:</span>
         <button id="sensorDisplayToggle">Inline</button>
@@ -1216,7 +1215,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.90';
+const GAME_VERSION = '2.91';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1499,14 +1498,9 @@ canvas.height = canvasHeight;
 let showRingInfo = true;
 const HOMING_RADIUS_STORAGE_KEY = 'ode_showMissileRadius';
 let showMissileRadius = localStorage.getItem(HOMING_RADIUS_STORAGE_KEY) !== 'off';
-function updateHomingRadiusToggle() {
-    const btn = getElement('homingRadiusToggle');
-    if (btn) btn.textContent = `Homing Radius: ${showMissileRadius ? 'On' : 'Off'}`;
-}
 function toggleHomingRadius() {
     showMissileRadius = !showMissileRadius;
     localStorage.setItem(HOMING_RADIUS_STORAGE_KEY, showMissileRadius ? 'on' : 'off');
-    updateHomingRadiusToggle();
     showToast(`Homing radius ${showMissileRadius ? 'visible' : 'hidden'}`);
 }
 let sensorUpgrades = { enemyVisuals: false, showHealthBars: false, targetAI: false };
@@ -3096,7 +3090,7 @@ function createUpgradeTree(initialRange) {
                 { name: 'Damage', cost: 2500, level: 0, maxLevel: 5, // Requires missile system active
                   f: level => 10 + 5 * level,
                   g: (level, cost, maxLvl) => `${10 + 5 * level}${level < maxLvl ? ` > ${15 + 5 * level}` : ''}` },
-                { name: 'Homing', cost: 3000, level: 0, maxLevel: 5, // Requires missile system active
+                { name: 'Homing', cost: 3000, level: 0, maxLevel: 8, // Requires missile system active; up to 80%
                   f: level => level === 0 ? 0 : 20 * level,
                   g: (level, cost, maxLvl) => {
                       if (level === 0) return '(Activate)';
@@ -4970,7 +4964,7 @@ function drawProjectilesLayer() {
         ctx.restore();
 
         if (showMissileRadius) {
-            ctx.strokeStyle = 'rgba(0,255,0,0.18)';
+            ctx.strokeStyle = 'rgba(0,255,0,0.1)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.arc(missile.x, missile.y, missile.homingRadius || base.missileHomingRadius, 0, Math.PI * 2);
@@ -5270,6 +5264,32 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 const pushNotches = categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS;
                 drawFocusNotchBar(b.u, panelX + padding, textY + padding / 2, isButtonMaxed, canAfford, pushNotches);
                 textY += 10 + padding;
+            }
+
+            // Mini toggle switch on the Homing card showing/hiding the
+            // homing radius circle around each missile. Its click region is
+            // pushed before the card's so the switch wins the hit-test.
+            if (categoryIndex === UPGRADE_CATEGORY_MISSILE && b.idx === UPGRADE_MISSILE_HOMING) {
+                const tW = 26, tH = 12, tR = tH / 2;
+                const tX = panelX + buttonWidth - tW - 6;
+                const tY = btnY + 5;
+                ctx.fillStyle = showMissileRadius ? 'rgba(0,255,0,0.6)' : 'rgba(120,120,120,0.6)';
+                ctx.beginPath();
+                ctx.arc(tX + tR, tY + tR, tR, Math.PI / 2, Math.PI * 1.5);
+                ctx.arc(tX + tW - tR, tY + tR, tR, Math.PI * 1.5, Math.PI / 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(showMissileRadius ? tX + tW - tR : tX + tR, tY + tR, tR - 2, 0, Math.PI * 2);
+                ctx.fill();
+                ringClickRegions.push({
+                    type: 'homing_radius_toggle',
+                    x: tX - 6,
+                    y: tY - 5,
+                    width: tW + 12,
+                    height: tH + 10
+                });
             }
 
             ringClickRegions.push({
@@ -6205,6 +6225,10 @@ function handleCanvasClick(clientX, clientY) {
                 activateXpBoost();
                 drawGame();
                 return;
+            } else if (region.type === 'homing_radius_toggle') {
+                toggleHomingRadius();
+                drawGame();
+                return;
             } else if (region.type === 'upgrade_button' || region.type === 'collapsible_upgrade_button') {
                 purchaseUpgrade(region.categoryIndex, region.upgradeIndex);
                 return; // Handle click and exit
@@ -6363,8 +6387,6 @@ getElement('macrossButton').onclick = fireMacrossMissiles;
 getElement('xpBoostButton').onclick = activateXpBoost;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme;
-getElement('homingRadiusToggle').onclick = toggleHomingRadius;
-updateHomingRadiusToggle();
 getElement('loadButton').onclick = loadAndStartGame;
 getElement('clearSaveButton').onclick = clearSavedGame;
 getElement('startFromHighScore').onclick = startGame;
