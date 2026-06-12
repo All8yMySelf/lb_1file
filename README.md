@@ -75,6 +75,40 @@ The game is under active development. Below is a brief summary of recent updates
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 
+### v2.75
+- Parallax starfield inside the visible sensor circle and a soft glow on the
+  base; the fog outside stays greyed out to mark sensor coverage.
+
+### v2.74
+- Juice FX pass behind the debug toggle: floating credit/damage text,
+  hit-stop on kills, screen shake, and kill-combo callouts.
+
+### v2.73
+- Pick-1-of-3 wave reward perks after each cleared wave, behind the debug
+  "Wave Rewards" toggle.
+
+### v2.72
+- Four experimental enemy archetypes (Splitter, Shielded, Healer, Kamikaze
+  swarm) behind the debug "Enemy Archetypes" toggle.
+
+### v2.71
+- The hidden debug menu (Q) now has persistent ON/OFF toggles for upcoming
+  experimental features: Enemy Archetypes, Wave Rewards, and Juice FX.
+
+### v2.70
+- Internal cleanup: split the monolithic draw routine into focused layers,
+  removed dead and duplicated drawing code, and trimmed a redundant per-frame
+  pass over the enemy pool. No intended gameplay or visual change.
+
+### v2.69
+- Q on the leaderboard screen now cleanly toggles cheat scores on and off for
+  everyone, without affecting the in-game debug menu.
+
+### v2.68
+- Leaderboard scores from runs that used the debug credit cheat are flagged and
+  hidden from normal players; cheat users (or anyone with the debug menu open
+  via Q) see them marked with `[Q]`.
+
 ### v2.67
 - Refactored the single-file internals so upgrade definitions and initial game
   state are easier to maintain while keeping `index.html` directly playable.
