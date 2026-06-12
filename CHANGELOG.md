@@ -1,5 +1,12 @@
 # Orbital Defense - Change Log
 
+## v2.90
+- Macross Missile Massacre volley size is now capped at 200 missiles
+  (50 -> 100 -> 200); higher Macros grades keep improving damage and
+  cooldown. Old saves above the cap are clamped on load.
+- The homing radius circle drawn around each missile is the missile's real
+  acquisition radius, so what you see is exactly what the homing logic uses.
+
 ## v2.89
 - Braided is now the one and only missile style. The Itano and Helix styles
   and the bottom "Missiles" style-cycling button have been removed.
