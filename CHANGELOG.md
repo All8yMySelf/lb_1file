@@ -1,5 +1,45 @@
 # Orbital Defense - Change Log
 
+## v2.80
+- XP enemies now bank charges instead of instantly doubling fire rate: a new
+  "XP Boost (N)" button pops up at the bottom showing how many charges you
+  hold, and they persist across waves and save/load.
+- Press the button to spend a charge: double fire rate for 20 seconds.
+  Pressing again while a boost runs doubles the rate again (x4, x8, ...),
+  with each stacked window lasting half as long (20s, 10s, 5s, 2.5s minimum).
+- The XP Status panel shows banked charges and the live multiplier/timer.
+
+## v2.79
+- Splitter children now burst out perpendicular to your line of fire (left
+  and right of the bullet stream) instead of spawning randomly, so they no
+  longer get mowed down the instant they appear.
+
+## v2.78
+- Repair Crew now overheals: the 30% restore stacks past max health (e.g.
+  130/100), and wave heals and health upgrades no longer strip the surplus.
+- Active wave-reward perks are now visible in a gold readout under the HUD
+  (e.g. `DMG +15% | BOUNTY +25% | HULL +20`).
+- Bounty Contract kills show the bonus explicitly in the floating credit
+  text — `+$13 (+3)` in green instead of plain gold.
+
+## v2.77
+- Enemy archetypes, wave rewards, and Juice FX are now permanently on for all
+  players; their debug toggles have been removed.
+- The hidden debug menu (Q) keeps only the +100,000 credits entry.
+
+## v2.76
+- Macross missile massacre: missiles now scatter outward in arcs with
+  streaking trails, twirl, then whip around and coalesce on their target.
+- New bottom "Missiles" button cycles four flight styles so the best look can
+  be picked during play: Classic (old behavior), Itano (spiral scatter and
+  converge — the anime one, default), Helix (corkscrew approach), and
+  Starburst (radial burst, wide arc back). The choice persists across
+  reloads.
+- Styled Macross volleys share one focus target (boss first, else nearest
+  enemy) so the whole swarm visibly converges on a single point.
+- Missiles are cheaper to get into and go further: first purchase cost
+  2000 -> 800, max missile count 6 -> 12.
+
 ## v2.75
 - Added a three-layer parallax starfield rendered only inside the visible
   sensor circle, so the lit zone reads as "what your sensors can see" against
