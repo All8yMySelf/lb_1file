@@ -75,6 +75,26 @@ The game is under active development. Below is a brief summary of recent updates
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
 
+### v2.80
+- XP kills bank charges on a new XP Boost button; each press doubles fire
+  rate, stacking with halved durations (20s, 10s, 5s...).
+
+### v2.79
+- Splitter children dodge sideways out of the bullet stream when they spawn.
+
+### v2.78
+- Repair Crew overheals past max health; active perks show in a HUD readout;
+  Bounty Contract bonuses appear in the floating kill text.
+
+### v2.77
+- Enemy archetypes, wave rewards, and Juice FX are now always on; debug
+  toggles removed.
+
+### v2.76
+- Macross-style missile choreography with four switchable flight styles
+  (bottom "Missiles" button); cheaper first missile purchase and up to 12
+  missiles.
+
 ### v2.75
 - Parallax starfield inside the visible sensor circle and a soft glow on the
   base; the fog outside stays greyed out to mark sensor coverage.

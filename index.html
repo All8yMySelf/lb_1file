@@ -179,7 +179,7 @@
     });
 </script>
 
-<title>Orbital Defense v2.75 - Optimised</title>
+<title>Orbital Defense v2.80 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -630,8 +630,12 @@
     <span id="waveDisplay"></span>
     <span id="healthDisplay"></span>
 </div>
+<div id="perkStatus" style="display:none"></div>
+<style>
+#perkStatus{position:absolute;top:36px;left:10px;z-index:10;font-size:11px;color:#ffd700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
+</style>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v2.75</h1>
+    <h1 id="gameTitle">Orbital Defense v2.80</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -661,8 +665,10 @@
         <button id="speedUpButton">&#187;</button>
     </div>
     <button id="macrossButton" style="display:none">Macross Missile Massacre</button>
+    <button id="xpBoostButton" style="display:none">XP Boost (0)</button>
     <button id="toggleInfoButton" class="active">o</button>
     <button id="themeButton">Theme: Retro</button>
+    <button id="missileStyleButton">Missiles: Itano</button>
     <div id="sensorToggle">
         <span class="switch-label">Enemy Info:</span>
         <button id="sensorDisplayToggle">Inline</button>
@@ -1210,7 +1216,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.75';
+const GAME_VERSION = '2.80';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1541,20 +1547,53 @@ let DEBUG_MODE = false; // Set to true to enable verbose logging
 let debugUpgradesVisible = false; // Hidden debug upgrade category toggle
 let cheatScoresVisible = false; // Leaderboard cheat-score visibility, toggled with Q while the leaderboard is open
 
-// Experimental feature flags, toggled from the debug menu (Q) and persisted
-// across reloads so features can be tested before going live
-const FEATURE_TOGGLES_STORAGE_KEY = 'ode_featureToggles';
-const featureToggles = (() => {
-    const defaults = { enemyArchetypes: false, waveRewards: false, juiceEffects: false };
-    try {
-        return { ...defaults, ...JSON.parse(localStorage.getItem(FEATURE_TOGGLES_STORAGE_KEY) || '{}') };
-    } catch (e) {
-        return defaults;
-    }
+// Enemy archetypes, wave rewards, and juice FX graduated from debug toggles
+// to permanent features in v2.77
+const featureToggles = { enemyArchetypes: true, waveRewards: true, juiceEffects: true };
+localStorage.removeItem('ode_featureToggles'); // Clean up the old toggle storage
+
+// Missile flight choreography styles, cycled with the bottom "Missiles"
+// button so the best-looking one can be picked during play
+const MISSILE_STYLES = ['Classic', 'Itano', 'Helix', 'Starburst'];
+const MISSILE_STYLE_STORAGE_KEY = 'ode_missileStyle';
+let missileStyleIndex = (() => {
+    const stored = parseInt(localStorage.getItem(MISSILE_STYLE_STORAGE_KEY), 10);
+    return Number.isFinite(stored) && stored >= 0 && stored < MISSILE_STYLES.length ? stored : 1; // Default: Itano
 })();
-window.featureToggles = featureToggles; // Console access for testing
-function saveFeatureToggles() {
-    localStorage.setItem(FEATURE_TOGGLES_STORAGE_KEY, JSON.stringify(featureToggles));
+function currentMissileStyle() { return MISSILE_STYLES[missileStyleIndex]; }
+
+// Per-missile launch parameters for the current style. scatterTime is the
+// ballistic spread phase before homing kicks in; curl spins the scatter
+// path; wobble adds the helix corkscrew.
+function missileStyleConfig(isMacross) {
+    const style = currentMissileStyle();
+    switch (style) {
+        case 'Itano':
+            return { style, scatterTime: isMacross ? 0.55 : 0.35,
+                     curl: (Math.random() < 0.5 ? -1 : 1) * (1.5 + Math.random() * 2.5),
+                     wobbleFreq: 0, wobbleAmp: 0 };
+        case 'Helix':
+            return { style, scatterTime: 0.15, curl: 0,
+                     wobbleFreq: 6 + Math.random() * 4, wobbleAmp: 2.2 };
+        case 'Starburst':
+            return { style, scatterTime: isMacross ? 0.6 : 0.4,
+                     curl: (Math.random() - 0.5) * 0.6,
+                     wobbleFreq: 0, wobbleAmp: 0 };
+        default:
+            return { style: 'Classic', scatterTime: 0, curl: 0, wobbleFreq: 0, wobbleAmp: 0 };
+    }
+}
+
+function updateMissileStyleButton() {
+    const btn = getElement('missileStyleButton');
+    if (btn) btn.textContent = `Missiles: ${currentMissileStyle()}`;
+}
+
+function cycleMissileStyle() {
+    missileStyleIndex = (missileStyleIndex + 1) % MISSILE_STYLES.length;
+    localStorage.setItem(MISSILE_STYLE_STORAGE_KEY, String(missileStyleIndex));
+    updateMissileStyleButton();
+    showToast(`Missile style: ${currentMissileStyle()}`);
 }
 let lastBaseX = 0;
 let lastBaseY = 0;
@@ -1756,6 +1795,14 @@ function resetMissile(missile, config) {
     missile.startY = config.startY || missile.y;
     missile.rangeLimit = config.rangeLimit || base.missileTargetingRadius * 1.1;
 
+    // Flight choreography (missile style switcher)
+    missile.style = config.style || 'Classic';
+    missile.age = 0;
+    missile.scatterTime = config.scatterTime || 0;
+    missile.curl = config.curl || 0;
+    missile.wobbleFreq = config.wobbleFreq || 0;
+    missile.wobbleAmp = config.wobbleAmp || 0;
+
     if (isRelease) {
         // When releasing back to the pool, clear dynamic state
         missile.target = null;
@@ -1766,6 +1813,12 @@ function resetMissile(missile, config) {
         missile.startX = 0;
         missile.startY = 0;
         missile.rangeLimit = base.missileTargetingRadius * 1.1;
+        missile.style = 'Classic';
+        missile.age = 0;
+        missile.scatterTime = 0;
+        missile.curl = 0;
+        missile.wobbleFreq = 0;
+        missile.wobbleAmp = 0;
     }
 }
 
@@ -2262,12 +2315,15 @@ function applyHealerAuras(dt) {
 
 function handleEnemyKilled(enemy, options = {}) {
     if (enemy.type === 'Splitter' && !enemy.isChild && !options.suppressSplit) {
-        for (let i = 0; i < SPLITTER_CHILD_COUNT; i++) {
-            const angle = Math.random() * Math.PI * 2;
+        // Children burst out perpendicular to the base-to-splitter axis so
+        // they sidestep the incoming bullet stream instead of dying to it
+        const axisAngle = Math.atan2(enemy.y - base.y, enemy.x - base.x);
+        const sideOffset = enemy.radius * 2 + 26;
+        [axisAngle + Math.PI / 2, axisAngle - Math.PI / 2].forEach(sideAngle => {
             createArchetypeEnemy('Splitter', enemy.wave,
-                enemy.x + Math.cos(angle) * enemy.radius,
-                enemy.y + Math.sin(angle) * enemy.radius, 0.5);
-        }
+                enemy.x + Math.cos(sideAngle) * sideOffset,
+                enemy.y + Math.sin(sideAngle) * sideOffset, 0.5);
+        });
         if (waveStates[enemy.wave]) {
             waveStates[enemy.wave].remainingEnemies += SPLITTER_CHILD_COUNT;
         }
@@ -2419,7 +2475,19 @@ function markHUDDirty() {
 
 function updateHUD() {
     getElement('creditsDisplay').textContent = `Credits: ${gameState.credits}`;
-    getElement('healthDisplay').textContent = `Health: ${Math.max(0, gameState.currentHealth)}/${gameState.maxHealth}`; // Ensure health doesn't show < 0
+    getElement('healthDisplay').textContent = `Health: ${Math.max(0, Math.round(gameState.currentHealth))}/${gameState.maxHealth}`; // Ensure health doesn't show < 0
+
+    // Active wave-reward perks readout, so picked perks stay visible
+    const perkParts = [];
+    if ((gameState.perkDamageMult || 1) > 1) perkParts.push(`DMG +${Math.round((gameState.perkDamageMult - 1) * 100)}%`);
+    if ((gameState.perkFireRateMult || 1) > 1) perkParts.push(`RATE +${Math.round((gameState.perkFireRateMult - 1) * 100)}%`);
+    if ((gameState.perkCreditMult || 1) > 1) perkParts.push(`BOUNTY +${Math.round((gameState.perkCreditMult - 1) * 100)}%`);
+    if ((gameState.perkBonusMaxHealth || 0) > 0) perkParts.push(`HULL +${gameState.perkBonusMaxHealth}`);
+    const perkStatus = getElement('perkStatus');
+    perkStatus.textContent = perkParts.join('  |  ');
+    perkStatus.style.display = perkParts.length > 0 ? 'block' : 'none';
+
+    updateXpBoostButton();
 
     const state = waveStates[gameState.wave] || {};
     const elapsedTime = state.elapsedTime || 0;
@@ -2761,7 +2829,7 @@ function shiftLoadedGameStateTimestamps(savedAt) {
         'laserEffectEndTime',
         'lastMissileFireTime',
         'stunEffectEndTime',
-        'doubleFireRateEndTime'
+        'xpBoostEndTime'
     ].forEach(key => {
         gameState[key] = shiftedSavedTimestamp(gameState[key], pauseOffset);
     });
@@ -3017,7 +3085,7 @@ function createUpgradeTree(initialRange) {
             category: "Missile Systems",
             expanded: false,
             upgrades: [
-                { name: 'Missiles', cost: 2000, level: 0, maxLevel: 6,
+                { name: 'Missiles', cost: 800, level: 0, maxLevel: 12,
                   f: level => level,
                   g: (level, cost, maxLvl) => {
                        if (level === 0) return '(Activate)';
@@ -3128,33 +3196,6 @@ function createUpgradeTree(initialRange) {
                     maxLevel: Infinity,
                     f: () => {},
                     g: () => ''
-                },
-                {
-                    name: 'Enemy Archetypes',
-                    cost: 0,
-                    level: 0,
-                    maxLevel: Infinity,
-                    f: () => {},
-                    g: () => featureToggles.enemyArchetypes ? 'ON' : 'OFF',
-                    toggleKey: 'enemyArchetypes'
-                },
-                {
-                    name: 'Wave Rewards',
-                    cost: 0,
-                    level: 0,
-                    maxLevel: Infinity,
-                    f: () => {},
-                    g: () => featureToggles.waveRewards ? 'ON' : 'OFF',
-                    toggleKey: 'waveRewards'
-                },
-                {
-                    name: 'Juice FX',
-                    cost: 0,
-                    level: 0,
-                    maxLevel: Infinity,
-                    f: () => {},
-                    g: () => featureToggles.juiceEffects ? 'ON' : 'OFF',
-                    toggleKey: 'juiceEffects'
                 }
             ]
         }
@@ -3183,14 +3224,19 @@ function createInitialGameState() {
         score: 0,
         enemiesKilled: 0,
         autoFire: true,
-        doubleFireRateEndTime: 0,
+        // XP Boost charge bank: kills of XP enemies bank charges; each press
+        // doubles fire rate, with each stacked press lasting half as long
+        xpCharges: 0,
+        xpBoostMultiplier: 1,
+        xpBoostEndTime: 0,
+        xpBoostLastDuration: 20,
         xpEnemiesSpawned: 0,
         xpEnemiesDestroyed: 0,
         xpEnemySpawnTime: 0,
         xpEnemySpawned: false,
         usedCheat: false,
-        // Wave-reward perk bonuses (debug "Wave Rewards" toggle); folded into
-        // upgrade recomputation so later purchases don't wipe them
+        // Wave-reward perk bonuses; folded into upgrade recomputation so
+        // later purchases don't wipe them
         perkDamageMult: 1,
         perkFireRateMult: 1,
         perkCreditMult: 1,
@@ -3665,7 +3711,13 @@ function handlePlayerFiring(dt) {
     const enemies = enemyPool.getActiveObjects();
 
     // --- Bullet Firing ---
-    const rate = base.fireRate / (currentTime < gameState.doubleFireRateEndTime ? 2 : 1);
+    const xpBoostActive = currentTime < (gameState.xpBoostEndTime || 0);
+    if (!xpBoostActive && (gameState.xpBoostMultiplier || 1) > 1) {
+        gameState.xpBoostMultiplier = 1; // Boost expired
+        updateXpBoostButton();
+        showToast('XP Boost expired');
+    }
+    const rate = base.fireRate / (xpBoostActive ? (gameState.xpBoostMultiplier || 1) : 1);
     if (currentTime - gameState.lastBulletFireTime >= rate / gameSpeedMultiplier) {
         // Find nearest enemy within cannon range
         let nearestEnemy = null;
@@ -3737,7 +3789,9 @@ function handlePlayerFiring(dt) {
                 target.isTargeted = true;
                 target.targetLockTime = TARGET_LOCK_DURATION;
                 const angle = Math.atan2(target.y - base.y, target.x - base.x);
-                const launchAngle = angle + (Math.random() - 0.5) * (Math.PI / 8); // Launch spread
+                // Styled launches scatter wide before converging on the target
+                const spread = currentMissileStyle() === 'Classic' ? Math.PI / 8 : Math.PI;
+                const launchAngle = angle + (Math.random() - 0.5) * spread;
 
                 missilePool.get({
                     x: base.x,
@@ -3751,7 +3805,8 @@ function handlePlayerFiring(dt) {
                     homingActive: true,
                     startX: base.x,
                     startY: base.y,
-                    rangeLimit: base.missileTargetingRadius * 1.1
+                    rangeLimit: base.missileTargetingRadius * (currentMissileStyle() === 'Classic' ? 1.1 : 1.9),
+                    ...missileStyleConfig(false)
                 });
                 if (sensorUpgrades.targetAI) target.allocatedDamage = (target.allocatedDamage||0) + base.missileDamage;
              });
@@ -3829,6 +3884,10 @@ function updateProjectiles(dt, baseMoved) {
 
     for (let i = missiles.length - 1; i >= 0; i--) {
         const missile = missiles[i];
+        missile.age += dt;
+        // During the scatter phase missiles fly ballistically (with curl) and
+        // ignore homing, then whip around and converge on the target
+        const inScatter = missile.age < missile.scatterTime;
         let targetEnemy = missile.target;
 
         // 1. Homing Logic: Find/Update Target
@@ -3838,7 +3897,7 @@ function updateProjectiles(dt, baseMoved) {
             missile.homingActive = true; // Activate general homing
         }
 
-        if (!targetEnemy && missile.homingActive) {
+        if (!targetEnemy && missile.homingActive && !inScatter) {
             // Find the closest enemy within homing range
             let closestDistSq = (missile.homingRadius || base.missileHomingRadius) ** 2;
             let potentialTarget = null;
@@ -3859,7 +3918,7 @@ function updateProjectiles(dt, baseMoved) {
         }
 
         // 2. Steering Logic
-        if (targetEnemy) {
+        if (targetEnemy && !inScatter) {
             targetEnemy.isTargeted = true;
             targetEnemy.targetLockTime = TARGET_LOCK_DURATION;
             const dx = targetEnemy.x - missile.x;
@@ -3871,14 +3930,26 @@ function updateProjectiles(dt, baseMoved) {
             while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
             while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
-            // Limit turning rate
-            const turnAmount = Math.max(-missileTurnSpeed, Math.min(missileTurnSpeed, angleDiff));
+            // Limit turning rate; styled missiles whip around harder so the
+            // scattered volley visibly coalesces on the target
+            const turnLimit = missileTurnSpeed * (missile.style !== 'Classic' ? 2.5 : 1);
+            const turnAmount = Math.max(-turnLimit, Math.min(turnLimit, angleDiff));
             const newAngle = currentAngle + turnAmount;
 
             missile.dx = Math.cos(newAngle);
             missile.dy = Math.sin(newAngle);
         }
         // else: continue straight
+
+        // 2b. Path bending: scatter curl (Itano/Starburst) and helix wobble
+        let bend = 0;
+        if (inScatter && missile.curl) bend += missile.curl * dt;
+        if (!inScatter && missile.wobbleAmp) bend += Math.sin(missile.age * missile.wobbleFreq) * missile.wobbleAmp * dt;
+        if (bend !== 0) {
+            const bentAngle = Math.atan2(missile.dy, missile.dx) + bend;
+            missile.dx = Math.cos(bentAngle);
+            missile.dy = Math.sin(bentAngle);
+        }
 
         // 3. Movement
         const missileMoveDist = missile.speed * base.missileSpeedMultiplier * dtScaled;
@@ -4003,7 +4074,9 @@ function startNextWave() {
     gameState.wave++;
     gameState.enemiesSpawnedThisWave = 0;
     gameState.isBossWave = false;
-    gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1));
+    // Wave heal tops up to max but never strips Repair Crew overheal
+    gameState.currentHealth = Math.max(gameState.currentHealth,
+        Math.min(gameState.maxHealth, gameState.currentHealth + Math.floor(gameState.maxHealth * 0.1)));
     markHUDDirty(); // Wave and health changed
     lastDisplayedSecond = -1; // Reset timer tracking for new wave
     const duration = WAVE_BASE_DURATION + (gameState.wave - 1) * WAVE_DURATION_INCREMENT;
@@ -4238,7 +4311,10 @@ function addFloatingText(x, y, text, color = '#ffffff', size = 12) {
 function onEnemyKilledFx(enemy, creditsEarned) {
     if (!featureToggles.juiceEffects) return;
     if (creditsEarned > 0) {
-        addFloatingText(enemy.x, enemy.y - enemy.radius - 6, `+$${creditsEarned}`, '#ffd700');
+        // Bounty Contract bonus is shown explicitly so the perk feels real
+        const bonus = creditsEarned - enemy.creditsValue;
+        const label = bonus > 0 ? `+$${creditsEarned} (+${bonus})` : `+$${creditsEarned}`;
+        addFloatingText(enemy.x, enemy.y - enemy.radius - 6, label, bonus > 0 ? '#7cfc00' : '#ffd700');
     }
     const now = Date.now();
     comboCount = (now - lastComboKillTime <= COMBO_WINDOW_MS) ? comboCount + 1 : 1;
@@ -4294,8 +4370,8 @@ function resetJuiceEffects() {
 // --- Wave Rewards (debug "Wave Rewards" toggle) ---
 // After each cleared wave the player picks 1 of 3 run-long perks
 const WAVE_REWARD_PERKS = [
-    { id: 'repair', name: 'Repair Crew', desc: () => `Restore ${Math.ceil(gameState.maxHealth * 0.3)} health now`,
-      apply: () => { gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth + Math.ceil(gameState.maxHealth * 0.3)); } },
+    { id: 'repair', name: 'Repair Crew', desc: () => `Restore ${Math.ceil(gameState.maxHealth * 0.3)} health now (stacks past max)`,
+      apply: () => { gameState.currentHealth += Math.ceil(gameState.maxHealth * 0.3); } },
     { id: 'hull', name: 'Reinforced Hull', desc: () => '+20 max health',
       apply: () => { gameState.perkBonusMaxHealth = (gameState.perkBonusMaxHealth || 0) + 20; gameState.maxHealth += 20; gameState.currentHealth += 20; } },
     { id: 'damage', name: 'Overcharged Rounds', desc: () => '+15% bullet damage',
@@ -5177,11 +5253,6 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
             gameState.usedCheat = true; // Score will be flagged [Q] on the leaderboard
             markHUDDirty(); // Credits changed
             showToast('Cheated 100,000 credits!');
-        } else if (upgrade.toggleKey) {
-            featureToggles[upgrade.toggleKey] = !featureToggles[upgrade.toggleKey];
-            saveFeatureToggles();
-            showToast(`${upgrade.name}: ${featureToggles[upgrade.toggleKey] ? 'ON' : 'OFF'}`);
-            drawGame();
         }
         return;
     }
@@ -5261,9 +5332,9 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                 case UPGRADE_DEFENSE_HEALTH:
                     const oldMaxHealth = gameState.maxHealth;
                     gameState.maxHealth = upgrade.f(level) + (gameState.perkBonusMaxHealth || 0);
-                    // Heal amount equal to the increase
+                    // Heal amount equal to the increase (no cap: Repair Crew
+                    // overheal may put current health above max)
                     gameState.currentHealth += (gameState.maxHealth - oldMaxHealth);
-                    gameState.currentHealth = Math.min(gameState.maxHealth, gameState.currentHealth); // Cap at new max
                     markHUDDirty(); // Health changed
                     break;
                 case UPGRADE_DEFENSE_MOVEMENT: base.currentMoveSpeed = upgrade.f(level); break;
@@ -5408,20 +5479,68 @@ function fireLaserAt(target) {
         createExplosion(target.x, target.y, target.color, 40, target.radius);
         handleEnemyKilled(target);
         if (target.xp) {
-            gameState.doubleFireRateEndTime = Date.now() + 20000;
+            gameState.xpCharges = (gameState.xpCharges || 0) + 1;
             gameState.xpEnemiesDestroyed++;
             updateXPStatsPanel();
             updateWaveStatsPanel();
-            showToast('Fire rate doubled!', 3000);
+            updateXpBoostButton();
+            showToast('XP charge banked! Press XP Boost to double fire rate.', 3000);
         }
         enemyPool.release(target);
         updateUpgradeAvailabilityFlags();
     }
 }
 
+// --- XP Boost charge bank ---
+// Banked XP charges double fire rate on demand. Pressing again while a
+// boost runs doubles the rate again, but the fresh window is half as long:
+// 20s, then 10s, then 5s...
+function activateXpBoost() {
+    if ((gameState.xpCharges || 0) <= 0) return;
+    const now = Date.now();
+    gameState.xpCharges--;
+    if (now < (gameState.xpBoostEndTime || 0)) {
+        gameState.xpBoostMultiplier = (gameState.xpBoostMultiplier || 1) * 2;
+        gameState.xpBoostLastDuration = Math.max(2.5, (gameState.xpBoostLastDuration || 20) / 2);
+    } else {
+        gameState.xpBoostMultiplier = 2;
+        gameState.xpBoostLastDuration = 20;
+    }
+    gameState.xpBoostEndTime = now + gameState.xpBoostLastDuration * 1000;
+    showToast(`Fire rate x${gameState.xpBoostMultiplier} for ${gameState.xpBoostLastDuration}s!`, 2500);
+    updateXpBoostButton();
+    updateXPStatsPanel();
+}
+
+function updateXpBoostButton() {
+    const btn = getElement('xpBoostButton');
+    if (!btn || !gameState) return;
+    const charges = gameState.xpCharges || 0;
+    const active = Date.now() < (gameState.xpBoostEndTime || 0);
+    btn.style.display = (charges > 0 || active) ? 'block' : 'none';
+    btn.textContent = active
+        ? `XP Boost x${gameState.xpBoostMultiplier} (${charges})`
+        : `XP Boost (${charges})`;
+    btn.disabled = charges <= 0;
+    btn.classList.toggle('active', active);
+}
+
 function fireMacrossMissiles() {
     if (gameState.macrossCooldownTimer <= 0 && base.macrossMissileCount > 0) {
         const count = base.macrossMissileCount;
+
+        // Styled volleys share one focus target (boss first, else nearest)
+        // so the whole swarm visibly coalesces on a single point
+        let focusTarget = null;
+        if (currentMissileStyle() !== 'Classic') {
+            const candidates = enemyPool.getActiveObjects().filter(e => !e.xp);
+            focusTarget = candidates.find(e => e.type === 'Boss') || null;
+            if (!focusTarget && candidates.length > 0) {
+                focusTarget = candidates.reduce((a, b) =>
+                    Math.hypot(a.x - base.x, a.y - base.y) < Math.hypot(b.x - base.x, b.y - base.y) ? a : b);
+            }
+        }
+
         for (let i = 0; i < count; i++) {
             const angle = (i / count) * Math.PI * 2 + Math.random() * 0.1 - 0.05; // Add slight random angle variation
             const launchSpeed = 3 + Math.random() * 3; // Vary launch speeds
@@ -5431,7 +5550,7 @@ function fireMacrossMissiles() {
                 y: base.y,
                 dx: Math.cos(angle),
                 dy: Math.sin(angle),
-                t: null,
+                t: focusTarget,
                 speed: launchSpeed,
                 turnSpeed: base.missileTurnSpeed,
                 homingRadius: base.missileHomingRadius,
@@ -5439,7 +5558,8 @@ function fireMacrossMissiles() {
                 homingActive: true,
                 startX: base.x,
                 startY: base.y,
-                rangeLimit: base.missileTargetingRadius * 1.1
+                rangeLimit: base.missileTargetingRadius * (currentMissileStyle() === 'Classic' ? 1.1 : 1.9),
+                ...missileStyleConfig(true)
             });
         }
 
@@ -5615,10 +5735,11 @@ function updateXPStatsPanel(){
     panel.style.maxWidth="200px";
     panel.style.top=(enemyPanel.offsetTop+enemyPanel.offsetHeight+PANEL_SPACING)+"px";
     let html=`<div>XP Enemies: ${gameState.xpEnemiesDestroyed}/${gameState.xpEnemiesSpawned}</div>`;
-    html+=`<div>Destroy with Manual Laser to double fire rate for 20 s.</div>`;
-    if(Date.now()<gameState.doubleFireRateEndTime){
-        const remaining=((gameState.doubleFireRateEndTime-Date.now())/1000).toFixed(1);
-        html+=`<div class="timer-blink">${remaining}s at 2x fire rate</div>`;
+    html+=`<div>Destroy with Manual Laser to bank an XP Boost charge.</div>`;
+    html+=`<div>Charges: ${gameState.xpCharges||0}</div>`;
+    if(Date.now()<(gameState.xpBoostEndTime||0)){
+        const remaining=((gameState.xpBoostEndTime-Date.now())/1000).toFixed(1);
+        html+=`<div class="timer-blink">${remaining}s at ${gameState.xpBoostMultiplier}x fire rate</div>`;
     }
     content.innerHTML=html;
 }
@@ -5693,7 +5814,7 @@ function showEnemyIntelPopup(type,stats){
     const hp=sensorUpgrades.showHealthBars?stats.health:'?';
     let html=`<div>${type}</div><div>Speed: ${stats.speed}</div><div>Health: ${hp}</div><div>Pattern: ${stats.attack}</div>`;
     if(type==='XP'){
-        html+=`<div>You need the Laser and Manual Targeting upgrades to hit this enemy. Click it before it escapes to double your fire rate for 20s.</div>`;
+        html+=`<div>You need the Laser and Manual Targeting upgrades to hit this enemy. Click it before it escapes to bank an XP Boost charge — spend charges anytime to double your fire rate.</div>`;
     }
     c.innerHTML=html;
     getElement("enemyIdentificationPopup").style.display="flex";
@@ -6046,8 +6167,11 @@ getElement('speedUpButton').onclick = () => {
     }
 };
 getElement('macrossButton').onclick = fireMacrossMissiles;
+getElement('xpBoostButton').onclick = activateXpBoost;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme;
+getElement('missileStyleButton').onclick = cycleMissileStyle;
+updateMissileStyleButton();
 getElement('loadButton').onclick = loadAndStartGame;
 getElement('clearSaveButton').onclick = clearSavedGame;
 getElement('startFromHighScore').onclick = startGame;
