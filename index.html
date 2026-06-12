@@ -668,7 +668,6 @@
     <button id="xpBoostButton" style="display:none">XP Boost (0)</button>
     <button id="toggleInfoButton" class="active">o</button>
     <button id="themeButton">Theme: Retro</button>
-    <button id="missileStyleButton">Missiles: Itano</button>
     <button id="homingRadiusToggle">Homing Radius: On</button>
     <div id="sensorToggle">
         <span class="switch-label">Enemy Info:</span>
@@ -1217,7 +1216,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '2.88';
+const GAME_VERSION = '2.89';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1568,61 +1567,19 @@ localStorage.removeItem('ode_featureToggles'); // Clean up the old toggle storag
 const XP_BOOST_LAYER_DURATIONS = [20, 10, 5, 4, 3, 2, 2];
 const XP_BOOST_MAX_ACTIVE_LAYERS = XP_BOOST_LAYER_DURATIONS.length;
 
-// Missile flight choreography styles, cycled with the bottom "Missiles"
-// button so the best-looking one can be picked during play
-const MISSILE_STYLES = ['Itano', 'Helix', 'Braided'];
-const MISSILE_STYLE_STORAGE_KEY = 'ode_missileStyle';
-let missileStyleIndex = (() => {
-    const stored = localStorage.getItem(MISSILE_STYLE_STORAGE_KEY);
-    const storedByName = MISSILE_STYLES.indexOf(stored);
-    if (storedByName >= 0) return storedByName;
+// Braided is the only missile flight choreography: missiles burst outward,
+// curl back, twist around each other with phase-spaced paths, then tighten
+// together onto the target before impact. scatterTime is the ballistic
+// spread phase before homing kicks in; curl spins the scatter path; wobble
+// adds the corkscrew; weave bends multiple missiles around each other.
+function currentMissileStyle() { return 'Braided'; }
 
-    // Migrate the old numeric cycle: Classic, Itano, Helix, Starburst.
-    const legacyIndex = parseInt(stored, 10);
-    const legacyMap = ['Itano', 'Itano', 'Helix', 'Braided'];
-    const migratedStyle = Number.isFinite(legacyIndex) ? legacyMap[legacyIndex] : 'Itano';
-    const migratedIndex = MISSILE_STYLES.indexOf(migratedStyle);
-    return migratedIndex >= 0 ? migratedIndex : 0; // Default: Itano
-})();
-function currentMissileStyle() { return MISSILE_STYLES[missileStyleIndex]; }
-
-// Per-missile launch parameters for the current style. scatterTime is the
-// ballistic spread phase before homing kicks in; curl spins the scatter
-// path; wobble adds the helix corkscrew; weave bends multiple missiles around
-// each other as they converge.
 function missileStyleConfig(isMacross) {
-    const style = currentMissileStyle();
-    switch (style) {
-        case 'Itano':
-            return { style, scatterTime: isMacross ? 0.55 : 0.35,
-                     curl: (Math.random() < 0.5 ? -1 : 1) * (1.5 + Math.random() * 2.5),
-                     wobbleFreq: 0, wobbleAmp: 0, weaveAmp: 0, weaveFreq: 0 };
-        case 'Helix':
-            return { style, scatterTime: 0.15, curl: 0,
-                     wobbleFreq: 6 + Math.random() * 4, wobbleAmp: 2.2,
-                     weaveAmp: 0, weaveFreq: 0 };
-        case 'Braided':
-            return { style, scatterTime: isMacross ? 0.5 : 0.38,
-                     curl: (Math.random() < 0.5 ? -1 : 1) * (2.4 + Math.random() * 2.2),
-                     wobbleFreq: 7 + Math.random() * 3, wobbleAmp: 1.4,
-                     weaveAmp: isMacross ? 55 : 34, weaveFreq: 7.5 + Math.random() * 2.5,
-                     weavePhase: Math.random() * Math.PI * 2 };
-        default:
-            return { style: 'Itano', scatterTime: 0.35, curl: 2.4, wobbleFreq: 0, wobbleAmp: 0,
-                     weaveAmp: 0, weaveFreq: 0 };
-    }
-}
-
-function updateMissileStyleButton() {
-    const btn = getElement('missileStyleButton');
-    if (btn) btn.textContent = `Missiles: ${currentMissileStyle()}`;
-}
-
-function cycleMissileStyle() {
-    missileStyleIndex = (missileStyleIndex + 1) % MISSILE_STYLES.length;
-    localStorage.setItem(MISSILE_STYLE_STORAGE_KEY, currentMissileStyle());
-    updateMissileStyleButton();
-    showToast(`Missile style: ${currentMissileStyle()}`);
+    return { style: 'Braided', scatterTime: isMacross ? 0.5 : 0.38,
+             curl: (Math.random() < 0.5 ? -1 : 1) * (2.4 + Math.random() * 2.2),
+             wobbleFreq: 7 + Math.random() * 3, wobbleAmp: 1.4,
+             weaveAmp: isMacross ? 55 : 34, weaveFreq: 7.5 + Math.random() * 2.5,
+             weavePhase: Math.random() * Math.PI * 2 };
 }
 let lastBaseX = 0;
 let lastBaseY = 0;
@@ -6406,8 +6363,6 @@ getElement('macrossButton').onclick = fireMacrossMissiles;
 getElement('xpBoostButton').onclick = activateXpBoost;
 getElement('toggleInfoButton').onclick = toggleRingInfoDisplay;
 getElement('themeButton').onclick = cycleTheme;
-getElement('missileStyleButton').onclick = cycleMissileStyle;
-updateMissileStyleButton();
 getElement('homingRadiusToggle').onclick = toggleHomingRadius;
 updateHomingRadiusToggle();
 getElement('loadButton').onclick = loadAndStartGame;

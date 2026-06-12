@@ -1,5 +1,9 @@
 # Orbital Defense - Change Log
 
+## v2.89
+- Braided is now the one and only missile style. The Itano and Helix styles
+  and the bottom "Missiles" style-cycling button have been removed.
+
 ## v2.88
 - New "Smart AI" upgrade (4 grades, requires Macross) for the Macross Missile
   Massacre. The volley reads each enemy's health and splits itself across
