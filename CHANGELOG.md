@@ -1,5 +1,11 @@
 # Orbital Defense - Change Log
 
+## v3.14
+- Defense Health is now an unlimited +10% max-health upgrade based on the
+  player's current max health, including boss and perk health gains.
+- The Health upgrade card now shows the current max health and the next +10%
+  value instead of fixed level targets.
+
 ## v3.13
 - Clicking the game screen outside canvas UI buttons now collapses any open
   upgrade category panels.

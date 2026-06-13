@@ -74,6 +74,10 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.14
+- Defense Health is now an unlimited +10% max-health upgrade that shows the
+  current value and next value, including boss and perk health gains.
+
 ### v3.13
 - Clicking the playfield outside upgrade buttons now collapses open upgrade
   panels.
