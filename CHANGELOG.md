@@ -1,5 +1,23 @@
 # Orbital Defense - Change Log
 
+## v3.13
+- Clicking the game screen outside canvas UI buttons now collapses any open
+  upgrade category panels.
+
+## v3.12
+- Tactical Zoom now keeps bullets and missiles alive until they leave the
+  actually visible world area, instead of clipping them at the old unzoomed
+  canvas bounds.
+
+## v3.11
+- Tactical Zoom now keeps the fog-of-war hash overlay full-screen while
+  cutting out the correctly zoomed sensor reveal area.
+
+## v3.10
+- Missile lifespan now uses total distance traveled instead of straight-line
+  distance from launch, so retargeting, weaving, and circling inside the
+  missile radius still consume the same travel budget.
+
 ## v3.09
 - Missile tail failure now starts at 75% of travel life and the tail is fully
   gone at 90%.
