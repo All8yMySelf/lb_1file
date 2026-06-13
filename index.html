@@ -179,7 +179,7 @@
     });
 </script>
 
-<title>Orbital Defense v3.09 - Optimised</title>
+<title>Orbital Defense v3.13 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -629,7 +629,7 @@
 #perkStatus{position:absolute;top:36px;left:10px;z-index:10;font-size:11px;color:#ffd700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v3.09</h1>
+    <h1 id="gameTitle">Orbital Defense v3.13</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -1208,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.09';
+const GAME_VERSION = '3.13';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1555,6 +1555,22 @@ function screenToWorld(x, y) {
     };
 }
 
+function getVisibleWorldBounds(screenMargin = 80) {
+    const topLeft = screenToWorld(-screenMargin, -screenMargin);
+    const bottomRight = screenToWorld(canvasWidth + screenMargin, canvasHeight + screenMargin);
+    return {
+        left: Math.min(topLeft.x, bottomRight.x),
+        right: Math.max(topLeft.x, bottomRight.x),
+        top: Math.min(topLeft.y, bottomRight.y),
+        bottom: Math.max(topLeft.y, bottomRight.y)
+    };
+}
+
+function isOutsideVisibleWorldBounds(x, y, screenMargin = 80) {
+    const bounds = getVisibleWorldBounds(screenMargin);
+    return x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom;
+}
+
 function applyTacticalWorldTransform() {
     if (!isTacticalZoomActive()) return false;
     ctx.translate(canvasWidth / 2, canvasHeight / 2);
@@ -1760,11 +1776,18 @@ function applyOverlay(radius) {
     fogCtx.clearRect(0,0,canvasWidth,canvasHeight);
     drawFogPattern();
     fogCtx.globalCompositeOperation = 'destination-out';
+    const cutoutCenter = worldToScreen(base.x, base.y);
+    const cutoutRadius = isTacticalZoomActive() ? radius * tacticalZoomLevel : radius;
     fogCtx.beginPath();
-    fogCtx.arc(base.x, base.y, radius, 0, Math.PI*2);
+    fogCtx.arc(cutoutCenter.x, cutoutCenter.y, cutoutRadius, 0, Math.PI*2);
     fogCtx.fill();
     fogCtx.globalCompositeOperation = 'source-over';
+    if (isTacticalZoomActive()) {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
     ctx.drawImage(fogCanvas,0,0);
+    if (isTacticalZoomActive()) ctx.restore();
 }
 
 // --- Object Pooling ---
@@ -1898,7 +1921,11 @@ function resetMissile(missile, config) {
     missile.startX = config.startX || missile.x;
     missile.startY = config.startY || missile.y;
     missile.rangeLimit = config.rangeLimit || base.missileTargetingRadius * (base.missileRangeMultiplier || 1.1);
+    missile.distanceTraveled = Math.max(0, Number(config.distanceTraveled) || 0);
     missile.lifeProgress = Number(config.lifeProgress) || 0;
+    if (missile.distanceTraveled === 0 && missile.lifeProgress > 0) {
+        missile.distanceTraveled = missile.lifeProgress * missile.rangeLimit;
+    }
     missile.fadeAlpha = typeof config.fadeAlpha === 'number' ? config.fadeAlpha : 1;
     missile.trailAlpha = typeof config.trailAlpha === 'number' ? config.trailAlpha : 1;
     missile.trailLengthFactor = typeof config.trailLengthFactor === 'number' ? config.trailLengthFactor : 1;
@@ -1936,6 +1963,7 @@ function resetMissile(missile, config) {
         missile.startX = 0;
         missile.startY = 0;
         missile.rangeLimit = base.missileTargetingRadius * (base.missileRangeMultiplier || 1.1);
+        missile.distanceTraveled = 0;
         missile.lifeProgress = 0;
         missile.fadeAlpha = 1;
         missile.trailAlpha = 1;
@@ -2894,6 +2922,7 @@ function serializeMissile(missile, enemyIndexByObject) {
         startX: missile.startX,
         startY: missile.startY,
         rangeLimit: missile.rangeLimit,
+        distanceTraveled: missile.distanceTraveled || 0,
         lifeProgress: missile.lifeProgress || 0,
         fadeAlpha: typeof missile.fadeAlpha === 'number' ? missile.fadeAlpha : 1,
         trailAlpha: typeof missile.trailAlpha === 'number' ? missile.trailAlpha : 1,
@@ -3021,6 +3050,7 @@ function restoreSavedRuntimeState(runtimeState, savedAt) {
                 startX: (Number(savedMissile.startX) || 0) * scaleX,
                 startY: (Number(savedMissile.startY) || 0) * scaleY,
                 rangeLimit: Number(savedMissile.rangeLimit) || base.missileTargetingRadius * 1.1,
+                distanceTraveled: Math.max(0, Number(savedMissile.distanceTraveled) || 0),
                 lifeProgress: Math.max(0, Math.min(1, Number(savedMissile.lifeProgress) || 0)),
                 fadeAlpha: typeof savedMissile.fadeAlpha === 'number' ? Math.max(0, Math.min(1, savedMissile.fadeAlpha)) : 1,
                 trailAlpha: typeof savedMissile.trailAlpha === 'number' ? Math.max(0, Math.min(1, savedMissile.trailAlpha)) : 1,
@@ -4178,8 +4208,8 @@ function updateProjectiles(dt, baseMoved) {
         bullet.x += bullet.dx * bulletMoveDist;
         bullet.y += bullet.dy * bulletMoveDist;
 
-        // Remove bullets out of bounds
-        if (bullet.x < -10 || bullet.x > canvasWidth + 10 || bullet.y < -10 || bullet.y > canvasHeight + 10) {
+        // Remove bullets only after they leave the currently visible world.
+        if (isOutsideVisibleWorldBounds(bullet.x, bullet.y, 40)) {
             releaseWeaponDamage(bullet.target, 'cannon', bullet.reservedDamage);
             bulletPool.release(bullet);
         }
@@ -4193,8 +4223,8 @@ function updateProjectiles(dt, baseMoved) {
         const missile = missiles[i];
         missile.age += dt;
         const rangeLimit = Math.max(1, missile.rangeLimit || 1);
-        const distFromStartBeforeMove = Math.hypot(missile.x - missile.startX, missile.y - missile.startY);
-        missile.lifeProgress = Math.min(1, distFromStartBeforeMove / rangeLimit);
+        missile.distanceTraveled = Math.max(0, Number(missile.distanceTraveled) || 0);
+        missile.lifeProgress = Math.min(1, missile.distanceTraveled / rangeLimit);
         const trailDecayAmount = missile.lifeProgress <= MISSILE_TRAIL_DECAY_START_RATIO
             ? 0
             : Math.min(1, (missile.lifeProgress - MISSILE_TRAIL_DECAY_START_RATIO) /
@@ -4331,17 +4361,16 @@ function updateProjectiles(dt, baseMoved) {
         const missileMoveDist = missile.speed * base.missileSpeedMultiplier * dtScaled;
         missile.x += missile.dx * missileMoveDist;
         missile.y += missile.dy * missileMoveDist;
+        missile.distanceTraveled += missileMoveDist;
 
         // 4. Update Trail
         missile.trail.unshift({ x: missile.x, y: missile.y });
         if (missile.trail.length > MISSILE_TRAIL_LENGTH) missile.trail.pop();
 
         // 5. Check bounds / Range (collision checked separately)
-        const distFromStart = Math.hypot(missile.x - missile.startX, missile.y - missile.startY);
-        missile.lifeProgress = Math.min(1, distFromStart / rangeLimit);
-        if (distFromStart > rangeLimit ||
-            missile.x < -50 || missile.x > canvasWidth + 50 ||
-            missile.y < -50 || missile.y > canvasHeight + 50) {
+        missile.lifeProgress = Math.min(1, missile.distanceTraveled / rangeLimit);
+        if (missile.distanceTraveled > rangeLimit ||
+            isOutsideVisibleWorldBounds(missile.x, missile.y, 80)) {
             releaseWeaponDamage(missile.reservedTarget, 'missile', missile.reservedDamage);
             missilePool.release(missile);
         }
@@ -6620,6 +6649,18 @@ function toggleUpgradeCategory(index) {
     drawGame();
 }
 
+function collapseUpgradeCategories() {
+    let collapsedAny = false;
+    upgradeTree.forEach(cat => {
+        if (cat.expanded) {
+            cat.expanded = false;
+            collapsedAny = true;
+        }
+    });
+    if (collapsedAny) drawGame();
+    return collapsedAny;
+}
+
 
 window.addEventListener('keydown', e => {
 
@@ -6795,6 +6836,7 @@ function handleCanvasClick(clientX, clientY) {
             }
         }
     }
+    collapseUpgradeCategories();
     if (paused) return;
 
     if (isGameRunning && base.manualTargeting && base.laserDamage > 0 && Date.now() - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {

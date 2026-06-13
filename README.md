@@ -74,6 +74,22 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.13
+- Clicking the playfield outside upgrade buttons now collapses open upgrade
+  panels.
+
+### v3.12
+- Bullets and missiles now continue across the full visible Tactical Zoom view
+  instead of disappearing at the old unzoomed canvas edge.
+
+### v3.11
+- Tactical Zoom now keeps the fog-of-war hash overlay filling the full screen
+  while revealing the correctly zoomed sensor area.
+
+### v3.10
+- Missile lifespan now counts actual distance traveled, so retargeted or
+  weaving missiles cannot exceed their travel budget by staying near base.
+
 ### v3.09
 - Missile tails now shrink from 75% to 90% of travel life, then missiles
   tumble unguided for the final 10%.
