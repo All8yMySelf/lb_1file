@@ -1,5 +1,74 @@
 # Orbital Defense - Change Log
 
+## v3.46
+- Wide Beam power now matches its displayed value: each level is +10% of focused
+  damage, and the cap against Laser Damage level is removed so it can be upgraded
+  all the way to match the focused beam's damage.
+
+## v3.45
+- Wide Beam upgrade card now displays actual per-target damage numbers (like the
+  Laser Damage card) instead of percentages.
+
+## v3.44
+- Wide Beam is now a single upgrade that activates at level 1 and then scales
+  its power by 10% per extra level, capped at the current Laser Damage level.
+- Removed the separate Wide Beam Power sub-button; power upgrades now appear on
+  the Wide Beam card itself once it is enabled.
+
+## v3.43
+- Wide beam spread now renders in the same yellow laser colour as the focused
+  beam, with opacity scaled by its relative power (10% power = ~10% visible).
+
+## v3.42
+- Restored the missing `STUN_RADIUS_INCREMENT_PER_LEVEL` configuration that was
+  accidentally dropped; this fixes both enemy visibility and the Special Weapon
+  (Stun) radius ring disappearing after the wide beam power work.
+
+## v3.41
+- Wide Beam is now upgradeable with Wide Beam Power, increasing wide beam
+  destruction by 10% per level (up to 10 levels).
+
+## v3.40
+- Wide Beam now draws as a cone-shaped spread instead of three thick individual
+  beams and deals 1/10 focused-beam damage per Kamikaze.
+- Focused laser beam at Fast/Boss targets is restored to the original thin
+  single beam look.
+
+## v3.39
+- Fixed enemy reveal radius so the laser's effective firing range also expands
+  visibility; prevents enemies from being hidden when Laser Range outpaces the
+  base acquisition reveal radius.
+
+## v3.38
+- Fixed a visibility regression where splitting Laser Damage and Laser Range hid
+  enemies beyond cannon/missile/sensor range; laser acquisition now restores its
+  own reveal radius.
+
+## v3.37
+- Separated Laser System into independent Damage and Range upgrades, mirroring
+  the Special Weapon split.
+- Laser radius anchors at acquisition range and grows via its own upgrade.
+- Added Wide Beam sub-upgrade that lets the laser sweep Kamikazes with a wider
+  beam, splitting total laser strength proportionally across the beam width.
+
+## v3.36
+- Decoupled missile radius from later cannon range upgrades by anchoring missile
+  radius independently when missiles are acquired.
+- Sensor range now tracks the furthest active radius while preserving its
+  Electronic FOV buffer distance beyond that ring.
+
+## v3.35
+- Locked missile trails to the selected Thin Needle look and removed the
+  temporary bottom Trail selector.
+- Missile Radius, Electronic FOV, and Stun Radius now use Tactical Zoom as the
+  unlock for unlimited post-cap upgrades.
+- Split Special Weapons into Stun Field strength and separate Stun Radius
+  upgrades.
+
+## v3.34
+- Kept Ghost Thin as the default missile trail and replaced the alternate Trail
+  selector entries with nine thinner/smoother Ghost Thin variants.
+
 ## v3.33
 - Made Ghost Thin the default missile trail style and reset the temporary Trail
   selector storage so live builds open on the chosen style.
