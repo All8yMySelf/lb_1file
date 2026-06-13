@@ -1,5 +1,56 @@
 # Orbital Defense - Change Log
 
+## v3.33
+- Made Ghost Thin the default missile trail style and reset the temporary Trail
+  selector storage so live builds open on the chosen style.
+
+## v3.32
+- Made Ghost Smoke the default missile trail style and reset the temporary
+  trail selector to a new Ghost-only test set.
+- Extended missile trail history again and retuned the Ghost variants so white
+  smoke starts directly behind the missile with orange flame layered over it.
+
+## v3.31
+- Added a temporary bottom Trail selector with the current missile trail as
+  Default plus ten longer flame-to-smoke variants for visual testing.
+- New trail variants layer dark orange flame, dark grey smoke, white haze, and
+  fade-out while keeping the current Default trail unchanged.
+
+## v3.30
+- Locked Hatch Lock opacity to the selected former 5/10 tuning and removed the
+  temporary bottom Hatch opacity button.
+
+## v3.29
+- Retuned Hatch opacity levels so 1/10 is the strongest reference and 2/10
+  through 10/10 step progressively less visible.
+
+## v3.28
+- Added a bottom Hatch opacity control with ten persisted transparency levels
+  for comparing the locked Hatch Lock target disc in-game.
+
+## v3.27
+- Locked missile homing visuals to Hatch Lock and removed the temporary homing
+  style selector.
+- Hatch Lock now shows a dashed ring around searching missiles and a stronger
+  hatched red disc beneath locked targets.
+
+## v3.25
+- Reduced the homing style cycle to Red Disc, Dashed Lock, Dashed Glow, and
+  Hatched Disc.
+- Added Dashed Glow as a combined transparent disc plus dashed red lock ring.
+- Added Hatched Disc with a fog-like diagonal hatch pattern and contact shadow
+  so it reads as sitting underneath enemies and range rings.
+
+## v3.24
+- Increased the Red Disc homing style visibility with a stronger transparent
+  fill, edge, and shadow so the depth effect is easier to read.
+
+## v3.23
+- Added a bottom-screen Homing style button with the existing ring as the
+  default plus ten alternate missile homing-radius displays.
+- Added a faint red filled-disc homing style that draws beneath enemies and
+  range rings with a soft shadowed depth effect.
+
 ## v3.22
 - Missile trails are locked to the Needle Core look after testing the temporary
   selector variants.
