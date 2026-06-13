@@ -1,5 +1,31 @@
 # Orbital Defense - Change Log
 
+## v3.22
+- Missile trails are locked to the Needle Core look after testing the temporary
+  selector variants.
+- Removed the missile trail style cycling button from the bottom controls.
+- Documented missile trail art as a follow-up area because the anime missile
+  massacre look still needs a stronger dedicated visual pass.
+
+## v3.18
+- Defense Systems now uses a green category outline instead of inheriting the
+  cannon purple outline.
+
+## v3.17
+- Weapon category colours are now consistent: Cannon is purple, Laser is
+  yellow, and Missile is red across upgrade borders and range rings.
+- The fired laser beam now uses the same yellow as the Laser System border and
+  targeting range.
+
+## v3.16
+- Missiles that lose and reacquire targets now use a softer retargeting turn
+  window, creating a wider arc instead of snapping sharply onto the new target.
+
+## v3.15
+- Missiles now use an anime-style white body with a red nose cone.
+- Missile trails now render as segmented smoke: bright white near the missile,
+  fading through grey and then out to transparent.
+
 ## v3.14
 - Defense Health is now an unlimited +10% max-health upgrade based on the
   player's current max health, including boss and perk health gains.
