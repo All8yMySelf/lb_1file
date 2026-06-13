@@ -74,6 +74,36 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.33
+- Made Ghost Thin the default missile trail style and reset the Trail selector
+  storage so the live build opens on it.
+
+### v3.32
+- Made Ghost Smoke the default missile trail and added ten Ghost-style variants
+  with white smoke starting behind the missile and orange flame layered over it.
+
+### v3.31
+- Added a temporary Trail button with the current missile trail as Default plus
+  ten longer flame-to-smoke trail variants for testing.
+
+### v3.30
+- Locked Hatch Lock opacity to the selected former 5/10 tuning and removed the
+  temporary Hatch opacity button.
+
+### v3.29
+- Retuned Hatch opacity so 1/10 is the strongest option and the remaining
+  levels get progressively fainter.
+
+### v3.28
+- Added a bottom Hatch opacity control with ten saved transparency levels for
+  testing the locked Hatch Lock target disc.
+
+### v3.27
+- Missile homing visuals are locked to Hatch Lock, with the temporary style
+  selector removed.
+- Hatch Lock shows a dashed ring while searching and a stronger hatched red
+  disc under locked enemies.
+
 ### v3.22
 - Missile trails are locked to Needle Core and the temporary trail style
   selector has been removed.
