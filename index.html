@@ -179,7 +179,7 @@
     });
 </script>
 
-<title>Orbital Defense v3.46 - Optimised</title>
+<title>Orbital Defense v3.61 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -629,7 +629,7 @@
 #perkStatus{position:absolute;top:36px;left:10px;z-index:10;font-size:11px;color:#ffd700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v3.46</h1>
+    <h1 id="gameTitle">Orbital Defense v3.61</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -1208,7 +1208,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.46';
+const GAME_VERSION = '3.61';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1466,6 +1466,28 @@ const UPGRADE_MISSILE_MACROSS = 4;
 const UPGRADE_MISSILE_SMART = 5;
 const UPGRADE_MISSILE_RETARGET = 6;
 const UPGRADE_MISSILE_LIFESPAN = 7;
+const UPGRADE_MISSILE_SUPERSONIC = 8;
+const UPGRADE_MISSILE_SUPER_WARHEAD = 9;
+const UPGRADE_MISSILE_SUPER_SALVO = 10;
+const UPGRADE_MISSILE_SUPER_SALVO_AI = 11;
+const UPGRADE_MISSILE_SUPER_SALVO_SPEED = 12;
+const UPGRADE_MISSILE_MINES = 13;
+const UPGRADE_MISSILE_MINE_MAGNETIC = 14;
+const MINE_MAX_COUNT = 150; // cap parked mines to bound collision/render cost
+const MINE_MIN_CLING_SPEED = 0.4; // magnetic pull starts slow...
+const MINE_MAX_CLING_SPEED = 9; // ...then accelerates to this before impact
+const MINE_CLING_ACCEL = 0.35; // per-frame cling speed ramp
+const MISSILE_RESEARCH_DURATION = 45; // seconds of game time
+const MISSILE_RESEARCH_COST = 5000;
+const SUPERSONIC_FIRE_INTERVAL = 5000; // ms between supersonic salvos
+const SUPERSONIC_SPEED_MULTIPLIER = 3.5;
+const SUPERSONIC_RANGE_MULTIPLIER = 2.0;
+const SUPERSONIC_SPLIT_THRESHOLD = 0.35; // split at 35% of range traveled
+const SUPERSONIC_PAYLOAD_BASE_SPEED = 7;
+// Fixed MIRV bus-release cone: reentry vehicles always fan across this same
+// total angle regardless of how many there are (more vehicles just subdivide
+// it). ~30 deg reads well top-down; real release cones are only a few degrees.
+const SUPERSONIC_MIRV_CONE = 0.52; // ~30 deg total dispersal cone (+/-15 deg)
 const UPGRADE_SPECIAL_STUN = 0;
 const UPGRADE_SPECIAL_STUN_RADIUS = 1;
 const UPGRADE_TIME_SLOW = 0;
@@ -1720,6 +1742,13 @@ const XP_BOOST_MAX_ACTIVE_LAYERS = XP_BOOST_LAYER_DURATIONS.length;
 // spread phase before homing kicks in; curl spins the scatter path; wobble
 // adds the corkscrew; weave bends multiple missiles around each other.
 function currentMissileStyle() { return 'Braided'; }
+
+function supersonicMissileStyleConfig() {
+    return { style: 'Linear', scatterTime: 0.05,
+             curl: 0, wobbleFreq: 0, wobbleAmp: 0,
+             weaveAmp: 0, weaveFreq: 0,
+             weavePhase: 0 };
+}
 
 function missileStyleConfig(isMacross) {
     return { style: 'Braided', scatterTime: isMacross ? 0.5 : 0.38,
@@ -1992,6 +2021,13 @@ function resetMissile(missile, config) {
     missile.weaveAmp = config.weaveAmp || 0;
     missile.weaveFreq = config.weaveFreq || 0;
     missile.weavePhase = config.weavePhase || 0;
+    missile.supersonic = config.supersonic || false;
+    missile.salvoPayloads = config.salvoPayloads || 0;
+    missile.salvoSplit = config.salvoSplit || false;
+    missile.isPayload = config.isPayload || false;
+    missile.mineCandidate = config.mineCandidate || false;
+    missile.isMine = config.isMine || false;
+    missile.mineClingSpeed = config.mineClingSpeed || 0;
 
     if (isRelease) {
         // When releasing back to the pool, clear dynamic state
@@ -2000,6 +2036,13 @@ function resetMissile(missile, config) {
         missile.reservedDamage = 0;
         missile.trail = [];
         missile.isMacross = false;
+        missile.supersonic = false;
+        missile.salvoPayloads = 0;
+        missile.salvoSplit = false;
+        missile.isPayload = false;
+        missile.mineCandidate = false;
+        missile.isMine = false;
+        missile.mineClingSpeed = 0;
         missile.homingActive = false;
         missile.homingRadius = base.missileHomingRadius;
         missile.startX = 0;
@@ -2279,6 +2322,25 @@ function getMissileTrailSegmentStyles(ageRatio, trailAlpha, pulse = 0, segmentIn
         { stroke: soot, width: Math.max(0.6, (2.8 - ageRatio * 1.7) * width) },
         { stroke: ember, width: Math.max(0.55, (3.0 - ageRatio * 7.5) * width) }
     ].filter(style => style.stroke && !style.stroke.endsWith(', 0)'));
+}
+
+function getSupersonicTrailSegmentStyles(ageRatio, trailAlpha, pulse = 0) {
+    const fade = Math.max(0, 1 - Math.pow(ageRatio, 1.35));
+    const alpha = trailAlpha * fade;
+    const flameWindow = Math.max(0, 1 - ageRatio / 0.25);
+    const smokeWindow = ageRatio > 0.08 ? Math.max(0, 1 - Math.abs(ageRatio - 0.46) / 0.54) : 0;
+    const hazeWindow = Math.max(0, 1 - Math.pow(ageRatio / 0.96, 1.18));
+    const w = 0.52;
+    const glow     = rgba(0,   200 + Math.round(pulse * 55), 255, alpha * flameWindow * 1.1);
+    const midBlue  = rgba(0,   80,  160, alpha * smokeWindow * 0.5);
+    const hazeCyan = rgba(160, 230, 255, alpha * hazeWindow  * 0.42);
+    const deepBlue = rgba(0,   20,  90,  alpha * smokeWindow * 0.3);
+    return [
+        { stroke: hazeCyan, width: Math.max(0.8, (7.0 - ageRatio * 3.5) * w) },
+        { stroke: midBlue,  width: Math.max(0.7, (4.5 - ageRatio * 2.6) * w) },
+        { stroke: deepBlue, width: Math.max(0.6, (3.0 - ageRatio * 1.8) * w) },
+        { stroke: glow,     width: Math.max(0.55,(3.5 - ageRatio * 8.0) * w) }
+    ].filter(s => s.stroke && !s.stroke.endsWith(', 0)'));
 }
 
 function strokeMissileTrailSegment(p0, p1, style) {
@@ -3173,7 +3235,9 @@ function serializeMissile(missile, enemyIndexByObject) {
         tumbleSpin: missile.tumbleSpin || 0,
         decayPhase: missile.decayPhase || 0,
         reservedTargetIndex: enemyIndexByObject.has(missile.reservedTarget) ? enemyIndexByObject.get(missile.reservedTarget) : -1,
-        reservedDamage: missile.reservedDamage || 0
+        reservedDamage: missile.reservedDamage || 0,
+        isMine: !!missile.isMine,
+        mineCandidate: !!missile.mineCandidate
     };
 }
 
@@ -3303,7 +3367,9 @@ function restoreSavedRuntimeState(runtimeState, savedAt) {
                 tumbleSpin: Number(savedMissile.tumbleSpin) || 0,
                 decayPhase: Number(savedMissile.decayPhase) || 0,
                 reservedTarget,
-                reservedDamage: Math.max(0, Number(savedMissile.reservedDamage) || 0)
+                reservedDamage: Math.max(0, Number(savedMissile.reservedDamage) || 0),
+                isMine: !!savedMissile.isMine,
+                mineCandidate: !!savedMissile.mineCandidate
             });
         });
     }
@@ -3336,6 +3402,7 @@ function shiftLoadedGameStateTimestamps(savedAt) {
         'lastLaserFireTime',
         'laserEffectEndTime',
         'lastMissileFireTime',
+        'lastSupersonicFireTime',
         'stunEffectEndTime',
         'xpBoostEndTime'
     ].forEach(key => {
@@ -3450,6 +3517,13 @@ function loadGame() {
         base.macrossActivationWave = Math.max(0, Math.floor(Number(savedBase.macrossActivationWave) || 0));
         base.stunLevel = savedBase.stunLevel;
         base.stunRadius = savedBase.stunRadius;
+       base.supersonicMissileCount = savedBase.supersonicMissileCount || 0;
+       base.supersonicMissileDamage = savedBase.supersonicMissileDamage || 0;
+       base.supersonicSalvoPayloads = savedBase.supersonicSalvoPayloads || 0;
+       base.supersonicSalvoAI = savedBase.supersonicSalvoAI || false;
+       base.supersonicPayloadSpeed = savedBase.supersonicPayloadSpeed || SUPERSONIC_PAYLOAD_BASE_SPEED;
+       base.missilesToMines = savedBase.missilesToMines || false;
+       base.mineMagnetRadius = savedBase.mineMagnetRadius || 0;
        base.missileSpeedMultiplier = savedBase.missileSpeedMultiplier;
        base.missileTurnSpeed = savedBase.missileTurnSpeed || 0.05;
       base.missileHomingRadius = savedBase.missileHomingRadius;
@@ -3688,6 +3762,52 @@ function createUpgradeTree(initialRange) {
                       const currentPct = 110 + level * 10;
                       const nextPct = level < maxLvl ? currentPct + 10 : currentPct;
                       return `${currentPct}%${level < maxLvl ? ` > ${nextPct}%` : ''}`;
+                  }},
+                { name: 'Supersonic', cost: 50000, level: 0, maxLevel: 1,
+                  f: level => level,
+                  g: (level, cost, maxLvl) => {
+                      if (level === 0) return '(Activate)\nExpands stun to sensor range';
+                      const dmg = base?.supersonicMissileDamage || 30;
+                      return `Active — ${dmg} dmg\nRange: sensor range`;
+                  }},
+                { name: 'Super Warhead', cost: 15000, level: 0, maxLevel: 5,
+                  f: level => 30 + 10 * level,
+                  g: (level, cost, maxLvl) => {
+                      if (level === 0) return '(Activate)\nBoosts supersonic dmg';
+                      const c = 30 + 10 * level, n = 30 + 10 * (level + 1);
+                      return `${c}${level < maxLvl ? ` > ${n}` : ''} dmg`;
+                  }},
+                { name: 'Super Salvo', cost: 20000, level: 0, maxLevel: 4,
+                  f: level => level + 1,
+                  g: (level, cost, maxLvl) => {
+                      if (level === 0) return '(Activate)\nMIRV: missile splits mid-flight';
+                      const payloads = level + 1;
+                      const next = level < maxLvl ? ` > ${payloads + 1}` : '';
+                      return `${payloads}${next} payloads/missile`;
+                  }},
+                { name: 'Salvo AI', cost: 30000, level: 0, maxLevel: 1,
+                  f: level => level,
+                  g: (level) => level === 0 ? '(Activate)\nPayloads spread to diff targets' : 'Active — smart targeting' },
+                { name: 'Salvo Speed', cost: 25000, level: 0, maxLevel: 4,
+                  f: level => SUPERSONIC_PAYLOAD_BASE_SPEED + level * 2,
+                  g: (level, cost, maxLvl) => {
+                      if (level === 0) return '(Activate)\nBoosts payload speed';
+                      const c = SUPERSONIC_PAYLOAD_BASE_SPEED + level * 2;
+                      const n = SUPERSONIC_PAYLOAD_BASE_SPEED + (level + 1) * 2;
+                      return `${c}${level < maxLvl ? ` > ${n}` : ''} speed`;
+                  }},
+                { name: 'Missiles to Mines', cost: 40000, level: 0, maxLevel: 1, // Requires Macross Smart AI
+                  f: level => level,
+                  g: (level) => level === 0
+                      ? '(Activate)\nMacross spares arm as ring mines'
+                      : 'Active — spares become mines' },
+                { name: 'Magnetic Mines', cost: 30000, level: 0, maxLevel: 6, // Requires Missiles to Mines
+                  f: level => level === 0 ? 0 : 60 + 30 * (level - 1),
+                  g: (level, cost, maxLvl) => {
+                      if (level === 0) return '(Activate)\nMine seeks enemies in radius';
+                      const c = 60 + 30 * (level - 1);
+                      const n = 60 + 30 * level;
+                      return `${c}${level < maxLvl ? ` > ${n}` : ''} seek radius`;
                   }}
             ]
         },
@@ -3803,6 +3923,9 @@ function createInitialGameState() {
         lastLaserFireTime: 0,
         laserEffectEndTime: 0,
         lastMissileFireTime: 0,
+        lastSupersonicFireTime: 0,
+        missileResearchTimer: 0,
+        missileResearchComplete: false,
         macrossCooldownTimer: 0,
         macrossUseCount: 0, // Each use in the current wave adds 5s to the next recharge
         macrossCooldownTotal: 0,
@@ -3888,6 +4011,13 @@ function createInitialBaseState(initialRange) {
         macrossSmartAccuracy: 0, // Needs Smart AI upgrade
         missileRetarget: false, // Needs Retarget upgrade
         missileRangeMultiplier: 1.1, // Lifespan: travel budget over missile radius
+        supersonicMissileCount: 0,
+        supersonicMissileDamage: 0,
+        supersonicSalvoPayloads: 0,
+        supersonicSalvoAI: false,
+        supersonicPayloadSpeed: SUPERSONIC_PAYLOAD_BASE_SPEED,
+        missilesToMines: false,
+        mineMagnetRadius: 0,
 
         stunLevel: 0, // Needs upgrade
         stunRadius: 0,
@@ -4445,6 +4575,48 @@ function handlePlayerFiring(dt) {
         }
     }
 
+    // --- Supersonic Missile Firing ---
+    if (base.supersonicMissileCount > 0 && currentTime - gameState.lastSupersonicFireTime >= SUPERSONIC_FIRE_INTERVAL / gameSpeedMultiplier) {
+        const supersonicRadius = base.sensorRange;
+        const supersonicCandidates = enemies
+            .filter(enemy => Math.hypot(enemy.x - base.x, enemy.y - base.y) <= supersonicRadius)
+            .filter(enemy => !enemy.xp)
+            .filter(e => hasTargetCapacity(e, 'missile'))
+            .sort((a, b) => Math.hypot(b.x - base.x, b.y - base.y) - Math.hypot(a.x - base.x, a.y - base.y));
+        const supTargets = supersonicCandidates.slice(0, base.supersonicMissileCount);
+        if (supTargets.length > 0) {
+            supTargets.forEach(target => {
+                target.isTargeted = true;
+                target.targetLockTime = TARGET_LOCK_DURATION;
+                const angle = Math.atan2(target.y - base.y, target.x - base.x);
+                const launchAngle = angle + (Math.random() - 0.5) * 0.15;
+                missilePool.get({
+                    x: base.x,
+                    y: base.y,
+                    dx: Math.cos(launchAngle),
+                    dy: Math.sin(launchAngle),
+                    t: target,
+                    speed: 6 + Math.random() * 2,
+                    turnSpeed: 0.018,
+                    homingRadius: base.missileHomingRadius,
+                    homingActive: true,
+                    startX: base.x,
+                    startY: base.y,
+                    rangeLimit: supersonicRadius * base.missileRangeMultiplier,
+                    reservedTarget: target,
+                    reservedDamage: sensorUpgrades.targetAI ? base.supersonicMissileDamage : 0,
+                    supersonic: true,
+                    salvoPayloads: base.supersonicSalvoPayloads,
+                    salvoSplit: false,
+                    ...supersonicMissileStyleConfig()
+                });
+                reserveWeaponDamage(target, 'missile', base.supersonicMissileDamage);
+            });
+            createExplosion(base.x, base.y, '#00ccff', 8, 12);
+            gameState.lastSupersonicFireTime = currentTime;
+        }
+    }
+
     // --- Laser Firing ---
     if (base.laserDamage > 0 && currentTime - gameState.lastLaserFireTime >= LASER_FIRE_INTERVAL / gameSpeedMultiplier) {
         const wideBeamActive = base.laserWideBeam > 0;
@@ -4565,6 +4737,33 @@ function updateProjectiles(dt, baseMoved) {
 
     for (let i = missiles.length - 1; i >= 0; i--) {
         const missile = missiles[i];
+
+        // Parked mines skip all flight logic. Magnetic mines reach out and drag
+        // in the nearest enemy within their pull radius (slow -> fast); contact
+        // detonation is handled by the normal missile-collision pass.
+        if (missile.isMine) {
+            if (base.mineMagnetRadius > 0) {
+                let nearest = null, bestD = base.mineMagnetRadius;
+                for (let k = enemies.length - 1; k >= 0; k--) {
+                    const e = enemies[k];
+                    if (e.xp) continue;
+                    const d = Math.hypot(e.x - missile.x, e.y - missile.y);
+                    if (d < bestD) { bestD = d; nearest = e; }
+                }
+                if (nearest) {
+                    missile.mineClingSpeed = Math.min(MINE_MAX_CLING_SPEED,
+                        Math.max(MINE_MIN_CLING_SPEED, missile.mineClingSpeed) + MINE_CLING_ACCEL);
+                    const ang = Math.atan2(nearest.y - missile.y, nearest.x - missile.x);
+                    missile.x += Math.cos(ang) * missile.mineClingSpeed * dtScaled;
+                    missile.y += Math.sin(ang) * missile.mineClingSpeed * dtScaled;
+                    missile.dx = Math.cos(ang); missile.dy = Math.sin(ang);
+                } else {
+                    missile.mineClingSpeed = 0; // no prey nearby: settle dormant
+                }
+            }
+            continue;
+        }
+
         missile.age += dt;
         const rangeLimit = Math.max(1, missile.rangeLimit || 1);
         missile.distanceTraveled = Math.max(0, Number(missile.distanceTraveled) || 0);
@@ -4722,6 +4921,46 @@ function updateProjectiles(dt, baseMoved) {
         missile.y += missile.dy * missileMoveDist;
         missile.distanceTraveled += missileMoveDist;
 
+        // Macross spare -> ring mine: an untargeted spare that reaches the red
+        // missile ring cuts its engine, snaps onto the ring, and parks as a mine.
+        if (missile.mineCandidate && !missile.isMine && !missile.target) {
+            const distFromBase = Math.hypot(missile.x - base.x, missile.y - base.y);
+            if (distFromBase >= base.missileTargetingRadius) {
+                releaseWeaponDamage(missile.reservedTarget, 'missile', missile.reservedDamage);
+                if (countActiveMines() < MINE_MAX_COUNT) {
+                    const ang = Math.atan2(missile.y - base.y, missile.x - base.x);
+                    missile.x = base.x + Math.cos(ang) * base.missileTargetingRadius;
+                    missile.y = base.y + Math.sin(ang) * base.missileTargetingRadius;
+                    missile.isMine = true;
+                    missile.mineCandidate = false;
+                    missile.homingActive = false;
+                    missile.target = null;
+                    missile.reservedTarget = null;
+                    missile.reservedDamage = 0;
+                    missile.speed = 0;
+                    missile.fadeAlpha = 1;
+                    missile.trailAlpha = 0;
+                    missile.mineClingSpeed = 0;
+                } else {
+                    missilePool.release(missile); // at the mine cap: spare just expires
+                }
+                continue;
+            }
+        }
+
+        // Supersonic MIRV split: the carrier head breaks fully apart into its
+        // reentry vehicles. Only commit the split once targets are in range —
+        // otherwise the carrier keeps flying and tries again next frame.
+        if (missile.supersonic && !missile.salvoSplit && missile.salvoPayloads > 1 &&
+            missile.distanceTraveled >= missile.rangeLimit * SUPERSONIC_SPLIT_THRESHOLD) {
+            const spawned = spawnSupersonicPayloads(missile);
+            if (spawned > 0) {
+                releaseWeaponDamage(missile.reservedTarget, 'missile', missile.reservedDamage);
+                missilePool.release(missile); // carrier is consumed by the split
+                continue; // skip the rest of this (now-released) missile's update
+            }
+        }
+
         // 4. Update Trail
         missile.trail.unshift({ x: missile.x, y: missile.y });
         if (missile.trail.length > MISSILE_TRAIL_LENGTH) missile.trail.pop();
@@ -4793,7 +5032,7 @@ function checkCollisions(dt) {
 
             if (distSq < radiiSumSq) {
                 missileHit = true;
-                const damage = missile.isMacross ? base.macrossMissileDamage : base.missileDamage;
+                const damage = missile.isMacross ? base.macrossMissileDamage : missile.supersonic ? base.supersonicMissileDamage : base.missileDamage;
                 releaseWeaponDamage(missile.reservedTarget, 'missile', missile.reservedDamage);
                 enemy.health -= applyShieldAbsorption(enemy, damage);
                  // Small impact explosion
@@ -4822,12 +5061,98 @@ function checkCollisions(dt) {
 }
 
 
+function spawnPayloadMissile(parent, target, remainingRange) {
+    // Reentry vehicle: aim straight at the assigned target and fly a ballistic
+    // line — no homing, no curving, like a real MIRV warhead after bus release.
+    const launchAngle = Math.atan2(target.y - parent.y, target.x - parent.x);
+    missilePool.get({
+        x: parent.x, y: parent.y,
+        dx: Math.cos(launchAngle), dy: Math.sin(launchAngle),
+        t: null,                 // no homing target -> steering never runs
+        speed: base.supersonicPayloadSpeed,
+        turnSpeed: 0,
+        homingRadius: 0,
+        homingActive: false,     // ballistic; never curves
+        startX: parent.x, startY: parent.y,
+        rangeLimit: remainingRange,
+        reservedTarget: target,  // kept only for damage reservation bookkeeping
+        reservedDamage: sensorUpgrades.targetAI ? base.supersonicMissileDamage : 0,
+        supersonic: true, isPayload: true, salvoSplit: true, salvoPayloads: 0,
+        ...supersonicMissileStyleConfig()
+    });
+    reserveWeaponDamage(target, 'missile', base.supersonicMissileDamage);
+}
+
+// The carrier "bus" breaks fully apart into `salvoPayloads` reentry vehicles.
+// Returns the number of payloads actually launched (0 if no targets in range,
+// so the caller can defer the split rather than wasting the missile).
+function countActiveMines() {
+    const arr = missilePool.getActiveObjects();
+    let n = 0;
+    for (let i = 0; i < arr.length; i++) if (arr[i].isMine) n++;
+    return n;
+}
+
+function spawnSupersonicPayloads(missile) {
+    const count = missile.salvoPayloads;
+    if (count <= 0) return 0;
+    const remainingRange = Math.max(100, missile.rangeLimit - missile.distanceTraveled);
+
+    // Reentry vehicles can only be flung within a fixed dispersal cone centered
+    // on the carrier's firing axis (its heading): +/- half-cone to each side.
+    const heading = Math.atan2(missile.dy, missile.dx);
+    const halfCone = SUPERSONIC_MIRV_CONE / 2;
+    const angleOffAxis = e => {
+        let d = Math.atan2(e.y - missile.y, e.x - missile.x) - heading;
+        while (d > Math.PI) d -= Math.PI * 2;
+        while (d < -Math.PI) d += Math.PI * 2;
+        return Math.abs(d);
+    };
+    const candidates = enemyPool.getActiveObjects()
+        .filter(e => !e.xp && Math.hypot(e.x - missile.x, e.y - missile.y) <= remainingRange)
+        .filter(e => angleOffAxis(e) <= halfCone) // only enemies inside the cone
+        .filter(e => hasTargetCapacity(e, 'missile'));
+    if (candidates.length === 0) return 0; // nothing in the cone yet: defer split
+
+    const nearestSorted = candidates.slice().sort((a, b) =>
+        Math.hypot(a.x - missile.x, a.y - missile.y) - Math.hypot(b.x - missile.x, b.y - missile.y));
+
+    // Assign a target to each reentry vehicle (all within the cone)
+    const targets = [];
+    if (base.supersonicSalvoAI) {
+        // Spread across distinct enemies, keeping the carrier's locked target first
+        const ordered = [];
+        if (missile.reservedTarget && candidates.includes(missile.reservedTarget)) ordered.push(missile.reservedTarget);
+        for (const e of nearestSorted) { if (!ordered.includes(e)) ordered.push(e); }
+        for (let i = 0; i < count; i++) targets.push(ordered[i % ordered.length]);
+    } else {
+        // Dumb mode: every reentry vehicle dives on the nearest enemy
+        for (let i = 0; i < count; i++) targets.push(nearestSorted[0]);
+    }
+
+    // Each vehicle flies a straight ballistic line to its target — the spread
+    // comes naturally from the targets' positions across the cone.
+    createExplosion(missile.x, missile.y, '#00ccff', count * 5, 16);
+    targets.forEach(t => spawnPayloadMissile(missile, t, remainingRange));
+    return count;
+}
+
 function updateCooldowns(dt) {
     // Macross Missile Cooldown
     if (gameState.macrossCooldownTimer > 0) {
         gameState.macrossCooldownTimer -= dt;
         if (gameState.macrossCooldownTimer <= 0) {
             gameState.macrossCooldownTimer = 0;
+        }
+    }
+    // Supersonic Research Timer
+    if (gameState.missileResearchTimer > 0 && !gameState.missileResearchComplete) {
+        gameState.missileResearchTimer -= dt;
+        if (gameState.missileResearchTimer <= 0) {
+            gameState.missileResearchTimer = 0;
+            gameState.missileResearchComplete = true;
+            showToast('Supersonic Missile research complete!', 3000);
+            markHUDDirty();
         }
     }
 }
@@ -5312,6 +5637,15 @@ function drawRangeRings() {
         ctx.arc(base.x, base.y, base.missileTargetingRadius, 0, Math.PI * 2);
         ctx.stroke();
     }
+    // Supersonic Missile Range — dashed cyan ring at sensor range
+    if (base.supersonicMissileCount > 0 && base.sensorRange > 0) {
+        ctx.strokeStyle = 'rgba(0, 200, 255, 0.35)';
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.arc(base.x, base.y, base.sensorRange, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
     // Laser Range (if applicable)
     if (base.laserDamage > 0 && base.laserRange > 0 && Number.isFinite(base.laserRange)) {
         const canUpgradeLaser = canPurchaseUpgrade(UPGRADE_CATEGORY_LASER, UPGRADE_LASER_RADIUS);
@@ -5348,6 +5682,9 @@ function drawRangeRings() {
         ];
         if (base.missileCount > 0 && base.missileTargetingRadius > 0) {
             ringInfoItems.push({ radius: base.missileTargetingRadius, label: 'Missile Range' });
+        }
+        if (base.supersonicMissileCount > 0 && base.sensorRange > 0) {
+            ringInfoItems.push({ radius: base.sensorRange, label: 'Supersonic / Sensor Range' });
         }
         if (base.laserDamage > 0 && base.laserRange > 0 && Number.isFinite(base.laserRange)) {
             ringInfoItems.push({ radius: base.laserRange, label: 'Laser Range' });
@@ -5699,15 +6036,52 @@ function drawProjectilesLayer() {
 
     // --- Draw Missiles ---
     missilePool.getActiveObjects().forEach(missile => {
+        // Parked mine: dark spiked casing with a slow red blink; magnetic mines
+        // show a faint pull-radius aura. Drawn instead of the missile body.
+        if (missile.isMine) {
+            ctx.save();
+            if (base.mineMagnetRadius > 0) {
+                ctx.strokeStyle = 'rgba(120, 200, 255, 0.10)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(missile.x, missile.y, base.mineMagnetRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            const blink = 0.5 + 0.5 * Math.sin(Date.now() / 250 + missile.x * 0.05);
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1.5;
+            for (let s = 0; s < 8; s++) {
+                const a = (s / 8) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(missile.x + Math.cos(a) * 4, missile.y + Math.sin(a) * 4);
+                ctx.lineTo(missile.x + Math.cos(a) * 8, missile.y + Math.sin(a) * 8);
+                ctx.stroke();
+            }
+            ctx.fillStyle = '#2b2b2b';
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(missile.x, missile.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = `rgba(255, 40, 40, ${0.35 + blink * 0.65})`;
+            ctx.beginPath();
+            ctx.arc(missile.x, missile.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            return;
+        }
+
         const missileAlpha = typeof missile.fadeAlpha === 'number' ? Math.max(0, Math.min(1, missile.fadeAlpha)) : 1;
         const trailAlpha = typeof missile.trailAlpha === 'number' ? Math.max(0, Math.min(1, missile.trailAlpha)) : missileAlpha;
         const trailLengthFactor = typeof missile.trailLengthFactor === 'number'
             ? Math.max(0, Math.min(1, missile.trailLengthFactor))
             : 1;
         const trailStyle = getMissileTrailStyle();
+        const isSupersonic = !!missile.supersonic;
 
         // Trail
-        const baseTrailLength = trailStyle.mode === 'default' ? 40 : Math.ceil(40 * (trailStyle.length || 1));
+        const baseTrailLength = isSupersonic ? Math.ceil(40 * 2.2) : (trailStyle.mode === 'default' ? 40 : Math.ceil(40 * (trailStyle.length || 1)));
         const visibleTrailLength = Math.min(missile.trail.length, Math.ceil(baseTrailLength * trailLengthFactor));
         if (visibleTrailLength > 1 && trailAlpha > 0.02) {
             ctx.save();
@@ -5716,8 +6090,13 @@ function drawProjectilesLayer() {
             for (let i = 1; i < visibleTrailLength; i++) {
                 const ageRatio = i / Math.max(1, visibleTrailLength - 1);
                 const pulse = Math.sin((missile.age || 0) * 18 + i * 0.9) * 0.5 + 0.5;
-                getMissileTrailSegmentStyles(ageRatio, trailAlpha, pulse, i, trailStyle)
-                    .forEach(style => strokeMissileTrailSegment(missile.trail[i - 1], missile.trail[i], style));
+                if (isSupersonic) {
+                    getSupersonicTrailSegmentStyles(ageRatio, trailAlpha, pulse)
+                        .forEach(style => strokeMissileTrailSegment(missile.trail[i - 1], missile.trail[i], style));
+                } else {
+                    getMissileTrailSegmentStyles(ageRatio, trailAlpha, pulse, i, trailStyle)
+                        .forEach(style => strokeMissileTrailSegment(missile.trail[i - 1], missile.trail[i], style));
+                }
             }
             ctx.restore();
         }
@@ -5728,23 +6107,48 @@ function drawProjectilesLayer() {
         ctx.globalAlpha = missileAlpha;
         ctx.translate(missile.x, missile.y);
         ctx.rotate(missile.unguidedDrift ? missile.tumbleAngle : Math.atan2(missile.dy, missile.dx));
-        ctx.fillStyle = missile.isMacross ? '#fff0e6' : '#f8f8f8';
-        ctx.strokeStyle = 'rgba(80, 80, 80, 0.85)';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(4.5, 0);
-        ctx.lineTo(-4, -2.4);
-        ctx.lineTo(-4, 2.4);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = '#ff1f1f';
-        ctx.beginPath();
-        ctx.moveTo(4.8, 0);
-        ctx.lineTo(1.1, -1.35);
-        ctx.lineTo(1.1, 1.35);
-        ctx.closePath();
-        ctx.fill();
+
+        if (isSupersonic) {
+            const scale = missile.isPayload ? 0.65 : 1;
+            ctx.shadowColor = '#00ccff';
+            ctx.shadowBlur = missile.isPayload ? 4 : 6;
+            ctx.fillStyle = missile.isPayload ? '#00eeff' : '#00ccff';
+            ctx.strokeStyle = 'rgba(0, 40, 80, 0.9)';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(7 * scale, 0);
+            ctx.lineTo(-5.5 * scale, -3.2 * scale);
+            ctx.lineTo(-5.5 * scale,  3.2 * scale);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(7.5 * scale, 0);
+            ctx.lineTo(2 * scale, -1.6 * scale);
+            ctx.lineTo(2 * scale,  1.6 * scale);
+            ctx.closePath();
+            ctx.fill();
+        } else {
+            ctx.fillStyle = missile.isMacross ? '#fff0e6' : '#f8f8f8';
+            ctx.strokeStyle = 'rgba(80, 80, 80, 0.85)';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(4.5, 0);
+            ctx.lineTo(-4, -2.4);
+            ctx.lineTo(-4, 2.4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#ff1f1f';
+            ctx.beginPath();
+            ctx.moveTo(4.8, 0);
+            ctx.lineTo(1.1, -1.35);
+            ctx.lineTo(1.1, 1.35);
+            ctx.closePath();
+            ctx.fill();
+        }
         ctx.restore();
     });
 
@@ -6055,6 +6459,13 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let ordnanceSyncButton = null;
         let fireControlButton = null;
         let tacticalZoomButton = null;
+        let supersonicButton = null;
+        let superWarheadButton = null;
+        let superSalvoButton = null;
+        let superSalvoAIButton = null;
+        let superSalvoSpeedButton = null;
+        let minesButton = null;
+        let magneticButton = null;
         let maxTextWidth = 0;
         category.upgrades.forEach((u, idx) => {
             const isFocus = categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS;
@@ -6066,6 +6477,13 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             const isOrdnanceSync = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_ORDNANCE_SYNC;
             const isFireControl = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_FIRE_CONTROL_AI;
             const isTacticalZoom = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_TACTICAL_ZOOM;
+            const isSupersonic = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SUPERSONIC;
+            const isSuperWarhead = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SUPER_WARHEAD;
+            const isSuperSalvo = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SUPER_SALVO;
+            const isSuperSalvoAI = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SUPER_SALVO_AI;
+            const isSuperSalvoSpeed = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SUPER_SALVO_SPEED;
+            const isMines = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_MINES;
+            const isMagnetic = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_MINE_MAGNETIC;
             const hasBar = isFocus || u.progressBar;
             const b = measureUpgradeButton(u, idx, hasBar, fontSize, padding, categoryIndex);
             maxTextWidth = Math.max(maxTextWidth, b.minWidth);
@@ -6078,6 +6496,13 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             else if (isOrdnanceSync) ordnanceSyncButton = b;
             else if (isFireControl) fireControlButton = b;
             else if (isTacticalZoom) tacticalZoomButton = b;
+            else if (isSupersonic) supersonicButton = b;
+            else if (isSuperWarhead) superWarheadButton = b;
+            else if (isSuperSalvo) superSalvoButton = b;
+            else if (isSuperSalvoAI) superSalvoAIButton = b;
+            else if (isSuperSalvoSpeed) superSalvoSpeedButton = b;
+            else if (isMines) minesButton = b;
+            else if (isMagnetic) magneticButton = b;
             else buttons.push(b);
         });
         if (tacticalZoomButton) {
@@ -6226,6 +6651,119 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             currentY += b.height + 10;
         });
 
+        // === Research Supersonic button + supersonic tree (missile category) ===
+        let supersonicButtonY = null;
+        if (categoryIndex === UPGRADE_CATEGORY_MISSILE) {
+            const researchH = fontSize * 2 + padding * 2 + 4;
+            const researchY = currentY;
+            const isComplete = gameState.missileResearchComplete;
+            const isActive = !isComplete && gameState.missileResearchTimer > 0;
+            const canAffordResearch = gameState.credits >= MISSILE_RESEARCH_COST;
+            const researchColor = '#00ccff';
+            const hasMissiles = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level > 0;
+            const hasZoom = hasTacticalZoomUpgrade();
+            const stunUp = upgradeTree[UPGRADE_CATEGORY_SPECIAL].upgrades[UPGRADE_SPECIAL_STUN];
+            const stunMaxed = stunUp.level >= stunUp.maxLevel;
+            const prereqsMet = hasMissiles && hasZoom && stunMaxed;
+            const prereqLocked = !isComplete && !isActive && !prereqsMet;
+
+            // Extend vertical spine to research button
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            if (centers.length > 0) {
+                ctx.moveTo(connectX, centers[centers.length - 1]);
+                ctx.lineTo(connectX, researchY + researchH / 2);
+            } else {
+                ctx.moveTo(connectX, researchY + researchH / 2);
+            }
+            ctx.lineTo(panelX, researchY + researchH / 2);
+            ctx.stroke();
+
+            // Background
+            ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+            ctx.fillRect(panelX, researchY, buttonWidth, researchH);
+            if (isComplete) {
+                ctx.fillStyle = 'rgba(120,120,120,0.25)';
+                ctx.fillRect(panelX, researchY, buttonWidth, researchH);
+            } else if (isActive) {
+                const progress = 1 - gameState.missileResearchTimer / MISSILE_RESEARCH_DURATION;
+                ctx.fillStyle = 'rgba(0,150,255,0.25)';
+                ctx.fillRect(panelX, researchY, buttonWidth * progress, researchH);
+            } else if (prereqLocked) {
+                ctx.fillStyle = 'rgba(80,80,80,0.3)';
+                ctx.fillRect(panelX, researchY, buttonWidth, researchH);
+            } else if (canAffordResearch && prereqsMet) {
+                ctx.fillStyle = 'rgba(0,255,0,0.2)';
+                ctx.fillRect(panelX, researchY, buttonWidth, researchH);
+            }
+            ctx.strokeStyle = isComplete ? maxedColor : prereqLocked ? 'rgba(120,120,120,0.6)' : researchColor;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(panelX, researchY, buttonWidth, researchH);
+
+            ctx.fillStyle = isComplete ? maxedColor : prereqLocked ? 'rgba(160,160,160,0.9)' : researchColor;
+            if (isComplete) {
+                ctx.fillText('Research: Done', panelX + padding, researchY + padding);
+                ctx.fillText('Supersonic unlocked', panelX + padding, researchY + padding + fontSize + 2);
+            } else if (isActive) {
+                ctx.fillText('Researching...', panelX + padding, researchY + padding);
+                ctx.fillText(`${gameState.missileResearchTimer.toFixed(1)}s remaining`, panelX + padding, researchY + padding + fontSize + 2);
+            } else if (prereqLocked) {
+                const missing = [
+                    !hasMissiles && 'Missiles',
+                    !hasZoom && 'Tactical Zoom',
+                    !stunMaxed && 'Max Stun Field'
+                ].filter(Boolean).join(', ');
+                ctx.fillText('Research: Supersonic', panelX + padding, researchY + padding);
+                ctx.fillText(`Need: ${missing}`, panelX + padding, researchY + padding + fontSize + 2);
+            } else {
+                ctx.fillText('Research: Supersonic', panelX + padding, researchY + padding);
+                ctx.fillText(`Cost: $${MISSILE_RESEARCH_COST}`, panelX + padding, researchY + padding + fontSize + 2);
+            }
+
+            if (!isComplete && !isActive && prereqsMet) {
+                ringClickRegions.push({ type: 'missile_research_button', x: panelX, y: researchY, width: buttonWidth, height: researchH });
+            }
+
+            currentY += researchH + 10;
+
+            // Draw Supersonic button if research complete
+            if (isComplete && supersonicButton) {
+                const supBtnY = currentY;
+                supersonicButtonY = supBtnY;
+                const supMaxed = Number.isFinite(supersonicButton.u.maxLevel) && supersonicButton.u.level >= supersonicButton.u.maxLevel;
+                const supAfford = canPurchaseUpgrade(UPGRADE_CATEGORY_MISSILE, UPGRADE_MISSILE_SUPERSONIC);
+
+                // Extend spine to supersonic button
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(connectX, researchY + researchH / 2);
+                ctx.lineTo(connectX, supBtnY + supersonicButton.height / 2);
+                ctx.lineTo(panelX, supBtnY + supersonicButton.height / 2);
+                ctx.stroke();
+
+                ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
+                ctx.fillRect(panelX, supBtnY, buttonWidth, supersonicButton.height);
+                ctx.strokeStyle = supMaxed ? maxedColor : '#00ccff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(panelX, supBtnY, buttonWidth, supersonicButton.height);
+                if (supMaxed) {
+                    ctx.fillStyle = 'rgba(120,120,120,0.25)';
+                    ctx.fillRect(panelX, supBtnY, buttonWidth, supersonicButton.height);
+                } else if (supAfford) {
+                    ctx.fillStyle = 'rgba(0,255,0,0.2)';
+                    ctx.fillRect(panelX, supBtnY, buttonWidth, supersonicButton.height);
+                }
+                ctx.fillStyle = supMaxed ? maxedColor : getUpgradeTextColor(supAfford);
+                let supTextY = supBtnY + padding;
+                supersonicButton.lines.forEach(line => { ctx.fillText(line, panelX + padding, supTextY); supTextY += fontSize; });
+
+                ringClickRegions.push({ type: 'collapsible_upgrade_button', x: panelX, y: supBtnY, width: buttonWidth, height: supersonicButton.height, categoryIndex: UPGRADE_CATEGORY_MISSILE, upgradeIndex: UPGRADE_MISSILE_SUPERSONIC });
+                currentY += supersonicButton.height + 10;
+            }
+        }
+
         if (focusButton) {
             drawSubUpgradeButton(focusButton, panelX, buttonWidth, gunButtonY !== null ? gunButtonY : currentY,
                 upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_MULTIBARREL].level > 0,
@@ -6253,9 +6791,26 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         }
 
         if (smartButton) {
-            drawSubUpgradeButton(smartButton, panelX, buttonWidth, macrosButtonY !== null ? macrosButtonY : currentY,
+            const smartY = macrosButtonY !== null ? macrosButtonY : currentY;
+            drawSubUpgradeButton(smartButton, panelX, buttonWidth, smartY,
                 upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MACROSS].level > 0,
                 categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+            // Mines stacks directly under Smart AI; Magnetic under Mines
+            // (same column, linked by vertical connectors)
+            if (minesButton) {
+                const minesY = smartY + smartButton.height + 14;
+                drawSubUpgradeButton(minesButton, panelX, buttonWidth, minesY,
+                    upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_SMART].level > 0,
+                    categoryIndex, displayColor, maxedColor, fontSize, padding, false, 1,
+                    smartY + smartButton.height);
+                if (magneticButton) {
+                    const magY = minesY + minesButton.height + 14;
+                    drawSubUpgradeButton(magneticButton, panelX, buttonWidth, magY,
+                        upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MINES].level > 0,
+                        categoryIndex, displayColor, maxedColor, fontSize, padding, false, 1,
+                        minesY + minesButton.height);
+                }
+            }
         }
 
         if (retargetButton) {
@@ -6275,6 +6830,32 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             drawSubUpgradeButton(fireControlButton, panelX, buttonWidth, (targetAIButtonY !== null ? targetAIButtonY : currentY) + offsetY,
                 upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_ORDNANCE_SYNC].level > 0,
                 categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+        }
+
+        if (superWarheadButton && supersonicButtonY !== null) {
+            drawSubUpgradeButton(superWarheadButton, panelX, buttonWidth, supersonicButtonY,
+                upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_SUPERSONIC].level > 0,
+                categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+        }
+
+        if (superSalvoButton && supersonicButtonY !== null) {
+            const salvoOffsetY = superWarheadButton ? superWarheadButton.height + 10 : 0;
+            const salvoY = supersonicButtonY + salvoOffsetY;
+            drawSubUpgradeButton(superSalvoButton, panelX, buttonWidth, salvoY,
+                upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_SUPERSONIC].level > 0,
+                categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+
+            if (superSalvoAIButton) {
+                drawSubUpgradeButton(superSalvoAIButton, panelX, buttonWidth, salvoY,
+                    upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_SUPER_SALVO].level > 0,
+                    categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+            }
+            if (superSalvoSpeedButton) {
+                const aiOffset = superSalvoAIButton ? superSalvoAIButton.height + 10 : 0;
+                drawSubUpgradeButton(superSalvoSpeedButton, panelX, buttonWidth, salvoY + aiOffset,
+                    upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_SUPER_SALVO].level > 0,
+                    categoryIndex, displayColor, maxedColor, fontSize, padding, false);
+            }
         }
     }
 
@@ -6332,8 +6913,10 @@ function drawFocusNotchBar(u, startX, barY, isButtonMaxed, canAfford, pushNotchR
 
 // Prerequisite-gated sub-upgrade button drawn to the right of its parent
 // button, with connector line and click region
-function drawSubUpgradeButton(btn, panelX, buttonWidth, btnY, prereqMet, categoryIndex, displayColor, maxedColor, fontSize, padding, withFocusBar) {
-    const subX = panelX + buttonWidth + 40;
+function drawSubUpgradeButton(btn, panelX, buttonWidth, btnY, prereqMet, categoryIndex, displayColor, maxedColor, fontSize, padding, withFocusBar, col = 1, vertLinkY = null) {
+    const colW = buttonWidth + 40;
+    const subX = panelX + colW * col;
+    const parentRight = panelX + colW * (col - 1) + buttonWidth;
     const isButtonMaxed = Number.isFinite(btn.u.maxLevel) && btn.u.level >= btn.u.maxLevel;
     ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
     ctx.fillRect(subX, btnY, buttonWidth, btn.height);
@@ -6362,8 +6945,15 @@ function drawSubUpgradeButton(btn, panelX, buttonWidth, btnY, prereqMet, categor
     ctx.strokeStyle = displayColor;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(panelX + buttonWidth, btnY + btn.height / 2);
-    ctx.lineTo(subX, btnY + btn.height / 2);
+    if (vertLinkY !== null) {
+        // Vertical connector from the bottom of the button above
+        const cx = subX + buttonWidth / 2;
+        ctx.moveTo(cx, vertLinkY);
+        ctx.lineTo(cx, btnY);
+    } else {
+        ctx.moveTo(parentRight, btnY + btn.height / 2);
+        ctx.lineTo(subX, btnY + btn.height / 2);
+    }
     ctx.stroke();
 
     ringClickRegions.push({
@@ -6392,10 +6982,44 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     }
 
     // Check prerequisite for missile sub-upgrades
-    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex > UPGRADE_MISSILE_COUNT) {
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex > UPGRADE_MISSILE_COUNT &&
+        upgradeIndex < UPGRADE_MISSILE_SUPERSONIC) {
         if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0) {
             showToast("Requires Missile System Acquisition first!", 2500);
             return; // Cannot buy sub-upgrades if missiles not acquired
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_SUPERSONIC) {
+        if (!gameState.missileResearchComplete) { showToast("Requires Supersonic Research first!", 2500); return; }
+        if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0) { showToast("Requires Missile System first!", 2500); return; }
+        if (!hasTacticalZoomUpgrade()) { showToast("Requires Sensor Tactical Zoom!", 2500); return; }
+        const stunUp = upgradeTree[UPGRADE_CATEGORY_SPECIAL].upgrades[UPGRADE_SPECIAL_STUN];
+        if (stunUp.level < stunUp.maxLevel) { showToast("Requires Stun Field fully maxed!", 2500); return; }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE &&
+        (upgradeIndex === UPGRADE_MISSILE_SUPER_WARHEAD || upgradeIndex === UPGRADE_MISSILE_SUPER_SALVO)) {
+        if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_SUPERSONIC].level === 0) {
+            showToast("Requires Supersonic Missile first!", 2500);
+            return;
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE &&
+        (upgradeIndex === UPGRADE_MISSILE_SUPER_SALVO_AI || upgradeIndex === UPGRADE_MISSILE_SUPER_SALVO_SPEED)) {
+        if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_SUPER_SALVO].level === 0) {
+            showToast("Requires Super Salvo first!", 2500);
+            return;
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_MINES) {
+        if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_SMART].level === 0) {
+            showToast("Requires Macross Smart AI first!", 2500);
+            return;
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_MINE_MAGNETIC) {
+        if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_MINES].level === 0) {
+            showToast("Requires Missiles to Mines first!", 2500);
+            return;
         }
     }
     if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_SMART) {
@@ -6588,6 +7212,33 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     break;
                 case UPGRADE_MISSILE_LIFESPAN:
                     base.missileRangeMultiplier = upgrade.f(level);
+                    break;
+                case UPGRADE_MISSILE_SUPERSONIC:
+                    base.supersonicMissileCount = upgrade.f(level); // 0 or 1
+                    if (level === 1 && isNewPurchase) {
+                        base.supersonicMissileDamage = 30;
+                        // Expand stun field to full sensor range
+                        base.stunRadius = base.sensorRange;
+                    }
+                    syncSensorRangeToFurthest();
+                    break;
+                case UPGRADE_MISSILE_SUPER_WARHEAD:
+                    base.supersonicMissileDamage = upgrade.f(level);
+                    break;
+                case UPGRADE_MISSILE_SUPER_SALVO:
+                    base.supersonicSalvoPayloads = upgrade.f(level); // 2–5 payloads
+                    break;
+                case UPGRADE_MISSILE_SUPER_SALVO_AI:
+                    base.supersonicSalvoAI = level > 0;
+                    break;
+                case UPGRADE_MISSILE_SUPER_SALVO_SPEED:
+                    base.supersonicPayloadSpeed = upgrade.f(level);
+                    break;
+                case UPGRADE_MISSILE_MINES:
+                    base.missilesToMines = level > 0;
+                    break;
+                case UPGRADE_MISSILE_MINE_MAGNETIC:
+                    base.mineMagnetRadius = upgrade.f(level);
                     break;
             }
             break;
@@ -6787,12 +7438,14 @@ function fireMacrossMissiles() {
                 turnSpeed: base.missileTurnSpeed,
                 homingRadius: base.missileHomingRadius,
                 macross: true,
-                homingActive: true,
+                // Mine spares fly straight out to the ring instead of homing
+                homingActive: !(base.missilesToMines && !assignments[i]),
                 startX: base.x,
                 startY: base.y,
                 rangeLimit: base.missileTargetingRadius * base.missileRangeMultiplier,
                 reservedTarget: assignments[i],
                 reservedDamage: sensorUpgrades.targetAI && assignments[i] ? base.macrossMissileDamage : 0,
+                mineCandidate: base.missilesToMines && !assignments[i], // untargeted spares arm as mines
                 ...styleConfig
             });
             reserveWeaponDamage(assignments[i], 'missile', base.macrossMissileDamage);
@@ -7271,6 +7924,26 @@ function handleCanvasClick(clientX, clientY) {
             } else if (region.type === 'macross_button') {
                 fireMacrossMissiles();
                 drawGame();
+                return;
+            } else if (region.type === 'missile_research_button') {
+                if (gameState.missileResearchComplete) {
+                    showToast('Research already complete!', 1500);
+                } else if (gameState.missileResearchTimer > 0) {
+                    showToast('Research already in progress!', 1500);
+                } else if (!hasTacticalZoomUpgrade()) {
+                    showToast('Requires Sensor Tactical Zoom!', 2500);
+                } else if (upgradeTree[UPGRADE_CATEGORY_SPECIAL].upgrades[UPGRADE_SPECIAL_STUN].level < upgradeTree[UPGRADE_CATEGORY_SPECIAL].upgrades[UPGRADE_SPECIAL_STUN].maxLevel) {
+                    showToast('Requires Stun Field fully maxed!', 2500);
+                } else if (gameState.credits < MISSILE_RESEARCH_COST) {
+                    showToast('Not enough credits!', 1500);
+                } else {
+                    gameState.credits -= MISSILE_RESEARCH_COST;
+                    gameState.missileResearchTimer = MISSILE_RESEARCH_DURATION;
+                    markHUDDirty();
+                    showToast(`Supersonic research started! ${MISSILE_RESEARCH_DURATION}s`, 2500);
+                    saveGame();
+                    drawGame();
+                }
                 return;
             } else if (region.type === 'upgrade_button' || region.type === 'collapsible_upgrade_button') {
                 purchaseUpgrade(region.categoryIndex, region.upgradeIndex);
