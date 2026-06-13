@@ -74,6 +74,64 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.46
+- Wide Beam power is no longer capped by Laser Damage level; it can be upgraded
+  to level 10 so its per-target damage matches the focused beam.
+
+### v3.45
+- Wide Beam upgrade card now shows actual per-target damage values, matching the
+  Laser Damage card format.
+
+### v3.44
+- Wide Beam is now a single upgrade: activates at level 1, then each extra
+  level adds 10% power, capped at the current Laser Damage level.
+
+### v3.43
+- Wide beam spread now matches the focused beam colour and scales its opacity
+  to its relative power, making weak spreads nearly transparent.
+
+### v3.42
+- Fixed a regression where enemy visibility and the Special Weapon stun radius
+  ring disappeared; restored the missing stun radius increment constant.
+
+### v3.41
+- Wide Beam Power upgrade added: increases wide beam destruction by 10% per
+  level (max 10 levels).
+
+### v3.40
+- Wide Beam draws a cone spread at Kamikazes (1/10 focused damage each)
+  instead of three thick beams.
+- Focused Fast/Boss laser beam restored to a thin single beam.
+
+### v3.39
+- Enemy reveal radius now follows the laser's effective firing range so
+  purchased Laser Range upgrades keep targets visible.
+
+### v3.38
+- Fixed enemy visibility regression from the laser split; laser acquisition
+  now provides its own reveal radius.
+
+### v3.37
+- Laser System is now split into independent Damage and Range upgrades.
+- Laser radius anchors at acquisition range and grows via its own upgrade.
+- New Wide Beam upgrade sweeps Kamikazes with a wider beam that spreads total
+  laser strength proportionally across its width.
+
+### v3.36
+- Missile radius no longer changes when cannon radius is upgraded.
+- Sensor range now follows the furthest active radius while keeping its
+  Electronic FOV buffer distance beyond that ring.
+
+### v3.35
+- Locked missile trails to Thin Needle and removed the temporary Trail button.
+- Tactical Zoom now unlocks unlimited post-cap Missile Radius, Electronic FOV,
+  and Stun Radius upgrades.
+- Special Weapons now separates Stun Field strength from Stun Radius.
+
+### v3.34
+- Kept Ghost Thin as the default missile trail and replaced the alternate Trail
+  selector entries with nine thinner/smoother variants.
+
 ### v3.33
 - Made Ghost Thin the default missile trail style and reset the Trail selector
   storage so the live build opens on it.
