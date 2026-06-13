@@ -74,6 +74,34 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.22
+- Missile trails are locked to Needle Core and the temporary trail style
+  selector has been removed.
+- Follow-up noted: the anime missile massacre trail art needs a stronger
+  dedicated visual pass.
+
+### v3.18
+- Defense Systems now uses a green outline instead of the cannon purple
+  category colour.
+
+### v3.17
+- Weapon colours are now consistent: Cannon purple, Laser yellow, and Missile
+  red for upgrade borders, range rings, and the fired laser beam.
+
+### v3.16
+- Retargeting missiles now arc more naturally toward reacquired targets instead
+  of making a sharp snap turn.
+
+### v3.15
+- Missiles now have white anime-style bodies with red tips and smoky trails
+  that fade from white to grey to transparent.
+
+## Follow-ups
+
+- Missile trail art: revisit the Macross/Itano-style missile massacre look.
+  Needle Core is the current best option, but the trails still need a stronger
+  custom visual treatment than the tested selector variants.
+
 ### v3.14
 - Defense Health is now an unlimited +10% max-health upgrade that shows the
   current value and next value, including boss and perk health gains.
