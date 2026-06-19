@@ -1,5 +1,79 @@
 # Orbital Defense - Change Log
 
+## v3.75
+- Restored weapon reward bonus labels to the right of their category buttons and
+  changed upgrade menu draw order so expanded panels render over those labels
+  when they overlap.
+
+## v3.74
+- Moved weapon reward bonus labels inside the left category buttons so they no
+  longer overlap expanded upgrade cards.
+
+## v3.73
+- Reward-modified upgrade cards now highlight the adjusted numbers in yellow on
+  the normal stat line instead of adding separate `Reward DMG/RATE` rows.
+
+## v3.72
+- Replaced reward skipping with purchasable reward-target unlocks for Missile
+  and Laser rewards.
+- Damage and Rapid Loader rewards now apply to a selected unlocked weapon target
+  instead of always folding into Cannon.
+- Weapon reward bonuses now display in yellow beside their left-side category
+  headers and inside affected expanded upgrade cards.
+
+## v3.71
+- Fixed Laser activation so buying the Laser System immediately creates a real
+  laser firing range at the 110% cannon-radius minimum instead of only setting
+  reveal range.
+- Added a Skip Reward button to the wave reward screen.
+
+## v3.70
+- Restored compact left-side category spacing while keeping side-branch upgrade
+  cards collision-aware within the expanded tree.
+- Branch connector lines now draw from the parent card to displaced child cards
+  so moved upgrade cards still show what they depend on.
+
+## v3.69
+- Raised the regular Missile count cap from 12 to 100 so very high-count
+  missile builds can be tested.
+- Raised the parked mine cap to 500 so a fully upgraded Macross mine volley can
+  keep all spare missiles instead of expiring at the old cap.
+- Added automatic vertical spacing for side-branch upgrade cards and reserved
+  the expanded tree height so growing upgrade trees do not overlap later UI.
+
+## v3.68
+- Added debug-menu credit grants for +1,000,000 and +100,000,000 credits,
+  alongside the existing +100,000 credit option.
+
+## v3.67
+- The Fog of War label and highlighted hatch circle now move as one grouped
+  callout, staying attached and hiding when the full callout cannot fit in fog.
+
+## v3.66
+- Generalized the 110% cannon-radius minimum into the laser and missile range
+  formulas themselves, so first-purchase rings and stale saved radius bases both
+  stay outside the cannon targeting ring.
+
+## v3.65
+- New non-cannon systems now start with a radius at least 10% beyond the
+  current cannon range, preventing laser, missile, or stun rings from spawning
+  directly on top of the cannon targeting ring.
+
+## v3.64
+- Made the Fog of War callout more compact and reserved its screen space so
+  range-info popups move out of its way.
+- The highlighted fog sample now chooses a position outside the current reveal
+  radius, and hides when there is no visible fog area left to identify.
+
+## v3.63
+- Brightened the Fog of War callout sample so the diagonal hatch lines inside
+  the highlighted circle are easier to see.
+
+## v3.62
+- Added a Fog of War callout to the ring-info overlay, with a highlighted
+  sample of the diagonal fog pattern and guidance about expanding sensor or
+  weapon range to spot enemies earlier.
+
 ## v3.46
 - Wide Beam power now matches its displayed value: each level is +10% of focused
   damage, and the cap against Laser Damage level is removed so it can be upgraded
