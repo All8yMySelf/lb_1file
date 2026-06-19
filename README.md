@@ -74,6 +74,64 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.75
+- Weapon reward labels are back beside their category buttons, with expanded
+  upgrade panels now drawing over them when panels overlap.
+
+### v3.74
+- Weapon reward labels now sit inside their left-side category buttons, avoiding
+  overlap with expanded upgrade cards.
+
+### v3.73
+- Reward bonuses now highlight the affected numbers on upgrade cards in yellow
+  rather than adding separate reward text rows.
+
+### v3.72
+- Reward targeting can now be unlocked for Missiles and Laser, letting Damage
+  and Rapid Loader rewards apply to specific weapon categories with yellow
+  category bonus labels.
+
+### v3.71
+- Buying Laser System now immediately gives the laser a real firing range, and
+  wave reward choices now include a Skip Reward button.
+
+### v3.70
+- Left-side category buttons stay compact again while expanded branch cards
+  still avoid overlaps and keep connector lines attached to their parents.
+
+### v3.69
+- Missile count now scales to 100, parked Macross mines cap at 500, and
+  side-branch upgrade cards auto-space to avoid overlapping each other.
+
+### v3.68
+- The debug menu now includes +1,000,000 and +100,000,000 credit grant buttons
+  in addition to the existing +100,000 option.
+
+### v3.67
+- The Fog of War text box and highlighted hatch circle now move together as a
+  single callout and hide when the whole callout cannot fit in fog.
+
+### v3.66
+- Laser and missile range calculations now enforce the 110% cannon-radius
+  minimum directly, including when loading older saved radius values.
+
+### v3.65
+- Newly activated non-cannon systems now start at least 10% beyond the current
+  cannon radius so their rings do not overlap the cannon targeting ring.
+
+### v3.64
+- The Fog of War callout is more compact, keeps range-info popups from covering
+  it, and only points at fog that is outside the current reveal radius.
+
+### v3.63
+- The Fog of War callout now uses brighter hatch lines inside the highlighted
+  sample circle so the pattern is easier to identify.
+
+### v3.62
+- Ring info now includes a Fog of War callout that highlights the diagonal fog
+  pattern and explains that better sensor or weapon range reveals enemies
+  sooner.
+
 ### v3.46
 - Wide Beam power is no longer capped by Laser Damage level; it can be upgraded
   to level 10 so its per-target damage matches the focused beam.
