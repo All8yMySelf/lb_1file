@@ -1,5 +1,17 @@
 # Orbital Defense - Change Log
 
+## v3.82
+- Clarified laser, sensor, and supersonic missile side-branch connector lines so
+  visual upgrade links match their actual prerequisites.
+- Auto XP Targeting now draws as a direct child of Manual Targeting.
+
+## v3.81
+- Added a high-cost Auto XP Targeting laser upgrade below Manual Targeting,
+  letting the laser automatically fire at XP enemies in range and bank XP Boost
+  charges without manual clicks.
+- The XP status and enemy intel text now mention the automatic XP targeting
+  option once the manual laser path is available.
+
 ## v3.80
 - Fixed enemy spawn distance so normal, boss, archetype, and XP enemies spawn
   outside the current reveal boundary, using the larger of the screen edge and
