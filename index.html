@@ -179,7 +179,7 @@
     });
 </script>
 
-<title>Orbital Defense v3.85 - Optimised</title>
+<title>Orbital Defense v3.87 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -632,7 +632,7 @@
 #perkStatus{position:absolute;top:36px;left:10px;z-index:10;font-size:11px;color:#ffd700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v3.85</h1>
+    <h1 id="gameTitle">Orbital Defense v3.87</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -1211,7 +1211,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.85';
+const GAME_VERSION = '3.87';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1321,10 +1321,11 @@ const CONFIG = {
     LASER_RANGE_INCREMENT_PER_LEVEL: 0.1, // Laser radius upgrade increment per level
     LASER_RANGE_TACTICAL_ZOOM_SOFT_CAP: 3, // Max radius levels without tactical zoom
     LASER_FOCUSED_BEAM_WIDTH: 1, // Normalized focused beam width unit
-    LASER_WIDE_BEAM_WIDTH: 3, // Normalized wide beam width unit
-    LASER_WIDE_BEAM_DAMAGE_MULTIPLIER: 0.1, // Wide beam spread does 1/10 focused damage per target
-    LASER_WIDE_BEAM_SPREAD_DEGREES: 30, // Total cone spread angle for wide beam
-    LASER_WIDE_BEAM_POWER_INCREMENT: 0.1, // 10% more wide beam damage per power level
+    LASER_WIDE_BEAM_WIDTH: 3, // Legacy save field for beam splitter width tuning
+    LASER_WIDE_BEAM_DAMAGE_MULTIPLIER: 0.1, // Beam splitter starts at 1/10 focused damage per target
+    LASER_WIDE_BEAM_SPREAD_DEGREES: 30, // Legacy cone spread value retained for saves/tuning
+    LASER_WIDE_BEAM_POWER_INCREMENT: 0.1, // 10% more split-beam damage per power level
+    LASER_BEAM_SPLITTER_MAX_TARGETS: 4, // Splitter fires up to four secondary beams per volley
     STUN_RADIUS_INCREMENT_PER_LEVEL: 0.03, // Stun radius increment per level
 
     // Visual & Rendering Parameters
@@ -1426,6 +1427,7 @@ const {
   LASER_WIDE_BEAM_DAMAGE_MULTIPLIER,
   LASER_WIDE_BEAM_SPREAD_DEGREES,
   LASER_WIDE_BEAM_POWER_INCREMENT,
+  LASER_BEAM_SPLITTER_MAX_TARGETS,
   STUN_RADIUS_INCREMENT_PER_LEVEL,
   // Visual & Rendering Parameters
   HIGHLIGHT_GLOW_OPACITY,
@@ -1460,7 +1462,7 @@ const UPGRADE_DEFENSE_MOVEMENT = 1;
 const UPGRADE_LASER_DAMAGE = 0; // Laser damage scaling
 const UPGRADE_LASER_MANUAL = 1; // Manual laser targeting
 const UPGRADE_LASER_RADIUS = 2; // Laser range upgrade
-const UPGRADE_LASER_WIDE_BEAM = 3; // Wide beam kamikaze sweep / power
+const UPGRADE_LASER_WIDE_BEAM = 3; // Beam splitter kamikaze sweep / power
 const UPGRADE_LASER_AUTO_XP = 4; // Auto-target XP enemies
 const UPGRADE_MISSILE_COUNT = 0;
 const UPGRADE_MISSILE_RANGE = 1;
@@ -1695,6 +1697,8 @@ let baseCanMove = true;
 let enemyIntel = { active:false, known:{}, order:[] };
 let keysPressed = {};
 let particles = [];
+let laserBeams = [];
+let laserCleaveFragments = [];
 let lastTime = 0;
 let deltaTime = 0;
 let gameState; // Contains credits, health, wave, score etc.
@@ -2173,6 +2177,8 @@ function resetPools() {
     bulletPool.clear();
     missilePool.clear();
     particles = [];
+    laserBeams = [];
+    laserCleaveFragments = [];
 }
 
 function scaleObjectPosition(obj, scaleX, scaleY) {
@@ -2217,6 +2223,13 @@ function resizeGameCanvasToWindow() {
     bulletPool.getActiveObjects().forEach(obj => scaleObjectPosition(obj, scaleX, scaleY));
     missilePool.getActiveObjects().forEach(obj => scaleObjectPosition(obj, scaleX, scaleY));
     particles.forEach(obj => scaleObjectPosition(obj, scaleX, scaleY));
+    laserBeams.forEach(beam => {
+        if (typeof beam.x1 === 'number') beam.x1 *= scaleX;
+        if (typeof beam.y1 === 'number') beam.y1 *= scaleY;
+        if (typeof beam.x2 === 'number') beam.x2 *= scaleX;
+        if (typeof beam.y2 === 'number') beam.y2 *= scaleY;
+    });
+    laserCleaveFragments.forEach(obj => scaleObjectPosition(obj, scaleX, scaleY));
 
     if (base && gameState && upgradeTree) {
         drawGame();
@@ -2398,6 +2411,20 @@ function isSupersonicWarheadWaveLocked(upgrade = getSupersonicWarheadUpgrade()) 
     return !!upgrade && upgrade.level >= getSupersonicWarheadUnlockedLevel();
 }
 
+function getBeamSplitterUnlockedLevel() {
+    const laserDamageLevel = upgradeTree?.[UPGRADE_CATEGORY_LASER]?.upgrades?.[UPGRADE_LASER_DAMAGE]?.level || 0;
+    const splitterMax = upgradeTree?.[UPGRADE_CATEGORY_LASER]?.upgrades?.[UPGRADE_LASER_WIDE_BEAM]?.maxLevel || 10;
+    return Math.min(splitterMax, Math.max(0, laserDamageLevel * 2));
+}
+
+function getEffectiveUpgradeMaxLevel(categoryIndex, upgradeIndex, upgrade = upgradeTree?.[categoryIndex]?.upgrades?.[upgradeIndex]) {
+    if (!upgrade) return 0;
+    if (categoryIndex === UPGRADE_CATEGORY_LASER && upgradeIndex === UPGRADE_LASER_WIDE_BEAM) {
+        return getBeamSplitterUnlockedLevel();
+    }
+    return upgrade.maxLevel;
+}
+
 function canPurchaseUpgrade(categoryIndex, upgradeIndex) {
     const upgrade = upgradeTree?.[categoryIndex]?.upgrades?.[upgradeIndex];
     if (!upgrade) return false;
@@ -2405,8 +2432,9 @@ function canPurchaseUpgrade(categoryIndex, upgradeIndex) {
         isSupersonicWarheadWaveLocked(upgrade)) {
         return false;
     }
+    const effectiveMaxLevel = getEffectiveUpgradeMaxLevel(categoryIndex, upgradeIndex, upgrade);
     return gameState.credits >= upgrade.cost &&
-        upgrade.level < upgrade.maxLevel &&
+        upgrade.level < effectiveMaxLevel &&
         !isTacticalZoomSoftLocked(categoryIndex, upgradeIndex, upgrade);
 }
 
@@ -2719,8 +2747,130 @@ function createExplosion(x, y, color, count = 15, enemyRadius = 10) {
     }
 }
 
+function addLaserBeamSegment(x1, y1, x2, y2, alpha = 1, width = 2, life = 0.18) {
+    laserBeams.push({
+        x1, y1, x2, y2,
+        alpha: Math.max(0.04, Math.min(1, alpha)),
+        width: Math.max(1, width),
+        life,
+        maxLife: life
+    });
+    if (laserBeams.length > 18) laserBeams.shift();
+}
+
+function createLaserCleaveEffect(enemy, beamAngle, overkillRatio = 0) {
+    const perp = beamAngle + Math.PI / 2;
+    const power = Math.max(0.35, Math.min(2.5, 0.65 + overkillRatio * 1.8));
+    const fragmentLife = 0.42;
+    [-1, 1].forEach(side => {
+        const offset = enemy.radius * 0.22 * side;
+        laserCleaveFragments.push({
+            x: enemy.x + Math.cos(perp) * offset,
+            y: enemy.y + Math.sin(perp) * offset,
+            vx: Math.cos(perp) * side * power + Math.cos(beamAngle) * 0.35,
+            vy: Math.sin(perp) * side * power + Math.sin(beamAngle) * 0.35,
+            radius: enemy.radius,
+            color: enemy.color,
+            angle: beamAngle,
+            side,
+            life: fragmentLife,
+            maxLife: fragmentLife
+        });
+    });
+    if (laserCleaveFragments.length > 24) {
+        laserCleaveFragments.splice(0, laserCleaveFragments.length - 24);
+    }
+
+    const halfCenters = [-1, 1].map(side => ({
+        x: enemy.x + Math.cos(perp) * side * enemy.radius * 0.32,
+        y: enemy.y + Math.sin(perp) * side * enemy.radius * 0.32,
+        side
+    }));
+    halfCenters.forEach(center => {
+        for (let i = 0; i < 12; i++) {
+            const sprayAngle = perp + (center.side < 0 ? Math.PI : 0) + (Math.random() - 0.5) * 0.9;
+            createParticle(
+                center.x + Math.cos(sprayAngle) * Math.random() * enemy.radius * 0.45,
+                center.y + Math.sin(sprayAngle) * Math.random() * enemy.radius * 0.45,
+                enemy.color,
+                2.5 + power * 2,
+                0.25 + Math.random() * 0.25,
+                Math.max(2, enemy.radius / 5)
+            );
+        }
+    });
+}
+
+function updateLaserEffects(dt) {
+    const dtScaled = dt * FRAMES_PER_SECOND;
+    for (let i = laserBeams.length - 1; i >= 0; i--) {
+        const beam = laserBeams[i];
+        beam.life -= dt;
+        if (beam.life <= 0) laserBeams.splice(i, 1);
+    }
+    for (let i = laserCleaveFragments.length - 1; i >= 0; i--) {
+        const fragment = laserCleaveFragments[i];
+        fragment.x += fragment.vx * dtScaled;
+        fragment.y += fragment.vy * dtScaled;
+        fragment.vx *= 0.96;
+        fragment.vy *= 0.96;
+        fragment.life -= dt;
+        if (fragment.life <= 0) laserCleaveFragments.splice(i, 1);
+    }
+}
+
+function drawLaserCleaveFragments() {
+    if (laserCleaveFragments.length === 0) return;
+    ctx.save();
+    laserCleaveFragments.forEach(fragment => {
+        const alpha = Math.max(0, fragment.life / fragment.maxLife);
+        const halfAngle = Math.PI / 2;
+        ctx.save();
+        ctx.globalAlpha = alpha * 0.78;
+        ctx.translate(fragment.x, fragment.y);
+        ctx.rotate(fragment.angle + (fragment.side > 0 ? 0 : Math.PI));
+        ctx.fillStyle = fragment.color;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, fragment.radius, -halfAngle, halfAngle);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = colorWithAlpha(currentTheme.canvasColors.laser, alpha);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, -fragment.radius);
+        ctx.lineTo(0, fragment.radius);
+        ctx.stroke();
+        ctx.restore();
+    });
+    ctx.restore();
+}
+
+function drawLaserBeamSegments() {
+    if (laserBeams.length === 0) return;
+    ctx.save();
+    laserBeams.forEach(beam => {
+        const lifeAlpha = Math.max(0, beam.life / beam.maxLife);
+        const alpha = beam.alpha * lifeAlpha;
+        ctx.strokeStyle = colorWithAlpha(currentTheme.canvasColors.laserGlow, alpha * 0.65);
+        ctx.lineWidth = beam.width * 2.6;
+        ctx.beginPath();
+        ctx.moveTo(beam.x1, beam.y1);
+        ctx.lineTo(beam.x2, beam.y2);
+        ctx.stroke();
+        ctx.strokeStyle = colorWithAlpha(currentTheme.canvasColors.laser, alpha);
+        ctx.lineWidth = beam.width;
+        ctx.beginPath();
+        ctx.moveTo(beam.x1, beam.y1);
+        ctx.lineTo(beam.x2, beam.y2);
+        ctx.stroke();
+    });
+    ctx.restore();
+}
+
 function updateParticles(dt) {
     const dtScaled = dt * FRAMES_PER_SECOND;
+    updateLaserEffects(dt);
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx * dtScaled;
@@ -3961,6 +4111,15 @@ function tryLoadGame() {
     getElement('clearSaveButton').style.display = display;
 }
 
+function savedUpgradeNameMatches(currentUpgrade, savedUpgrade) {
+    if (!currentUpgrade || !savedUpgrade) return false;
+    if (currentUpgrade.name === savedUpgrade.name) return true;
+    const aliases = {
+        'Beam Splitter': ['Wide Beam']
+    };
+    return (aliases[currentUpgrade.name] || []).includes(savedUpgrade.name);
+}
+
 function loadGame() {
     if (!savedGame) return false;
 
@@ -4026,7 +4185,7 @@ function loadGame() {
         savedGame.upgrades.forEach((savedCategory, i) => {
             savedCategory.upgrades.forEach((savedUpgrade, j) => {
                 const currentUpgrade = upgradeTree[i].upgrades[j];
-                if (currentUpgrade && currentUpgrade.name === savedUpgrade.name) { // Check name match for safety
+                if (savedUpgradeNameMatches(currentUpgrade, savedUpgrade)) { // Check name match for safety
                     currentUpgrade.level = savedUpgrade.level;
                     currentUpgrade.cost = savedUpgrade.cost;
                     // Re-apply the effect immediately based on the loaded level
@@ -4178,7 +4337,7 @@ function createUpgradeTree(initialRange) {
                       const next = getLaserRadiusBase() * (1 + (level + 1) * LASER_RANGE_INCREMENT_PER_LEVEL);
                       return `${Math.round(current)} > ${Math.round(next)}`;
                   } },
-                { name: 'Wide Beam', cost: 3000, level: 0, maxLevel: 10,
+                { name: 'Beam Splitter', cost: 3000, level: 0, maxLevel: 10,
                   f: level => level === 0 ? 0 : level * LASER_WIDE_BEAM_POWER_INCREMENT,
                   g: (level, cost, maxLvl) => {
                       if (level === 0) return '(Activate)';
@@ -4511,11 +4670,11 @@ function createInitialBaseState(initialRange) {
         laserRange: 0, // Needs upgrade
         laserRadiusBase: 0, // Anchored on first laser range purchase
         laserRevealRadius: 0, // Reveal radius when laser damage is acquired
-        laserWideBeam: 0, // Wide beam level (0 = off, 1+ = active + power level)
-        laserWideBeamPower: 1, // Derived destruction power multiplier
+        laserWideBeam: 0, // Beam Splitter level (0 = off, 1+ = active + power level)
+        laserWideBeamPower: 1, // Derived Beam Splitter destruction multiplier
         laserTargetX: 0, laserTargetY: 0, // For visual effect
         laserTargetPositions: [], // Deprecated: kept for save compatibility
-        laserWideBeamTargets: [], // Wide beam spread target positions
+        laserWideBeamTargets: [], // Beam Splitter target positions
         manualTargeting: false,
         autoXpTargeting: false,
         gunBarrelCount: 1,
@@ -5186,7 +5345,7 @@ function handlePlayerFiring(dt) {
     // --- Laser Firing ---
     const laserInterval = LASER_FIRE_INTERVAL / getWeaponFireRateMultiplier('laser');
     if (base.laserDamage > 0 && currentTime - gameState.lastLaserFireTime >= laserInterval / gameSpeedMultiplier) {
-        const wideBeamActive = base.laserWideBeam > 0;
+        const beamSplitterActive = base.laserWideBeam > 0;
         const inLaserRange = enemy => base.laserRange === Infinity || Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.laserRange;
         const autoXpTarget = base.manualTargeting && base.autoXpTargeting
             ? enemies
@@ -5205,83 +5364,35 @@ function handlePlayerFiring(dt) {
             inLaserRange(enemy) && hasTargetCapacity(enemy, 'laser')
         );
 
-        // Wide beam spread: Kamikazes, 1/10 focused damage each
-        // Wide beam spread: Kamikazes, 1/10 focused damage each
-        const wideBeamTargets = wideBeamActive ? enemies.filter(enemy =>
-            !enemy.xp && enemy.type === 'Kamikaze' &&
-            inLaserRange(enemy) && hasTargetCapacity(enemy, 'laser')
-        ) : [];
+        // Beam Splitter: up to four Kamikaze split beams, scaling from 10% to 100% of focused damage.
+        const wideBeamTargets = beamSplitterActive ? enemies
+            .filter(enemy =>
+                !enemy.xp && enemy.type === 'Kamikaze' &&
+                inLaserRange(enemy) && hasTargetCapacity(enemy, 'laser')
+            )
+            .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y))
+            .slice(0, LASER_BEAM_SPLITTER_MAX_TARGETS) : [];
 
         if (focusedTarget || wideBeamTargets.length > 0) {
             gameState.lastLaserFireTime = currentTime;
             gameState.laserEffectEndTime = currentTime + 200; // Duration of visual effect
 
             // Store render state
-            base.laserTargetX = focusedTarget ? focusedTarget.x : 0;
-            base.laserTargetY = focusedTarget ? focusedTarget.y : 0;
+            base.laserTargetX = 0;
+            base.laserTargetY = 0;
             base.laserWideBeamTargets = wideBeamTargets.map(t => ({ x: t.x, y: t.y }));
 
             // Fire focused beam
             if (focusedTarget) {
-                focusedTarget.isTargeted = true;
-                focusedTarget.targetLockTime = TARGET_LOCK_DURATION;
-                reserveWeaponDamage(focusedTarget, 'laser', base.laserDamage);
-                focusedTarget.health -= applyShieldAbsorption(focusedTarget, base.laserDamage);
-                releaseWeaponDamage(focusedTarget, 'laser', base.laserDamage);
-
-                for (let i = 0; i < 5; i++) {
-                    const t = i / 5;
-                    createParticle(
-                        base.x + (focusedTarget.x - base.x) * t,
-                        base.y + (focusedTarget.y - base.y) * t,
-                        currentTheme.canvasColors.laser, 1, 0.2, 3
-                    );
-                }
-
-                if (focusedTarget.health <= 0) {
-                    gameState.credits += killCredits(focusedTarget.creditsValue);
-                    onEnemyKilledFx(focusedTarget, killCredits(focusedTarget.creditsValue));
-                    gameState.score += focusedTarget.creditsValue * 20;
-                    gameState.enemiesKilled++;
-                    markHUDDirty();
-                    createExplosion(focusedTarget.x, focusedTarget.y, focusedTarget.color, 40, focusedTarget.radius);
-                    handleEnemyKilled(focusedTarget);
-                    enemyPool.release(focusedTarget);
-                    updateUpgradeAvailabilityFlags();
-                }
+                applyLaserCleaveStrike(focusedTarget, base.laserDamage, 20);
             }
 
-            // Fire wide beam spread at Kamikazes
+            // Fire split beams at Kamikazes
             if (wideBeamTargets.length > 0) {
                 const wideBeamPower = base.laserWideBeamPower || 1;
                 const spreadDamage = base.laserDamage * LASER_WIDE_BEAM_DAMAGE_MULTIPLIER * wideBeamPower;
                 wideBeamTargets.forEach(laserTarget => {
-                    laserTarget.isTargeted = true;
-                    laserTarget.targetLockTime = TARGET_LOCK_DURATION;
-                    reserveWeaponDamage(laserTarget, 'laser', spreadDamage);
-                    laserTarget.health -= applyShieldAbsorption(laserTarget, spreadDamage);
-                    releaseWeaponDamage(laserTarget, 'laser', spreadDamage);
-
-                    for (let i = 0; i < 5; i++) {
-                        const t = i / 5;
-                        createParticle(
-                            base.x + (laserTarget.x - base.x) * t,
-                            base.y + (laserTarget.y - base.y) * t,
-                            currentTheme.canvasColors.laser, 1, 0.2, 2
-                        );
-                    }
-
-                    if (laserTarget.health <= 0) {
-                        gameState.credits += killCredits(laserTarget.creditsValue);
-                        onEnemyKilledFx(laserTarget, killCredits(laserTarget.creditsValue));
-                        gameState.score += laserTarget.creditsValue * 20;
-                        gameState.enemiesKilled++;
-                        markHUDDirty();
-                        createExplosion(laserTarget.x, laserTarget.y, laserTarget.color, 40, laserTarget.radius);
-                        handleEnemyKilled(laserTarget);
-                        enemyPool.release(laserTarget);
-                        updateUpgradeAvailabilityFlags();
-                    }
+                    applyLaserCleaveStrike(laserTarget, spreadDamage, 20);
                 });
             }
         }
@@ -6102,6 +6213,68 @@ function killCredits(creditsValue) {
     return Math.round(creditsValue * (gameState.perkCreditMult || 1));
 }
 
+function finishLaserKill(target, scoreMultiplier = 20) {
+    gameState.credits += killCredits(target.creditsValue);
+    onEnemyKilledFx(target, killCredits(target.creditsValue));
+    gameState.score += target.creditsValue * scoreMultiplier;
+    gameState.enemiesKilled++;
+    markHUDDirty();
+    handleEnemyKilled(target);
+    if (target.xp) {
+        gameState.xpCharges = (gameState.xpCharges || 0) + 1;
+        gameState.xpEnemiesDestroyed++;
+        updateXPStatsPanel();
+        updateWaveStatsPanel();
+        updateXpBoostButton();
+        showToast('XP charge banked! Press XP Boost to double fire rate.', 3000);
+    }
+    enemyPool.release(target);
+    updateUpgradeAvailabilityFlags();
+}
+
+function applyLaserCleaveStrike(target, damage, scoreMultiplier = 20) {
+    if (!target || damage <= 0) return false;
+    const dx = target.x - base.x;
+    const dy = target.y - base.y;
+    const dist = Math.max(1, Math.hypot(dx, dy));
+    const dirX = dx / dist;
+    const dirY = dy / dist;
+    const durability = Math.max(0, target.health) + Math.max(0, target.shield || 0);
+
+    target.isTargeted = true;
+    target.targetLockTime = TARGET_LOCK_DURATION;
+
+    if (damage < durability) {
+        addLaserBeamSegment(base.x, base.y, target.x, target.y, 0.16, 2, 0.12);
+        return false;
+    }
+
+    const overkill = Math.max(0, damage - durability);
+    const overkillAlpha = Math.max(0.08, Math.min(1, overkill / Math.max(1, damage)));
+    const beamRange = Number.isFinite(base.laserRange) && base.laserRange > 0
+        ? base.laserRange
+        : Math.max(canvasWidth, canvasHeight);
+    const carryLength = Math.max(90, Math.min(beamRange, beamRange * overkillAlpha));
+
+    addLaserBeamSegment(base.x, base.y, target.x, target.y, 1, 2.5, 0.2);
+    if (overkill > 0) {
+        addLaserBeamSegment(
+            target.x,
+            target.y,
+            target.x + dirX * carryLength,
+            target.y + dirY * carryLength,
+            overkillAlpha,
+            2,
+            0.22
+        );
+    }
+    createLaserCleaveEffect(target, Math.atan2(dy, dx), overkillAlpha);
+    target.shield = 0;
+    target.health = 0;
+    finishLaserKill(target, scoreMultiplier);
+    return true;
+}
+
 function queueWaveReward() {
     if (!featureToggles.waveRewards) return;
     if (gameState.currentHealth <= 0 || isDeathSequence) return;
@@ -6376,6 +6549,8 @@ function drawGame() {
     drawGunBarrels(enemies);
     drawEnemiesLayer(enemies);
     drawProjectilesLayer();
+    drawLaserBeamSegments();
+    drawLaserCleaveFragments();
     drawParticles();
     drawFloatingTexts();
     if (worldTransformActive) ctx.restore();
@@ -6959,47 +7134,29 @@ function drawProjectilesLayer() {
             ctx.stroke();
         }
 
-        // Wide beam spread: cone-shaped sweep at Kamikazes
+        // Beam Splitter: separate split bolts at Kamikazes.
         const wideTargets = Array.isArray(base.laserWideBeamTargets) ? base.laserWideBeamTargets : [];
         if (wideTargets.length > 0) {
-            const angles = wideTargets.map(t => Math.atan2(t.y - base.y, t.x - base.x));
-            // Average angle handling wrap-around
-            let avgAngle = angles[0];
-            if (angles.length > 1) {
-                const sumX = angles.reduce((s, a) => s + Math.cos(a), 0);
-                const sumY = angles.reduce((s, a) => s + Math.sin(a), 0);
-                avgAngle = Math.atan2(sumY, sumX);
-            }
-            const maxDist = Math.max(...wideTargets.map(t => Math.hypot(t.x - base.x, t.y - base.y)), base.laserRange || 1);
-            const halfSpread = (LASER_WIDE_BEAM_SPREAD_DEGREES * Math.PI / 180) / 2;
-            const leftAngle = avgAngle - halfSpread;
-            const rightAngle = avgAngle + halfSpread;
-            const leftX = base.x + Math.cos(leftAngle) * maxDist;
-            const leftY = base.y + Math.sin(leftAngle) * maxDist;
-            const rightX = base.x + Math.cos(rightAngle) * maxDist;
-            const rightY = base.y + Math.sin(rightAngle) * maxDist;
-
-            // Wide beam opacity scales with its power relative to focused beam
+            // Splitter opacity scales with its power relative to focused beam.
             const wideBeamPower = base.laserWideBeamPower || 1;
             const powerRatio = Math.min(1, LASER_WIDE_BEAM_DAMAGE_MULTIPLIER * wideBeamPower);
-            const wideBeamAlpha = Math.max(0.05, powerRatio);
+            const wideBeamAlpha = Math.max(0.08, powerRatio);
 
-            ctx.strokeStyle = colorWithAlpha(currentTheme.canvasColors.laser, wideBeamAlpha);
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(base.x, base.y);
-            ctx.lineTo(leftX, leftY);
-            ctx.moveTo(base.x, base.y);
-            ctx.lineTo(rightX, rightY);
-            ctx.stroke();
+            wideTargets.forEach(target => {
+                ctx.strokeStyle = colorWithAlpha(currentTheme.canvasColors.laserGlow, wideBeamAlpha * 0.5);
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(base.x, base.y);
+                ctx.lineTo(target.x, target.y);
+                ctx.stroke();
 
-            ctx.fillStyle = colorWithAlpha(currentTheme.canvasColors.laser, wideBeamAlpha * 0.5);
-            ctx.beginPath();
-            ctx.moveTo(base.x, base.y);
-            ctx.lineTo(leftX, leftY);
-            ctx.lineTo(rightX, rightY);
-            ctx.closePath();
-            ctx.fill();
+                ctx.strokeStyle = colorWithAlpha(currentTheme.canvasColors.laser, wideBeamAlpha);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(base.x, base.y);
+                ctx.lineTo(target.x, target.y);
+                ctx.stroke();
+            });
         }
     }
 
@@ -7200,6 +7357,22 @@ function drawMacrossMenuButton(x, y, categorySpacing) {
     return height + categorySpacing;
 }
 
+function getLaserRechargeStatus(now = Date.now()) {
+    if (!gameState || !base || base.laserDamage <= 0) {
+        return { active: false, ready: false, progress: 0, remainingMs: 0, totalMs: 0 };
+    }
+    const totalMs = Math.max(1, (LASER_FIRE_INTERVAL / getWeaponFireRateMultiplier('laser')) / gameSpeedMultiplier);
+    const elapsedMs = Math.max(0, now - (gameState.lastLaserFireTime || 0));
+    const progress = Math.min(1, elapsedMs / totalMs);
+    return {
+        active: true,
+        ready: progress >= 1,
+        progress,
+        remainingMs: Math.max(0, totalMs - elapsedMs),
+        totalMs
+    };
+}
+
 // --- Canvas Collapsible Upgrade Category UI Drawing Helper ---
 // Modified to handle a whole category of upgrades
 
@@ -7228,6 +7401,19 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
     } else if (hasAvailable) {
         ctx.fillStyle = 'rgba(0,255,0,0.3)';
         ctx.fillRect(x, y, boxWidth, headerHeight);
+    }
+
+    if (categoryIndex === UPGRADE_CATEGORY_LASER) {
+        const laserRecharge = getLaserRechargeStatus();
+        if (laserRecharge.active) {
+            ctx.fillStyle = laserRecharge.ready
+                ? 'rgba(0,255,0,0.25)'
+                : colorWithAlpha(color, 0.35);
+            ctx.fillRect(x, y, boxWidth * laserRecharge.progress, headerHeight);
+            ctx.strokeStyle = laserRecharge.ready ? '#00ff00' : displayColor;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, boxWidth, headerHeight);
+        }
     }
 
     const headerTextColor = isMaxed
@@ -7387,7 +7573,8 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         currentY = y;
         buttons.forEach((b, idx) => {
             const btnY = currentY;
-            const isButtonMaxed = Number.isFinite(b.u.maxLevel) && b.u.level >= b.u.maxLevel;
+            const effectiveMaxLevel = getEffectiveUpgradeMaxLevel(categoryIndex, b.idx, b.u);
+            const isButtonMaxed = Number.isFinite(effectiveMaxLevel) && b.u.level >= effectiveMaxLevel;
             ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
             ctx.fillRect(panelX, btnY, buttonWidth, b.height);
             ctx.strokeStyle = isButtonMaxed ? maxedColor : displayColor;
@@ -7729,7 +7916,13 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
 // Bar-style buttons show only the name; the rest append generated stats.
 function measureUpgradeButton(u, idx, hasBar, fontSize, padding, categoryIndex = null) {
     const softLocked = categoryIndex !== null && isTacticalZoomSoftLocked(categoryIndex, idx, u);
-    const lines = hasBar ? [u.name] : `${u.name}: ${u.g(u.level, u.cost, u.maxLevel)}`.split('\n');
+    const effectiveMaxLevel = categoryIndex !== null ? getEffectiveUpgradeMaxLevel(categoryIndex, idx, u) : u.maxLevel;
+    const beamSplitterDamageLocked =
+        categoryIndex === UPGRADE_CATEGORY_LASER &&
+        idx === UPGRADE_LASER_WIDE_BEAM &&
+        u.level >= effectiveMaxLevel &&
+        u.level < u.maxLevel;
+    const lines = hasBar ? [u.name] : `${u.name}: ${u.g(u.level, u.cost, effectiveMaxLevel)}`.split('\n');
     const highlightLineIndexes = [];
     const target = REWARD_TARGETS.find(item => item.categoryIndex === categoryIndex);
     if (target) {
@@ -7750,7 +7943,11 @@ function measureUpgradeButton(u, idx, hasBar, fontSize, padding, categoryIndex =
             highlightLineIndexes.push(0);
         }
     }
-    lines.push(softLocked ? 'Tactical Zoom required' : (u.level < u.maxLevel ? `Cost: ${formatCurrency(u.cost)}` : 'MAX'));
+    lines.push(softLocked
+        ? 'Tactical Zoom required'
+        : (beamSplitterDamageLocked
+            ? 'Upgrade Laser Damage'
+            : (u.level < effectiveMaxLevel ? `Cost: ${formatCurrency(u.cost)}` : 'MAX')));
     const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
     const barWidth = hasBar ? u.maxLevel * 10 + (u.maxLevel - 1) * 2 : 0;
     const height = lines.length * fontSize + (hasBar ? padding * 3 + 10 : padding * 2);
@@ -7805,7 +8002,8 @@ function drawSubUpgradeButton(btn, panelX, buttonWidth, btnY, prereqMet, categor
     const colW = buttonWidth + 40;
     const subX = panelX + colW * col;
     const parentRight = panelX + colW * (col - 1) + buttonWidth;
-    const isButtonMaxed = Number.isFinite(btn.u.maxLevel) && btn.u.level >= btn.u.maxLevel;
+    const effectiveMaxLevel = getEffectiveUpgradeMaxLevel(categoryIndex, btn.idx, btn.u);
+    const isButtonMaxed = Number.isFinite(effectiveMaxLevel) && btn.u.level >= effectiveMaxLevel;
 
     ctx.strokeStyle = displayColor;
     ctx.lineWidth = 2;
@@ -7993,6 +8191,11 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
             showToast("Requires Laser upgrade first!", 2500);
             return;
         }
+        const beamSplitterCap = getBeamSplitterUnlockedLevel();
+        if (upgrade.level >= beamSplitterCap && upgrade.level < upgrade.maxLevel) {
+            showToast("Upgrade Laser Damage to unlock more Beam Splitter power.", 2500);
+            return;
+        }
     }
     if (categoryIndex === UPGRADE_CATEGORY_SPECIAL && upgradeIndex === UPGRADE_SPECIAL_STUN_RADIUS) {
         if (upgradeTree[UPGRADE_CATEGORY_SPECIAL].upgrades[UPGRADE_SPECIAL_STUN].level === 0) {
@@ -8001,9 +8204,10 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
         }
     }
 
+    const effectiveMaxLevel = getEffectiveUpgradeMaxLevel(categoryIndex, upgradeIndex, upgrade);
     if (isTacticalZoomSoftLocked(categoryIndex, upgradeIndex, upgrade)) {
         showToast("Unlock Tactical Zoom for unlimited radius upgrades.", 2500);
-    } else if (gameState.credits >= upgrade.cost && upgrade.level < upgrade.maxLevel) {
+    } else if (gameState.credits >= upgrade.cost && upgrade.level < effectiveMaxLevel) {
         gameState.credits -= upgrade.cost;
         upgrade.level++;
         upgrade.cost = Math.ceil(upgrade.cost * 1.5); // Increase cost
@@ -8016,7 +8220,7 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
         saveGame(); // Auto-save on upgrade
     } else if (gameState.credits < upgrade.cost) {
          showToast("Not enough credits!", 1500);
-    } else if (upgrade.level >= upgrade.maxLevel) {
+    } else if (upgrade.level >= effectiveMaxLevel) {
          showToast(`${upgrade.name} at Max Level!`, 1500);
     }
 }
@@ -8233,41 +8437,12 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
 
 // --- Special Actions ---
 function fireLaserAt(target) {
-    target.isTargeted = true;
-    target.targetLockTime = TARGET_LOCK_DURATION;
-    target.health -= applyShieldAbsorption(target, base.laserDamage);
     const now = Date.now();
     gameState.lastLaserFireTime = now;
     gameState.laserEffectEndTime = now + 200;
-    base.laserTargetX = target.x;
-    base.laserTargetY = target.y;
-    for (let i = 0; i < 5; i++) {
-        const t = i / 5;
-        createParticle(
-            base.x + (target.x - base.x) * t,
-            base.y + (target.y - base.y) * t,
-            currentTheme.canvasColors.laser, 1, 0.2, 3
-        );
-    }
-    if (target.health <= 0) {
-        gameState.credits += killCredits(target.creditsValue);
-        onEnemyKilledFx(target, killCredits(target.creditsValue));
-        gameState.score += target.creditsValue * 20;
-        gameState.enemiesKilled++;
-        markHUDDirty(); // Credits changed
-        createExplosion(target.x, target.y, target.color, 40, target.radius);
-        handleEnemyKilled(target);
-        if (target.xp) {
-            gameState.xpCharges = (gameState.xpCharges || 0) + 1;
-            gameState.xpEnemiesDestroyed++;
-            updateXPStatsPanel();
-            updateWaveStatsPanel();
-            updateXpBoostButton();
-            showToast('XP charge banked! Press XP Boost to double fire rate.', 3000);
-        }
-        enemyPool.release(target);
-        updateUpgradeAvailabilityFlags();
-    }
+    base.laserTargetX = 0;
+    base.laserTargetY = 0;
+    applyLaserCleaveStrike(target, base.laserDamage, 20);
 }
 
 // --- XP Boost charge bank ---

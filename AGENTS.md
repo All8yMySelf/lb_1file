@@ -140,7 +140,7 @@ Current side-branch parent/child links:
 - Cannon `Multibarrel` -> `Focus Radius`.
 - Laser `Damage` -> `Manual Targeting`.
 - Laser `Manual Targeting` -> `Auto XP Targeting`.
-- Laser `Damage` -> `Wide Beam`.
+- Laser `Damage` -> `Beam Splitter` (legacy save name: `Wide Beam`).
 - Sensors `Enemy Identification` -> `Target Analysis AI`.
 - Sensors `Target Analysis AI` -> `Ordnance Sync`.
 - Sensors `Ordnance Sync` -> `Fire Control AI`.
@@ -160,15 +160,18 @@ connectors for children anchored to a parent in the previous column.
 
 ## Current State (2026-07-02)
 
-Live (`testing`) is at v3.85. Versions v3.76-v3.85 added the Q-debug
+Local test build is v3.87; live (`testing`) remains v3.85 until the user asks
+to publish these local edits. Versions v3.76-v3.87 added the Q-debug
 performance overlay, improved high-missile-count performance, restored
 comma-separated currency formatting, stabilized missile trail visuals, fixed
 enemy spawning so enemies appear outside the current fog-of-war reveal boundary,
 added Auto XP Targeting under Laser Manual Targeting, and clarified upgrade tree
 connector lines. Supersonic activation now branches from Supersonic Research,
 Super Warhead is an expensive wave-capped damage ladder, wave rewards now
-require explicit boss destruction, and Supersonic weapons are boss-only. See
-`CHANGELOG.md` for per-version detail.
+require explicit boss destruction, Supersonic weapons are boss-only, and laser
+kills use the cleave/overkill beam experiment. Laser System also shows recharge
+progress on its category button, and Beam Splitter replaces the old Wide Beam
+UI. See `CHANGELOG.md` for per-version detail.
 
 Code landmarks in `index.html`:
 
@@ -195,6 +198,12 @@ Code landmarks in `index.html`:
 - Auto XP Targeting is a high-cost Laser side-branch off Manual Targeting. It
   automatically fires the existing XP laser path at XP enemies in laser range
   when the normal laser cooldown is ready.
+- Beam Splitter is the Laser Damage side-branch at `UPGRADE_LASER_WIDE_BEAM`;
+  keep that constant and the `laserWideBeam*` save fields for compatibility.
+  The visible upgrade name is `Beam Splitter`, with `Wide Beam` accepted as a
+  legacy save alias by `savedUpgradeNameMatches()`. Splitter purchases are
+  capped by Laser Damage progression (`getBeamSplitterUnlockedLevel()`), and it
+  fires up to four Kamikaze split beams instead of drawing the old cone sweep.
 - Supersonic Research unlocks the Supersonic activation card as its direct
   child. Super Warhead then scales Supersonic damage by grade: one grade unlocks
   per wave, with late grades tuned toward about half of the matching wave boss's
@@ -209,6 +218,10 @@ Code landmarks in `index.html`:
 - Wave rewards must only be granted when the wave boss is explicitly destroyed.
   Boss base-impact or any other non-kill boss resolution should show the locked,
   greyed-out reward preview instead of granting a perk.
+- Laser kills use `applyLaserCleaveStrike()`: laser power must meet or exceed
+  remaining shield plus health to kill; lethal hits create split-half fragments
+  and overkill creates a transparent carry-through beam. Avoid reintroducing the
+  normal radial explosion for laser kills unless the experiment is reverted.
 
 Known follow-ups (not yet requested; confirm with the user before doing):
 
