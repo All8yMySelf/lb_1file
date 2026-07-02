@@ -162,8 +162,8 @@ connectors for children anchored to a parent in the previous column.
 
 ## Current State (2026-07-02)
 
-Local test build is v3.93; live (`testing`) remains v3.85 until the user asks
-to publish these local edits. Versions v3.76-v3.87 added the Q-debug
+Local test build is v3.93; live (`testing`) is also v3.93 as of 2026-07-02.
+New local edits stay unpublished until the user asks to publish. Versions v3.76-v3.87 added the Q-debug
 performance overlay, improved high-missile-count performance, restored
 comma-separated currency formatting, stabilized missile trail visuals, fixed
 enemy spawning so enemies appear outside the current fog-of-war reveal boundary,
