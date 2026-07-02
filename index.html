@@ -179,7 +179,7 @@
     });
 </script>
 
-<title>Orbital Defense v3.88 - Optimised</title>
+<title>Orbital Defense v3.93 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -632,7 +632,7 @@
 #perkStatus{position:absolute;top:36px;left:10px;z-index:10;font-size:11px;color:#ffd700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v3.88</h1>
+    <h1 id="gameTitle">Orbital Defense v3.93</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -1211,7 +1211,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.88';
+const GAME_VERSION = '3.93';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1319,6 +1319,7 @@ const CONFIG = {
     MISSILE_LAUNCH_SPREAD_DIVISOR: 0.5, // Angle spread divisor for missile launch
     LASER_RANGE_BASE_MULTIPLIER: 0.3, // Base laser range as % of screen
     LASER_RANGE_INCREMENT_PER_LEVEL: 0.1, // Laser radius upgrade increment per level
+    LASER_RECHARGE_INCREMENT_PER_LEVEL: 0.15, // Each Recharge level adds 15% laser fire rate
     LASER_RANGE_TACTICAL_ZOOM_SOFT_CAP: 3, // Max radius levels without tactical zoom
     LASER_FOCUSED_BEAM_WIDTH: 1, // Normalized focused beam width unit
     LASER_WIDE_BEAM_WIDTH: 3, // Legacy save field for beam splitter width tuning
@@ -1326,6 +1327,7 @@ const CONFIG = {
     LASER_WIDE_BEAM_SPREAD_DEGREES: 30, // Legacy cone spread value retained for saves/tuning
     LASER_WIDE_BEAM_POWER_INCREMENT: 0.1, // 10% more split-beam damage per power level
     LASER_BEAM_SPLITTER_MAX_TARGETS: 4, // Splitter fires up to four secondary beams per volley
+    LASER_SPLITTER_BASE_DAMAGE: 3, // Beam Splitter total damage at level 1 (doubles per level; independent of Laser Damage)
     STUN_RADIUS_INCREMENT_PER_LEVEL: 0.03, // Stun radius increment per level
 
     // Visual & Rendering Parameters
@@ -1421,6 +1423,7 @@ const {
   MISSILE_LAUNCH_SPREAD_DIVISOR,
   LASER_RANGE_BASE_MULTIPLIER,
   LASER_RANGE_INCREMENT_PER_LEVEL,
+  LASER_RECHARGE_INCREMENT_PER_LEVEL,
   LASER_RANGE_TACTICAL_ZOOM_SOFT_CAP,
   LASER_FOCUSED_BEAM_WIDTH,
   LASER_WIDE_BEAM_WIDTH,
@@ -1428,6 +1431,7 @@ const {
   LASER_WIDE_BEAM_SPREAD_DEGREES,
   LASER_WIDE_BEAM_POWER_INCREMENT,
   LASER_BEAM_SPLITTER_MAX_TARGETS,
+  LASER_SPLITTER_BASE_DAMAGE,
   STUN_RADIUS_INCREMENT_PER_LEVEL,
   // Visual & Rendering Parameters
   HIGHLIGHT_GLOW_OPACITY,
@@ -1464,6 +1468,7 @@ const UPGRADE_LASER_MANUAL = 1; // Manual laser targeting
 const UPGRADE_LASER_RADIUS = 2; // Laser range upgrade
 const UPGRADE_LASER_WIDE_BEAM = 3; // Beam splitter kamikaze sweep / power
 const UPGRADE_LASER_AUTO_XP = 4; // Auto-target XP enemies
+const UPGRADE_LASER_RECHARGE = 5; // Laser fire-rate / recharge upgrade
 const UPGRADE_MISSILE_COUNT = 0;
 const UPGRADE_MISSILE_RANGE = 1;
 const UPGRADE_MISSILE_DAMAGE = 2;
@@ -2036,13 +2041,35 @@ function getOrderedMissileTrail(missile) {
     return ordered;
 }
 
-function advanceMissileTrail(missile) {
+function advanceMissileTrail(missile, fullSpeedStep) {
     if (!Array.isArray(missile.trail) || missile.trail.length === 0) {
         const normalized = normalizeMissileTrailBuffer(null, missile.x, missile.y);
         missile.trail = normalized.trail;
         missile.trailHead = 0;
         missile.trailCount = normalized.count;
+        missile.trailLastX = missile.x;
+        missile.trailLastY = missile.y;
+        missile.trailAccumDist = 0;
         return;
+    }
+    // Distance-gated sampling: when time control slows the game, only record a new
+    // trail point once the missile has moved far enough that the trail's spatial
+    // density matches full speed. This keeps the visible trail length constant
+    // (the trail looks the same as at full speed, just progressing slower). When
+    // fullSpeedStep is not provided (full speed / fast-forward), record every tick
+    // exactly as before.
+    if (Number.isFinite(fullSpeedStep) && fullSpeedStep > 0) {
+        const lx = Number.isFinite(missile.trailLastX) ? missile.trailLastX : missile.x;
+        const ly = Number.isFinite(missile.trailLastY) ? missile.trailLastY : missile.y;
+        const ddx = missile.x - lx;
+        const ddy = missile.y - ly;
+        missile.trailAccumDist = (missile.trailAccumDist || 0) + Math.sqrt(ddx * ddx + ddy * ddy);
+        missile.trailLastX = missile.x;
+        missile.trailLastY = missile.y;
+        if (missile.trailAccumDist < fullSpeedStep) {
+            return; // not far enough yet; keep the previous trail point
+        }
+        missile.trailAccumDist = 0;
     }
     const trailLength = missile.trail.length;
     const nextHead = ((missile.trailHead || 0) - 1 + trailLength) % trailLength;
@@ -2412,9 +2439,19 @@ function isSupersonicWarheadWaveLocked(upgrade = getSupersonicWarheadUpgrade()) 
 }
 
 function getBeamSplitterUnlockedLevel() {
-    const laserDamageLevel = upgradeTree?.[UPGRADE_CATEGORY_LASER]?.upgrades?.[UPGRADE_LASER_DAMAGE]?.level || 0;
-    const splitterMax = upgradeTree?.[UPGRADE_CATEGORY_LASER]?.upgrades?.[UPGRADE_LASER_WIDE_BEAM]?.maxLevel || 10;
-    return Math.min(splitterMax, Math.max(0, laserDamageLevel * 2));
+    // Beam Splitter has its own damage line, but its total damage may not exceed the main
+    // laser's damage. The player must upgrade Laser Damage to raise this cap. Returns the
+    // highest splitter level whose total damage stays within the raw main-laser damage.
+    const splitterUp = upgradeTree?.[UPGRADE_CATEGORY_LASER]?.upgrades?.[UPGRADE_LASER_WIDE_BEAM];
+    const laserDmgUp = upgradeTree?.[UPGRADE_CATEGORY_LASER]?.upgrades?.[UPGRADE_LASER_DAMAGE];
+    if (!splitterUp || !laserDmgUp) return 0;
+    const maxLvl = splitterUp.maxLevel || 10;
+    const laserDamage = laserDmgUp.f(laserDmgUp.level); // raw main-laser damage (excludes perks)
+    let cap = 0;
+    for (let L = 1; L <= maxLvl; L++) {
+        if (splitterUp.f(L) <= laserDamage) cap = L; else break;
+    }
+    return cap;
 }
 
 function getEffectiveUpgradeMaxLevel(categoryIndex, upgradeIndex, upgrade = upgradeTree?.[categoryIndex]?.upgrades?.[upgradeIndex]) {
@@ -2476,6 +2513,12 @@ function getWeaponFireRateMultiplier(target = 'cannon') {
     return gameState?.perkFireRateMultByTarget?.[target] || 1;
 }
 
+// Effective laser fire interval, combining the base interval, wave-reward fire-rate
+// perks, and the Recharge upgrade multiplier. All laser cooldown consumers use this.
+function getLaserFireInterval() {
+    return LASER_FIRE_INTERVAL / (getWeaponFireRateMultiplier('laser') * (base?.laserRechargeMultiplier || 1));
+}
+
 function addWeaponDamageReward(target) {
     ensureRewardState();
     gameState.perkDamageMultByTarget[target] = (gameState.perkDamageMultByTarget[target] || 1) * 1.15;
@@ -2495,10 +2538,12 @@ function recomputeWeaponStats() {
     const cannonDamageLevel = upgradeTree[UPGRADE_CATEGORY_CANNON]?.upgrades?.[UPGRADE_CANNON_DAMAGE]?.level || 0;
     const cannonRateLevel = upgradeTree[UPGRADE_CATEGORY_CANNON]?.upgrades?.[UPGRADE_CANNON_FIRERATE]?.level || 0;
     const laserDamageLevel = upgradeTree[UPGRADE_CATEGORY_LASER]?.upgrades?.[UPGRADE_LASER_DAMAGE]?.level || 0;
+    const laserRechargeLevel = upgradeTree[UPGRADE_CATEGORY_LASER]?.upgrades?.[UPGRADE_LASER_RECHARGE]?.level || 0;
     const missileDamageLevel = upgradeTree[UPGRADE_CATEGORY_MISSILE]?.upgrades?.[UPGRADE_MISSILE_DAMAGE]?.level || 0;
     base.bulletDamage = upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_DAMAGE].f(cannonDamageLevel) * getWeaponDamageMultiplier('cannon');
     base.fireRate = upgradeTree[UPGRADE_CATEGORY_CANNON].upgrades[UPGRADE_CANNON_FIRERATE].f(cannonRateLevel) / getWeaponFireRateMultiplier('cannon');
     base.laserDamage = upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].f(laserDamageLevel) * getWeaponDamageMultiplier('laser');
+    base.laserRechargeMultiplier = upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_RECHARGE].f(laserRechargeLevel);
     base.missileDamage = upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_DAMAGE].f(missileDamageLevel) * getWeaponDamageMultiplier('missile');
 }
 
@@ -2710,10 +2755,19 @@ function drawMissileHomingLayer() {
         if (lockTarget && drawnLockTargets.has(lockTarget)) continue;
         if (lockTarget) drawnLockTargets.add(lockTarget);
         if (!lockTarget && freeMissileStride > 1 && freeMissileIndex++ % freeMissileStride !== 0) continue;
+        const homingRadius = missile.homingRadius || base.missileHomingRadius || 0;
+        // When a missile is locked onto an enemy, show a red lock ring around that
+        // enemy even before the Homing upgrade is purchased (the base still assigns
+        // a target the moment an enemy enters the missile radius). Without Homing
+        // the homing radius is 0, so fall back to an enemy-sized ring. With Homing
+        // (radius > 0) the existing homing-radius ring is unchanged.
+        const ringRadius = lockTarget && homingRadius <= 0
+            ? (lockTarget.radius || 6) + 6
+            : homingRadius;
         drawHomingRadiusStyle(
             lockTarget ? lockTarget.x : missile.x,
             lockTarget ? lockTarget.y : missile.y,
-            missile.homingRadius || base.missileHomingRadius,
+            ringRadius,
             missileAlpha,
             missile.age || 0,
             !!lockTarget
@@ -4338,18 +4392,26 @@ function createUpgradeTree(initialRange) {
                       return `${Math.round(current)} > ${Math.round(next)}`;
                   } },
                 { name: 'Beam Splitter', cost: 3000, level: 0, maxLevel: 10,
-                  f: level => level === 0 ? 0 : level * LASER_WIDE_BEAM_POWER_INCREMENT,
+                  f: level => level === 0 ? 0 : LASER_SPLITTER_BASE_DAMAGE * Math.pow(2, level - 1), // total splitter damage (doubles per level)
                   g: (level, cost, maxLvl) => {
                       if (level === 0) return '(Activate)';
-                      const laserDmg = base?.laserDamage || 0;
-                      const currentDmg = Math.round(laserDmg * level * LASER_WIDE_BEAM_POWER_INCREMENT);
-                      if (level >= maxLvl) return `${currentDmg}`;
-                      const nextDmg = Math.round(laserDmg * (level + 1) * LASER_WIDE_BEAM_POWER_INCREMENT);
-                      return `${currentDmg} > ${nextDmg}`;
+                      const perBeam = lvl => Math.round((LASER_SPLITTER_BASE_DAMAGE * Math.pow(2, lvl - 1)) / LASER_BEAM_SPLITTER_MAX_TARGETS);
+                      const cur = perBeam(level);
+                      if (level >= maxLvl) return `${cur}/beam`;
+                      return `${cur} > ${perBeam(level + 1)}/beam`;
                   } },
                 { name: 'Auto XP Targeting', cost: 500000, level: 0, maxLevel: 1,
                   f: level => level > 0,
-                  g: level => level > 0 ? 'XP auto-fire enabled' : 'Auto-shoot XP enemies' }
+                  g: level => level > 0 ? 'XP auto-fire enabled' : 'Auto-shoot XP enemies' },
+                { name: 'Recharge', cost: 1500, level: 0, maxLevel: 10,
+                  f: level => 1 + level * LASER_RECHARGE_INCREMENT_PER_LEVEL, // fire-rate multiplier
+                  g: (level, cost, maxLvl) => {
+                      const perk = getWeaponFireRateMultiplier('laser');
+                      const rate = lvl => (1000 / LASER_FIRE_INTERVAL) * perk * (1 + lvl * LASER_RECHARGE_INCREMENT_PER_LEVEL);
+                      const cur = rate(level).toFixed(1);
+                      if (level >= maxLvl) return `${cur}/s`;
+                      return `${cur} > ${rate(level + 1).toFixed(1)}/s`;
+                  } }
             ]
         },
         { // Category 3: Missiles
@@ -4668,6 +4730,8 @@ function createInitialBaseState(initialRange) {
         cannonRange: initialRange,
         laserDamage: 0, // Needs upgrade
         laserRange: 0, // Needs upgrade
+        laserRechargeMultiplier: 1, // Recharge fire-rate multiplier (1 = base)
+        laserSplitterDamage: 0, // Beam Splitter total damage (own line, independent of Laser Damage)
         laserRadiusBase: 0, // Anchored on first laser range purchase
         laserRevealRadius: 0, // Reveal radius when laser damage is acquired
         laserWideBeam: 0, // Beam Splitter level (0 = off, 1+ = active + power level)
@@ -5343,7 +5407,7 @@ function handlePlayerFiring(dt) {
     }
 
     // --- Laser Firing ---
-    const laserInterval = LASER_FIRE_INTERVAL / getWeaponFireRateMultiplier('laser');
+    const laserInterval = getLaserFireInterval();
     if (base.laserDamage > 0 && currentTime - gameState.lastLaserFireTime >= laserInterval / gameSpeedMultiplier) {
         const beamSplitterActive = base.laserWideBeam > 0;
         const inLaserRange = enemy => base.laserRange === Infinity || Math.hypot(enemy.x - base.x, enemy.y - base.y) <= base.laserRange;
@@ -5364,7 +5428,8 @@ function handlePlayerFiring(dt) {
             inLaserRange(enemy) && hasTargetCapacity(enemy, 'laser')
         );
 
-        // Beam Splitter: up to four Kamikaze split beams, scaling from 10% to 100% of focused damage.
+        // Beam Splitter: up to four Kamikaze split beams. The splitter has its own damage
+        // line (independent of Laser Damage); the total is split across the targeted Kamikazes.
         const wideBeamTargets = beamSplitterActive ? enemies
             .filter(enemy =>
                 !enemy.xp && enemy.type === 'Kamikaze' &&
@@ -5389,8 +5454,10 @@ function handlePlayerFiring(dt) {
 
             // Fire split beams at Kamikazes
             if (wideBeamTargets.length > 0) {
-                const wideBeamPower = base.laserWideBeamPower || 1;
-                const spreadDamage = base.laserDamage * LASER_WIDE_BEAM_DAMAGE_MULTIPLIER * wideBeamPower;
+                const n = wideBeamTargets.length; // 1..4 Kamikazes actually targeted
+                // Splitter has its own damage line (independent of Laser Damage): the total
+                // is split evenly across the targeted Kamikazes.
+                const spreadDamage = (base.laserSplitterDamage || 0) / n;
                 wideBeamTargets.forEach(laserTarget => {
                     applyLaserCleaveStrike(laserTarget, spreadDamage, 20);
                 });
@@ -5666,7 +5733,11 @@ function updateProjectiles(dt, baseMoved) {
         }
 
         // 4. Update Trail
-        advanceMissileTrail(missile);
+        // fullSpeedStep = distance the missile would have covered this tick at full
+        // speed. Passing it only when slow lets advanceMissileTrail space trail points
+        // at full-speed density so the trail length is unchanged by time control.
+        const trailFullSpeedStep = gameSpeedMultiplier < 1 ? missileMoveDist / gameSpeedMultiplier : undefined;
+        advanceMissileTrail(missile, trailFullSpeedStep);
 
         // 5. Check bounds / Range (collision checked separately)
         missile.lifeProgress = Math.min(1, missile.distanceTraveled / rangeLimit);
@@ -7143,9 +7214,9 @@ function drawProjectilesLayer() {
         // Beam Splitter: separate split bolts at Kamikazes.
         const wideTargets = Array.isArray(base.laserWideBeamTargets) ? base.laserWideBeamTargets : [];
         if (wideTargets.length > 0) {
-            // Splitter opacity scales with its power relative to focused beam.
-            const wideBeamPower = base.laserWideBeamPower || 1;
-            const powerRatio = Math.min(1, LASER_WIDE_BEAM_DAMAGE_MULTIPLIER * wideBeamPower);
+            // Splitter opacity scales with its level: full strength at the cap (parity).
+            const wideBeamPower = base.laserWideBeamPower || 0;
+            const powerRatio = Math.min(1, wideBeamPower / LASER_BEAM_SPLITTER_MAX_TARGETS);
             const wideBeamAlpha = Math.max(0.08, powerRatio);
 
             wideTargets.forEach(target => {
@@ -7367,7 +7438,7 @@ function getLaserRechargeStatus(now = Date.now()) {
     if (!gameState || !base || base.laserDamage <= 0) {
         return { active: false, ready: false, progress: 0, remainingMs: 0, totalMs: 0 };
     }
-    const totalMs = Math.max(1, (LASER_FIRE_INTERVAL / getWeaponFireRateMultiplier('laser')) / gameSpeedMultiplier);
+    const totalMs = Math.max(1, getLaserFireInterval() / gameSpeedMultiplier);
     const elapsedMs = Math.max(0, now - (gameState.lastLaserFireTime || 0));
     const progress = Math.min(1, elapsedMs / totalMs);
     return {
@@ -7448,6 +7519,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let manualButton = null;
         let autoXpButton = null;
         let wideBeamButton = null;
+        let rechargeButton = null;
         let smartButton = null;
         let retargetButton = null;
         let ordnanceSyncButton = null;
@@ -7467,6 +7539,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             const isManualLaser = categoryIndex === UPGRADE_CATEGORY_LASER && idx === UPGRADE_LASER_MANUAL;
             const isAutoXpLaser = categoryIndex === UPGRADE_CATEGORY_LASER && idx === UPGRADE_LASER_AUTO_XP;
             const isWideBeam = categoryIndex === UPGRADE_CATEGORY_LASER && idx === UPGRADE_LASER_WIDE_BEAM;
+            const isRecharge = categoryIndex === UPGRADE_CATEGORY_LASER && idx === UPGRADE_LASER_RECHARGE;
             const isSmartAI = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SMART;
             const isRetarget = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_RETARGET;
             const isOrdnanceSync = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_ORDNANCE_SYNC;
@@ -7487,6 +7560,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             else if (isManualLaser) manualButton = b;
             else if (isAutoXpLaser) autoXpButton = b;
             else if (isWideBeam) wideBeamButton = b;
+            else if (isRecharge) rechargeButton = b;
             else if (isSmartAI) smartButton = b;
             else if (isRetarget) retargetButton = b;
             else if (isOrdnanceSync) ordnanceSyncButton = b;
@@ -7508,6 +7582,14 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             } else {
                 buttons.push(tacticalZoomButton);
             }
+        }
+
+        // Place Recharge on the main spine between Laser Damage and Range so the
+        // connector runs Damage -> Recharge -> Range.
+        if (rechargeButton) {
+            const dmgIdx = buttons.findIndex(b => b.idx === UPGRADE_LASER_DAMAGE);
+            if (dmgIdx !== -1) buttons.splice(dmgIdx + 1, 0, rechargeButton);
+            else buttons.push(rechargeButton);
         }
 
         const buttonWidth = Math.max(150, maxTextWidth + padding * 2);
@@ -7601,6 +7683,10 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             }
             if (categoryIndex === UPGRADE_CATEGORY_SPECIAL && b.idx === UPGRADE_SPECIAL_STUN_RADIUS &&
                 upgradeTree[UPGRADE_CATEGORY_SPECIAL].upgrades[UPGRADE_SPECIAL_STUN].level === 0) {
+                canAfford = false;
+            }
+            if (categoryIndex === UPGRADE_CATEGORY_LASER && b.idx === UPGRADE_LASER_RECHARGE &&
+                upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level === 0) {
                 canAfford = false;
             }
 
@@ -8192,14 +8278,23 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
             return;
         }
     }
+    if (categoryIndex === UPGRADE_CATEGORY_LASER && upgradeIndex === UPGRADE_LASER_RECHARGE) {
+        if (upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level === 0) {
+            showToast("Requires Laser upgrade first!", 2500);
+            return;
+        }
+    }
     if (categoryIndex === UPGRADE_CATEGORY_LASER && upgradeIndex === UPGRADE_LASER_WIDE_BEAM) {
         if (upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level === 0) {
             showToast("Requires Laser upgrade first!", 2500);
             return;
         }
+        // The splitter's total damage may not exceed the main laser's damage. Once it reaches
+        // that ceiling, the player must upgrade Laser Damage to raise the cap before buying more.
+        const splitterUpgrade = upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_WIDE_BEAM];
         const beamSplitterCap = getBeamSplitterUnlockedLevel();
-        if (upgrade.level >= beamSplitterCap && upgrade.level < upgrade.maxLevel) {
-            showToast("Upgrade Laser Damage to unlock more Beam Splitter power.", 2500);
+        if (splitterUpgrade.level >= beamSplitterCap && splitterUpgrade.level < splitterUpgrade.maxLevel) {
+            showToast("Upgrade Laser Damage to raise the Beam Splitter cap.", 2500);
             return;
         }
     }
@@ -8287,9 +8382,13 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                  base.manualTargeting = level > 0;
              } else if (upgradeIndex === UPGRADE_LASER_AUTO_XP) {
                  base.autoXpTargeting = level > 0;
+             } else if (upgradeIndex === UPGRADE_LASER_RECHARGE) {
+                 base.laserRechargeMultiplier = upgrade.f(level);
              } else if (upgradeIndex === UPGRADE_LASER_WIDE_BEAM) {
                  base.laserWideBeam = level;
                  base.laserWideBeamPower = level;
+                 // Independent splitter damage line: derived solely from splitter level.
+                 base.laserSplitterDamage = upgrade.f(level);
              }
              break;
         case UPGRADE_CATEGORY_MISSILE:
@@ -9065,7 +9164,7 @@ function handleCanvasClick(clientX, clientY) {
     if (paused) return;
 
     if (isGameRunning && base.manualTargeting && base.laserDamage > 0 &&
-        Date.now() - gameState.lastLaserFireTime >= (LASER_FIRE_INTERVAL / getWeaponFireRateMultiplier('laser')) / gameSpeedMultiplier) {
+        Date.now() - gameState.lastLaserFireTime >= getLaserFireInterval() / gameSpeedMultiplier) {
         const target = enemyPool.getActiveObjects().find(e =>
             e.xp &&
             worldClick.x >= e.x - e.radius && worldClick.x <= e.x + e.radius &&

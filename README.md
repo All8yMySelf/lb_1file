@@ -74,6 +74,28 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.93
+- The red homing lock ring now shows around the targeted enemy for the first purchased
+  missiles too (it previously needed the Homing upgrade, whose radius was 0 before purchase).
+
+### v3.92
+- Missile trails no longer shrink when you slow time; they keep full-speed length and shape,
+  just progressing slower.
+
+### v3.91
+- Beam Splitter's cap is now gated by Laser Damage: its total damage can't exceed the main
+  laser's damage, so you must upgrade Laser Damage to raise the splitter cap. It keeps its own
+  independent damage line (doubling per level, split across Kamikazes).
+
+### v3.90
+- Beam Splitter is now a fully independent damage line: upgrading Laser Damage no longer
+  auto-strengthens it. It has its own damage (doubling per level, split across the Kamikazes
+  in range) with a 10-level cap for a long, separate upgrade path.
+
+### v3.89
+- New Laser **Recharge** upgrade (between Damage and Range) speeds up laser fire rate by 15%
+  per level. Beam Splitter reworked to fire up to four Kamikaze split beams.
+
 ### v3.88
 - Beam Splitter sub-lethal hits now chip away at Kamikaze health instead of
   being silently discarded, so splitter volleys visibly reduce health bars.
