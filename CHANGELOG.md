@@ -1,5 +1,23 @@
 # Orbital Defense - Change Log
 
+## v3.106
+- Left-side Info / hover-help card is now the same 170px width as the other
+  upgrade menu category buttons.
+- Info / hover-help card text reduced to 12px so it fits comfortably inside the
+  170px button width.
+- Fog of War callout title and body text reduced to 12px (10px on small screens).
+
+## v3.105
+- Right-side Hotkeys and Enemy Stats panels now match the canvas Fog of War
+  callout styling: clean cyan border, same translucent dark background, yellow
+  headers, white body text, and CRT scanline overlay.
+- All right-side panel text is now 16px, matching the left-side upgrade menu
+  button text, and the Fog of War callout body/title text is also 16px.
+- The left-side Info / hover-help card now uses the same Fog-of-War appearance
+  (cyan border, dark translucent background, white text).
+- Reduced the hidden Enemy Stats sizing row from `#999000` to `#99000` to avoid
+  over-reserving panel width.
+
 ## v3.104
 - Enemy Stats now measures a hidden worst-case `#999000` row for each known enemy
   type and sizes the panel to the required width instead of using the broader
