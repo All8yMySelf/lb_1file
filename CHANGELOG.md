@@ -1,5 +1,42 @@
 # Orbital Defense - Change Log
 
+## v3.80
+- Fixed enemy spawn distance so normal, boss, archetype, and XP enemies spawn
+  outside the current reveal boundary, using the larger of the screen edge and
+  the active sensor/largest weapon range plus a buffer.
+- Enemy visibility and spawning now share the same reveal-radius calculation, so
+  enemies enter view by crossing the fog-of-war edge instead of appearing well
+  inside it after range upgrades.
+
+## v3.79
+- Replaced the missile-count-based trail simplification with one fixed
+  medium-detail smoke/flame trail renderer, so missile trails look the same
+  whether there are a few missiles or a full late-wave swarm on screen.
+- Kept the circular missile trail buffer optimization from v3.76 so the stable
+  trail look still avoids the old per-frame trail array churn.
+
+## v3.78
+- Restored comma-separated formatting for visible credit totals, upgrade prices,
+  Supersonic research cost, reward unlock prices, credit-cache rewards, and
+  floating credit gain text.
+
+## v3.77
+- Moved the Q-debug performance overlay above the Fog of War callout when that
+  callout is visible, keeping it clear of the bottom support button.
+- Gave the Q-debug performance overlay a fixed-width layout with padded stats
+  so changing missile, particle, enemy, or bullet counts no longer resize it.
+
+## v3.76
+- Added a Q-debug FPS overlay showing FPS, frame/update/draw timing, and live
+  missile, bullet, enemy, and particle counts.
+- Improved high-missile-count performance by reusing missile trail point
+  buffers, adaptively simplifying missile trail rendering under load, reducing
+  homing-radius debug ring density during large untargeted volleys, and capping
+  missile launch/impact particle bursts.
+- Reworked missile target selection and retargeting hot paths to use squared
+  distance checks and one-pass candidate lists instead of repeated `Math.hypot`
+  filter/sort work.
+
 ## v3.75
 - Restored weapon reward bonus labels to the right of their category buttons and
   changed upgrade menu draw order so expanded panels render over those labels

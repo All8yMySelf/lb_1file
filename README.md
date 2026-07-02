@@ -74,6 +74,28 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.80
+- Enemies now spawn outside the current fog-of-war reveal boundary, so expanded
+  sensor or weapon ranges reveal enemies as they cross inward instead of after
+  they are already inside the largest range ring.
+
+### v3.79
+- Missile trails now use one fixed medium-detail smoke/flame renderer at every
+  missile count, so late-wave swarms no longer switch to a different look.
+
+### v3.78
+- Credit totals, upgrade prices, research costs, reward unlocks, and credit gain
+  text now show comma-separated thousands and millions again.
+
+### v3.77
+- The Q debug performance overlay now uses a fixed width and sits above the Fog
+  of War callout instead of the bottom support button area.
+
+### v3.76
+- Q debug mode now shows an FPS/performance overlay, and high missile-count
+  fights spend less frame time on trails, homing-radius rings, target scans, and
+  particle bursts.
+
 ### v3.75
 - Weapon reward labels are back beside their category buttons, with expanded
   upgrade panels now drawing over them when panels overlap.
