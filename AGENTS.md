@@ -140,6 +140,8 @@ Current side-branch parent/child links:
 - Cannon `Multibarrel` -> `Focus Radius`.
 - Laser `Damage` -> `Manual Targeting`.
 - Laser `Manual Targeting` -> `Auto XP Targeting`.
+- Laser `Damage` -> `Recharge` (sits on the main spine between Damage and Range; no
+  side-branch connector).
 - Laser `Damage` -> `Beam Splitter` (legacy save name: `Wide Beam`).
 - Sensors `Enemy Identification` -> `Target Analysis AI`.
 - Sensors `Target Analysis AI` -> `Ordnance Sync`.
@@ -160,7 +162,7 @@ connectors for children anchored to a parent in the previous column.
 
 ## Current State (2026-07-02)
 
-Local test build is v3.88; live (`testing`) remains v3.85 until the user asks
+Local test build is v3.93; live (`testing`) remains v3.85 until the user asks
 to publish these local edits. Versions v3.76-v3.87 added the Q-debug
 performance overlay, improved high-missile-count performance, restored
 comma-separated currency formatting, stabilized missile trail visuals, fixed
@@ -186,9 +188,18 @@ Code landmarks in `index.html`:
 - The homing radius circle toggle is a small switch drawn on the Homing card
   (click region type `homing_radius_toggle`; state in `showMissileRadius`,
   persisted in localStorage). The circle draws around a missile's locked target,
-  or around the missile while it searches.
+  or around the missile while it searches. The lock ring radius is the missile's
+  homing radius; before the Homing upgrade is purchased that radius is 0, so
+  `drawMissileHomingLayer` falls back to an enemy-sized ring
+  (`lockTarget.radius + 6`) so the base's target assignment is still visible for
+  the first purchased missiles.
 - Braided is the only missile flight style (`missileStyleConfig`); the
   Itano/Helix styles and the style-cycling button were removed.
+- Missile trails use distance-gated sampling in `advanceMissileTrail(missile,
+  fullSpeedStep)`. The single caller (`updateProjectiles`) passes `fullSpeedStep`
+  only when `gameSpeedMultiplier < 1`, so trail points stay at full-speed spatial
+  density and the visible trail length is unchanged by slow motion. At full speed
+  / fast-forward `fullSpeedStep` is `undefined` and a point is recorded every tick.
 - Missile travel range is `missileTargetingRadius * base.missileRangeMultiplier`
   (Lifespan upgrade, 1.1 at grade 0 up to 1.9 maxed).
 - Enemy visibility and spawn distance share the reveal-radius calculation via
@@ -201,9 +212,30 @@ Code landmarks in `index.html`:
 - Beam Splitter is the Laser Damage side-branch at `UPGRADE_LASER_WIDE_BEAM`;
   keep that constant and the `laserWideBeam*` save fields for compatibility.
   The visible upgrade name is `Beam Splitter`, with `Wide Beam` accepted as a
-  legacy save alias by `savedUpgradeNameMatches()`. Splitter purchases are
-  capped by Laser Damage progression (`getBeamSplitterUnlockedLevel()`), and it
-  fires up to four Kamikaze split beams instead of drawing the old cone sweep.
+  legacy save alias by `savedUpgradeNameMatches()`. It is a **fully independent
+  damage line**: total splitter damage is
+  `LASER_SPLITTER_BASE_DAMAGE * 2^(level-1)` (doubles per level), stored on
+  `base.laserSplitterDamage` and set in `applyUpgradeEffect`. It does **not**
+  scale with `base.laserDamage` — upgrading Laser Damage must not change splitter
+  damage. Each volley splits `base.laserSplitterDamage` evenly across the N
+  Kamikazes in range (max `LASER_BEAM_SPLITTER_MAX_TARGETS`), so each beam deals
+  `laserSplitterDamage / N`. The splitter's purchasable cap is gated by Laser
+  Damage: `getBeamSplitterUnlockedLevel()` returns the highest splitter level
+  whose total damage stays within the raw main-laser damage (excludes perks), so
+  the splitter's total damage may not exceed the laser's. The player must upgrade
+  Laser Damage to raise the cap (it rises ~1 splitter level per Laser Damage
+  level, capped at the splitter's hard `maxLevel` of 10). The splitter damage
+  formula itself is unchanged — only the purchasable cap moves. Cost rises
+  x1.5 per level via the standard purchase path. Design intent: many
+  independent upgrade lines (Laser Damage for Fast/Boss, Beam Splitter for
+  Kamikaze swarms, Recharge for fire rate, Range, Manual/Auto-XP targeting) so
+  players pursue different builds to reach the highest wave.
+- Laser Recharge is the Laser Damage main-spine upgrade at
+  `UPGRADE_LASER_RECHARGE` (between Damage and Range). `f` returns the fire-rate
+  multiplier `1 + level * LASER_RECHARGE_INCREMENT_PER_LEVEL`, stored on
+  `base.laserRechargeMultiplier`. All laser cooldown consumers read
+  `getLaserFireInterval()`, which folds in this multiplier and the wave-reward
+  fire-rate perk.
 - Supersonic Research unlocks the Supersonic activation card as its direct
   child. Super Warhead then scales Supersonic damage by grade: one grade unlocks
   per wave, with late grades tuned toward about half of the matching wave boss's

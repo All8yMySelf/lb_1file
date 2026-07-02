@@ -1,5 +1,38 @@
 # Orbital Defense - Change Log
 
+## v3.93
+- The red homing lock ring now shows around the targeted enemy for the first purchased
+  missiles too, not just after the Homing upgrade. Previously the ring radius came from
+  the Homing upgrade (0 before it's purchased), so basic missiles showed no lock even
+  though they were already assigned a target. The ring now falls back to an enemy-sized
+  circle when the homing radius is 0; Homing-upgraded behavior is unchanged.
+
+## v3.92
+- Missile trails no longer shrink when you slow time with the time-control dock.
+  Trail points are now distance-gated to full-speed spacing, so at slow speed the
+  trail keeps the same length and shape as at full speed — it just progresses
+  slower. Full-speed and fast-forward behavior is unchanged.
+
+## v3.91
+- Beam Splitter's purchasable cap is now gated by Laser Damage: its total damage may not exceed
+  the main laser's damage. The splitter keeps its own independent damage line (still doubles per
+  level, does not scale with Laser Damage), but once it reaches the laser-damage ceiling the
+  player must upgrade Laser Damage to raise the cap before buying more splitter levels. Cap
+  rises ~1 splitter level per Laser Damage level (capped at the splitter's hard max of 10). The
+  card shows an "Upgrade Laser Damage" prompt while gated.
+
+## v3.90
+- Beam Splitter is now a fully independent damage line: its damage no longer scales with
+  Laser Damage, so upgrading Laser Damage no longer auto-strengthens the splitter. It has its
+  own damage that doubles per level (`LASER_SPLITTER_BASE_DAMAGE` x 2^(level-1)), split evenly
+  across the Kamikazes in range. Cap raised to 10 (cost still rises x1.5 per level), giving a
+  long, separate upgrade path for varied builds.
+
+## v3.89
+- New Laser **Recharge** upgrade (between Damage and Range): each level adds 15% laser
+  fire rate, so the laser recharges faster to keep up with fast Kamikaze swarms.
+- Beam Splitter reworked to fire up to four Kamikaze split beams with its own damage model.
+
 ## v3.88
 - Fixed Beam Splitter (and focused laser) sub-lethal hits doing no damage.
   `applyLaserCleaveStrike` previously discarded any volley whose damage was
