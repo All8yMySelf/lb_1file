@@ -74,6 +74,15 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.87
+- Laser System now shows weapon recharge progress on its left-side category
+  button, and Beam Splitter replaces Wide Beam with up to four Kamikaze split
+  bolts whose power cap advances with Laser Damage.
+
+### v3.86
+- Laser kills now cleave enemies into two fading halves, and overkill creates a
+  transparent carry-through beam based on remaining laser power.
+
 ### v3.85
 - Supersonic missiles now fire only at bosses, once per boss, while Super Salvo
   adds guided boss-seeking MIRV payloads in +2 steps; every 10th wave now brings

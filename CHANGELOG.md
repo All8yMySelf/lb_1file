@@ -1,5 +1,24 @@
 # Orbital Defense - Change Log
 
+## v3.87
+- Laser System category button now shows laser recharge progress, dropping back
+  when a laser volley fires and filling back up as the weapon recharges.
+- Renamed the Kamikaze side-beam upgrade to Beam Splitter and changed its
+  visual from a cone sweep into up to four separate split laser bolts.
+- Beam Splitter damage is capped by Laser Damage progression: it can be upgraded
+  toward parity with the focused laser, then requires more Laser Damage levels
+  before additional splitter power can be purchased.
+
+## v3.86
+- Reworked laser kills into a cleave experiment: lethal laser hits split enemies
+  into two fading halves with separate particle sprays instead of using the
+  normal radial explosion.
+- Laser shots now only destroy targets when laser power meets or exceeds the
+  target's remaining shield plus health; weaker shots draw a faint hit beam but
+  do not damage the target.
+- Overkill power now creates a carry-through laser segment whose transparency
+  scales with the remaining beam power after the kill.
+
 ## v3.85
 - Supersonic missiles are now boss-only weapons: they wait for a boss inside
   sensor range and fire once per boss instead of cycling through normal enemies.
