@@ -74,6 +74,10 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.88
+- Beam Splitter sub-lethal hits now chip away at Kamikaze health instead of
+  being silently discarded, so splitter volleys visibly reduce health bars.
+
 ### v3.87
 - Laser System now shows weapon recharge progress on its left-side category
   button, and Beam Splitter replaces Wide Beam with up to four Kamikaze split

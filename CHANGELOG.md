@@ -1,5 +1,11 @@
 # Orbital Defense - Change Log
 
+## v3.88
+- Fixed Beam Splitter (and focused laser) sub-lethal hits doing no damage.
+  `applyLaserCleaveStrike` previously discarded any volley whose damage was
+  below the target's shield plus health; it now chips away at shield first
+  then health, so Kamikaze health bars visibly decrease across splitter volleys.
+
 ## v3.87
 - Laser System category button now shows laser recharge progress, dropping back
   when a laser volley fires and filling back up as the weapon recharges.

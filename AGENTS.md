@@ -160,7 +160,7 @@ connectors for children anchored to a parent in the previous column.
 
 ## Current State (2026-07-02)
 
-Local test build is v3.87; live (`testing`) remains v3.85 until the user asks
+Local test build is v3.88; live (`testing`) remains v3.85 until the user asks
 to publish these local edits. Versions v3.76-v3.87 added the Q-debug
 performance overlay, improved high-missile-count performance, restored
 comma-separated currency formatting, stabilized missile trail visuals, fixed
