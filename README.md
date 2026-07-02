@@ -76,6 +76,19 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.106
+- Left-side Info / hover-help card is now the same 170px width as the other
+  upgrade menu buttons, with text reduced to 12px for a comfortable fit.
+- Fog of War callout text reduced to 12px (10px on small screens).
+
+### v3.105
+- Right-side Hotkeys and Enemy Stats panels adopt the Fog of War callout look:
+  clean cyan border, dark translucent background, yellow headers, white 16px body
+  text under the CRT scanlines.
+- Fog of War callout text is now 16px, and the left-side Info / hover-help card
+  matches the same Fog-of-War styling.
+- Enemy Stats width sizing reduced from `#999000` to `#99000`.
+
 ### v3.104
 - Enemy Stats now sizes itself from a hidden `#999000` worst-case row and locks
   enemy order by first identified health, preventing distracting row reshuffles.
