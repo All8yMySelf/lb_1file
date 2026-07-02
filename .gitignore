@@ -1,2 +1,6 @@
 .DS_Store
 node_modules/
+.codex-usage/
+orbital-defense-smoke-*/
+CLAUDE.md
+IMPROVEMENT_PLAN.md

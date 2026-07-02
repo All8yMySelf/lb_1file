@@ -26,6 +26,19 @@ Each wave spawns a group of enemies that approach from beyond your sensor range.
 - Defeated enemies drop experience and credits used to buy upgrades such as improved cannon range, missile homing, and sensor enhancements.
 - To send the next wave early, use the **Send Next Wave** button when available.
 
+## Enemy Types
+- **Kamikaze** - fast impact threats. Thin them early with cannon, laser focus, or missiles.
+- **Normal** - baseline enemies. Cannon and missiles clear them efficiently.
+- **Fast** - quick runners. Range, recharge, and targeting upgrades stop leaks.
+- **Tank** - high health targets. Laser damage, missile damage, and focus fire work best.
+- **Splitter** - breaks into more threats. Beam Splitter and Macross volleys help control swarms.
+- **Shielded** - absorbs damage first. Sustained laser and missile fire strip shields.
+- **Healer** - restores allies. Prioritize with sensors, targeting, and burst damage.
+- **Boss** - boss kills unlock rewards. Supersonic weapons are built for boss pressure.
+- **XP** - flees across the field. Collect it for XP Boost charges.
+
+Enemy Stats uses **#** for count, **»** for speed, and **♥** for health. In wave rows, **E** means Enemies.
+
 ## Game Over and Leaderboard
 When you are defeated the **Game Over** screen displays your final wave and time survived. Enter your initials to submit a score to the global leaderboard. Scores are ranked by wave and completion time. You can view the leaderboard from the start screen at any time.
 

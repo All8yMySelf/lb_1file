@@ -162,8 +162,33 @@ connectors for children anchored to a parent in the previous column.
 
 ## Current State (2026-07-02)
 
-Local test build is v3.93; live (`testing`) is also v3.93 as of 2026-07-02.
-New local edits stay unpublished until the user asks to publish. Versions v3.76-v3.87 added the Q-debug
+Local test build is v3.104 and is ready to publish to `testing` when requested.
+v3.104 completes the Enemy Stats / left-menu UI pass:
+
+- `#battleStatusSection` lives inside `#enemyStatsPanel`; the old standalone
+  `#waveStatsPanel` and right-side XP Status panel are retired.
+- Enemy row `#` counts are expected-incoming per type, summed via
+  `getWaveCompositionCounts()` over `activeWaves`.
+- Enemy Stats rows use `ENEMY_STAT_ICONS` + `WAVE_COMP_DISPLAY`, and the panel
+  sizes itself from hidden worst-case `#999000` rows.
+- Enemy Stats ordering is locked by first identified strength:
+  `identifyEnemy()` stores `sortHealth`, then `insertEnemyIntelTypeByStrength()`
+  places the type once so live health/speed updates do not reshuffle rows.
+- Battle Status details expand above the bottom `Total: E = Enemies: N` row.
+  `Send Next Wave` uses the cyan Fog-of-War callout styling.
+- XP Boost progress is folded into the left XP Boost card with the cyan XP
+  marker and live banked-charge count. Manual Targeting unlocks the XP Boost
+  hover explanation.
+- The Info / How To Play card is a double-height fixed help panel. Hovering
+  menu/upgrade buttons writes compact help there; clicking it pauses the game
+  and opens the centered How To Play overlay.
+
+New local edits stay unpublished until the user asks to publish. v3.94 added
+the Battle Status wave-composition preview: each wave's spawn sequence is
+pre-rolled into `waveStates[w].spawnPlan` (`rollWaveSpawnPlan()`, same
+distribution as the old per-spawn roll), and `spawnEnemy` consumes plan slots
+by `spawned` index. Plans are persisted in saves and rebuilt by
+`normalizeLoadedWaveState` when missing. Versions v3.76-v3.87 added the Q-debug
 performance overlay, improved high-missile-count performance, restored
 comma-separated currency formatting, stabilized missile trail visuals, fixed
 enemy spawning so enemies appear outside the current fog-of-war reveal boundary,

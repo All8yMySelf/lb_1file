@@ -1,5 +1,91 @@
 # Orbital Defense - Change Log
 
+## v3.104
+- Enemy Stats now measures a hidden worst-case `#999000` row for each known enemy
+  type and sizes the panel to the required width instead of using the broader
+  fixed range.
+- Enemy Stats ordering now inserts newly identified enemies by their first
+  identified health value, then locks that order so live stat changes do not
+  reshuffle the list.
+- The Send Next Wave button now uses the cyan fog-callout treatment for its
+  border, text, hover state, and background.
+
+## v3.103
+- Enemy Stats is tightened back down while keeping the compact rows on one line
+  for large active-wave counts.
+- Enemy Stats rows now use a stable order with Kamikaze pinned first, then newly
+  discovered enemy types kept in discovery order so the list no longer jumps
+  around as health and wave data changes.
+- The Info card now says `Click Here for Instructions.`, and the centered How To
+  Play overlay includes the main controls, stat labels, XP Boost notes, and a
+  color/icon guide for enemy types.
+
+## v3.102
+- Enemy Stats is wider and keeps each enemy row on one line, leaving room for
+  three-digit counts and long health values.
+- Right-side panels now use the darker retro HUD treatment with gold borders,
+  and the How To Play overlay has a matching centered guide panel.
+- The left Info / How To Play card now shows only hover help text, without a
+  separate title inside the card.
+
+## v3.101
+- The Info / How To Play menu card is now a larger help panel: hovering menu
+  buttons and upgrade cards writes their compact help text into that fixed card
+  instead of showing a floating callout over the upgrade tree.
+- Battle Status bottom text now reads `Total: E = Enemies: N`.
+
+## v3.100
+- Battle Status now labels per-wave counts with `E` and shows the compact bottom
+  legend as `Total: E = Enemies: N`.
+- Upgrade hover callouts now choose from more above/below/right placements and
+  strongly prefer positions that do not overlap any visible menu button.
+
+## v3.99
+- Battle Status details now expand above the Total Enemies row, keeping Total
+  Enemies pinned at the bottom with an expand-up arrow and a compact enemy-count
+  legend for the per-wave rows.
+- Upgrade menu hover help now uses a fog-callout-style canvas panel with corner
+  brackets and a connector line to the hovered card, choosing a nearby position
+  that avoids covering other menu buttons when possible.
+
+## v3.98
+- Left-side upgrade menu hover tips now show compact category stats on system
+  headers and short purpose/current-state/cost notes on upgrade cards, positioned
+  to the right of the hovered card so they do not cover the button.
+- Battle Status is now compact by default: Total Enemies stays visible under
+  Enemy Stats, with an arrow to expand Send Next Wave and per-wave details.
+
+## v3.97
+- Retired the separate right-side XP Status panel and folded XP Boost progress into
+  the left-side XP Boost card, including the matching cyan XP marker and live
+  banked-charge count.
+- XP Boost now shows a Manual Targeting hover tip explaining that XP charges can
+  be saved, spent, and stacked.
+
+## v3.96
+- Battle Status merged into the Enemy Stats box: below the enemy rows sit Send Next
+  Wave, one compact line per active wave (`W3 E57 0:43` — wave, enemies left, time
+  left), and the Total Enemies line. Folding Enemy Stats now folds all of it.
+- The `#` metric on each enemy row now means how many of that type are still expected
+  (unspawned + alive across active waves) instead of currently-on-field, replacing the
+  colored per-wave composition line, which has been removed.
+
+## v3.95
+- Enemy Stats panel redesigned: each identified enemy gets a colored icon hinting at its
+  behavior (● Normal, ▶ Fast, ■ Tank, ⬢ Shielded, ✱ Splitter, ✚ Healer, ▲ Kamikaze,
+  ★ Boss, ◆ XP) plus compact metrics — `#` how many are on the field right now,
+  `»` speed, `♥` health. Counts update live as enemies spawn and die.
+- Right-hand panels (Hotkeys, Enemy Stats, XP Status, Battle Status) restyled to match
+  the upgrade/button look: themed border and background instead of the plain dark box.
+
+## v3.94
+- Battle Status now previews each wave's composition: a color-coded line under the wave
+  entry shows counts per enemy type (e.g. `24No 5Fa 4Ta 4Ka 1Bo`), colors matching the
+  enemies on the field. Counts cover unspawned enemies (Kamikaze slots expand to their
+  full swarm) plus everything still alive, and shrink as the wave is cleared.
+- Wave composition is now pre-rolled when a wave starts (same spawn distribution as
+  before) so the preview is truthful, and it survives save/load.
+
 ## v3.93
 - The red homing lock ring now shows around the targeted enemy for the first purchased
   missiles too, not just after the Homing upgrade. Previously the ring radius came from

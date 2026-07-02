@@ -28,6 +28,8 @@ node scripts/smoke_check.mjs
 ```
 
 For local multi-agent workflow and publishing notes, see [AGENTS.md](AGENTS.md).
+For Codex-specific orchestration and usage-accounting workflow, see
+[CODEX.md](CODEX.md).
 
 ## About
 
@@ -73,6 +75,67 @@ initials, wave, time, and ranking validation.
 
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
+
+### v3.104
+- Enemy Stats now sizes itself from a hidden `#999000` worst-case row and locks
+  enemy order by first identified health, preventing distracting row reshuffles.
+- The Send Next Wave button now matches the cyan fog-callout styling.
+
+### v3.103
+- Enemy Stats is narrower again and keeps enemy rows stable: Kamikaze stays first
+  and other enemy types keep discovery order instead of jumping around.
+- The Info card now says `Click Here for Instructions.`, and the full guide
+  overlay includes controls, stat labels, XP Boost notes, and enemy type icons.
+
+### v3.102
+- Enemy Stats is wider and keeps enemy rows on one line, while right-side panels
+  use a darker retro HUD treatment with gold borders.
+- The Info / How To Play card now shows only hover help text, and the full guide
+  overlay explains enemy colors, stats, movement, upgrades, and XP Boost.
+
+### v3.101
+- The Info / How To Play menu card is now a larger fixed help panel for hover
+  text, so upgrade help no longer covers nearby buttons.
+- Battle Status bottom text now reads `Total: E = Enemies: N`.
+
+### v3.100
+- Battle Status now uses `E` for per-wave enemy counts and shows the compact
+  bottom legend as `Total: E = Enemies: N`.
+- Upgrade hover callouts now more aggressively avoid covering visible menu
+  buttons, trying above, below, and right-side placements before falling back.
+
+### v3.99
+- Battle Status wave details now expand above a bottom Total Enemies row, with
+  compact per-wave enemy counts and a bottom legend.
+- Upgrade hover help now uses a fog-callout-style canvas panel with a connector
+  line to the hovered card and placement that avoids covering nearby buttons.
+
+### v3.98
+- Left-side upgrade menu hover tips now show compact live system stats or upgrade
+  explanations beside the hovered card.
+- Battle Status now collapses under Total Enemies, keeping Enemy Stats compact
+  until the wave details are expanded.
+
+### v3.97
+- XP Boost progress now lives on the left-side XP Boost card with the cyan XP
+  marker, live banked-charge count, and a Manual Targeting hover tip for saving,
+  spending, and stacking charges.
+- The separate right-side XP Status panel has been removed.
+
+### v3.96
+- Battle Status now lives inside the Enemy Stats box (Send Next Wave, compact
+  per-wave lines, Total Enemies), and each enemy row's `#` shows how many of
+  that type are still expected across active waves.
+
+### v3.95
+- Enemy Stats panel now shows a colored behavior icon per enemy type with compact
+  live metrics (`#` count on field, `»` speed, `♥` health), and the right-hand
+  panels are restyled to match the upgrade-button look.
+
+### v3.94
+- Battle Status now shows a color-coded composition preview for each incoming wave
+  (counts per enemy type), so you can prepare the right upgrades before pressing
+  Send Next Wave.
 
 ### v3.93
 - The red homing lock ring now shows around the targeted enemy for the first purchased
