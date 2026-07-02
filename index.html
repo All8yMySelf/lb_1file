@@ -179,7 +179,7 @@
     });
 </script>
 
-<title>Orbital Defense v3.82 - Optimised</title>
+<title>Orbital Defense v3.85 - Optimised</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg-gradient:linear-gradient(135deg,#0f2027,#203a43,#2c5364);--body-bg:#000;--text-color:#fff;--hud-color:#fff;--title-color:#fff;--final-stats-color:#cfab52;--button-bg:#2c220f;--button-text:#e6b54b;--button-border:#e6b54b;--button-hover-bg:#1c1404;--button-disabled-bg:#2f240c;--button-disabled-text:#ac4834;--upgrade-title-color:#e6b54b;--toggle-active-bg:#1c1404;--toggle-active-text:#e6b54b;--toast-bg:rgba(0,0,0,.7);--toast-text:#fff;--switch-bg:#2f240c;--switch-slider-color:#e6b54b;--switch-checked-bg:#1c1404;--switch-label-color:#e6b54b;--stats-border:rgba(230,181,75,.3);--stats-bg:rgba(0,0,0,.4);--hotkey-bg:rgba(0,0,0,.6);--hotkey-text:rgba(230,181,75,.8);--canvas-bg:rgba(0,0,0,.7);--crt-overlay-bg:linear-gradient(rgba(0,0,0,.6) 50%,transparent);--crt-overlay-blend:overlay;--crt-scanline-color:rgba(0,0,0,.1);--crt-vignette:radial-gradient(circle at center,transparent 60%,rgba(0,0,0,.6) 100%);--crt-interlace-color:rgba(0,0,0,.25);--font-family:"Press Start 2P",monospace;--hud-outline-color:#000;--button-font-size:24px;--upgrade-button-font-size:16px;--tab-font-size:14px;--ring-ui-font-size:11px}*{font-family:var(--font-family);box-sizing:border-box;padding:0}*,body{margin:0}body{overflow:hidden;background:var(--body-bg);color:var(--text-color)}#crt-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:5;background-image:var(--crt-overlay-bg);background-size:100% 2px;background-blend-mode:var(--crt-overlay-blend)}#gameCanvas{background:var(--canvas-bg);touch-action:none}#gameCanvas,.bg{position:absolute;top:0;left:0}.bg{width:100%;height:100%;background:var(--bg-gradient);z-index:-1}/* HUD must stay above overlay (z-index > 5) */#hud{position:absolute;top:0;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;font-size:var(--hud-font-size);padding:0;z-index:10;line-height:2;min-height:0;color:var(--hud-color)}#gameOverScreen h1,#startScreen h1{font-size:3rem;text-align:center;overflow:hidden;text-overflow:ellipsis;color:var(--title-color)}#gameOverScreen h1{font-size:5rem;margin-bottom:1rem}#hud span{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hud #creditsDisplay{text-align:left}#hud #healthDisplay{text-align:right}#gameOverScreen,#highScoreModal,#leaderboard-screen,#sensorWarning,#startScreen,#enemyIdentificationPopup,#howToPlayOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--canvas-bg);text-align:center;z-index:100}#gameOverScreen #finalStats{font-size:2rem;margin-bottom:1.5rem;color:var(--final-stats-color)}button{padding:10px 20px;font-size:var(--button-font-size);line-height:1;margin-top:22px;background:var(--button-bg);color:var(--button-text);border:2px solid var(--button-border);cursor:pointer;transition:all .3s ease}button:hover{background:var(--button-hover-bg);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}button:active{transform:translateY(1px)}button:disabled{background:var(--button-disabled-bg);color:var(--button-disabled-text);cursor:not-allowed;transform:none;box-shadow:none}/* Controls must stay above overlay (z-index > 5) */#controls{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;z-index:10;align-items:center}#toggleInfoButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#toggleInfoButton.active{background-color:var(--toggle-active-bg);color:var(--toggle-active-text)}#fullscreenButton,#playPauseButton,#slowDownButton,#speedUpButton{width:30px;height:30px;padding:0;border-radius:50%;font-size:20px;line-height:20px}#timeSpeedControls{display:none;align-items:center;gap:4px;padding:2px 6px;border:1px solid var(--stats-border);border-radius:12px;background:var(--hotkey-bg)}#timeSpeedControls button{width:22px;height:22px;margin:0;font-size:14px;line-height:14px;padding:0}#speedDisplay{display:flex;align-items:center;justify-content:center;width:34px;font-size:12px}#toast{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:10px 20px;border-radius:20px;z-index:1000;opacity:0;transition:opacity .3s ease;pointer-events:none}#toast.show{opacity:1}.switch{position:relative;display:inline-block;width:50px;height:24px;margin-right:10px}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--switch-bg);border-radius:24px}.slider,.slider:before{position:absolute;transition:.4s}.slider:before{content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:var(--switch-slider-color);border-radius:50%}input:checked+.slider{background-color:var(--switch-checked-bg)}input:checked+.slider:before{transform:translateX(26px)}.switch-label{color:var(--switch-label-color);font-size:16px}.stats{display:flex;justify-content:center;gap:20px;margin-top:10px}.stats div{border:1px solid var(--stats-border);padding:5px 10px;background:var(--stats-bg);border-radius:5px}/* Hotkey panel must stay above overlay (z-index > 5) */#hotkeys{z-index:10;position:absolute;top:60px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);display:none}#hotkeys.show{display:block}#sensorToggle{display:flex;align-items:center;gap:5px;font-size:var(--hotkey-font-size);color:var(--hotkey-text);z-index:10}#sensorDisplayToggle{padding:2px 8px;cursor:pointer}#enemyHUD,#sensorDisplayToggle{font-size:var(--hotkey-font-size)}#enemyHUD{position:absolute;top:100px;right:10px;background:var(--hotkey-bg);padding:5px 10px;border-radius:5px;color:var(--hotkey-text);display:none;line-height:1.2;text-align:right;z-index:10;opacity:.9}#enemyHUD.show{display:block}#highScoreTable table{width:80%;margin:0 auto;border-collapse:collapse;font-size:2rem}#highScoreTable td,#highScoreTable th{padding:4px 8px;border-bottom:1px solid var(--button-border);text-align:left}#highScoreTable td{white-space:nowrap}#highScoreTable th{font-weight:700}#highScoreTable td:last-child{text-align:right}.blinking-cursor{font-weight:700;animation:a 1s step-end infinite}@keyframes a{50%{opacity:0}}#highScoreModal input{width:5ch;text-align:center;font-size:24px;background:transparent;color:var(--text-color);border:none;border-bottom:2px solid var(--button-border);outline:none}.crt-scanlines{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,var(--crt-scanline-color),var(--crt-scanline-color) 1px,transparent 0,transparent 2px);pointer-events:none}.crt-container{transform:translateZ(0);position:relative;overflow:hidden}.crt-container:before{background:var(--crt-vignette);z-index:1}.crt-container:after,.crt-container:before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}.crt-container:after{background:linear-gradient(hsla(0,6%,7%,0) 50%,var(--crt-interlace-color) 0);background-size:100% 4px;z-index:2}
@@ -397,7 +397,9 @@
 #waveRewardScreen p{color:var(--text-color);font-size:14px}
 #waveRewardChoices{display:flex;gap:20px;margin-top:18px}
 .waveRewardCard{width:220px;padding:16px;border:2px solid var(--button-border);background:var(--button-bg);color:var(--button-text);cursor:pointer;transition:all .2s ease}
+.waveRewardCard.locked{cursor:not-allowed;filter:grayscale(1);opacity:.42}
 .waveRewardCard:hover{background:var(--button-hover-bg);transform:translateY(-3px);box-shadow:0 4px 8px rgba(0,0,0,.2)}
+.waveRewardCard.locked:hover{background:var(--button-bg);transform:none;box-shadow:none}
 .waveRewardCard h3{font-size:15px;margin-bottom:10px}
 .waveRewardCard p{font-size:12px;line-height:1.5}
 .waveRewardCard button{display:block;width:100%;margin:8px 0 0;padding:8px;font-size:12px}
@@ -630,7 +632,7 @@
 #perkStatus{position:absolute;top:36px;left:10px;z-index:10;font-size:11px;color:#ffd700;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 <div id="startScreen">
-    <h1 id="gameTitle">Orbital Defense v3.82</h1>
+    <h1 id="gameTitle">Orbital Defense v3.85</h1>
     <button id="startButton">Start Game</button>
     <button id="loadButton" style="display:none;">Load Game</button>
     <button id="clearSaveButton" style="display:none;">Clear Save</button>
@@ -672,8 +674,8 @@
 
 </div>
 <div id="waveRewardScreen" style="display:none">
-    <h2>Wave Cleared!</h2>
-    <p>Choose a reward</p>
+    <h2 id="waveRewardTitle">Wave Cleared!</h2>
+    <p id="waveRewardSubtitle">Choose a reward</p>
     <div id="waveRewardChoices"></div>
 </div>
 <div id="hotkeys" class="show">
@@ -1209,7 +1211,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.82';
+const GAME_VERSION = '3.85';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1486,6 +1488,13 @@ const SUPERSONIC_SPEED_MULTIPLIER = 3.5;
 const SUPERSONIC_RANGE_MULTIPLIER = 2.0;
 const SUPERSONIC_SPLIT_THRESHOLD = 0.35; // split at 35% of range traveled
 const SUPERSONIC_PAYLOAD_BASE_SPEED = 7;
+const SUPERSONIC_WARHEAD_BOSS_DAMAGE_RATIO = 0.5;
+const SUPERSONIC_WARHEAD_MIN_DAMAGE = 500;
+const SUPERSONIC_WARHEAD_BASE_COST = 100000;
+const SUPERSONIC_WARHEAD_COST_GROWTH = 1.42;
+const SUPERSONIC_WARHEAD_WAVE_CAP_BUFFER = 0;
+const MULTI_BOSS_WAVE_INTERVAL = 10;
+const MULTI_BOSS_COUNT = 2;
 // Fixed MIRV bus-release cone: reentry vehicles always fan across this same
 // total angle regardless of how many there are (more vehicles just subdivide
 // it). ~30 deg reads well top-down; real release cones are only a few degrees.
@@ -1939,6 +1948,7 @@ function resetEnemy(enemy, config) {
     enemy.wave = config.wave ?? 0;
     enemy.dx = config.dx ?? 0;
     enemy.dy = config.dy ?? 0;
+    enemy.supersonicFired = !!config.supersonicFired;
 
     enemy.isTargeted = !!config.isTargeted;
     enemy.targetLockTime = Math.max(0, Number(config.targetLockTime) || 0);
@@ -1967,6 +1977,7 @@ function resetEnemy(enemy, config) {
         enemy.shield = 0;
         enemy.maxShield = 0;
         enemy.isChild = false;
+        enemy.supersonicFired = false;
     }
 }
 
@@ -2344,9 +2355,56 @@ function isTacticalZoomSoftLocked(categoryIndex, upgradeIndex, upgrade = upgrade
     return softCap !== null && !hasTacticalZoomUpgrade() && upgrade && upgrade.level >= softCap;
 }
 
+function getBossHealthForWave(waveNumber = gameState?.wave || 1) {
+    const wave = Math.max(1, Math.floor(Number(waveNumber) || 1));
+    const difficultyScaling = Math.pow(ENEMY_HEALTH_SCALE_FACTOR, wave - 1);
+    return (BOSS_HEALTH_BASE + wave * BOSS_HEALTH_WAVE_MULTIPLIER) * difficultyScaling;
+}
+
+function getBossCountForWave(waveNumber = gameState?.wave || 1) {
+    const wave = Math.max(1, Math.floor(Number(waveNumber) || 1));
+    return wave % MULTI_BOSS_WAVE_INTERVAL === 0 ? MULTI_BOSS_COUNT : 1;
+}
+
+function getSupersonicWarheadUnlockedLevel() {
+    return Math.max(1, Math.floor(Number(gameState?.wave) || 1) + SUPERSONIC_WARHEAD_WAVE_CAP_BUFFER);
+}
+
+function getSupersonicWarheadDamage(level) {
+    const grade = Math.max(1, Math.floor(Number(level) || 1));
+    return Math.max(
+        SUPERSONIC_WARHEAD_MIN_DAMAGE,
+        Math.ceil(getBossHealthForWave(grade) * SUPERSONIC_WARHEAD_BOSS_DAMAGE_RATIO)
+    );
+}
+
+function getSupersonicWarheadCost(level) {
+    const grade = Math.max(1, Math.floor(Number(level) || 1));
+    return Math.ceil(SUPERSONIC_WARHEAD_BASE_COST * Math.pow(SUPERSONIC_WARHEAD_COST_GROWTH, grade - 1));
+}
+
+function getSupersonicWarheadUpgrade() {
+    return upgradeTree?.[UPGRADE_CATEGORY_MISSILE]?.upgrades?.[UPGRADE_MISSILE_SUPER_WARHEAD] || null;
+}
+
+function syncSupersonicWarheadCost() {
+    const upgrade = getSupersonicWarheadUpgrade();
+    if (!upgrade) return;
+    upgrade.maxLevel = Infinity;
+    upgrade.cost = getSupersonicWarheadCost((upgrade.level || 0) + 1);
+}
+
+function isSupersonicWarheadWaveLocked(upgrade = getSupersonicWarheadUpgrade()) {
+    return !!upgrade && upgrade.level >= getSupersonicWarheadUnlockedLevel();
+}
+
 function canPurchaseUpgrade(categoryIndex, upgradeIndex) {
     const upgrade = upgradeTree?.[categoryIndex]?.upgrades?.[upgradeIndex];
     if (!upgrade) return false;
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_SUPER_WARHEAD &&
+        isSupersonicWarheadWaveLocked(upgrade)) {
+        return false;
+    }
     return gameState.credits >= upgrade.cost &&
         upgrade.level < upgrade.maxLevel &&
         !isTacticalZoomSoftLocked(categoryIndex, upgradeIndex, upgrade);
@@ -3102,6 +3160,7 @@ function spawnEnemy(isBoss = false, waveNumber = gameState.wave) {
         waveBossAlive[waveNumber] = true;
         if (waveStates[waveNumber]) {
             waveStates[waveNumber].bossAlive = true;
+            waveStates[waveNumber].remainingBosses = Math.max(1, waveStates[waveNumber].remainingBosses || 0);
         }
     }
 
@@ -3262,10 +3321,21 @@ function handleEnemyKilled(enemy, options = {}) {
         }
     }
     if (enemy.type === 'Boss') {
-        waveBossAlive[enemy.wave] = false;
+        const bossDefeated = !options.baseImpact;
         if (waveStates[enemy.wave]) {
-            waveStates[enemy.wave].bossAlive = false;
-            waveStates[enemy.wave].remainingBosses = 0;
+            if (bossDefeated) {
+                waveStates[enemy.wave].bossesDefeated = Math.min(
+                    waveStates[enemy.wave].totalBosses || 1,
+                    (waveStates[enemy.wave].bossesDefeated || 0) + 1
+                );
+            }
+            waveStates[enemy.wave].remainingBosses = Math.max(0, (waveStates[enemy.wave].remainingBosses || 1) - 1);
+            waveStates[enemy.wave].bossAlive = waveStates[enemy.wave].remainingBosses > 0;
+            waveStates[enemy.wave].bossDefeated =
+                (waveStates[enemy.wave].bossesDefeated || 0) >= (waveStates[enemy.wave].totalBosses || 1);
+            waveBossAlive[enemy.wave] = waveStates[enemy.wave].bossAlive;
+        } else {
+            waveBossAlive[enemy.wave] = false;
         }
         // Boss death alone no longer advances the wave. Progression is handled
         // centrally when remaining enemies and bosses reach zero.
@@ -3601,7 +3671,8 @@ function serializeEnemy(enemy) {
         weaponReservations: createWeaponReservations(enemy.weaponReservations),
         shield: enemy.shield || 0,
         maxShield: enemy.maxShield || 0,
-        isChild: !!enemy.isChild
+        isChild: !!enemy.isChild,
+        supersonicFired: !!enemy.supersonicFired
     };
 }
 
@@ -3720,7 +3791,8 @@ function restoreSavedRuntimeState(runtimeState, savedAt) {
                 weaponReservations: createWeaponReservations(savedEnemy.weaponReservations),
                 shield: Math.max(0, Number(savedEnemy.shield) || 0),
                 maxShield: Math.max(0, Number(savedEnemy.maxShield) || 0),
-                isChild: !!savedEnemy.isChild
+                isChild: !!savedEnemy.isChild,
+                supersonicFired: !!savedEnemy.supersonicFired
             });
             restoredEnemies.push(enemy);
         });
@@ -4184,23 +4256,27 @@ function createUpgradeTree(initialRange) {
                 { name: 'Supersonic', cost: 50000, level: 0, maxLevel: 1,
                   f: level => level,
                   g: (level, cost, maxLvl) => {
-                      if (level === 0) return '(Activate)\nExpands stun to sensor range';
-                      const dmg = base?.supersonicMissileDamage || 30;
-                      return `Active — ${dmg} dmg\nRange: sensor range`;
+                      if (level === 0) return '(Activate)\nUnlocks supersonic missile';
+                      const dmg = base?.supersonicMissileDamage || getSupersonicWarheadDamage(1);
+                      return `Active — ${formatNumber(dmg)} dmg\nRange: sensor range`;
                   }},
-                { name: 'Super Warhead', cost: 15000, level: 0, maxLevel: 5,
-                  f: level => 30 + 10 * level,
+                { name: 'Super Warhead', cost: SUPERSONIC_WARHEAD_BASE_COST, level: 0, maxLevel: Infinity,
+                  f: level => getSupersonicWarheadDamage(level),
                   g: (level, cost, maxLvl) => {
-                      if (level === 0) return '(Activate)\nBoosts supersonic dmg';
-                      const c = 30 + 10 * level, n = 30 + 10 * (level + 1);
-                      return `${c}${level < maxLvl ? ` > ${n}` : ''} dmg`;
+                      const unlocked = getSupersonicWarheadUnlockedLevel();
+                      if (level >= unlocked) {
+                          return `${formatNumber(getSupersonicWarheadDamage(Math.max(1, level)))} dmg\nWave ${gameState.wave + 1} unlocks next`;
+                      }
+                      const nextLevel = level + 1;
+                      const currentText = level > 0 ? `${formatNumber(getSupersonicWarheadDamage(level))} > ` : '';
+                      return `${currentText}${formatNumber(getSupersonicWarheadDamage(nextLevel))} dmg\nGrade ${nextLevel}/${unlocked}`;
                   }},
                 { name: 'Super Salvo', cost: 20000, level: 0, maxLevel: 4,
-                  f: level => level + 1,
+                  f: level => level * 2,
                   g: (level, cost, maxLvl) => {
                       if (level === 0) return '(Activate)\nMIRV: missile splits mid-flight';
-                      const payloads = level + 1;
-                      const next = level < maxLvl ? ` > ${payloads + 1}` : '';
+                      const payloads = level * 2;
+                      const next = level < maxLvl ? ` > ${(level + 1) * 2}` : '';
                       return `${payloads}${next} payloads/missile`;
                   }},
                 { name: 'Salvo AI', cost: 30000, level: 0, maxLevel: 1,
@@ -4396,6 +4472,7 @@ function createInitialGameState() {
 
 function createInitialWaveRuntime() {
     const initialTotalEnemies = Math.round(WAVE_BASE_DURATION * ENEMY_SPAWN_RATE_PER_SECOND);
+    const initialBosses = getBossCountForWave(1);
     return {
         activeWaves: [1],
         waveBossAlive: { 1: false },
@@ -4407,11 +4484,14 @@ function createInitialWaveRuntime() {
                 xpSpawnTime: Math.random() * (WAVE_BASE_DURATION - 2),
                 xpSpawned: false,
                 bossAlive: false,
+                bossDefeated: false,
+                bossesDefeated: 0,
+                rewardLockShown: false,
                 spawned: 0,
                 totalEnemies: initialTotalEnemies,
                 remainingEnemies: initialTotalEnemies,
-                totalBosses: 1,
-                remainingBosses: 1
+                totalBosses: initialBosses,
+                remainingBosses: initialBosses
             }
         },
         completedWaves: {},
@@ -4849,7 +4929,7 @@ function updateEnemies(dt) {
             addFloatingText(base.x, base.y - base.radius - 10, `-${impactDamage}`, '#ff5555', 14);
             createExplosion(enemy.x, enemy.y, enemy.color, 20, enemy.radius);
             markHUDDirty(); // Mark for health display update
-            handleEnemyKilled(enemy, { suppressSplit: true }); // Splitters don't split on base impact
+            handleEnemyKilled(enemy, { suppressSplit: true, baseImpact: true }); // Splitters don't split on base impact
             enemyPool.release(enemy);
             if (gameState.currentHealth <= 0) {
                  startDeathSequence(); // Begin slow-motion before game over
@@ -4882,9 +4962,16 @@ function spawnNewEnemies(dt) {
 
         if (!state.isBossWave && state.elapsedTime >= state.duration && state.spawned >= state.totalEnemies) {
             if (DEBUG_MODE) console.log(`[wave ${waveStr}] boss spawned`);
-            spawnEnemy(true, Number(waveStr));
+            const bossCount = state.totalBosses || getBossCountForWave(Number(waveStr));
+            state.totalBosses = bossCount;
+            state.remainingBosses = bossCount;
+            state.bossesDefeated = 0;
+            state.bossDefeated = false;
+            for (let i = 0; i < bossCount; i++) {
+                spawnEnemy(true, Number(waveStr));
+            }
             state.isBossWave = true;
-            showToast('Boss Wave!', 3000);
+            showToast(bossCount > 1 ? `Boss Wave! ${bossCount} bosses incoming!` : 'Boss Wave!', 3000);
             markHUDDirty(); // Boss wave changes timer display
         } else if (!state.isBossWave && state.spawned < state.totalEnemies && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) {
             spawnEnemy(false, Number(waveStr));
@@ -5051,7 +5138,7 @@ function handlePlayerFiring(dt) {
         const supersonicRadiusSq = supersonicRadius * supersonicRadius;
         for (let i = 0; i < enemies.length; i++) {
             const enemy = enemies[i];
-            if (enemy.xp || !hasTargetCapacity(enemy, 'missile')) continue;
+            if (enemy.type !== 'Boss' || enemy.supersonicFired || !hasTargetCapacity(enemy, 'missile')) continue;
             const dx = enemy.x - base.x;
             const dy = enemy.y - base.y;
             const distSq = dx * dx + dy * dy;
@@ -5060,10 +5147,11 @@ function handlePlayerFiring(dt) {
                 supersonicCandidates.push(enemy);
             }
         }
-        supersonicCandidates.sort((a, b) => b._supersonicSortDistSq - a._supersonicSortDistSq);
+        supersonicCandidates.sort((a, b) => a._supersonicSortDistSq - b._supersonicSortDistSq);
         const supTargets = supersonicCandidates.slice(0, base.supersonicMissileCount);
         if (supTargets.length > 0) {
             supTargets.forEach(target => {
+                target.supersonicFired = true;
                 target.isTargeted = true;
                 target.targetLockTime = TARGET_LOCK_DURATION;
                 const angle = Math.atan2(target.y - base.y, target.x - base.x);
@@ -5566,17 +5654,16 @@ function checkCollisions(dt) {
 
 
 function spawnPayloadMissile(parent, target, remainingRange) {
-    // Reentry vehicle: aim straight at the assigned target and fly a ballistic
-    // line — no homing, no curving, like a real MIRV warhead after bus release.
+    // Reentry vehicle: a small guided boss-killer released by the carrier bus.
     const launchAngle = Math.atan2(target.y - parent.y, target.x - parent.x);
     missilePool.get({
         x: parent.x, y: parent.y,
         dx: Math.cos(launchAngle), dy: Math.sin(launchAngle),
-        t: null,                 // no homing target -> steering never runs
+        t: target,
         speed: base.supersonicPayloadSpeed,
-        turnSpeed: 0,
-        homingRadius: 0,
-        homingActive: false,     // ballistic; never curves
+        turnSpeed: 0.028,
+        homingRadius: base.sensorRange,
+        homingActive: true,
         startX: parent.x, startY: parent.y,
         rangeLimit: remainingRange,
         reservedTarget: target,  // kept only for damage reservation bookkeeping
@@ -5613,7 +5700,7 @@ function spawnSupersonicPayloads(missile) {
         return Math.abs(d);
     };
     const candidates = enemyPool.getActiveObjects()
-        .filter(e => !e.xp && Math.hypot(e.x - missile.x, e.y - missile.y) <= remainingRange)
+        .filter(e => e.type === 'Boss' && Math.hypot(e.x - missile.x, e.y - missile.y) <= remainingRange)
         .filter(e => angleOffAxis(e) <= halfCone) // only enemies inside the cone
         .filter(e => hasTargetCapacity(e, 'missile'));
     if (candidates.length === 0) return 0; // nothing in the cone yet: defer split
@@ -5630,7 +5717,7 @@ function spawnSupersonicPayloads(missile) {
         for (const e of nearestSorted) { if (!ordered.includes(e)) ordered.push(e); }
         for (let i = 0; i < count; i++) targets.push(ordered[i % ordered.length]);
     } else {
-        // Dumb mode: every reentry vehicle dives on the nearest enemy
+        // Dumb mode: every reentry vehicle dives on the nearest boss
         for (let i = 0; i < count; i++) targets.push(nearestSorted[0]);
     }
 
@@ -5680,6 +5767,7 @@ function startNextWave() {
     gameState.xpEnemySpawned = false;
     gameState.xpEnemySpawnTime = Math.random() * (duration - 2);
     const totalEnemies = Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND);
+    const totalBosses = getBossCountForWave(gameState.wave);
     waveStates[gameState.wave] = {
         elapsedTime: 0,
         duration,
@@ -5687,11 +5775,14 @@ function startNextWave() {
         xpSpawnTime: gameState.xpEnemySpawnTime,
         xpSpawned: false,
         bossAlive: false,
+        bossDefeated: false,
+        bossesDefeated: 0,
+        rewardLockShown: false,
         spawned: 0,
         totalEnemies,
         remainingEnemies: totalEnemies,
-        totalBosses: 1,
-        remainingBosses: 1
+        totalBosses,
+        remainingBosses: totalBosses
     };
     activeWaves.push(gameState.wave);
     waveBossAlive[gameState.wave] = false;
@@ -5705,6 +5796,7 @@ function resetActiveWaveForLoadedGame() {
     const duration = gameState.waveDuration || WAVE_BASE_DURATION + (wave - 1) * WAVE_DURATION_INCREMENT;
     const elapsedTime = Math.max(0, Math.min(gameState.waveElapsedTime || 0, duration));
     const totalEnemies = Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND);
+    const totalBosses = getBossCountForWave(wave);
     const spawned = Math.max(0, Math.min(gameState.enemiesSpawnedThisWave || 0, totalEnemies));
     const remainingEnemies = Math.max(0, totalEnemies - spawned);
 
@@ -5718,11 +5810,14 @@ function resetActiveWaveForLoadedGame() {
             xpSpawnTime: gameState.xpEnemySpawnTime || Math.random() * (duration - 2),
             xpSpawned: !!gameState.xpEnemySpawned,
             bossAlive: false,
+            bossDefeated: false,
+            bossesDefeated: 0,
+            rewardLockShown: false,
             spawned,
             totalEnemies,
             remainingEnemies,
-            totalBosses: 1,
-            remainingBosses: 1
+            totalBosses,
+            remainingBosses: totalBosses
         }
     };
     gameState.waveDuration = duration;
@@ -5734,14 +5829,21 @@ function normalizeLoadedWaveState(wave, savedState, hasSavedRuntimeState) {
     const duration = Math.max(1, Number(savedState?.duration) || defaultDuration);
     const elapsedTime = Math.max(0, Math.min(Number(savedState?.elapsedTime) || 0, duration));
     const totalEnemies = Math.max(0, Math.floor(Number(savedState?.totalEnemies) || Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND)));
+    const totalBosses = Math.max(1, Math.floor(Number(savedState?.totalBosses) || getBossCountForWave(wave)));
     const spawned = Math.max(0, Math.min(totalEnemies, Math.floor(Number(savedState?.spawned) || 0)));
     const unspawnedEnemies = Math.max(0, totalEnemies - spawned);
     const savedRemainingEnemies = Number.isFinite(Number(savedState?.remainingEnemies))
         ? Math.max(0, Math.floor(Number(savedState.remainingEnemies)))
         : unspawnedEnemies;
     const savedRemainingBosses = Number.isFinite(Number(savedState?.remainingBosses))
-        ? Math.max(0, Math.floor(Number(savedState.remainingBosses)))
-        : (savedState?.bossAlive === false && savedState?.isBossWave ? 0 : 1);
+        ? Math.max(0, Math.min(totalBosses, Math.floor(Number(savedState.remainingBosses))))
+        : (savedState?.bossAlive === false && savedState?.isBossWave ? 0 : totalBosses);
+    const bossesDefeated = Number.isFinite(Number(savedState?.bossesDefeated))
+        ? Math.max(0, Math.min(totalBosses, Math.floor(Number(savedState.bossesDefeated))))
+        : (typeof savedState?.bossDefeated === 'boolean' && savedState.bossDefeated ? totalBosses : 0);
+    const bossDefeated = typeof savedState?.bossDefeated === 'boolean'
+        ? savedState.bossDefeated
+        : bossesDefeated >= totalBosses;
     const remainingEnemies = hasSavedRuntimeState
         ? savedRemainingEnemies
         : Math.max(0, Math.min(savedRemainingEnemies, unspawnedEnemies));
@@ -5757,10 +5859,13 @@ function normalizeLoadedWaveState(wave, savedState, hasSavedRuntimeState) {
             : Math.random() * Math.max(0, duration - 2),
         xpSpawned: !!savedState?.xpSpawned,
         bossAlive: hasSavedRuntimeState ? !!savedState?.bossAlive : false,
+        bossDefeated,
+        bossesDefeated,
+        rewardLockShown: !!savedState?.rewardLockShown,
         spawned,
         totalEnemies,
         remainingEnemies,
-        totalBosses: Math.max(1, Math.floor(Number(savedState?.totalBosses) || 1)),
+        totalBosses,
         remainingBosses: savedRemainingBosses
     };
 }
@@ -5991,6 +6096,7 @@ const WAVE_REWARD_PERKS = [
 ];
 let pendingWaveRewards = 0;
 let waveRewardActive = false;
+let waveRewardLocked = false;
 
 function killCredits(creditsValue) {
     return Math.round(creditsValue * (gameState.perkCreditMult || 1));
@@ -6003,20 +6109,20 @@ function queueWaveReward() {
     if (!waveRewardActive) showWaveRewardChoice();
 }
 
-function showWaveRewardChoice() {
-    if (pendingWaveRewards <= 0) return;
-    pendingWaveRewards--;
-    waveRewardActive = true;
-    pauseGame();
+function setWaveRewardMessage(title, subtitle) {
+    getElement('waveRewardTitle').textContent = title;
+    getElement('waveRewardSubtitle').textContent = subtitle;
+}
+
+function drawWaveRewardCards(container, locked = false) {
     ensureRewardState();
-    const container = getElement('waveRewardChoices');
     container.textContent = '';
     const startIndex = Math.max(0, gameState.wave - 1) % WAVE_REWARD_PERKS.length;
     const rewardCount = Math.min(3, WAVE_REWARD_PERKS.length);
     for (let i = 0; i < rewardCount; i++) {
         const perk = WAVE_REWARD_PERKS[(startIndex + i) % WAVE_REWARD_PERKS.length];
         const card = document.createElement('div');
-        card.className = 'waveRewardCard';
+        card.className = `waveRewardCard${locked ? ' locked' : ''}`;
         const title = document.createElement('h3');
         title.textContent = perk.name;
         const desc = document.createElement('p');
@@ -6029,31 +6135,63 @@ function showWaveRewardChoice() {
                 .forEach(target => {
                     const targetButton = document.createElement('button');
                     targetButton.textContent = target.label;
-                    targetButton.addEventListener('click', event => {
-                        event.stopPropagation();
-                        pickWaveReward(perk, target.id);
-                    });
+                    targetButton.disabled = locked;
+                    if (!locked) {
+                        targetButton.addEventListener('click', event => {
+                            event.stopPropagation();
+                            pickWaveReward(perk, target.id);
+                        });
+                    }
                     card.appendChild(targetButton);
                 });
-        } else {
+        } else if (!locked) {
             card.addEventListener('click', () => pickWaveReward(perk));
         }
         container.appendChild(card);
     }
+
     REWARD_TARGETS
         .filter(target => !gameState.rewardTargetsUnlocked[target.id])
         .forEach(target => {
             const card = document.createElement('div');
-            card.className = 'waveRewardCard';
+            card.className = `waveRewardCard${locked ? ' locked' : ''}`;
             const title = document.createElement('h3');
             title.textContent = `Unlock ${target.label} Rewards`;
             const desc = document.createElement('p');
             desc.textContent = `Cost: ${formatCurrency(target.unlockCost)}`;
             card.appendChild(title);
             card.appendChild(desc);
-            card.addEventListener('click', () => purchaseRewardTargetUnlock(target));
+            if (!locked) {
+                card.addEventListener('click', () => purchaseRewardTargetUnlock(target));
+            }
             container.appendChild(card);
         });
+}
+
+function showLockedWaveRewardPreview() {
+    if (!featureToggles.waveRewards || waveRewardActive) return;
+    waveRewardActive = true;
+    waveRewardLocked = true;
+    pauseGame();
+    setWaveRewardMessage('Wave Rewards Locked', "You must destroy the wave's boss to access these.");
+    const container = getElement('waveRewardChoices');
+    drawWaveRewardCards(container, true);
+    const dismiss = document.createElement('button');
+    dismiss.textContent = 'Continue';
+    dismiss.addEventListener('click', closeWaveRewardScreen);
+    container.appendChild(dismiss);
+    getElement('waveRewardScreen').style.display = 'flex';
+}
+
+function showWaveRewardChoice() {
+    if (pendingWaveRewards <= 0) return;
+    pendingWaveRewards--;
+    waveRewardActive = true;
+    waveRewardLocked = false;
+    pauseGame();
+    setWaveRewardMessage('Wave Cleared!', 'Choose a reward');
+    const container = getElement('waveRewardChoices');
+    drawWaveRewardCards(container, false);
     getElement('waveRewardScreen').style.display = 'flex';
 }
 
@@ -6072,6 +6210,13 @@ function pickWaveReward(perk, target = null) {
 
 function closeWaveRewardScreen() {
     getElement('waveRewardScreen').style.display = 'none';
+    if (waveRewardLocked) {
+        waveRewardActive = false;
+        waveRewardLocked = false;
+        resumeGame();
+        saveGame({ silent: true });
+        return;
+    }
     waveRewardActive = false;
     if (pendingWaveRewards > 0) {
         showWaveRewardChoice();
@@ -6097,6 +6242,7 @@ function purchaseRewardTargetUnlock(target) {
 function resetWaveRewards() {
     pendingWaveRewards = 0;
     waveRewardActive = false;
+    waveRewardLocked = false;
     getElement('waveRewardScreen').style.display = 'none';
 }
 
@@ -6107,13 +6253,19 @@ function checkWaveCompletion(dt) {
     activeWaves = activeWaves.filter(w => {
         const state = waveStates[w];
         const hasEnemies = enemies.some(e => e.wave === w);
+        if (state && state.isBossWave && state.remainingEnemies <= 0 && !hasEnemies && !state.bossDefeated && !state.rewardLockShown) {
+            state.rewardLockShown = true;
+            showLockedWaveRewardPreview();
+        }
         if (state && state.remainingEnemies <= 0 && state.remainingBosses <= 0 && !hasEnemies) {
             const remaining = Math.floor(Math.max(0, state.duration - state.elapsedTime));
             completedWaves[w] = remaining;
             if (w > completedWave) completedWave = w;
             delete waveStates[w];
             delete waveBossAlive[w];
-            queueWaveReward();
+            if (state.bossDefeated) {
+                queueWaveReward();
+            }
             return false;
         }
         return true;
@@ -7403,13 +7555,13 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 const supMaxed = Number.isFinite(supersonicButton.u.maxLevel) && supersonicButton.u.level >= supersonicButton.u.maxLevel;
                 const supAfford = canPurchaseUpgrade(UPGRADE_CATEGORY_MISSILE, UPGRADE_MISSILE_SUPERSONIC);
 
-                // Extend spine to supersonic button
+                // Supersonic activation is the direct child of completed research.
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.moveTo(connectX, researchY + researchH / 2);
-                ctx.lineTo(connectX, supBtnY + supersonicButton.height / 2);
-                ctx.lineTo(panelX, supBtnY + supersonicButton.height / 2);
+                const researchChildX = panelX + buttonWidth / 2;
+                ctx.moveTo(researchChildX, researchY + researchH);
+                ctx.lineTo(researchChildX, supBtnY);
                 ctx.stroke();
 
                 ctx.fillStyle = currentTheme.canvasColors.ringUpgradeBoxBg || 'rgba(50,50,50,0.7)';
@@ -7714,6 +7866,9 @@ function drawSubUpgradeButton(btn, panelX, buttonWidth, btnY, prereqMet, categor
 // --- Upgrade Logic ---
 function purchaseUpgrade(categoryIndex, upgradeIndex) {
     const upgrade = upgradeTree[categoryIndex].upgrades[upgradeIndex];
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_SUPER_WARHEAD) {
+        syncSupersonicWarheadCost();
+    }
 
     if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
         const debugCreditGrants = [100000, 1000000, 100000000];
@@ -7748,6 +7903,11 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
             showToast("Requires Supersonic Missile first!", 2500);
             return;
         }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_SUPER_WARHEAD &&
+        isSupersonicWarheadWaveLocked(upgrade)) {
+        showToast(`Next Super Warhead grade unlocks at wave ${gameState.wave + 1}.`, 2500);
+        return;
     }
     if (categoryIndex === UPGRADE_CATEGORY_MISSILE &&
         (upgradeIndex === UPGRADE_MISSILE_SUPER_SALVO_AI || upgradeIndex === UPGRADE_MISSILE_SUPER_SALVO_SPEED)) {
@@ -7973,7 +8133,9 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                 case UPGRADE_MISSILE_SUPERSONIC:
                     base.supersonicMissileCount = upgrade.f(level); // 0 or 1
                     if (level === 1 && isNewPurchase) {
-                        base.supersonicMissileDamage = 30;
+                        base.supersonicMissileDamage = getSupersonicWarheadDamage(
+                            upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_SUPER_WARHEAD].level || 1
+                        );
                         // Expand stun field to full sensor range
                         base.stunRadius = base.sensorRange;
                     }
@@ -7981,9 +8143,10 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     break;
                 case UPGRADE_MISSILE_SUPER_WARHEAD:
                     base.supersonicMissileDamage = upgrade.f(level);
+                    syncSupersonicWarheadCost();
                     break;
                 case UPGRADE_MISSILE_SUPER_SALVO:
-                    base.supersonicSalvoPayloads = upgrade.f(level); // 2–5 payloads
+                    base.supersonicSalvoPayloads = upgrade.f(level); // 2, 4, 6, 8 payloads
                     break;
                 case UPGRADE_MISSILE_SUPER_SALVO_AI:
                     base.supersonicSalvoAI = level > 0;

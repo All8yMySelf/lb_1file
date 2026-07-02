@@ -148,6 +148,7 @@ Current side-branch parent/child links:
 - Missile `Macros` -> `Smart AI`.
 - Missile `Smart AI` -> `Missiles to Mines`.
 - Missile `Missiles to Mines` -> `Magnetic Mines`.
+- Missile `Supersonic Research` -> `Supersonic`.
 - Missile `Supersonic` -> `Super Warhead`.
 - Missile `Supersonic` -> `Super Salvo`.
 - Missile `Super Salvo` -> `Salvo AI`.
@@ -159,12 +160,15 @@ connectors for children anchored to a parent in the previous column.
 
 ## Current State (2026-07-02)
 
-Live (`testing`) is at v3.82. Versions v3.76-v3.82 added the Q-debug
+Live (`testing`) is at v3.85. Versions v3.76-v3.85 added the Q-debug
 performance overlay, improved high-missile-count performance, restored
 comma-separated currency formatting, stabilized missile trail visuals, fixed
 enemy spawning so enemies appear outside the current fog-of-war reveal boundary,
 added Auto XP Targeting under Laser Manual Targeting, and clarified upgrade tree
-connector lines. See `CHANGELOG.md` for per-version detail.
+connector lines. Supersonic activation now branches from Supersonic Research,
+Super Warhead is an expensive wave-capped damage ladder, wave rewards now
+require explicit boss destruction, and Supersonic weapons are boss-only. See
+`CHANGELOG.md` for per-version detail.
 
 Code landmarks in `index.html`:
 
@@ -191,6 +195,20 @@ Code landmarks in `index.html`:
 - Auto XP Targeting is a high-cost Laser side-branch off Manual Targeting. It
   automatically fires the existing XP laser path at XP enemies in laser range
   when the normal laser cooldown is ready.
+- Supersonic Research unlocks the Supersonic activation card as its direct
+  child. Super Warhead then scales Supersonic damage by grade: one grade unlocks
+  per wave, with late grades tuned toward about half of the matching wave boss's
+  health. Keep the wave cap and visual connectors aligned if this ladder
+  changes.
+- Supersonic missiles and their MIRV payloads target bosses only. The carrier
+  fires once per boss when that boss enters sensor/supersonic range; do not let
+  this path select normal, archetype, or XP enemies. Super Salvo payload counts
+  increase by 2 per level.
+- Every 10th wave spawns two bosses. Wave rewards require all bosses in that
+  wave to be explicitly destroyed.
+- Wave rewards must only be granted when the wave boss is explicitly destroyed.
+  Boss base-impact or any other non-kill boss resolution should show the locked,
+  greyed-out reward preview instead of granting a perk.
 
 Known follow-ups (not yet requested; confirm with the user before doing):
 

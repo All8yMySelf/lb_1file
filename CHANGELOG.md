@@ -1,5 +1,28 @@
 # Orbital Defense - Change Log
 
+## v3.85
+- Supersonic missiles are now boss-only weapons: they wait for a boss inside
+  sensor range and fire once per boss instead of cycling through normal enemies.
+- Super Salvo now upgrades MIRV payloads by twos, with guided payloads that also
+  seek bosses only.
+- Every 10th wave now spawns two bosses, and both must be destroyed to earn the
+  wave reward.
+
+## v3.84
+- Wave rewards now require an explicitly destroyed wave boss instead of any
+  resolved boss state, so boss base-impact no longer grants reward choices.
+- When rewards are blocked, the reward screen previews the would-have-been
+  choices greyed out with a message that the wave's boss must be destroyed.
+
+## v3.83
+- Made Supersonic activation draw as a direct child of completed Supersonic
+  Research instead of another main missile-spine card.
+- Reworked Super Warhead into an expensive wave-capped damage ladder: each wave
+  unlocks one more grade, and late grades scale toward roughly half of that
+  wave's boss health per Supersonic hit.
+- Raised the Supersonic damage floor so the weapon starts meaningfully strong
+  before the boss-health scaling curve overtakes it.
+
 ## v3.82
 - Clarified laser, sensor, and supersonic missile side-branch connector lines so
   visual upgrade links match their actual prerequisites.

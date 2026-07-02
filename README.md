@@ -74,6 +74,20 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.85
+- Supersonic missiles now fire only at bosses, once per boss, while Super Salvo
+  adds guided boss-seeking MIRV payloads in +2 steps; every 10th wave now brings
+  two bosses.
+
+### v3.84
+- Wave rewards now unlock only after the wave boss is destroyed; blocked rewards
+  show as greyed-out previews explaining that the boss must be defeated first.
+
+### v3.83
+- Supersonic now branches directly from Supersonic Research, and Super Warhead
+  has an expensive wave-capped damage ladder that can scale toward half-boss
+  hits at matching wave grades.
+
 ### v3.82
 - Upgrade tree side-branch connector lines now more clearly show prerequisite
   relationships, including Auto XP Targeting directly under Manual Targeting.
