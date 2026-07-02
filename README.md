@@ -74,6 +74,15 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.82
+- Upgrade tree side-branch connector lines now more clearly show prerequisite
+  relationships, including Auto XP Targeting directly under Manual Targeting.
+
+### v3.81
+- Laser System now has a high-cost Auto XP Targeting upgrade under Manual
+  Targeting, allowing XP enemies in laser range to be shot automatically for XP
+  Boost charges.
+
 ### v3.80
 - Enemies now spawn outside the current fog-of-war reveal boundary, so expanded
   sensor or weapon ranges reveal enemies as they cross inward instead of after
