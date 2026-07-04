@@ -1613,7 +1613,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.128';
+const GAME_VERSION = '3.129';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -5862,7 +5862,9 @@ function spawnNewEnemies(dt) {
     const dtScaled = dt * FRAMES_PER_SECOND;
 
     for (const [waveStr, state] of Object.entries(waveStates)) {
-        state.elapsedTime += dt;
+        // Freeze the timer once the wave is cleared and waiting on the
+        // post-explosion reward popup, so the time bonus isn't eaten.
+        if (!state.rewardDeferred) state.elapsedTime += dt;
 
         if (!state.xpSpawned && state.elapsedTime >= state.xpSpawnTime) {
             spawnXPEnemy(Number(waveStr));
@@ -7535,6 +7537,10 @@ const WAVE_REWARD_PERKS = [
 let pendingWaveRewards = 0;
 let waveRewardActive = false;
 let waveRewardLocked = false;
+// How long (in game-seconds) to hold a boss-cleared wave open so the death
+// explosion plays out before the wave-reward popup appears. Counted in game
+// time so it respects slow-mo and pauses with the rest of the game.
+const WAVE_REWARD_EXPLOSION_DELAY = 1.0;
 
 function killCredits(creditsValue) {
     return Math.round(creditsValue * (gameState.perkCreditMult || 1));
@@ -7763,14 +7769,30 @@ function checkWaveCompletion(dt) {
             showLockedWaveRewardPreview();
         }
         if (state && state.remainingEnemies <= 0 && state.remainingBosses <= 0 && !hasEnemies) {
+            // Defer the wave-reward popup until the boss's death explosion has
+            // had time to play out. Hold the wave open (so the next wave doesn't
+            // start) while the countdown runs and while the reward screen is up.
+            if (state.bossDefeated && !state.rewardDeferred) {
+                state.rewardDeferred = true;
+                state.rewardDelay = WAVE_REWARD_EXPLOSION_DELAY;
+            }
+            if (state.rewardDeferred) {
+                if (!state.rewardQueued) {
+                    state.rewardDelay -= dt;
+                    if (state.rewardDelay <= 0) {
+                        state.rewardQueued = true;
+                        queueWaveReward();
+                    }
+                }
+                if (!state.rewardQueued || waveRewardActive || pendingWaveRewards > 0) {
+                    return true; // keep the wave open during explosion + reward screen
+                }
+            }
             const remaining = Math.floor(Math.max(0, state.duration - state.elapsedTime));
             completedWaves[w] = remaining;
             if (w > completedWave) completedWave = w;
             delete waveStates[w];
             delete waveBossAlive[w];
-            if (state.bossDefeated) {
-                queueWaveReward();
-            }
             return false;
         }
         return true;
