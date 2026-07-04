@@ -1,5 +1,12 @@
 # Orbital Defense - Change Log
 
+## v3.134
+- Base laser recharge is now 5 seconds (was 0.5 s). The Recharge upgrade now
+  shaves a flat 0.6 s off the cooldown per level (down from a percentage fire-
+  rate multiplier), floored at 0.1 s. Max level lowered to 9 so the final
+  purchase lands exactly at 0.1 s recharge. The upgrade button now displays
+  the recharge time in seconds (e.g. "5.0s > 4.4s") instead of shots/sec.
+
 ## v3.133
 - The 360° coverage celebration now pauses the game and "paints" the entire
   sensor range solid green, washing over the whole play area. A beat later the

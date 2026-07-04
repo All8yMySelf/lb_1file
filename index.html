@@ -1622,7 +1622,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.133';
+const GAME_VERSION = '3.134';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1666,7 +1666,7 @@ const CONFIG = {
     BASE_INITIAL_MOVE_SPEED: 2,
     BASE_MOVE_SPEED_INCREMENT: 1,
     MISSILE_FIRE_INTERVAL: 2000, // ms
-    LASER_FIRE_INTERVAL: 500, // ms
+    LASER_FIRE_INTERVAL: 5000, // ms — base laser recharge is 5 seconds
     STUN_EFFECT_DURATION: 2000, // ms
     TARGET_LOCK_DURATION: 300, // ms brackets stay red this long after targeting
     AUTO_SAVE_INTERVAL: 60000, // ms (1 minute)
@@ -5076,14 +5076,16 @@ function createUpgradeTree(initialRange) {
                 { name: 'Auto XP Targeting', cost: 500000, level: 0, maxLevel: 1,
                   f: level => level > 0,
                   g: level => level > 0 ? 'XP auto-fire enabled' : 'Auto-shoot XP enemies' },
-                { name: 'Recharge', cost: 1500, level: 0, maxLevel: 10,
-                  f: level => 1 + level * LASER_RECHARGE_INCREMENT_PER_LEVEL, // fire-rate multiplier
+                { name: 'Recharge', cost: 1500, level: 0, maxLevel: 9,
+                  // Each level shaves 0.6s off the 5s base recharge, floored at 0.1s.
+                  // f returns the fire-rate multiplier: interval(s) = 5.0 / mult.
+                  f: level => 5.0 / Math.max(0.1, 5.0 - level * 0.6),
                   g: (level, cost, maxLvl) => {
                       const perk = getWeaponFireRateMultiplier('laser');
-                      const rate = lvl => (1000 / LASER_FIRE_INTERVAL) * perk * (1 + lvl * LASER_RECHARGE_INCREMENT_PER_LEVEL);
-                      const cur = rate(level).toFixed(1);
-                      if (level >= maxLvl) return `${cur}/s`;
-                      return `${cur} > ${rate(level + 1).toFixed(1)}/s`;
+                      const interval = lvl => Math.max(0.1, 5.0 - lvl * 0.6) / perk; // seconds
+                      const cur = interval(level).toFixed(1);
+                      if (level >= maxLvl) return `${cur}s`;
+                      return `${cur}s > ${interval(level + 1).toFixed(1)}s`;
                   } }
             ]
         },
