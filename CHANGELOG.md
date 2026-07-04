@@ -1,5 +1,19 @@
 # Orbital Defense - Change Log
 
+## v3.124
+- Early-wave spawns now pull in proportion to the slow-speed factor, so on the
+  10%-speed waves enemies spawn close enough that they still arrive at the base
+  at the normal pace despite crawling. Spawn rate itself was never changed; this
+  just closes the travel-time gap so it no longer feels like a long wait between
+  contacts. The spawn distance scales back out to its normal off-screen value as
+  the per-wave speed ramp reaches full.
+- Radar contacts now respect the Enemy Visuals (identification) upgrade. Before
+  identification, every painted contact renders as a uniform small grey circle —
+  real size and color stay hidden. Once identification is bought, the sweep
+  shows the enemy's true size and color, then fades color → grey → near-invisible
+  over the final 25% of the sweep cycle, so players can watch contacts go stale
+  and feel the need to upgrade the sweep to keep re-confirming them.
+
 ## v3.123
 - Replaced the estimated-position ghost and "EST POS" label with a smoother
   fade model. A painted enemy now renders at its real position and fades from
