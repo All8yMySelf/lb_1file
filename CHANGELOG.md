@@ -1,5 +1,13 @@
 # Orbital Defense - Change Log
 
+## v3.128
+- Cannons and lasers can no longer target a radar contact once it has faded to
+  invisible. Targeting is now gated on the contact being visibly painted — the
+  sweep is on it, it is in the fresh-paint flare, or it is still in the visible
+  fade window (before the 50% invisible mark). Once it goes invisible it drops
+  off the targeting list until the next sweep repaints it. This closes the loop
+  where a contact painted once stayed shootable forever.
+
 ## v3.127
 - Radar contact fade is now an ember-like flicker. Contacts hold full
   appearance for the first 25% of the sweep wait, then colour fades to grey
