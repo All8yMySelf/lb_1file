@@ -142,6 +142,10 @@ Current side-branch parent/child links:
 - Laser `Manual Targeting` -> `Auto XP Targeting`.
 - Laser `Damage` -> `Recharge` (sits on the main spine between Damage and Range; no
   side-branch connector).
+- Missile `Missiles` -> `Recharge` (rendered at the TOP of the Missile Systems
+  spine, above the Missiles card; gated on Missiles being purchased. Stored at
+  array index 15 (`UPGRADE_MISSILE_RECHARGE`) and reordered to render at top so
+  existing save indices 0-14 do not shift).
 - Laser `Damage` -> `Beam Splitter` (legacy save name: `Wide Beam`).
 - Sensors `Enemy Identification` -> `Target Analysis AI`.
 - Sensors `Target Analysis AI` -> `Ordnance Sync`.
@@ -160,10 +164,26 @@ Draw connector lines behind child cards so they do not obscure card text or
 borders. Use vertical connectors for stacked direct descendants and elbow
 connectors for children anchored to a parent in the previous column.
 
-## Current State (2026-07-02)
+## Current State (2026-07-04)
 
-Local test build is v3.104 and is ready to publish to `testing` when requested.
-v3.104 completes the Enemy Stats / left-menu UI pass:
+Live on `testing` is **v3.137**. Recent work (v3.126-v3.137) landed the tactical
+radar sweep/coverage pass and a unified upgradable Recharge system:
+
+- **Radar sweep** (Sensors): width is a child of max Sweep Speed; contacts fade
+  color → grey → invisible (fire-flicker) by 50% of the sweep; faded-invisible
+  contacts cannot be targeted until repainted; at 100% width the sweep retires
+  into permanent 360° coverage, celebrated by a soft-pause green-paint flash +
+  banner (click to dismiss).
+- **Recharge upgrades**: Laser and Missile Recharge now share identical tuning —
+  5s base, −0.6s/level floored at 0.1s over 9 levels, button shows seconds. The
+  Laser and Missile Systems category headers both show a live recharge progress
+  fill (green = ready). `getLaserFireInterval()` / `getMissileFireInterval()`
+  are the single source of truth for cooldowns.
+- **Debug**: credit-grant buttons now span 100K / 1M / 100M / 1B / 100B.
+- **XP contact**: targeted by the cannon pre-identification (no damage); dropped
+  from targeting once Enemy Identification is purchased.
+
+The prior v3.104 Enemy Stats / left-menu UI pass:
 
 - `#battleStatusSection` lives inside `#enemyStatsPanel`; the old standalone
   `#waveStatsPanel` and right-side XP Status panel are retired.
@@ -196,15 +216,21 @@ added Auto XP Targeting under Laser Manual Targeting, and clarified upgrade tree
 connector lines. Supersonic activation now branches from Supersonic Research,
 Super Warhead is an expensive wave-capped damage ladder, wave rewards now
 require explicit boss destruction, Supersonic weapons are boss-only, and laser
-kills use the cleave/overkill beam experiment. Laser System also shows recharge
-progress on its category button, and Beam Splitter replaces the old Wide Beam
-UI. See `CHANGELOG.md` for per-version detail.
+kills use the cleave/overkill beam experiment. Laser and Missile Systems both
+show recharge progress on their category buttons, and Beam Splitter replaces the
+old Wide Beam UI. See `CHANGELOG.md` for per-version detail.
 
 Code landmarks in `index.html`:
 
-- Missile upgrade ladder: Missiles > Radius > Damage > Homing (8 grades,
-  80%) > Macros > Lifespan, with offshoot cards Retarget (off Radius) and
-  Smart AI (off Macros). Indices are the `UPGRADE_MISSILE_*` constants.
+- Missile upgrade ladder: Recharge (rendered at top, gated on Missiles) >
+  Missiles > Radius > Damage > Homing (8 grades, 80%) > Macros > Lifespan,
+  with offshoot cards Retarget (off Radius) and Smart AI (off Macros). Indices
+  are the `UPGRADE_MISSILE_*` constants; `UPGRADE_MISSILE_RECHARGE` (=15) is
+  appended at the end of the array and reordered to render at top so existing
+  save indices 0-14 stay stable. Missile cooldown uses `getMissileFireInterval()`
+  (= `MISSILE_FIRE_INTERVAL` / perk / `base.missileRechargeMultiplier`); the
+  Missile Recharge upgrade uses the same −0.6s/level-to-0.1s formula as the
+  laser.
 - The Macross Missile Massacre fires from a canvas card drawn under the XP
   Boost card (`drawMacrossMenuButton`, click region type `macross_button`)
   or via the M hotkey. Each use adds 5s to the next recharge

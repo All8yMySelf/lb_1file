@@ -9,6 +9,7 @@
 - **Fire:** The cannon automatically shoots when enemies are in range. Press **F** to toggle auto-fire or use the **Space** key when auto-fire is disabled.
 - **Macross Missiles:** Press **M** or click the Macross card (under the XP Boost card in the upgrade menu) to unleash a barrage of up to 200 homing missiles once the Macros upgrade is unlocked. The card fills as it recharges and turns green when ready; every launch adds 5 seconds to the next recharge. The Smart AI sub-upgrade splits the volley across enemies based on their health.
 - **Homing Radius:** The small switch on the Homing upgrade card toggles a faint circle showing each missile's homing acquisition radius (drawn around its locked target, or around the missile while it searches).
+- **Recharge upgrades:** The Laser and Missile Systems category buttons fill left-to-right as their cooldown recharges and turn green when ready to fire again. The Recharge upgrade (top of each tree) shortens that cooldown — 5s base, −0.6s per level down to a 0.1s floor. Missiles require the Missiles upgrade first; the Laser Recharge requires Laser Damage first.
 - **Game Speed:** Use the **«** and **»** buttons to adjust how fast the game runs. You can change the speed even while paused.
 - **Upgrades:** Click the base to open the upgrade ring. You can also click directly on an upgrade icon within the ring for quick access.
 - **Interface Toggles:**
@@ -22,6 +23,7 @@
 ## Surviving Waves
 Each wave spawns a group of enemies that approach from beyond your sensor range. The faint ring around your base shows the cannon's firing radius. Upgrade the **Sensors** category to detect enemies earlier. Destroy enemies to earn credits and purchase new abilities.
 
+- A rotating **radar sweep** paints contacts as it passes — enemies light up with a blip, then fade color → grey → invisible until the sweep comes back around. Weapons can only engage contacts the sweep has painted, so faded-invisible enemies drop off your targeting until repainted. Upgrade **Radar Sweep Speed** and **Radar Sweep Width** (a child of max Sweep Speed) to keep contacts live; at 100% width the sweep retires into permanent 360° coverage.
 - Watch the timer as waves progress; bosses appear periodically and require extra firepower.
 - Defeated enemies drop experience and credits used to buy upgrades such as improved cannon range, missile homing, and sensor enhancements.
 - To send the next wave early, use the **Send Next Wave** button when available.

@@ -76,6 +76,108 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.137
+- Added +1,000,000,000 (1 billion) and +100,000,000,000 (100 billion) credits
+  to the Debug credit-grant buttons, alongside the existing 100K / 1M / 100M.
+  Use still flags the run as [Q] (cheated) on the leaderboard.
+
+### v3.136
+- The Missile Systems category header now shows a live recharge progress fill,
+  mirroring the Laser header — fills left-to-right as the missile cooldown
+  elapses and turns green when missiles are ready (active once Missiles is
+  purchased).
+
+### v3.135
+- Missiles now have an upgradable Recharge, mirroring the laser. Base missile
+  recharge raised 2s → 5s. The new Missile Recharge upgrade sits at the top of
+  the Missile Systems tree (requires the Missiles upgrade) and shaves a flat
+  0.6s off the cooldown per level, floored at 0.1s, over 9 levels. The button
+  displays recharge time in seconds. Existing saves are preserved (the upgrade
+  is appended at array end and reordered to render at top).
+
+### v3.134
+- Base laser recharge raised 0.5s → 5s. The Laser Recharge upgrade now
+  subtracts a flat 0.6s per level (floored at 0.1s) instead of a percentage
+  fire-rate multiplier; max level lowered to 9 so the final level lands at
+  0.1s. The button now shows recharge time in seconds (e.g. "5.0s > 4.4s").
+
+### v3.133
+- The 360° coverage celebration now soft-pauses the game and paints the entire
+  sensor range solid green. A beat later the gold "360° Real-Time Coverage
+  Achieved" banner pops up with a click-to-continue prompt; clicking dismisses
+  it, resumes play, and fades the green out over ~1s. Replaces the earlier
+  transient flash version.
+
+### v3.132
+- Purchasing the final Radar Sweep Width upgrade (reaching full 360° coverage)
+  now triggers a celebration: a whole-range green flash, a centered gold
+  congratulations banner, and a toast.
+
+### v3.131
+- The XP enemy is now targeted by the cannon like a real enemy before it is
+  identified (cannon fires, bullets strike with a hit spark but deal no
+  damage). Once Enemy Identification is purchased, the cannon no longer
+  targets it, leaving it for the manual laser.
+
+### v3.130
+- Radar Sweep Width is now a child of Radar Sweep Speed: it cannot be
+  purchased until Sweep Speed is maxed (100%). Cost raised 300 → 2500 per
+  level. At 100% width the sweep retires into full 360° coverage (no sweep
+  drawn).
+
+### v3.129
+- Wave-reward popup is now deferred until after the boss's death explosion
+  plays out. The wave timer freezes during that delay so the post-wave time
+  bonus is not consumed by the explosion/reward wait.
+
+### v3.128
+- Cannons and lasers can no longer target a radar contact once it has faded
+  to invisible. Targeting is gated on the contact being visibly painted; once
+  invisible it drops off the targeting list until the next sweep repaints it.
+
+### v3.127
+- Radar fade is now a fire-light flicker: a contact's color fades starting
+  ~25% past the sweep, transitions color → grey, then flickers grey →
+  invisible by 50% of the sweep cycle.
+
+### v3.126
+- Halved the initial cannon range. The first Sensor Range (Electronic FOV)
+  upgrade is now granted free at start so the sensor ring shows. Sensor base
+  range is decoupled from cannon range (own floor) so halving the cannon no
+  longer collapses the sensor envelope.
+
+### v3.125
+- Wave-1 pacing is now slow and deliberate for teaching: an early-wave spawn
+  factor ramps from 20% on wave 1 back to full by wave 5. Scan radius leads
+  cannon range by 10px at base. Fixed a close-spawn bug and made the radar
+  fade clearly visible across the sweep cycle.
+
+### v3.124
+- Early-wave spawn distance now scales with the slow-speed factor so enemies
+  still arrive at the normal pace on slow waves. Radar contacts respect the
+  Enemy Visuals (identification) upgrade — before identification every
+  painted contact renders as a uniform small grey circle.
+
+### v3.123
+- Replaced the estimated-position ghost with a smooth fade model: a painted
+  enemy renders at its real position and fades color → grey → near-invisible,
+  timed to the sweep. The fresh-paint blip flare still pops on each pass.
+
+### v3.122
+- Reworded the one-time radar nudge toast to point more clearly at the
+  Sensors → Radar Sweep upgrades.
+
+### v3.121
+- Replaced the abrupt half-pace cutoff with a gentler learn-the-radar ramp:
+  enemies start at 1/10 normal speed on wave 1 and climb ~1.6x per wave to
+  full speed by wave 6.
+
+### v3.120
+- Grey estimated tracks now carry an "EST POS" label. A one-time toast nudges
+  players toward Radar Sweep upgrades the first time a contact fades to grey.
+  Weapons respect the radar: turrets, missiles, and the laser only engage
+  contacts the sweep has painted at least once.
+
 ### v3.119
 - Radar Sweep is now a tactical mechanic: an 80s green phosphor sweep paints
   contacts (blip flash + sonar ping); between paints enemies show as grey
