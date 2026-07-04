@@ -1,5 +1,15 @@
 # Orbital Defense - Change Log
 
+## v3.135
+- Missiles now have an upgradable Recharge, mirroring the laser system. Base
+  missile recharge raised from 2 s to 5 s. The new Missile Recharge upgrade
+  (top of the Missile Systems tree, requires the Missiles upgrade) shaves a
+  flat 0.6 s off the cooldown per level, floored at 0.1 s, over 9 levels —
+  identical tuning to the laser Recharge. The button displays recharge time
+  in seconds (5.0s > 4.4s > … > 0.1s). Existing saves are preserved: the
+  upgrade is appended at the end of the missile array and reordered to the
+  top at render time, so no existing missile upgrade levels shift.
+
 ## v3.134
 - Base laser recharge is now 5 seconds (was 0.5 s). The Recharge upgrade now
   shaves a flat 0.6 s off the cooldown per level (down from a percentage fire-

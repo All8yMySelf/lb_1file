@@ -1622,7 +1622,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.134';
+const GAME_VERSION = '3.135';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -1665,7 +1665,7 @@ const CONFIG = {
     MAX_ENEMY_COUNT: 30, // Increased from 20
     BASE_INITIAL_MOVE_SPEED: 2,
     BASE_MOVE_SPEED_INCREMENT: 1,
-    MISSILE_FIRE_INTERVAL: 2000, // ms
+    MISSILE_FIRE_INTERVAL: 5000, // ms — base missile recharge is 5 seconds
     LASER_FIRE_INTERVAL: 5000, // ms — base laser recharge is 5 seconds
     STUN_EFFECT_DURATION: 2000, // ms
     TARGET_LOCK_DURATION: 300, // ms brackets stay red this long after targeting
@@ -1895,6 +1895,7 @@ const UPGRADE_MISSILE_SUPER_SALVO_AI = 11;
 const UPGRADE_MISSILE_SUPER_SALVO_SPEED = 12;
 const UPGRADE_MISSILE_MINES = 13;
 const UPGRADE_MISSILE_MINE_MAGNETIC = 14;
+const UPGRADE_MISSILE_RECHARGE = 15;
 const MINE_MAX_COUNT = 500; // cap parked mines high enough for max Macross volleys
 const MINE_MIN_CLING_SPEED = 0.4; // magnetic pull starts slow...
 const MINE_MAX_CLING_SPEED = 9; // ...then accelerates to this before impact
@@ -2974,6 +2975,12 @@ function getWeaponFireRateMultiplier(target = 'cannon') {
 // perks, and the Recharge upgrade multiplier. All laser cooldown consumers use this.
 function getLaserFireInterval() {
     return LASER_FIRE_INTERVAL / (getWeaponFireRateMultiplier('laser') * (base?.laserRechargeMultiplier || 1));
+}
+
+// Effective missile fire interval, combining the base interval, wave-reward fire-rate
+// perks, and the Recharge upgrade multiplier. All missile cooldown consumers use this.
+function getMissileFireInterval() {
+    return MISSILE_FIRE_INTERVAL / (getWeaponFireRateMultiplier('missile') * (base?.missileRechargeMultiplier || 1));
 }
 
 function addWeaponDamageReward(target) {
@@ -4183,6 +4190,7 @@ function getUpgradePurposeText(categoryIndex, upgradeIndex) {
         if (upgradeIndex === UPGRADE_MISSILE_SUPER_SALVO_SPEED) return 'Speeds up supersonic payloads.';
         if (upgradeIndex === UPGRADE_MISSILE_MINES) return 'Turns spare Macross missiles into mines.';
         if (upgradeIndex === UPGRADE_MISSILE_MINE_MAGNETIC) return 'Lets mines pull toward enemies.';
+        if (upgradeIndex === UPGRADE_MISSILE_RECHARGE) return 'Shortens missile recharge time.';
     }
     if (categoryIndex === UPGRADE_CATEGORY_SPECIAL) {
         if (upgradeIndex === UPGRADE_SPECIAL_STUN) return 'Slows enemies around the base.';
@@ -5198,7 +5206,18 @@ function createUpgradeTree(initialRange) {
                       const c = 60 + 30 * (level - 1);
                       const n = 60 + 30 * level;
                       return `${c}${level < maxLvl ? ` > ${n}` : ''} seek radius`;
-                  }}
+                  }},
+                { name: 'Recharge', cost: 1500, level: 0, maxLevel: 9, // Requires Missiles; rendered at top
+                  // Each level shaves 0.6s off the 5s base recharge, floored at 0.1s.
+                  // f returns the fire-rate multiplier: interval(s) = 5.0 / mult.
+                  f: level => 5.0 / Math.max(0.1, 5.0 - level * 0.6),
+                  g: (level, cost, maxLvl) => {
+                      const perk = getWeaponFireRateMultiplier('missile');
+                      const interval = lvl => Math.max(0.1, 5.0 - lvl * 0.6) / perk; // seconds
+                      const cur = interval(level).toFixed(1);
+                      if (level >= maxLvl) return `${cur}s`;
+                      return `${cur}s > ${interval(level + 1).toFixed(1)}s`;
+                  } }
             ]
         },
         { // Category 4: Special
@@ -5422,6 +5441,7 @@ function createInitialBaseState(initialRange) {
         laserDamage: 0, // Needs upgrade
         laserRange: 0, // Needs upgrade
         laserRechargeMultiplier: 1, // Recharge fire-rate multiplier (1 = base)
+        missileRechargeMultiplier: 1, // Missile recharge fire-rate multiplier (1 = base)
         laserSplitterDamage: 0, // Beam Splitter total damage (own line, independent of Laser Damage)
         laserRadiusBase: 0, // Anchored on first laser range purchase
         laserRevealRadius: 0, // Reveal radius when laser damage is acquired
@@ -6012,7 +6032,7 @@ function handlePlayerFiring(dt) {
     }
 
     // --- Missile Firing ---
-    const missileInterval = MISSILE_FIRE_INTERVAL / getWeaponFireRateMultiplier('missile');
+    const missileInterval = getMissileFireInterval();
     if (base.missileCount > 0 && currentTime - gameState.lastMissileFireTime >= missileInterval / gameSpeedMultiplier) {
         const targetCandidates = [];
         const missileRadiusSq = base.missileTargetingRadius * base.missileTargetingRadius;
@@ -8997,6 +9017,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let autoXpButton = null;
         let wideBeamButton = null;
         let rechargeButton = null;
+        let missileRechargeButton = null;
         let smartButton = null;
         let retargetButton = null;
         let ordnanceSyncButton = null;
@@ -9030,6 +9051,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             const isSuperSalvoSpeed = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SUPER_SALVO_SPEED;
             const isMines = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_MINES;
             const isMagnetic = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_MINE_MAGNETIC;
+            const isMissileRecharge = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_RECHARGE;
             const isSweepWidth = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_SWEEP_WIDTH;
             const hasBar = isFocus || u.progressBar;
             const b = measureUpgradeButton(u, idx, hasBar, fontSize, padding, categoryIndex);
@@ -9040,6 +9062,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             else if (isAutoXpLaser) autoXpButton = b;
             else if (isWideBeam) wideBeamButton = b;
             else if (isRecharge) rechargeButton = b;
+            else if (isMissileRecharge) missileRechargeButton = b;
             else if (isSmartAI) smartButton = b;
             else if (isRetarget) retargetButton = b;
             else if (isOrdnanceSync) ordnanceSyncButton = b;
@@ -9070,6 +9093,14 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             const dmgIdx = buttons.findIndex(b => b.idx === UPGRADE_LASER_DAMAGE);
             if (dmgIdx !== -1) buttons.splice(dmgIdx + 1, 0, rechargeButton);
             else buttons.push(rechargeButton);
+        }
+
+        // Place missile Recharge at the top of the Missile Systems spine, ahead
+        // of the Missiles button, so it reads as the first upgrade in the tree.
+        if (missileRechargeButton) {
+            const countIdx = buttons.findIndex(b => b.idx === UPGRADE_MISSILE_COUNT);
+            if (countIdx !== -1) buttons.splice(countIdx, 0, missileRechargeButton);
+            else buttons.unshift(missileRechargeButton);
         }
 
         const buttonWidth = Math.max(150, maxTextWidth + padding * 2);
@@ -9171,6 +9202,10 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             }
             if (categoryIndex === UPGRADE_CATEGORY_LASER && b.idx === UPGRADE_LASER_RECHARGE &&
                 upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level === 0) {
+                canAfford = false;
+            }
+            if (categoryIndex === UPGRADE_CATEGORY_MISSILE && b.idx === UPGRADE_MISSILE_RECHARGE &&
+                upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0) {
                 canAfford = false;
             }
 
@@ -9790,6 +9825,12 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
             return;
         }
     }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE && upgradeIndex === UPGRADE_MISSILE_RECHARGE) {
+        if (upgradeTree[UPGRADE_CATEGORY_MISSILE].upgrades[UPGRADE_MISSILE_COUNT].level === 0) {
+            showToast("Requires Missiles upgrade first!", 2500);
+            return;
+        }
+    }
     if (categoryIndex === UPGRADE_CATEGORY_LASER && upgradeIndex === UPGRADE_LASER_WIDE_BEAM) {
         if (upgradeTree[UPGRADE_CATEGORY_LASER].upgrades[UPGRADE_LASER_DAMAGE].level === 0) {
             showToast("Requires Laser upgrade first!", 2500);
@@ -9979,6 +10020,9 @@ function applyUpgradeEffect(categoryIndex, upgradeIndex, isNewPurchase) {
                     break;
                 case UPGRADE_MISSILE_MINE_MAGNETIC:
                     base.mineMagnetRadius = upgrade.f(level);
+                    break;
+                case UPGRADE_MISSILE_RECHARGE:
+                    base.missileRechargeMultiplier = upgrade.f(level);
                     break;
             }
             break;
