@@ -1622,7 +1622,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.135';
+const GAME_VERSION = '3.136';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -8917,6 +8917,22 @@ function getLaserRechargeStatus(now = Date.now()) {
     };
 }
 
+function getMissileRechargeStatus(now = Date.now()) {
+    if (!gameState || !base || base.missileCount <= 0) {
+        return { active: false, ready: false, progress: 0, remainingMs: 0, totalMs: 0 };
+    }
+    const totalMs = Math.max(1, getMissileFireInterval() / gameSpeedMultiplier);
+    const elapsedMs = Math.max(0, now - (gameState.lastMissileFireTime || 0));
+    const progress = Math.min(1, elapsedMs / totalMs);
+    return {
+        active: true,
+        ready: progress >= 1,
+        progress,
+        remainingMs: Math.max(0, totalMs - elapsedMs),
+        totalMs
+    };
+}
+
 // --- Canvas Collapsible Upgrade Category UI Drawing Helper ---
 // Modified to handle a whole category of upgrades
 
@@ -8971,6 +8987,18 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 : colorWithAlpha(color, 0.35);
             ctx.fillRect(x, y, boxWidth * laserRecharge.progress, headerHeight);
             ctx.strokeStyle = laserRecharge.ready ? '#00ff00' : displayColor;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, boxWidth, headerHeight);
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_MISSILE) {
+        const missileRecharge = getMissileRechargeStatus();
+        if (missileRecharge.active) {
+            ctx.fillStyle = missileRecharge.ready
+                ? 'rgba(0,255,0,0.25)'
+                : colorWithAlpha(color, 0.35);
+            ctx.fillRect(x, y, boxWidth * missileRecharge.progress, headerHeight);
+            ctx.strokeStyle = missileRecharge.ready ? '#00ff00' : displayColor;
             ctx.lineWidth = 2;
             ctx.strokeRect(x, y, boxWidth, headerHeight);
         }

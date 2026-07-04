@@ -1,5 +1,11 @@
 # Orbital Defense - Change Log
 
+## v3.136
+- The Missile Systems category header button now shows a live recharge
+  progress fill, mirroring the Laser header. The header fills left-to-right
+  as the missile cooldown elapses and turns green when missiles are ready
+  to fire again (active only once the Missiles upgrade is purchased).
+
 ## v3.135
 - Missiles now have an upgradable Recharge, mirroring the laser system. Base
   missile recharge raised from 2 s to 5 s. The new Missile Recharge upgrade
