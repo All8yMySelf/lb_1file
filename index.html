@@ -786,9 +786,10 @@ body.fx-glitching #gameCanvas{animation:fxJit .35s steps(6);filter:drop-shadow(2
 .waveRewardCard.locked:hover{background:var(--button-bg);transform:none;box-shadow:none}
 .waveRewardCard h3{font-size:15px;margin-bottom:10px}
 .waveRewardCard p{font-size:12px;line-height:1.5}
-#fullCoverageBanner{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.45);text-align:center;z-index:130;pointer-events:none}
+#fullCoverageBanner{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.45);text-align:center;z-index:130;pointer-events:auto;cursor:pointer}
 #fullCoverageBanner h2{color:#ffd700;font-size:30px;margin-bottom:10px;text-shadow:0 0 20px rgba(255,215,0,0.75)}
 #fullCoverageBanner p{color:var(--text-color);font-size:16px;max-width:560px;line-height:1.5}
+#fullCoverageBanner .fc-hint{margin-top:18px;color:var(--text-color);opacity:0.7;font-size:13px;letter-spacing:1px}
 .waveRewardCard button{display:block;width:100%;margin:8px 0 0;padding:8px;font-size:12px}
 </style>
 <style>
@@ -1068,6 +1069,7 @@ body.fx-glitching #gameCanvas{animation:fxJit .35s steps(6);filter:drop-shadow(2
 <div id="fullCoverageBanner" style="display:none">
     <h2>360° Real-Time Coverage Achieved</h2>
     <p>Congratulations — your sensors now see every enemy, all the time. The radar sweep is no longer needed.</p>
+    <div class="fc-hint">CLICK TO CONTINUE</div>
 </div>
 <div id="hotkeys" class="show">
   <div id="hotkeysHeader">Hotkeys <span id="hotkeysToggle" class="arrow">▾</span></div>
@@ -1620,7 +1622,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.132';
+const GAME_VERSION = '3.133';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -5675,6 +5677,9 @@ function gameLoop(timestamp) {
 
 // --- Game Update Logic ---
 function updateGame(dt) {
+    // 360° coverage celebration soft-pauses the sim (no spawns/movement/fire)
+    // while the green range fill and congratulations banner are on screen.
+    if (fxFullCoverageActive && !fxFullCoverageFading) return;
     // Apply game speed multiplier to delta time
     let effectiveDt = dt * gameSpeedMultiplier;
 
@@ -7043,7 +7048,9 @@ let fxMuzzleAngle = 0;
 let fxRecoil = 0;           // px of barrel recoil
 let fxSlowMoTime = 0;       // seconds of boss-kill slow motion left
 let fxGlitchTime = 0;       // seconds of canvas tear left
-let fxFullCoverageFlashTime = 0; // seconds of 360°-coverage celebration flash left
+let fxFullCoverageActive = false;      // 360° coverage celebration: pauses updates, paints range green
+let fxFullCoverageGreenAlpha = 0;     // 0..1 alpha of the solid green range fill
+let fxFullCoverageFading = false;      // true once dismissed — green fades out and play resumes
 let fullCoverageBannerTimer = null;
 let fxSweepAngle = 0;       // radar sweep angle
 let fxRadarNudgeShown = false; // one-time "estimated position" hint per run
@@ -7057,7 +7064,9 @@ function resetFxEffects() {
     fxMuzzleLife = 0; fxRecoil = 0; fxSlowMoTime = 0; fxGlitchTime = 0;
     fxSweepAngle = 0;
     fxRadarNudgeShown = false;
-    fxFullCoverageFlashTime = 0;
+    fxFullCoverageActive = false;
+    fxFullCoverageFading = false;
+    fxFullCoverageGreenAlpha = 0;
     fxFlashes.length = 0; fxShootingStars.length = 0;
     document.body.classList.remove('fx-lowhp', 'fx-bosswarn', 'fx-glitching');
     const comboEl = fxEl('fx-combo');
@@ -7119,7 +7128,15 @@ function updateFxEffects(dt) {
     if (fxMuzzleLife > 0) fxMuzzleLife = Math.max(0, fxMuzzleLife - dt);
     if (fxRecoil > 0) fxRecoil = Math.max(0, fxRecoil - dt * 40);
     if (fxGlitchTime > 0) fxGlitchTime = Math.max(0, fxGlitchTime - dt);
-    if (fxFullCoverageFlashTime > 0) fxFullCoverageFlashTime = Math.max(0, fxFullCoverageFlashTime - dt);
+    // 360° coverage celebration: once dismissed, fade the green fill out and
+    // clear the flag once it is fully gone.
+    if (fxFullCoverageFading) {
+        fxFullCoverageGreenAlpha = Math.max(0, fxFullCoverageGreenAlpha - dt / 1.2);
+        if (fxFullCoverageGreenAlpha <= 0) {
+            fxFullCoverageFading = false;
+            fxFullCoverageActive = false;
+        }
+    }
     updateFxRadar(dt);
     for (let i = fxFlashes.length - 1; i >= 0; i--) {
         fxFlashes[i].life -= dt;
@@ -7184,17 +7201,32 @@ function isRadarSweepSpeedMaxed() {
 // Played once when Radar Sweep Width reaches 100% (360° coverage): flashes the
 // whole sensor range and shows a big congratulations banner.
 function triggerRadarFullCoverageCelebration() {
-    fxFullCoverageFlashTime = 2.2;
+    // Paint the whole sensor range green and soft-pause the sim while the
+    // congratulations banner is on screen. The banner appears a beat after
+    // the green so the "paint" reads first; clicking the banner dismisses it
+    // and the green fades out as play resumes.
+    fxFullCoverageActive = true;
+    fxFullCoverageFading = false;
+    fxFullCoverageGreenAlpha = 1;
     const banner = getElement('fullCoverageBanner');
     if (banner) {
-        banner.style.display = 'flex';
-        if (fullCoverageBannerTimer) clearTimeout(fullCoverageBannerTimer);
+        banner.style.display = 'none';
+        banner.onclick = dismissFullCoverageCelebration;
+        if (fullCoverageBannerTimer) { clearTimeout(fullCoverageBannerTimer); fullCoverageBannerTimer = null; }
         fullCoverageBannerTimer = setTimeout(() => {
-            banner.style.display = 'none';
-            fullCoverageBannerTimer = null;
-        }, 5500);
+            if (fxFullCoverageActive && !fxFullCoverageFading) banner.style.display = 'flex';
+        }, 450);
     }
     showToast('360° real-time sensor coverage achieved!', 5000);
+}
+
+function dismissFullCoverageCelebration() {
+    if (!fxFullCoverageActive || fxFullCoverageFading) return;
+    const banner = getElement('fullCoverageBanner');
+    if (banner) banner.style.display = 'none';
+    if (fullCoverageBannerTimer) { clearTimeout(fullCoverageBannerTimer); fullCoverageBannerTimer = null; }
+    // Updates resume immediately; the green fill fades out over ~1.2s.
+    fxFullCoverageFading = true;
 }
 // Weapons may only engage contacts the radar has painted at least once.
 // A faded (but once-painted) contact is still enough to shoot at; a
@@ -7382,32 +7414,27 @@ function drawFxRadarGhosts(enemies) {
     ctx.restore();
 }
 
-// Celebration flash played once when Radar Sweep Width first reaches 360°
-// coverage: a whole-range fill, a bright ring at the sensor range, and an
-// expanding shockwave from the base outward.
-function drawFxFullCoverageFlash() {
-    if (fxFullCoverageFlashTime <= 0) return;
+// Celebration overlay played once when Radar Sweep Width first reaches 360°
+// coverage: the radar "paints" the entire sensor range solid green. Held at
+// full alpha while the congratulations banner is up; fades out after the
+// player clicks to dismiss.
+function drawFxFullCoverageFill() {
+    if (fxFullCoverageGreenAlpha <= 0) return;
     const r = Math.max(1, base.sensorRange || getEnemyRevealRadius());
-    const TOTAL = 2.2;
-    const k = Math.max(0, Math.min(1, fxFullCoverageFlashTime / TOTAL));
+    const a = fxFullCoverageGreenAlpha;
     ctx.save();
-    const grad = ctx.createRadialGradient(base.x, base.y, 0, base.x, base.y, r);
-    grad.addColorStop(0, `rgba(120, 255, 180, ${0.16 * k})`);
-    grad.addColorStop(0.75, `rgba(120, 255, 180, ${0.10 * k})`);
-    grad.addColorStop(1, 'rgba(120, 255, 180, 0)');
-    ctx.fillStyle = grad;
+    // Solid green wash across the whole sensor circle
+    ctx.fillStyle = `rgba(70, 255, 140, ${0.6 * a})`;
     ctx.beginPath();
     ctx.arc(base.x, base.y, r, 0, Math.PI * 2);
     ctx.fill();
-    ctx.lineWidth = 4 + 8 * k;
-    ctx.strokeStyle = `rgba(150, 255, 190, ${0.7 * k})`;
+    // Bright edge ring at the sensor range
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = `rgba(170, 255, 195, ${0.9 * a})`;
+    ctx.shadowColor = `rgba(120, 255, 170, ${0.8 * a})`;
+    ctx.shadowBlur = 18 * a;
     ctx.beginPath();
     ctx.arc(base.x, base.y, r, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = `rgba(255, 255, 255, ${0.55 * k})`;
-    ctx.beginPath();
-    ctx.arc(base.x, base.y, Math.max(1, r * (1 - k)), 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
 }
@@ -7974,7 +8001,6 @@ function drawGame() {
     const fogCalloutLayout = showRingInfo ? getFogOfWarCalloutLayout(visibleRadius) : null;
     drawMissileHomingLayer();
     drawRangeRings(fogCalloutLayout);
-    drawFxFullCoverageFlash();
     drawBaseAndIndicators();
     const enemies = enemyPool.getActiveObjects();
     drawGunBarrels(enemies);
@@ -7990,6 +8016,7 @@ function drawGame() {
     drawParticles();
     drawFxFlashes();
     drawFloatingTexts();
+    drawFxFullCoverageFill();
     if (worldTransformActive) ctx.restore();
     if (shakeActive) ctx.restore();
     if (showRingInfo) drawFogOfWarCallout(fogCalloutLayout);
