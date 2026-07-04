@@ -1,5 +1,11 @@
 # Orbital Defense - Change Log
 
+## v3.137
+- Added two larger debug credit-grant buttons: +1,000,000,000 (1 billion)
+  and +100,000,000,000 (100 billion) credits, alongside the existing
+  100K / 1M / 100M buttons. As always, using any credit grant flags the
+  run as [Q] (cheated) on the leaderboard.
+
 ## v3.136
 - The Missile Systems category header button now shows a live recharge
   progress fill, mirroring the Laser header. The header fills left-to-right

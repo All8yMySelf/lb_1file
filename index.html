@@ -1622,7 +1622,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.136';
+const GAME_VERSION = '3.137';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -5338,6 +5338,22 @@ function createUpgradeTree(initialRange) {
                 },
                 {
                     name: '+100,000,000 credits',
+                    cost: 0,
+                    level: 0,
+                    maxLevel: Infinity,
+                    f: () => {},
+                    g: () => ''
+                },
+                {
+                    name: '+1,000,000,000 credits',
+                    cost: 0,
+                    level: 0,
+                    maxLevel: Infinity,
+                    f: () => {},
+                    g: () => ''
+                },
+                {
+                    name: '+100,000,000,000 credits',
                     cost: 0,
                     level: 0,
                     maxLevel: Infinity,
@@ -9724,7 +9740,7 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     }
 
     if (categoryIndex === UPGRADE_CATEGORY_DEBUG) {
-        const debugCreditGrants = [100000, 1000000, 100000000];
+        const debugCreditGrants = [100000, 1000000, 100000000, 1000000000, 100000000000];
         const grant = debugCreditGrants[upgradeIndex] || 0;
         if (grant > 0) {
             gameState.credits += grant;
