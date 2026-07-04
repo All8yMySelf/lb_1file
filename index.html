@@ -1613,7 +1613,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.127';
+const GAME_VERSION = '3.128';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -7157,7 +7157,7 @@ function isRadarLimitedMode() { return fxOn('radar') && !isRadarFullCoverage() &
 function isEnemyEngageable(enemy) {
     if (!isRadarLimitedMode()) return true;
     if (enemy.xp) return true;
-    return !!(enemy.fxTrack && enemy.fxTrack.count > 0);
+    return fxRadarEnemyTargetable(enemy);
 }
 function getRadarWedgeWidth() { return (getRadarWidthPct() / 100) * Math.PI * 2; }
 function getRadarAngularSpeed() { return 0.45 + (getRadarSpeedPct() / 100) * 1.75; }
@@ -7238,6 +7238,23 @@ function fxRadarEnemyLive(enemy) {
     const a = Math.atan2(enemy.y - base.y, enemy.x - base.x);
     const behind = (((fxSweepAngle - a) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     return behind <= getRadarWedgeWidth();
+}
+
+// A contact is targetable while it is still visible: the sweep is on it, it
+// is in the fresh-paint flare, or it is fading but has not yet reached the
+// invisible phase (p < 0.5). Once it has faded to invisible it cannot be
+// engaged again until the next sweep repaints it.
+function fxRadarEnemyTargetable(enemy) {
+    if (enemy.xp) return true;
+    const t = enemy.fxTrack;
+    if (!t || t.count === 0) return false;
+    if (t.blip > 0) return true;
+    const a = Math.atan2(enemy.y - base.y, enemy.x - base.x);
+    const behind = (((fxSweepAngle - a) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const W = getRadarWedgeWidth();
+    if (behind <= W) return true;
+    const p = (behind - W) / (Math.PI * 2 - W);
+    return p < 0.5;
 }
 
 // Painted contacts: bright blip flare on fresh paint, then the contact fades
