@@ -1,5 +1,16 @@
 # Orbital Defense - Change Log
 
+## v3.130
+- Radar Sweep Width is now a child of Radar Sweep Speed. It cannot be purchased
+  until Radar Sweep Speed is pushed to its maximum (100%). The width button
+  renders as a sub-button connected to the speed button and shows a
+  "Requires max Sweep Speed" lock line until the prerequisite is met; clicking
+  it before then shows a toast.
+- Radar Sweep Width cost raised from 300 to 2500 per level so it is an expensive
+  late-game sink. Each level still widens the sweep 10% → 100%, and at 100% the
+  sweep covers everything (full 360° coverage, no sweep drawn).
+- Added info descriptions for the Sweep Speed and Sweep Width upgrades.
+
 ## v3.129
 - Wave-reward popup is now deferred until after the boss's death explosion
   has played out. When the boss dies, the wave is held open for a short

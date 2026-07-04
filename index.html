@@ -1613,7 +1613,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.129';
+const GAME_VERSION = '3.130';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -2913,6 +2913,10 @@ function canPurchaseUpgrade(categoryIndex, upgradeIndex) {
         isSupersonicWarheadWaveLocked(upgrade)) {
         return false;
     }
+    if (categoryIndex === UPGRADE_CATEGORY_SENSORS && upgradeIndex === UPGRADE_SENSOR_SWEEP_WIDTH &&
+        !isRadarSweepSpeedMaxed()) {
+        return false;
+    }
     const effectiveMaxLevel = getEffectiveUpgradeMaxLevel(categoryIndex, upgradeIndex, upgrade);
     return gameState.credits >= upgrade.cost &&
         upgrade.level < effectiveMaxLevel &&
@@ -4187,6 +4191,8 @@ function getUpgradePurposeText(categoryIndex, upgradeIndex) {
         if (upgradeIndex === UPGRADE_SENSOR_ORDNANCE_SYNC) return 'Shares targeting data across weapons.';
         if (upgradeIndex === UPGRADE_SENSOR_FIRE_CONTROL_AI) return 'Improves automated fire decisions.';
         if (upgradeIndex === UPGRADE_SENSOR_TACTICAL_ZOOM) return 'Unlocks tactical zoom and long-range upgrades.';
+        if (upgradeIndex === UPGRADE_SENSOR_SWEEP_SPEED) return 'Spins the radar sweep faster. Max this out to unlock Radar Sweep Width.';
+        if (upgradeIndex === UPGRADE_SENSOR_SWEEP_WIDTH) return 'Widens the radar sweep. Child of Sweep Speed — only available at max speed. At 100% the sweep covers everything.';
     }
     if (categoryIndex === UPGRADE_CATEGORY_DEFENSE) {
         if (upgradeIndex === UPGRADE_DEFENSE_HEALTH) return 'Increases base hull capacity.';
@@ -5255,7 +5261,7 @@ function createUpgradeTree(initialRange) {
                 { name: 'Tactical Zoom', cost: 1200, level: 0, maxLevel: 1,
                   f: level => level > 0,
                   g: (level) => level > 0 ? 'Active' : '(Install)' },
-                { name: 'Radar Sweep Width', cost: 300, level: 0, maxLevel: 10,
+                { name: 'Radar Sweep Width', cost: 2500, level: 0, maxLevel: 10,
                   f: level => getRadarWidthPctForLevel(level),
                   g: (level, cost, maxLvl) => {
                       const current = getRadarWidthPctForLevel(level);
@@ -7153,6 +7159,14 @@ function getRadarSpeedPct() {
 }
 function isRadarFullCoverage() { return getRadarWidthPct() >= 100; }
 function isRadarLimitedMode() { return fxOn('radar') && !isRadarFullCoverage() && upgradeTree; }
+// Radar Sweep Width is a child of Radar Sweep Speed: it only unlocks once the
+// speed upgrade has been pushed to its maximum level.
+function isRadarSweepSpeedMaxed() {
+    const speed = upgradeTree?.[UPGRADE_CATEGORY_SENSORS]?.upgrades?.[UPGRADE_SENSOR_SWEEP_SPEED];
+    if (!speed) return false;
+    const maxLvl = getEffectiveUpgradeMaxLevel(UPGRADE_CATEGORY_SENSORS, UPGRADE_SENSOR_SWEEP_SPEED, speed);
+    return Number.isFinite(maxLvl) ? speed.level >= maxLvl : false;
+}
 // Weapons may only engage contacts the radar has painted at least once.
 // A faded (but once-painted) contact is still enough to shoot at; a
 // never-detected enemy is invisible to fire control.
@@ -8906,6 +8920,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let superSalvoSpeedButton = null;
         let minesButton = null;
         let magneticButton = null;
+        let sweepWidthButton = null;
         let maxTextWidth = 0;
         category.upgrades.forEach((u, idx) => {
             const isFocus = categoryIndex === UPGRADE_CATEGORY_CANNON && idx === UPGRADE_CANNON_FOCUS_RADIUS;
@@ -8926,6 +8941,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             const isSuperSalvoSpeed = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_SUPER_SALVO_SPEED;
             const isMines = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_MINES;
             const isMagnetic = categoryIndex === UPGRADE_CATEGORY_MISSILE && idx === UPGRADE_MISSILE_MINE_MAGNETIC;
+            const isSweepWidth = categoryIndex === UPGRADE_CATEGORY_SENSORS && idx === UPGRADE_SENSOR_SWEEP_WIDTH;
             const hasBar = isFocus || u.progressBar;
             const b = measureUpgradeButton(u, idx, hasBar, fontSize, padding, categoryIndex);
             maxTextWidth = Math.max(maxTextWidth, b.minWidth);
@@ -8947,6 +8963,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             else if (isSuperSalvoSpeed) superSalvoSpeedButton = b;
             else if (isMines) minesButton = b;
             else if (isMagnetic) magneticButton = b;
+            else if (isSweepWidth) sweepWidthButton = b;
             else buttons.push(b);
         });
         if (tacticalZoomButton) {
@@ -8975,6 +8992,7 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
         let targetAIButtonY = null;
         let macrosButtonY = null;
         let radiusButtonY = null;
+        let sweepSpeedButtonY = null;
         const subButtonPlacements = [];
         const placeSubButton = (btn, preferredY, col = 1) => {
             let placedY = preferredY;
@@ -9014,6 +9032,9 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
             }
             if (categoryIndex === UPGRADE_CATEGORY_MISSILE && b.idx === UPGRADE_MISSILE_RANGE) {
                 radiusButtonY = tempY;
+            }
+            if (categoryIndex === UPGRADE_CATEGORY_SENSORS && b.idx === UPGRADE_SENSOR_SWEEP_SPEED) {
+                sweepSpeedButtonY = tempY;
             }
             tempY += b.height + 10;
         });
@@ -9254,6 +9275,15 @@ function drawCollapsibleUpgradeElement(x, y, title, category, categoryIndex, isE
                 calcHealthButtonY !== null ? centerOf(calcHealthButtonY, buttons.find(b => b.idx === UPGRADE_SENSOR_HEALTHBARS) || targetButton) : null);
         }
 
+        if (sweepWidthButton) {
+            const speedBtn = buttons.find(b => b.idx === UPGRADE_SENSOR_SWEEP_SPEED) || sweepWidthButton;
+            const widthY = placeSubButton(sweepWidthButton, sweepSpeedButtonY !== null ? sweepSpeedButtonY : currentY);
+            drawSubUpgradeButton(sweepWidthButton, panelX, buttonWidth, widthY,
+                isRadarSweepSpeedMaxed(),
+                categoryIndex, displayColor, maxedColor, fontSize, padding, false, 1, null,
+                sweepSpeedButtonY !== null ? centerOf(sweepSpeedButtonY, speedBtn) : null);
+        }
+
         if (manualButton) {
             const manualY = placeSubButton(manualButton, laserButtonY !== null ? laserButtonY : currentY);
             drawSubUpgradeButton(manualButton, panelX, buttonWidth, manualY,
@@ -9388,6 +9418,11 @@ function measureUpgradeButton(u, idx, hasBar, fontSize, padding, categoryIndex =
         idx === UPGRADE_LASER_WIDE_BEAM &&
         u.level >= effectiveMaxLevel &&
         u.level < u.maxLevel;
+    const sweepWidthLocked =
+        categoryIndex === UPGRADE_CATEGORY_SENSORS &&
+        idx === UPGRADE_SENSOR_SWEEP_WIDTH &&
+        !isRadarSweepSpeedMaxed() &&
+        u.level < effectiveMaxLevel;
     const lines = hasBar ? [u.name] : `${u.name}: ${u.g(u.level, u.cost, effectiveMaxLevel)}`.split('\n');
     const highlightLineIndexes = [];
     const target = REWARD_TARGETS.find(item => item.categoryIndex === categoryIndex);
@@ -9413,7 +9448,9 @@ function measureUpgradeButton(u, idx, hasBar, fontSize, padding, categoryIndex =
         ? 'Tactical Zoom required'
         : (beamSplitterDamageLocked
             ? 'Upgrade Laser Damage'
-            : (u.level < effectiveMaxLevel ? `Cost: ${formatCurrency(u.cost)}` : 'MAX')));
+            : (sweepWidthLocked
+                ? 'Requires max Sweep Speed'
+                : (u.level < effectiveMaxLevel ? `Cost: ${formatCurrency(u.cost)}` : 'MAX'))));
     const textWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
     const barWidth = hasBar ? u.maxLevel * 10 + (u.maxLevel - 1) * 2 : 0;
     const height = lines.length * fontSize + (hasBar ? padding * 3 + 10 : padding * 2);
@@ -9631,6 +9668,12 @@ function purchaseUpgrade(categoryIndex, upgradeIndex) {
     if (categoryIndex === UPGRADE_CATEGORY_SENSORS && upgradeIndex === UPGRADE_SENSOR_TARGET_AI) {
         if (upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_HEALTHBARS].level === 0) {
             showToast("Requires Calculate Enemies' Health first!", 2500);
+            return;
+        }
+    }
+    if (categoryIndex === UPGRADE_CATEGORY_SENSORS && upgradeIndex === UPGRADE_SENSOR_SWEEP_WIDTH) {
+        if (!isRadarSweepSpeedMaxed()) {
+            showToast("Requires maximum Radar Sweep Speed first!", 3000);
             return;
         }
     }
