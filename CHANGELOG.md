@@ -1,5 +1,13 @@
 # Orbital Defense - Change Log
 
+## v3.133
+- The 360° coverage celebration now pauses the game and "paints" the entire
+  sensor range solid green, washing over the whole play area. A beat later the
+  centered gold "360° Real-Time Coverage Achieved" banner pops up over the
+  green with a "Click to continue" prompt. Clicking the banner dismisses it;
+  play resumes immediately and the green fill fades out over about a second.
+  (Replaces the earlier transient flash version of the celebration.)
+
 ## v3.132
 - Purchasing the final Radar Sweep Width upgrade (reaching 100% / full 360°
   coverage) now triggers a celebration: a whole-range green flash sweeps the
