@@ -1,5 +1,13 @@
 # Orbital Defense - Change Log
 
+## v3.121
+- Replaced the abrupt half-pace cutoff with a gentler learn-the-radar ramp:
+  enemies now start at 1/10 of normal speed on wave 1 and climb ~1.6x per wave
+  (wave 1: 10%, 2: 16%, 3: 26%, 4: 41%, 5: 66%, 6+: full speed). This gives new
+  players several waves to learn the sensor sweep and buy Radar Sweep upgrades
+  before the pressure reaches its normal level. The ramp only touches the
+  early-wave factor; the usual per-wave difficulty scaling still applies on top.
+
 ## v3.120
 - Grey estimated tracks now carry an "EST POS" label so players can tell at a
   glance that the grey contact is a guessed position, not the real target.

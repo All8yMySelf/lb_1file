@@ -1613,7 +1613,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.120';
+const GAME_VERSION = '3.121';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -3870,10 +3870,15 @@ function spawnXPEnemy(waveNumber) {
     updateWaveStatsPanel();
 }
 
-// Early waves run at half pace so new players can learn the radar before the
-// pressure ramps up; wave 3+ uses the normal progression.
+// Enemies start at 1/10 speed so new players have time to learn the radar and
+// realise they must upgrade Sensors (Radar Sweep) to engage contacts. Speed
+// climbs ~1.6x per wave — the same feel as the normal per-wave bump — until it
+// reaches full speed at wave 6, after which the usual difficulty progression
+// takes over unmodified.
+const RADAR_LEARN_START = 0.1;   // wave 1 runs at 10% of normal speed
+const RADAR_LEARN_RAMP = 1.6;    // per-wave multiplier back toward 1.0
 function getEarlyWaveSpeedFactor(waveNumber) {
-    return waveNumber <= 2 ? 0.5 : 1;
+    return Math.min(1, RADAR_LEARN_START * Math.pow(RADAR_LEARN_RAMP, waveNumber - 1));
 }
 
 // Creates one archetype enemy without touching wave spawn counters; callers
