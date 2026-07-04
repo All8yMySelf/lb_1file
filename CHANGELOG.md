@@ -1,5 +1,13 @@
 # Orbital Defense - Change Log
 
+## v3.132
+- Purchasing the final Radar Sweep Width upgrade (reaching 100% / full 360°
+  coverage) now triggers a celebration: a whole-range green flash sweeps the
+  sensor circle with an expanding/contracting ring, a centered gold
+  "360° Real-Time Coverage Achieved" banner appears over the play area, and a
+  toast confirms the milestone. The radar sweep is no longer needed at this
+  point — sensors see every enemy all the time.
+
 ## v3.131
 - XP enemy is now targeted by the cannon like a real enemy before it is
   identified: the cannon acquires and fires at it, bullets strike (hit spark)
