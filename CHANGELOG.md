@@ -1,5 +1,15 @@
 # Orbital Defense - Change Log
 
+## v3.127
+- Radar contact fade is now an ember-like flicker. Contacts hold full
+  appearance for the first 25% of the sweep wait, then colour fades to grey
+  (25%→37.5%), then grey fades to invisible (37.5%→50%) with a fire-light
+  flicker shimmering the alpha in and out as it dies. From 50% on the contact
+  is fully gone, so the player loses it and has to wait for the next sweep to
+  repaint it — the "where are they?" worry the design is aiming for.
+- Each enemy flickers on its own phase (derived from its bearing) so the
+  shimmer is irregular across the field rather than a uniform pulse.
+
 ## v3.126
 - Initial cannon range is now halved at game start, while the sensor radius
   stays at its previous full value. Enemies get painted in the gap between the
