@@ -1,5 +1,14 @@
 # Orbital Defense - Change Log
 
+## v3.123
+- Replaced the estimated-position ghost and "EST POS" label with a smoother
+  fade model. A painted enemy now renders at its real position and fades from
+  its own color through grey to nearly invisible, timed to the sweep so it
+  almost vanishes just before the wedge comes back around to repaint it. The
+  fresh-paint blip flare still pops when the sweep finds the contact. Players
+  can see enemies are there and watch them fade, which makes the case for
+  upgrading Radar Sweep to keep re-confirming them.
+
 ## v3.122
 - Reworded the one-time radar nudge toast to "Upgrade Sensor Sweep to pick up
   enemies earlier and confirm their locations." so the call to action is
