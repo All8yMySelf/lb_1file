@@ -1,5 +1,15 @@
 # Orbital Defense - Change Log
 
+## v3.131
+- XP enemy is now targeted by the cannon like a real enemy before it is
+  identified: the cannon acquires and fires at it, bullets strike (hit spark)
+  but deal no damage — the contact is invulnerable to the cannon. This wastes
+  fire on the XP contact, signalling it is special and motivating the Enemy
+  Identification upgrade.
+- Once Enemy Identification is purchased, the cannon no longer targets the XP
+  contact at all (bullets pass through it), leaving it for the manual laser to
+  destroy. The manual laser's ability to destroy XP contacts is unchanged.
+
 ## v3.130
 - Radar Sweep Width is now a child of Radar Sweep Speed. It cannot be purchased
   until Radar Sweep Speed is pushed to its maximum (100%). The width button
