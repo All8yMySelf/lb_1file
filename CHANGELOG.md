@@ -1,5 +1,19 @@
 # Orbital Defense - Change Log
 
+## v3.126
+- Initial cannon range is now halved at game start, while the sensor radius
+  stays at its previous full value. Enemies get painted in the gap between the
+  sensor ring and the cannon ring, then fade to nothing before they can be
+  engaged, making it obvious the player needs to upgrade cannon range.
+- The first Electronic FOV (Sensor Range) upgrade is now granted for free at
+  start, so the sensor ring is visible immediately without any purchase. The
+  upgrade tree shows it owned at level 1.
+- Added a `sensorBaseRange` floor so the sensor radius never collapses when the
+  cannon is halved or weapons are undersized; the sensor ring only grows when
+  the player upgrades Sensor Range or cannon range beyond the floor.
+- Save/restore now persists `sensorBaseRange` (defaults to 0 for old saves,
+  preserving their behaviour).
+
 ## v3.125
 - Wave-1 pacing is now slow and deliberate for teaching. A new early-wave spawn
   factor ramps the spawn rate from 20% on wave 1 back to full by wave 5 (matching

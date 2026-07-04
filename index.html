@@ -1613,7 +1613,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.125';
+const GAME_VERSION = '3.126';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -3036,7 +3036,8 @@ function getSensorBufferForLevel(level) {
 function syncSensorRangeToFurthest() {
     const furthest = getFurthestNonSensorRadius();
     const buffer = Math.max(0, Number(base?.sensorRangeBuffer) || 0);
-    base.sensorRange = furthest + buffer;
+    const baseFloor = Math.max(0, Number(base?.sensorBaseRange) || 0);
+    base.sensorRange = Math.max(furthest, baseFloor) + buffer;
 }
 
 function getNextDefenseHealthValue(currentMaxHealth = gameState?.maxHealth || 100) {
@@ -4886,6 +4887,8 @@ function loadGame() {
         base.sensorRange = savedBase.sensorRange || base.cannonRange;
         base.sensorReferenceRange = savedBase.sensorReferenceRange || savedBase.cannonRange || base.cannonRange;
         base.sensorRangeBuffer = Math.max(0, Number(savedBase.sensorRangeBuffer) || (base.sensorRange - getFurthestNonSensorRadius()));
+        base.sensorBaseRange = Math.max(0, Number(savedBase.sensorBaseRange) || 0);
+        syncSensorRangeToFurthest();
         base.color = savedBase.color;
         base.currentMoveSpeed = savedBase.currentMoveSpeed; // Restore move speed
 
@@ -5228,8 +5231,9 @@ function createUpgradeTree(initialRange) {
                 { name: 'Electronic FOV', cost: 50, level: 0, maxLevel: Infinity,
                   f: level => getSensorBufferForLevel(level),
                   g: (level, cost, maxLvl) => {
-                      const current = Math.round(getFurthestNonSensorRadius() + getSensorBufferForLevel(level));
-                      const next = Math.round(getFurthestNonSensorRadius() + getSensorBufferForLevel(level + 1));
+                      const floor = Math.max(getFurthestNonSensorRadius(), Number(base?.sensorBaseRange) || 0);
+                      const current = Math.round(floor + getSensorBufferForLevel(level));
+                      const next = Math.round(floor + getSensorBufferForLevel(level + 1));
                       if (level >= 20 && !hasTacticalZoomUpgrade()) return `${current}\nUnlock Tactical Zoom`;
                       return `${current} > ${next}`;
                   } },
@@ -5397,7 +5401,7 @@ function createInitialBaseState(initialRange) {
         radius: BASE_RADIUS,
         fireRate: INITIAL_FIRE_RATE, // ms per shot
         bulletDamage: 1,
-        cannonRange: initialRange,
+        cannonRange: initialRange / 2, // Halved at start so enemies paint & fade in the sensor gap, motivating cannon-range upgrades
         laserDamage: 0, // Needs upgrade
         laserRange: 0, // Needs upgrade
         laserRechargeMultiplier: 1, // Recharge fire-rate multiplier (1 = base)
@@ -5436,9 +5440,10 @@ function createInitialBaseState(initialRange) {
         missileTurnSpeed: 0.05,
         missileHomingRadius: 0,
         focusRadiusSetting: 0,
-        sensorRange: initialRange,
+        sensorRange: initialRange * 1.1,
         sensorReferenceRange: initialRange,
-        sensorRangeBuffer: 0,
+        sensorRangeBuffer: initialRange * 0.1, // Level-1 Electronic FOV granted free at start
+        sensorBaseRange: initialRange, // Floor that keeps the sensor ring at the pre-halve radius regardless of cannon
         color: 'rgb(94,79,162)',
         currentMoveSpeed: BASE_INITIAL_MOVE_SPEED // Base speed without upgrades
     };
@@ -5489,6 +5494,12 @@ function initializeGame(shouldTryLoad = true) {
     resetPools();
     resetInputRuntime();
     upgradeTree = createUpgradeTree(initialRange);
+
+    // Grant the first Sensor Range (Electronic FOV) upgrade for free at start so the sensor ring shows.
+    const fovUpgrade = upgradeTree[UPGRADE_CATEGORY_SENSORS].upgrades[UPGRADE_SENSOR_RANGE];
+    fovUpgrade.level = 1;
+    base.sensorRangeBuffer = fovUpgrade.f(1);
+    syncSensorRangeToFurthest();
 
     updateHUD();
     drawGame();
