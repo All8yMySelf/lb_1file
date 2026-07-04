@@ -1,5 +1,22 @@
 # Orbital Defense - Change Log
 
+## v3.125
+- Wave-1 pacing is now slow and deliberate for teaching. A new early-wave spawn
+  factor ramps the spawn rate from 20% on wave 1 back to full by wave 5 (matching
+  the speed-ramp horizon), and the wave's total enemy count scales with it so
+  the boss still triggers correctly. Combined with the existing slow movement,
+  the first contact arrives quickly but enemies no longer swarm the base.
+- Scan radius now leads cannon range by 10px at base, so contacts appear just
+  outside cannon range and have room to fade before being engaged.
+- Fixed the close-spawn bug from v3.124 that could spawn enemies inside cannon
+  range (causing instant impacts). Spawns now floor just outside the scan radius
+  on early waves and scale back out to the normal off-screen distance as the
+  speed ramp reaches full.
+- Radar fade is now clearly visible: contacts hold full appearance for the first
+  half of the sweep cycle, transition color → grey over the next 25%, then fade
+  to fully invisible over the final 25% — the enemy survives long enough now
+  (slow + detected outside cannon range) to see the whole fade play out.
+
 ## v3.124
 - Early-wave spawns now pull in proportion to the slow-speed factor, so on the
   10%-speed waves enemies spawn close enough that they still arrive at the base
