@@ -1,5 +1,130 @@
 # Orbital Defense - Change Log
 
+## v3.120
+- Grey estimated tracks now carry an "EST POS" label so players can tell at a
+  glance that the grey contact is a guessed position, not the real target.
+- The first time a contact fades to a grey track in a run, a one-time toast
+  nudge points players at the Sensors → Radar Sweep upgrades as the way to
+  buy permanent live tracking (the nudge fires once per run, then stays quiet).
+- Half-pace waves 1–2 carried over from v3.119 groundwork: enemies run at 50%
+  speed on the first two waves so new players can learn the radar before the
+  pressure ramps up; wave 3+ returns to the normal progression.
+- Weapons respect the radar: turrets, missiles, and the laser only engage
+  contacts the sweep has painted at least once — a never-detected enemy is
+  invisible to fire control. A grey estimated track is enough to shoot at.
+
+## v3.119
+- The Radar Sweep is now a tactical sensor mechanic instead of a cosmetic
+  overlay. An 80s-style green phosphor sweep (afterglow trail, bright leading
+  edge, faint scope rings) rotates inside sensor range. Enemies only render as
+  live, colored contacts while the sweep paints them; each paint flares the
+  contact up with an expanding blip ring and a throttled sonar ping (respects
+  the SFX toggle).
+- Between paints, contacts fade to grey estimated tracks whose accuracy
+  improves per paint: the 1st paint gives a rough position fix with a random
+  error and no motion estimate; the 2nd paint fixes the true position and
+  bearing but only 75% of the speed; from the 3rd paint the track is perfect
+  and follows the real target continuously.
+- Two new Sensors upgrades: Radar Sweep Width and Radar Sweep Speed, each
+  10 levels from 10% to 100% (cost 300, ×1.5 per level). Width sets the lit
+  wedge angle; at 100% the sweep disappears and coverage is a permanent 360°
+  view (pre-radar behavior). Speed raises the rotation rate for faster
+  re-acquisition.
+- The radar can still be disabled entirely from the FX cog menu, which
+  restores always-visible enemies.
+- Removed the CRT Curvature and Boot Animation effects after testing.
+- Weapons targeting is unchanged (turrets have their own fire control); the
+  radar governs what the player can see.
+
+## v3.118
+- Fixed the FX cog button doing nothing on click. The main script is inline,
+  so its `defer` attribute is ignored and the FX panel wiring ran during
+  parse, before the panel markup at the end of the page existed. The wiring
+  now waits for DOMContentLoaded.
+
+## v3.117
+- Retro FX settings moved from the hidden Debug menu to a cog button in the
+  bottom controls: clicking it opens a transparent panel with live checkboxes
+  (plus All on / All off), so effects can be auditioned mid-game. The v3.116
+  Debug menu FX entries are removed.
+- Removed the Phosphor Glow effect entirely; it hurt readability.
+- Boss warning improved for the fog-of-war gap between spawn and visibility:
+  the banner now reads "BOSS IN THE FOG — CLOSING IN", and a pulsing red
+  chevron with a BOSS label tracks along the sensor edge toward any boss that
+  is still hidden, disappearing once the boss becomes visible.
+
+## v3.116
+- Added the Retro FX pack: 13 new presentational effects, every one
+  individually toggleable from the hidden Debug upgrade menu (press Q, open
+  Debug) so you can audition them and keep only what you like. Choices persist
+  in localStorage and there is an "FX: Toggle All" entry to flip everything at
+  once. All effects default to On.
+  - CRT authenticity: Phosphor Glow (canvas rings/base/barrels + HUD text),
+    CRT Curvature (rounded tube corners, edge shadow, subtle brightness
+    flicker), Boot Animation (CRT power-on line when a run starts), Impact
+    Glitch (chromatic aberration + signal tears when the base takes a hit).
+  - Game juice: Muzzle Flash + barrel recoil on the cannon, Death Flash
+    (white flash frame + shockwave ring on kills, bigger for bosses), Combo
+    Meter (persistent kill-streak readout, bottom center), Boss Warning
+    (letterboxed flashing WARNING banner when a boss spawns), Boss Slow-Mo
+    (brief slow motion when a boss dies), Low-HP Pulse (red edge pulse and
+    health flicker below 30% health), Wave Banner (typewriter WAVE N INCOMING
+    on each new wave).
+  - Ambience: Shooting Stars and a rotating Radar Sweep inside sensor range.
+
+## v3.115
+- Removed the v3.113 HUD Font experiment button after testing; the theme
+  default font won. The v3.114 HUD fixes (CRT overlay over the HUD, soft
+  drop shadow instead of the black outline) are kept.
+
+## v3.114
+- The top HUD (credits, wave, health) now sits below the global CRT overlay so
+  scanlines pass over it, matching the bottom controls.
+- Removed the hard black outline and dark halo from HUD text that washed it
+  out; HUD text now uses a soft drop shadow, and the glow font styles apply
+  correctly.
+
+## v3.113
+- Added a HUD Font button to the bottom controls that cycles the top HUD text
+  (credits, wave, health) through four styles: theme default, VT323 with a
+  phosphor glow, Press Start 2P arcade, and Share Tech Mono with glow and
+  letter-spacing. Only the top HUD is affected and the choice persists in
+  localStorage.
+
+## v3.112
+- Expanded the Enemy Identified popup into a larger tactical dossier with an
+  in-game-size enemy visual, role, behavior, stat explanations, weapon estimates,
+  and upgrade advice.
+- Enemy dossiers now calculate current cannon shots to kill and show current or
+  locked laser, missile, and specialist weapon guidance per enemy type.
+
+## v3.111
+- Moved the Info / hover-help card to the bottom of the left menu stack, after
+  XP Boost and any other action cards, so its variable height no longer shifts
+  the upgrade category buttons.
+
+## v3.110
+- Bottom controls and the Support me widget now sit below the global CRT overlay
+  so scanlines pass over them like the rest of the game.
+- Enemy Stats now matches the Hotkeys panel width before Enemy Identification is
+  purchased, wrapping the locked-message text instead of widening the panel.
+
+## v3.109
+- Removed the remaining bottom decorative lines from the Support me widget and
+  bottom control buttons.
+- Forced injected Support me widget internals to stay borderless and shadowless.
+
+## v3.108
+- Removed the boxed border treatment from the bottom controls and Support me
+  widget in favor of a lighter bottom HUD line/glow.
+- Support me text now uses the same yellow accent as the Fog of War title.
+
+## v3.107
+- Bottom controls now match the Retro HUD side-panel styling with translucent
+  dark panels, cyan borders, scanlines, and compact square buttons.
+- The Support me widget wrapper now uses the same bottom-HUD treatment as the
+  theme, enemy info, music, and sound controls.
+
 ## v3.106
 - Left-side Info / hover-help card is now the same 170px width as the other
   upgrade menu category buttons.
