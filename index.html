@@ -1613,7 +1613,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.121';
+const GAME_VERSION = '3.122';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -7196,7 +7196,7 @@ function fxRadarContact(enemy) {
     // so they learn they can buy permanent live tracking.
     if (t.count === 1 && !fxRadarNudgeShown) {
         fxRadarNudgeShown = true;
-        showToast('Grey contacts = ESTIMATED POSITION. Upgrade Sensors → Radar Sweep to keep live tracking.', 5500);
+        showToast('Upgrade Sensor Sweep to pick up enemies earlier and confirm their locations.', 5500);
     }
 }
 
