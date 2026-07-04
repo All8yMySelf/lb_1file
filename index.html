@@ -1613,7 +1613,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.124';
+const GAME_VERSION = '3.125';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -3881,6 +3881,18 @@ function getEarlyWaveSpeedFactor(waveNumber) {
     return Math.min(1, RADAR_LEARN_START * Math.pow(RADAR_LEARN_RAMP, waveNumber - 1));
 }
 
+// Early waves also spawn more deliberately so the player has time to learn the
+// radar sweep and watch contacts fade before the pace ramps up. Climbs back to
+// the full spawn rate by wave 5, matching the speed-ramp horizon.
+const RADAR_LEARN_SPAWN_START = 0.2; // wave 1 spawns at 20% of the normal rate
+const RADAR_LEARN_SPAWN_RAMP = 1.6;
+function getEarlyWaveSpawnFactor(waveNumber) {
+    return Math.min(1, RADAR_LEARN_SPAWN_START * Math.pow(RADAR_LEARN_SPAWN_RAMP, waveNumber - 1));
+}
+function getWaveTotalEnemies(duration, waveNumber) {
+    return Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND * getEarlyWaveSpawnFactor(waveNumber));
+}
+
 // Creates one archetype enemy without touching wave spawn counters; callers
 // manage the bookkeeping. childScale < 1 spawns a smaller, faster splitter child.
 function createArchetypeEnemy(name, waveNumber, x, y, childScale = 1) {
@@ -5349,7 +5361,7 @@ function createInitialGameState() {
 }
 
 function createInitialWaveRuntime() {
-    const initialTotalEnemies = Math.round(WAVE_BASE_DURATION * ENEMY_SPAWN_RATE_PER_SECOND);
+    const initialTotalEnemies = getWaveTotalEnemies(WAVE_BASE_DURATION, 1);
     const initialBosses = getBossCountForWave(1);
     return {
         activeWaves: [1],
@@ -5864,7 +5876,7 @@ function spawnNewEnemies(dt) {
             showFxBossWarning();
             showToast(bossCount > 1 ? `Boss Wave! ${bossCount} bosses incoming!` : 'Boss Wave!', 3000);
             markHUDDirty(); // Boss wave changes timer display
-        } else if (!state.isBossWave && state.spawned < state.totalEnemies && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled) {
+        } else if (!state.isBossWave && state.spawned < state.totalEnemies && enemies.length < MAX_ENEMY_COUNT && Math.random() < 0.03 * gameSpeedMultiplier * dtScaled * getEarlyWaveSpawnFactor(Number(waveStr))) {
             spawnEnemy(false, Number(waveStr));
         }
     }
@@ -6625,7 +6637,7 @@ function startNextWave() {
     gameState.waveElapsedTime = 0;
     gameState.xpEnemySpawned = false;
     gameState.xpEnemySpawnTime = Math.random() * (duration - 2);
-    const totalEnemies = Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND);
+    const totalEnemies = getWaveTotalEnemies(duration, gameState.wave);
     const totalBosses = getBossCountForWave(gameState.wave);
     waveStates[gameState.wave] = {
         elapsedTime: 0,
@@ -6655,7 +6667,7 @@ function resetActiveWaveForLoadedGame() {
     const wave = gameState.wave || 1;
     const duration = gameState.waveDuration || WAVE_BASE_DURATION + (wave - 1) * WAVE_DURATION_INCREMENT;
     const elapsedTime = Math.max(0, Math.min(gameState.waveElapsedTime || 0, duration));
-    const totalEnemies = Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND);
+    const totalEnemies = getWaveTotalEnemies(duration, wave);
     const totalBosses = getBossCountForWave(wave);
     const spawned = Math.max(0, Math.min(gameState.enemiesSpawnedThisWave || 0, totalEnemies));
     const remainingEnemies = Math.max(0, totalEnemies - spawned);
@@ -6689,7 +6701,7 @@ function normalizeLoadedWaveState(wave, savedState, hasSavedRuntimeState) {
     const defaultDuration = WAVE_BASE_DURATION + (wave - 1) * WAVE_DURATION_INCREMENT;
     const duration = Math.max(1, Number(savedState?.duration) || defaultDuration);
     const elapsedTime = Math.max(0, Math.min(Number(savedState?.elapsedTime) || 0, duration));
-    const totalEnemies = Math.max(0, Math.floor(Number(savedState?.totalEnemies) || Math.round(duration * ENEMY_SPAWN_RATE_PER_SECOND)));
+    const totalEnemies = Math.max(0, Math.floor(Number(savedState?.totalEnemies) || getWaveTotalEnemies(duration, wave)));
     const totalBosses = Math.max(1, Math.floor(Number(savedState?.totalBosses) || getBossCountForWave(wave)));
     const spawned = Math.max(0, Math.min(totalEnemies, Math.floor(Number(savedState?.spawned) || 0)));
     const unspawnedEnemies = Math.max(0, totalEnemies - spawned);
@@ -7266,7 +7278,7 @@ function drawFxRadarGhosts(enemies) {
                 radius = 4;
             }
             const fadeP = Math.min(1, Math.max(0, (p - 0.75) / 0.25));
-            ctx.globalAlpha = 1 - fadeP * 0.92; // ~8% just before repaint
+            ctx.globalAlpha = 1 - fadeP; // fades to invisible over the final 25%
             ctx.fillStyle = color;
             ctx.beginPath();
             ctx.arc(enemy.x, enemy.y, radius, 0, Math.PI * 2);
@@ -8044,7 +8056,7 @@ function drawGunBarrels(enemies) {
 function getEnemyRevealRadius() {
     const laserReveal = Math.max(base.laserRevealRadius || 0, base.laserRange || 0);
     return Math.max(
-        base.cannonRange,
+        (base.cannonRange || 0) + 10, // small base lead so contacts show just outside cannon range
         base.missileTargetingRadius,
         laserReveal,
         base.sensorRange,
@@ -8056,12 +8068,14 @@ function getEnemySpawnRadius(enemyRadius = 0) {
     const farthestViewportCorner = Math.hypot(canvasWidth, canvasHeight) / 2;
     const revealBoundary = getEnemyRevealRadius() + Math.max(0, enemyRadius) + SPAWN_RADIUS_OFFSET;
     const baseRadius = Math.max(farthestViewportCorner + OFF_SCREEN_SPAWN_BOUNDARY_OFFSET, revealBoundary);
-    // On slow early waves, pull the spawn distance in proportion to the speed
-    // factor so enemies still arrive at the base at the normal pace despite
-    // crawling — travel time scales as distance/speed, so matching the factor
-    // keeps it roughly constant. Floor keeps them from spawning on the base.
+    // On slow early waves, pull spawns in so the first contact arrives quickly,
+    // but never inside cannon range — floor at reveal + a small margin so the
+    // enemy is detected just outside cannon range and has room to fade before
+    // being engaged. Scales back out to the normal off-screen distance as the
+    // per-wave speed ramp reaches full.
     const factor = getEarlyWaveSpeedFactor(gameState.wave);
-    return Math.max(60, baseRadius * factor);
+    const earlySpawn = getEnemyRevealRadius() + Math.max(0, enemyRadius) + 8;
+    return Math.max(earlySpawn, baseRadius * factor);
 }
 
 function isEnemyVisibleToPlayer(enemy) {
