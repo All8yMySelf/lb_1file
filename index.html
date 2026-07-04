@@ -1613,7 +1613,7 @@ function cleanupEventListeners() {
 
 let currentThemeIndex = 0;
 let currentTheme = THEMES[currentThemeIndex];
-const GAME_VERSION = '3.130';
+const GAME_VERSION = '3.131';
 const GAME_TITLE = `Orbital Defense v${GAME_VERSION}`;
 const SAVE_SCHEMA_VERSION = 3;
 const SAVE_STORAGE_KEY = 'orbitalDefenseGame_v2.9';
@@ -5937,7 +5937,7 @@ function handlePlayerFiring(dt) {
         let minDistanceSq = base.cannonRange * base.cannonRange;
 
         enemies.forEach(enemy => {
-            if (enemy.xp) return;
+            if (enemy.xp && sensorUpgrades.enemyVisuals) return; // Identified XP contacts are left for the manual laser
             if (!isEnemyEngageable(enemy)) return; // Radar hasn't painted it yet
             const dx = enemy.x - base.x;
             const dy = enemy.y - base.y;
@@ -5951,7 +5951,7 @@ function handlePlayerFiring(dt) {
         if (nearestEnemy && (gameState.autoFire || keysPressed[' '])) {
             let targets = enemies
                 .filter(e => Math.hypot(e.x - base.x, e.y - base.y) <= base.cannonRange)
-                .filter(e => !e.xp)
+                .filter(e => !(e.xp && sensorUpgrades.enemyVisuals))
                 .filter(e => isEnemyEngageable(e))
                 .filter(e => hasTargetCapacity(e, 'cannon'))
                 .sort((a, b) => Math.hypot(a.x - base.x, a.y - base.y) - Math.hypot(b.x - base.x, b.y - base.y));
@@ -6467,7 +6467,7 @@ function checkCollisions(dt) {
         let bulletHit = false;
         for (let j = enemies.length - 1; j >= 0; j--) {
             const enemy = enemies[j];
-            if (enemy.xp) continue;
+            if (enemy.xp && sensorUpgrades.enemyVisuals) continue; // Identified XP contacts are for the manual laser only
             // Simple circle collision check
             const dx = bullet.x - enemy.x;
             const dy = bullet.y - enemy.y;
@@ -6477,8 +6477,11 @@ function checkCollisions(dt) {
             if (distSq < radiiSumSq) {
                 bulletHit = true;
                 releaseWeaponDamage(bullet.target, 'cannon', bullet.reservedDamage);
-                enemy.health -= applyShieldAbsorption(enemy, base.bulletDamage);
                 createParticle(bullet.x, bullet.y, currentTheme.canvasColors.particleHit, 2, 0.3, 2); // Hit spark
+                if (enemy.xp) {
+                    break; // Pre-identification the cannon fires at the XP contact but cannot damage it
+                }
+                enemy.health -= applyShieldAbsorption(enemy, base.bulletDamage);
 
                 if (enemy.health <= 0) {
                     gameState.credits += killCredits(enemy.creditsValue);
