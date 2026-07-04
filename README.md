@@ -76,6 +76,79 @@ initials, wave, time, and ranking validation.
 The game is under active development. Below is a brief summary of recent updates.
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
+### v3.119
+- Radar Sweep is now a tactical mechanic: an 80s green phosphor sweep paints
+  contacts (blip flash + sonar ping); between paints enemies show as grey
+  estimated tracks that get more accurate with each pass. New Sensors
+  upgrades - Radar Sweep Width and Speed - go from 10% to 100%; at 100% width
+  the sweep retires into permanent 360° coverage. CRT Curvature and Boot
+  Animation effects removed.
+
+### v3.118
+- Fixed the FX cog button not opening its settings panel (initialisation ran
+  before the panel existed in the DOM).
+
+### v3.117
+- Retro FX toggles now live in a cog button next to the theme button, opening
+  a transparent in-game panel with live checkboxes. Phosphor Glow is removed;
+  the boss warning now flags bosses approaching through the fog with a pulsing
+  edge marker until they become visible.
+
+### v3.116
+- Added the Retro FX pack: 13 toggleable visual effects (phosphor glow, CRT
+  curvature and flicker, boot animation, impact glitch, muzzle flash, death
+  flash, combo meter, boss warning banner, boss slow-mo, low-HP pulse, wave
+  banner, shooting stars, radar sweep). Toggle each from the hidden Debug
+  upgrade menu (Q); settings persist in localStorage and default to On.
+
+### v3.115
+- Removed the HUD Font experiment button; the theme default font won and the
+  v3.114 HUD readability fixes remain.
+
+### v3.114
+- The top HUD (credits, wave, health) now renders under the CRT scanline
+  overlay, and the washed-out black text outline is replaced with a soft
+  drop shadow so the HUD font styles show properly.
+
+### v3.113
+- Added a HUD Font button to the bottom controls that cycles the top HUD text
+  (credits, wave, health) through four font styles; the choice persists and
+  the rest of the UI is unaffected.
+
+### v3.112
+- Expanded the Enemy Identified popup into a larger tactical dossier with an
+  in-game-size enemy visual, role, behavior, stat explanations, weapon estimates,
+  and upgrade advice.
+- Enemy dossiers now calculate current cannon shots to kill and show current or
+  locked laser, missile, and specialist weapon guidance per enemy type.
+
+### v3.111
+- Moved the Info / hover-help card to the bottom of the left menu stack, after
+  XP Boost and any other action cards, so its variable height no longer shifts
+  the upgrade category buttons.
+
+### v3.110
+- Bottom controls and the Support me widget now sit below the global CRT overlay
+  so scanlines pass over them like the rest of the game.
+- Enemy Stats now matches the Hotkeys panel width before Enemy Identification is
+  purchased, wrapping the locked-message text instead of widening the panel.
+
+### v3.109
+- Removed the remaining bottom decorative lines from the Support me widget and
+  bottom control buttons.
+- Support me widget internals are now forced borderless and shadowless.
+
+### v3.108
+- Bottom-row controls and the Support me widget now use a lighter borderless HUD
+  line/glow treatment instead of boxed frames.
+- Support me text now uses the same yellow accent as the Fog of War title.
+
+### v3.107
+- Bottom-row controls now use the same Retro HUD styling as the side panels:
+  translucent dark panels, cyan borders, scanlines, and compact square buttons.
+- The Support me widget now visually matches the theme, enemy info, music, and
+  sound controls.
+
 ### v3.106
 - Left-side Info / hover-help card is now the same 170px width as the other
   upgrade menu buttons, with text reduced to 12px for a comfortable fit.
