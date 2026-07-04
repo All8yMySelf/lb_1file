@@ -1,5 +1,10 @@
 # Orbital Defense - Change Log
 
+## v3.122
+- Reworded the one-time radar nudge toast to "Upgrade Sensor Sweep to pick up
+  enemies earlier and confirm their locations." so the call to action is
+  clearer for new players.
+
 ## v3.121
 - Replaced the abrupt half-pace cutoff with a gentler learn-the-radar ramp:
   enemies now start at 1/10 of normal speed on wave 1 and climb ~1.6x per wave
