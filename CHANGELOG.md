@@ -1,5 +1,15 @@
 # Orbital Defense - Change Log
 
+## v3.129
+- Wave-reward popup is now deferred until after the boss's death explosion
+  has played out. When the boss dies, the wave is held open for a short
+  game-time delay (respecting slow-mo and pause) while the explosion
+  renders, then the reward screen appears. The next wave does not start
+  until the player picks a reward.
+- The wave timer freezes at the moment of boss death during that delay, so
+  the post-wave time bonus is no longer consumed by the explosion/reward
+  wait.
+
 ## v3.128
 - Cannons and lasers can no longer target a radar contact once it has faded to
   invisible. Targeting is now gated on the contact being visibly painted — the
